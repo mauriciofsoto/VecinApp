@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Plataforma de Comunidad para Edificios
 
 ## Estructura
@@ -18,3 +19,5 @@
 
 ## Convención de commits
 Ver CONTRIBUTING.md
+=======
+>>>>>>> 51e0d6623231b1a0e8249690393d01291a8ac5dc
