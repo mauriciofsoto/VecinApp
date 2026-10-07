@@ -32,7 +32,8 @@
             ],
             "styles": [
               "src/styles/styles.scss"
-            ]
+            ],
+            "polyfills": []
           },
           "configurations": {
             "production": {
