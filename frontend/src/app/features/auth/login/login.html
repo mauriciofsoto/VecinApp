@@ -1,0 +1,58 @@
+<app-auth-layout [showTopLink]="true" topLinkText="Crear cuenta" topLinkRoute="/registro">
+  <!-- Avatar Icon -->
+  <div class="flex justify-center mb-6">
+    <div class="w-24 h-24 rounded-full bg-brand-blue flex items-center justify-center shadow-lg ring-4 ring-white/70">
+      <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"></circle>
+        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <form class="flex flex-col gap-4">
+    <!-- Email -->
+    <div class="flex flex-col gap-1.5">
+      <label for="email" class="text-xs font-semibold text-brand-neutral-title ml-1">
+        Email
+      </label>
+      <input 
+        id="email" 
+        type="email" 
+        placeholder="Email@gmail.com" 
+        class="w-full px-4 py-3 rounded-xl bg-brand-surface-input text-brand-neutral-title placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple transition-all" 
+      />
+    </div>
+
+    <!-- Contraseña -->
+    <div class="flex flex-col gap-1.5">
+      <label for="password" class="text-xs font-semibold text-brand-neutral-title ml-1">
+        Contraseña
+      </label>
+      <input 
+        id="password" 
+        type="password" 
+        placeholder="********" 
+        class="w-full px-4 py-3 rounded-xl bg-brand-surface-input text-brand-neutral-title placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple transition-all" 
+      />
+      <div class="flex justify-start mt-1">
+        <a 
+          routerLink="/forgot-password" 
+          class="text-xs italic text-brand-neutral-muted hover:text-brand-purple transition-colors cursor-pointer"
+        >
+          Olvidé mi contraseña
+        </a>
+      </div>
+    </div>
+
+    <!-- Botón Submit -->
+    <div class="flex justify-center mt-6">
+      <button 
+        type="submit" 
+        class="px-8 py-2.5 rounded-full bg-brand-purple hover:bg-brand-purple-dark text-white font-medium text-sm shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer active:scale-95"
+      >
+        Iniciar Sesión
+      </button>
+    </div>
+  </form>
+</app-auth-layout>
