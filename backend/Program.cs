@@ -4,26 +4,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using VecinApp.Data;
-using VecinApp.Services;
 using VecinApp.Models;
+using VecinApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Conexion con DB
+// Conexión con PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-
+// Configuración de Identity
 builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 {
-    // Constraseñas
     options.Password.RequiredLength = 8;
     options.Password.RequireDigit = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = false;
-
 
     options.User.RequireUniqueEmail = true;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
@@ -32,7 +30,7 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-// JWT 
+// Configuración de JWT
 var jwtSecret = builder.Configuration["JwtSettings:Secret"] ?? "ClaveSuperSecretaYExtensaParaFirmarTokensVecinApp2026!";
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "VecinAppBackend";
 var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "VecinAppFrontend";
@@ -57,7 +55,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Servicio para generar tokens y CORS para conectar con Angular (localhost:4200)
+// Servicios y CORS 
 builder.Services.AddScoped<TokenService>();
 
 builder.Services.AddCors(options =>
@@ -70,13 +68,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-
+// Pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -84,16 +81,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Habilitar CORS
 app.UseCors("AllowAngular");
 
-// Middleware de Autenticación y Autorización en orden estricto
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed inicial de usuario de prueba 
+// Seed inicial de usuario de prueba
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
