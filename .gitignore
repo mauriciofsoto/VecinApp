@@ -7,3 +7,6 @@ dist/
 bin/
 obj/
 *.user
+
+.vs/
+

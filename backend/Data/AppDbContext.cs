@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using VecinApp.Models;
@@ -12,7 +12,7 @@ public class AppDbContext : IdentityDbContext<Usuario>
     {
     }
 
-    // Tablas de negocio 
+    // Tablas de negocio
     public DbSet<Rol> Roles { get; set; }
     public DbSet<Edificio> Edificios { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
@@ -32,12 +32,11 @@ public class AppDbContext : IdentityDbContext<Usuario>
     public DbSet<Paquete> Paquetes { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
 
-    // Tabla de autenticación 
+    // Tabla de autenticación
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Inicializa todas las tablas de ASP.NET Core Identity
         base.OnModelCreating(modelBuilder);
 
         // =========================
@@ -65,7 +64,7 @@ public class AppDbContext : IdentityDbContext<Usuario>
         });
 
         // =========================
-        // USUARIO 
+        // USUARIO (Identity + Relaciones)
         // =========================
         modelBuilder.Entity<Usuario>(entity =>
         {
@@ -97,13 +96,11 @@ public class AppDbContext : IdentityDbContext<Usuario>
             entity.Property(e => e.IdEdificio)
                 .HasColumnName("id_edificio");
 
-            // Usuario → Rol
             entity.HasOne(e => e.Rol)
                 .WithMany(e => e.Usuarios)
                 .HasForeignKey(e => e.IdRol)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Usuario → Edificio
             entity.HasOne(e => e.Edificio)
                 .WithMany(e => e.Usuarios)
                 .HasForeignKey(e => e.IdEdificio)

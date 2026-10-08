@@ -15,9 +15,9 @@ public class Usuario : IdentityUser
     public EstadoUsuario Estado { get; set; } = EstadoUsuario.Activo;
     public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
 
-    // Relaciones de tu compañera
-    public int IdRol { get; set; }
-    public Rol Rol { get; set; } = null!;
+    // Relaciones del modelo de datos
+    public int? IdRol { get; set; }
+    public Rol? Rol { get; set; }
 
     public int? IdEdificio { get; set; }
     public Edificio? Edificio { get; set; }
