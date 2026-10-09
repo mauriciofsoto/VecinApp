@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthLayout } from '../auth-layout/auth-layout';
@@ -21,12 +21,25 @@ export class ResetPassword implements OnInit {
   newPassword = '';
   confirmPassword = '';
 
-  successMessage = '';
-  errorMessage = '';
   isLoading = false;
 
+ 
+  successMessage = signal('');
+  errorMessage = signal('');
+
+ 
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
+
+  toggleShowNewPassword(): void {
+    this.showNewPassword.update((prev) => !prev);
+  }
+
+  toggleShowConfirmPassword(): void {
+    this.showConfirmPassword.update((prev) => !prev);
+  }
+
   ngOnInit(): void {
-    // Si viene redirigido con queryParams (?email=...&token=...), se completan solos
     const emailParam = this.route.snapshot.queryParamMap.get('email');
     const tokenParam = this.route.snapshot.queryParamMap.get('token');
 
@@ -36,41 +49,50 @@ export class ResetPassword implements OnInit {
 
   onSubmit(): void {
     if (!this.email || !this.token || !this.newPassword || !this.confirmPassword) {
-      this.errorMessage = 'Por favor, completá todos los campos.';
+      this.errorMessage.set('Por favor, completá todos los campos.');
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden.';
+      this.errorMessage.set('Las contraseñas no coinciden.');
       return;
     }
 
-    if (this.newPassword.length < 6) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
+    // Regla: mínimo 8 caracteres, al menos una mayúscula, una minúscula y un número
+    const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (!passwordPolicy.test(this.newPassword)) {
+      this.errorMessage.set(
+        'La contraseña debe tener al menos 8 caracteres, incluir al menos una letra mayúscula, una minúscula y un número.'
+      );
       return;
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
-    this.authService.resetPassword({
-      email: this.email,
-      token: this.token,
-      newPassword: this.newPassword
-    }).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        this.successMessage = res.message;
-        // Redirige al login tras 2 segundos de confirmación
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Error al restablecer la contraseña. Verificá los datos ingresados.';
-      }
-    });
+    this.authService
+      .resetPassword({
+        email: this.email,
+        token: this.token,
+        newPassword: this.newPassword,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.successMessage.set(res.message);
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.errorMessage.set(
+            err.error?.message ||
+              'Error al restablecer la contraseña. Verificá los datos ingresados.'
+          );
+        },
+      });
   }
 }

@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthLayout } from '../auth-layout/auth-layout';
 import { AuthService } from '../../../core/services/auth.service';
@@ -13,12 +12,12 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class ForgotPassword {
   private authService = inject(AuthService);
-  private router = inject(Router);
-
+  private cdr = inject(ChangeDetectorRef);
   email = '';
   successMessage = '';
   errorMessage = '';
   isLoading = false;
+  isSent = false;
 
   onSubmit(): void {
     if (!this.email) {
@@ -27,27 +26,23 @@ export class ForgotPassword {
     }
 
     this.isLoading = true;
+    this.isSent = false;
     this.errorMessage = '';
     this.successMessage = '';
+    this.cdr.detectChanges();
 
     this.authService.forgotPassword(this.email).subscribe({
       next: (res) => {
         this.isLoading = false;
-        this.successMessage = res.message;
-
-        // Si el backend devuelve devToken (entorno de pruebas sin servidor SMTP configurado)
-        // redirige automáticamente a reset-password precargando los queryParams
-        if (res.devToken) {
-          setTimeout(() => {
-            this.router.navigate(['/reset-password'], {
-              queryParams: { email: this.email, token: res.devToken }
-            });
-          }, 2000);
-        }
+        this.isSent = true;
+        this.successMessage = res.message || 'Si el correo está registrado, recibirás un correo con las instrucciones.';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isLoading = false;
+        this.isSent = false;
         this.errorMessage = err.error?.message || 'Ocurrió un error al procesar la solicitud.';
+        this.cdr.detectChanges();
       }
     });
   }

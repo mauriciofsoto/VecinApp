@@ -9,13 +9,16 @@ using VecinApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+/*
 // Conexión con PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+*/
 
-
-
+// Conexion temporal en memoria
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseInMemoryDatabase("VecinAppTestDb"));
 
 // Configuración de Identity
 builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
@@ -93,15 +96,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed inicial de usuario de prueba
+// Seed inicial de usuario de prueba y generación de token para Juan González
 using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
     var testEmail = "vecino@vecinapp.com";
 
-    if (await userManager.FindByEmailAsync(testEmail) == null)
+    var user = await userManager.FindByEmailAsync(testEmail);
+
+    if (user == null)
     {
-        var testUser = new Usuario
+        user = new Usuario
         {
             UserName = testEmail,
             Email = testEmail,
@@ -112,8 +117,25 @@ using (var scope = app.Services.CreateScope())
             FechaRegistro = DateTime.UtcNow
         };
 
-        await userManager.CreateAsync(testUser, "Password123");
+        await userManager.CreateAsync(user, "Password123");
     }
-}
+
+   // Token de prueba para reset password (6 dígitos usando Email)
+    if (user != null)
+    {   
+        var clientBaseUrl = "http://localhost:4200";
+        var resetUrl = $"{clientBaseUrl}/reset-password?email={Uri.EscapeDataString(user.Email!)}";
+        var resetToken = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("\n==================================================");
+        Console.WriteLine("CÓDIGO DE 6 DÍGITOS PARA JUAN GONZÁLEZ:");
+        Console.WriteLine($"{resetToken}");
+        Console.WriteLine($"Link: {resetUrl}");
+        Console.WriteLine("==================================================\n");
+        Console.ResetColor();
+    }
 
 app.Run();
+
+}

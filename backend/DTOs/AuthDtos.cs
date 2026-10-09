@@ -9,3 +9,5 @@ public record RefreshRequest(string RefreshToken);
 public record ForgotPasswordRequest(string Email);
 
 public record ResetPasswordRequest(string Email, string Token, string NewPassword);
+
+public record LogoutRequest(string RefreshToken);

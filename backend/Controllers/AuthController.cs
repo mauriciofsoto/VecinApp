@@ -114,7 +114,6 @@ public class AuthController : ControllerBase
 
     // POST /auth/logout
     [HttpPost("logout")]
-    [Authorize]
     public async Task<IActionResult> Logout([FromBody] RefreshRequest request)
     {
         var token = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == request.RefreshToken);
@@ -142,6 +141,7 @@ public class AuthController : ControllerBase
         });
     }
 
+
     // POST /auth/forgot-password
     [HttpPost("forgot-password")]
     [AllowAnonymous]
@@ -155,19 +155,19 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            // Se responde 200 para evitar enumeración de usuarios
-            return Ok(new { message = "Si el correo está registrado, recibirás las instrucciones." });
+            
+            return Ok(new { message = "Si el correo está registrado, recibirás las instrucciones para reestablecer tu contraseña." });
         }
 
-        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        // Genera el código numérico de 6 dígitos asociado al email
+        var codigoEmail = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
 
         return Ok(new
         {
-            message = "Si el correo está registrado, recibirás las instrucciones.",
-            devToken = resetToken
+            message = "Si el correo está registrado, recibirás las instrucciones para reestablecer tu contraseña.",
+            devToken = codigoEmail
         });
     }
-
     // POST /auth/reset-password
     [HttpPost("reset-password")]
     [AllowAnonymous]
@@ -186,7 +186,20 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Solicitud inválida o expirada." });
         }
 
-        var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+        // Validar código de 6 dígitos
+        var esValido = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", request.Token);
+        if (!esValido)
+        {
+            return BadRequest(new { message = "El código de verificación es incorrecto o ha expirado." });
+        }
+
+        // Generar token interno y cambiar contraseña
+        var tokenInterno = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, tokenInterno, request.NewPassword);
+ 
+       
+
+
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -195,4 +208,6 @@ public class AuthController : ControllerBase
 
         return Ok(new { message = "Contraseña restablecida con éxito. Ya podés iniciar sesión." });
     }
+
+
 }
