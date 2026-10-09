@@ -5,7 +5,9 @@ using VecinApp.Models;
 
 namespace VecinApp.Data;
 
-public class AppDbContext : IdentityDbContext<Usuario>
+public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
+// Se especifican los tres tipos genéricos para evitar que EF intente mapear IdentityUser y Usuario por duplicado en el modelo
+
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
@@ -13,9 +15,9 @@ public class AppDbContext : IdentityDbContext<Usuario>
     }
 
     // Tablas de negocio
-    public DbSet<Rol> Roles { get; set; }
+    public new DbSet<Rol> Roles { get; set; }
     public DbSet<Edificio> Edificios { get; set; }
-    public DbSet<Usuario> Usuarios { get; set; }
+    //public DbSet<Usuario> Usuarios { get; set; } -- lo maneja Identity
     public DbSet<Unidad> Unidades { get; set; }
     public DbSet<UsuarioUnidad> UsuariosUnidades { get; set; }
     public DbSet<Aviso> Avisos { get; set; }
@@ -38,6 +40,50 @@ public class AppDbContext : IdentityDbContext<Usuario>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // =========================
+        // TABLA BASE IDENTITY
+        // =========================
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.ToTable("usuario");
+
+            entity.Property(e => e.Nombre)
+                .HasColumnName("nombre")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.Apellido)
+                .HasColumnName("apellido")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.Estado)
+                .HasColumnName("estado")
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(e => e.FechaRegistro)
+                .HasColumnName("fecha_registro")
+                .IsRequired();
+
+            entity.Property(e => e.IdRol)
+                .HasColumnName("id_rol");
+
+            entity.Property(e => e.IdEdificio)
+                .HasColumnName("id_edificio");
+
+            entity.HasOne(e => e.Rol)
+                .WithMany(e => e.Usuarios)
+                .HasForeignKey(e => e.IdRol)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Usuarios)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         // =========================
         // ROL

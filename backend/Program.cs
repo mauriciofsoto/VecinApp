@@ -14,6 +14,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+
+
+
 // Configuración de Identity
 builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 {
@@ -27,6 +30,8 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.MaxFailedAccessAttempts = 5;
 })
+
+
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
