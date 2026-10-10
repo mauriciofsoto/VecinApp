@@ -1,0 +1,32 @@
+<section class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#dbeafe] via-[#ede9fe] to-[#fae8ff] p-4 sm:p-6 md:p-8">
+  <!-- Card contenedora con altura mínima fija -->
+  <div class="w-full max-w-md min-h-[590px] bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/60 overflow-hidden flex flex-col justify-between transition-all duration-200">
+    
+    <!-- Top Header -->
+    <header class="w-full bg-gradient-to-r from-[#93c5fd] to-[#a5b4fc] py-5 px-6 text-center relative shadow-sm">
+      <h1 class="text-3xl md:text-4xl text-white font-logo italic font-bold tracking-wide drop-shadow-sm select-none">
+        VecinApp
+      </h1>
+
+      @if (showTopLink) {
+        <a 
+          [routerLink]="topLinkRoute" 
+          class="absolute right-5 top-1/2 -translate-y-1/2 text-xs md:text-sm font-semibold text-white/95 hover:text-white hover:underline transition-colors cursor-pointer"
+        >
+          {{ topLinkText }}
+        </a>
+      }
+    </header>
+
+    <!-- Slot para inyectar cada formulario (alineado al inicio para no generar saltos de espaciado) -->
+    <div class="flex-1 flex flex-col justify-start pt-6 pb-6 px-8 w-full max-w-sm mx-auto">
+      <ng-content></ng-content>
+    </div>
+
+    <!-- Footer sutil -->
+    <footer class="py-3 text-center text-xs text-slate-400/50 select-none">
+      VecinApp © 2026
+    </footer>
+
+  </div>
+</section>

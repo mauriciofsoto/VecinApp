@@ -1,3 +1,13 @@
-.vs/
+# Frontend (Angular / Node)
+node_modules/
+.angular/
+dist/
+
+# Backend (.NET / C#)
 bin/
 obj/
+*.user
+
+.vs/
+[Bb]in/
+[Oo]bj/

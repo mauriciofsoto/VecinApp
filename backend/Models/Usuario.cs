@@ -1,24 +1,25 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace VecinApp.Models;
 
-public class Usuario
+public enum EstadoUsuario
 {
-    public int IdUsuario { get; set; }
+    Activo = 1,
+    Desactivado = 2
+}
 
-    public int IdRol { get; set; }
+public class Usuario : IdentityUser
+{
+    public string Nombre { get; set; } = string.Empty;
+    public string Apellido { get; set; } = string.Empty;
+    public EstadoUsuario Estado { get; set; } = EstadoUsuario.Activo;
+    public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
+
+    // Relaciones del modelo de datos
+    public int? IdRol { get; set; }
+    public Rol? Rol { get; set; }
 
     public int? IdEdificio { get; set; }
-
-    public string Nombre { get; set; } = string.Empty;
-
-    public string Apellido { get; set; } = string.Empty;
-
-    public string Email { get; set; } = string.Empty;
-
-    public string Estado { get; set; } = string.Empty;
-
-    // Relaciones
-    public Rol Rol { get; set; } = null!;
-
     public Edificio? Edificio { get; set; }
 
     public ICollection<UsuarioUnidad> UsuariosUnidades { get; set; } = new List<UsuarioUnidad>();
