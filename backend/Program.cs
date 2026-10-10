@@ -9,16 +9,12 @@ using VecinApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/*
+
 // Conexión con PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
-*/
 
-// Conexion temporal en memoria
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("VecinAppTestDb"));
 
 // Configuración de Identity
 builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
