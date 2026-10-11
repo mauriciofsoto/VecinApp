@@ -1,0 +1,6 @@
+@use '../../../../../styles/abstracts' as *;
+
+// El host no genera caja: el <dialog> se muestra en la capa superior del navegador
+:host { display: contents; }
+
+.modal { @include modal-shell; }

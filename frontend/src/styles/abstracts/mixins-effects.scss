@@ -1,0 +1,9 @@
+@use 'variables' as *;
+@use 'mixins-core' as *;
+
+@mixin glass-panel-effect {
+  @include backdrop-blur;
+  background: $glass-bg;
+  border: 1px solid $glass-border;
+  box-shadow: $shadow-md;
+}

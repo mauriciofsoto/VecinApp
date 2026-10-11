@@ -1,0 +1,34 @@
+<!-- Botón en el dashboard para abrir el modal -->
+<button type="button" class="btn-primary" (click)="showModal.set(true)">
+  + Nuevo Vecino
+</button>
+
+<!-- COMPONENTE MODAL REUTILIZABLE -->
+<app-modal 
+  heading="Registrar Nuevo Vecino" 
+  size="md" 
+  [(open)]="showModal"
+>
+  <!-- Cuerpo del modal (se proyecta automáticamente en el modal-body) -->
+  <form class="space-y-4">
+    <div class="form-group">
+      <label class="text-small text-muted">Nombre completo</label>
+      <input type="text" placeholder="Ej. Ana Pérez" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label class="text-small text-muted">Unidad / Depto</label>
+      <input type="text" placeholder="Ej. 4 B" class="form-input" />
+    </div>
+  </form>
+
+  <!-- Pie del modal (se proyecta en el modal-footer gracias a ngProjectAs o [modal-footer]) -->
+  <div modal-footer class="flex gap-3">
+    <button type="button" class="btn-ghost" (click)="showModal.set(false)">
+      Cancelar
+    </button>
+    <button type="button" class="btn-primary" (click)="guardarVecino()">
+      Guardar
+    </button>
+  </div>
+</app-modal>

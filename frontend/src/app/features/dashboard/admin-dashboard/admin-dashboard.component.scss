@@ -1,0 +1,22 @@
+@use '../../../../styles/abstracts' as *;
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-dashboard-layout {
+  @include full-screen-layout;
+
+  > main,
+  .app-main-content {
+    @include main-scroll-container; // ya incluye el scrollbar custom
+  }
+}
+
+.bento-grid { @include bento-grid-custom; }
+.bento-item { @include bento-item; }
+
+// Feedback visual CDK Drag & Drop (preview + placeholder + transición)
+@include cdk-drag-feedback;

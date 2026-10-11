@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Web Dark Glass</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --glass-bg: rgba(30, 41, 59, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-hover: rgba(51, 65, 85, 0.7);
+      --primary: #2563eb;
+      --primary-glow: rgba(37, 99, 235, 0.35);
+      --accent: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --warning: #eab308;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body {
+      background: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* GLASS COMMON */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      margin: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      padding-left: 8px;
+    }
+
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+    .nav-item.active a, .nav-item a:hover {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      flex: 1;
+      padding: 16px 24px 24px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .building-selector {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      padding: 8px 16px;
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold;
+    }
+
+    /* DASHBOARD GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stat-header { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.85rem; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: #fff; }
+    .stat-footer { font-size: 0.8rem; color: var(--accent); }
+
+    /* ACTION BAR (Botonera rápida) */
+    .quick-actions {
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .btn-action {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+    .btn-action:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .btn-action.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* COLUMNAS DE TRABAJO */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; display: flex; justify-content: space-between; }
+
+    /* BADGES */
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+    .badge-warning { background: rgba(234, 179, 8, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-success { background: rgba(34, 197, 94, 0.2); color: var(--success); border: 1px solid var(--success); }
+
+    /* TABLA AGIL */
+    .table-list { display: flex; flex-direction: column; gap: 12px; }
+    .table-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .item-info { display: flex; flex-direction: column; gap: 2px; }
+    .item-title { font-weight: 600; font-size: 0.95rem; }
+    .item-sub { font-size: 0.8rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar glass-panel">
+    <div class="brand">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M3 6l9-4 9 4M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+      ConsorcioOS
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active"><a href="#">📊 Dashboard</a></li>
+      <li class="nav-item"><a href="#">⚠️ Incidencias</a></li>
+      <li class="nav-item"><a href="#">👥 Inquilinos / QR</a></li>
+      <li class="nav-item"><a href="#">📦 Paquetería</a></li>
+      <li class="nav-item"><a href="#">🗳️ Votaciones</a></li>
+      <li class="nav-item"><a href="#">💬 Comunidad Feed</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    
+    <!-- TOPBAR -->
+    <header class="topbar glass-panel">
+      <div>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Edificio Seleccionado:</span>
+        <select class="building-selector">
+          <option>San Cristóbal - Av. Jujuy 1240</option>
+          <option>Palermo - Gorriti 4500</option>
+        </select>
+      </div>
+      <div class="user-profile">
+        <div style="text-align: right;">
+          <div style="font-weight: 600; font-size: 0.9rem;">Zoe Vivas</div>
+          <div style="font-size: 0.75rem; color: var(--accent);">Administradora</div>
+        </div>
+        <div class="avatar">ZV</div>
+      </div>
+    </header>
+
+    <!-- METRICAS -->
+    <section class="stats-grid">
+      <div class="stat-card glass-panel">
+        <div class="stat-header">Incidencias Sin Resolver</div>
+        <div class="stat-value" style="color: var(--danger);">4</div>
+        <div class="stat-footer">⚠️ 2 Urgentes requieren derivación</div>
+      </div>
+      <div class="stat-card glass-panel">
+        <div class="stat-header">Encuestas En Curso</div>
+        <div class="stat-value" style="color: var(--accent);">1</div>
+        <div class="stat-footer">🗳️ "Bomba de Agua" (78% votó)</div>
+      </div>
+      <div class="stat-card glass-panel">
+        <div class="stat-header">Paquetes en Portería</div>
+        <div class="stat-value" style="color: var(--warning);">9</div>
+        <div class="stat-footer">📦 3 pendientes de retiro > 48hs</div>
+      </div>
+      <div class="stat-card glass-panel">
+        <div class="stat-header">Inquilinos Activos</div>
+        <div class="stat-value">32 / 36</div>
+        <div class="stat-footer" style="color: var(--success);">✅ 88% Registrados en app</div>
+      </div>
+    </section>
+
+    <!-- ACCIONES RAPIDAS -->
+    <section class="quick-actions glass-panel">
+      <span style="font-weight: 600; font-size: 0.9rem; margin-right: 8px;">Acciones Rápida Admin:</span>
+      <button class="btn-action primary">📱 Generar QR Inquilino</button>
+      <button class="btn-action">📢 Publicar Aviso Urgente</button>
+      <button class="btn-action">📊 Crear Votación</button>
+      <button class="btn-action">📑 Exportar Faltantes de Voto</button>
+    </section>
+
+    <!-- COLUMNAS DE CONTENIDO -->
+    <section class="content-grid">
+      
+      <!-- INCIDENCIAS PARA DERIVAR -->
+      <div class="glass-panel" style="padding: 20px;">
+        <div class="card-title">
+          <span>⚠️ Ultimas Incidencias Recibidas</span>
+          <a href="#" style="color: var(--accent); font-size: 0.85rem; text-decoration: none;">Ver todas</a>
+        </div>
+        <div class="table-list">
+          
+          <div class="table-item">
+            <div class="item-info">
+              <span class="item-title">Filtración en techo de cochera #4</span>
+              <span class="item-sub">Reportado por: Depto 2B • Hace 2 horas</span>
+            </div>
+            <span class="badge badge-danger">Urgente</span>
+            <button class="btn-action" style="padding: 6px 12px; font-size: 0.8rem;">Derivar a Portería</button>
+          </div>
+
+          <div class="table-item">
+            <div class="item-info">
+              <span class="item-title">Basura acumulada en palier del 5to piso</span>
+              <span class="item-sub">Reportado por: Depto 5A • Hace 5 horas</span>
+            </div>
+            <span class="badge badge-warning">En Proceso</span>
+            <button class="btn-action" style="padding: 6px 12px; font-size: 0.8rem;">Ver Detalle</button>
+          </div>
+
+          <div class="table-item">
+            <div class="item-info">
+              <span class="item-title">Ruido molesto / Reparación fuera de hora</span>
+              <span class="item-sub">Reportado por: Depto 1C • Ayer</span>
+            </div>
+            <span class="badge badge-success">Resuelto</span>
+            <button class="btn-action" style="padding: 6px 12px; font-size: 0.8rem; opacity: 0.5;">Cerrado</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VOTO EN CURSO & NO-VOTANTES -->
+      <div class="glass-panel" style="padding: 20px;">
+        <div class="card-title">
+          <span>🗳️ Encuesta: Bomba de Agua</span>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">¿Aprobar compra de nuevo motor centrifugo?</p>
+        
+        <div style="background: rgba(255,255,255,0.05); border-radius: 8px; height: 10px; overflow: hidden; margin-bottom: 8px;">
+          <div style="background: var(--accent); width: 78%; height: 100%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
+          <span>78% Votó (28 Deptos)</span>
+          <span>Faltan 8</span>
+        </div>
+
+        <button class="btn-action primary" style="width: 100%; justify-content: center;">📄 Descargar Lista de No-Votantes (PDF/Excel)</button>
+      </div>
+
+    </section>
+
+  </main>
+
+</body>
+</html>

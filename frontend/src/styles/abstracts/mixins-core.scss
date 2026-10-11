@@ -1,0 +1,72 @@
+@use 'sass:map';
+@use 'variables' as *;
+
+// ========================================
+// MIXINS PRIMITIVOS (los ladrillos de todo lo demás)
+// ========================================
+
+// display flex + centrado en ambos ejes
+@mixin flex-center($inline: false) {
+  @if $inline { display: inline-flex; } @else { display: flex; }
+  align-items: center;
+  justify-content: center;
+}
+
+// fila con items centrados verticalmente
+@mixin flex-row($gap: $space-2) {
+  display: flex;
+  align-items: center;
+  gap: $gap;
+}
+
+// columna
+@mixin flex-col($gap: 0) {
+  display: flex;
+  flex-direction: column;
+  @if $gap != 0 { gap: $gap; }
+}
+
+// texto cortado con "..."
+@mixin truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// blur con prefijo webkit
+@mixin backdrop-blur($px: 16px) {
+  backdrop-filter: blur($px);
+  -webkit-backdrop-filter: blur($px);
+}
+
+// resplandor
+@mixin glow($color, $size: 15px, $alpha: 0.25) {
+  box-shadow: 0 0 $size rgba($color, $alpha);
+}
+
+// Fondo tintado + borde + texto del mismo color (badges, botones de estado)
+@mixin status-tint($color, $bg-alpha: 0.2, $border-alpha: 1) {
+  background: rgba($color, $bg-alpha);
+  color: $color;
+  border: 1px solid rgba($color, $border-alpha);
+}
+
+// Estado activo / seleccionado
+@mixin active-state($color: $primary) {
+  background: rgba($color, 0.2);
+  border-color: rgba($color, 0.5);
+  box-shadow: 0 0 15px rgba($color, 0.25);
+}
+
+// Elevación al hover
+@mixin hover-lift($y: -2px) {
+  &:hover:not(:disabled) { transform: translateY($y); }
+  &:active:not(:disabled) { transform: translateY(0); }
+}
+
+// Aplica un tamaño desde un map (reemplaza los @if 'sm' / 'md' / 'lg')
+@mixin apply-size($sizes, $key) {
+  @each $prop, $value in map.get($sizes, $key) {
+    #{$prop}: $value;
+  }
+}

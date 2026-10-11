@@ -1,0 +1,35 @@
+<div class="comment-input-container">
+  
+  <!-- AVATAR O INICIALES DEL USUARIO -->
+  <div class="avatar-wrapper">
+    @if (userAvatar) {
+      <img [src]="userAvatar" alt="Usuario" class="avatar-img" />
+    } @else {
+      <div class="avatar-fallback">{{ userInitials }}</div>
+    }
+  </div>
+
+  <!-- CAMPO DE TEXTO + ACCIÓN -->
+  <div class="input-wrapper">
+    <textarea
+      [(ngModel)]="commentText"
+      [placeholder]="placeholder"
+      [disabled]="disabled || loading"
+      (keydown)="onKeyDown($event)"
+      rows="1"
+      class="comment-textarea">
+    </textarea>
+
+    <div class="actions">
+      <app-button
+        variant="primary"
+        size="sm"
+        [disabled]="!commentText.trim() || disabled || loading"
+        (buttonClick)="onSend()">
+        <span>Enviar</span>
+        <span>➔</span>
+      </app-button>
+    </div>
+  </div>
+
+</div>

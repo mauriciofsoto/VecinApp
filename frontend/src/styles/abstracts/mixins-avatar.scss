@@ -1,0 +1,29 @@
+@use 'variables' as *;
+@use 'mixins-core' as *;
+
+// Estructura circular y tamaño
+@mixin avatar-base($size: 2.25rem) {
+  @include flex-center;
+  width: $size;
+  height: $size;
+  border-radius: $radius-circle;
+  flex-shrink: 0;
+}
+
+// Avatar con imagen
+@mixin avatar-image($size: 2.25rem) {
+  @include avatar-base($size);
+  object-fit: cover;
+  border: 1px solid $glass-border;
+}
+
+// Fallback de iniciales (sin foto)
+@mixin avatar-fallback($size: 2.25rem) {
+  @include avatar-base($size);
+  background: rgba($primary, 0.2);
+  color: $primary-light;
+  border: 1px solid rgba($primary, 0.35);
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+  user-select: none;
+}

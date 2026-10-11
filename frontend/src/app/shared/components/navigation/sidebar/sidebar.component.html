@@ -1,0 +1,57 @@
+<!-- 🍔 BOTÓN HAMBURGUESA MÓVIL (Visible solo en mobile) -->
+<button 
+  class="mobile-toggle-btn md:hidden"
+  (click)="toggleSidebar()"
+  aria-label="Abrir menú">
+  ☰
+</button>
+
+<!-- FONDO OSCURO (BACKDROP) EN MÓVIL CUANDO ESTÁ ABIERTO -->
+@if (isOpen) {
+  <div class="sidebar-backdrop md:hidden" (click)="toggleSidebar()"></div>
+}
+
+<!-- CONTENEDOR PRINCIPAL DEL SIDEBAR -->
+<aside class="app-sidebar" [class.is-open]="isOpen">
+  <!-- Brand Header -->
+  <div class="sidebar-header">
+    <img src="assets/logo.svg" alt="VecinApp" class="brand-logo" />
+    <span class="brand-title">VecinApp</span>
+  </div>
+
+  <!-- Menú de Navegación -->
+  <nav class="sidebar-nav">
+    <a class="nav-item active" routerLink="/admin/dashboard" (click)="toggleSidebar()">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item" routerLink="/admin/incidents" (click)="toggleSidebar()">
+      <span class="nav-icon">🚨</span>
+      <span>Incidencias</span>
+    </a>
+    <a class="nav-item" routerLink="/admin/neighbors" (click)="toggleSidebar()">
+      <span class="nav-icon">👥</span>
+      <span>Vecinos</span>
+    </a>
+    <a class="nav-item" routerLink="/admin/settings" (click)="toggleSidebar()">
+      <span class="nav-icon">⚙️</span>
+      <span>Configuración</span>
+    </a>
+  </nav>
+
+  <!-- Profile & Actions Footer -->
+  <div class="sidebar-footer">
+    <div class="user-profile">
+      <img src="assets/avatar-placeholder.png" alt="Usuario" class="avatar" />
+      <div class="user-info">
+        <span class="user-name">Zoe Vivas</span>
+        <span class="user-role">Administrador</span>
+      </div>
+    </div>
+
+    <button class="btn-logout" (click)="toggleSidebar()">
+      <span>🚪</span>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>
