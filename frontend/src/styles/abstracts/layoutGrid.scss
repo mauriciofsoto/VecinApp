@@ -1,0 +1,36 @@
+// ========================================
+// SISTEMA DE LAYOUT Y BENTO GRID 
+// ========================================
+
+/* Contenedor Principal del Dashboard */
+.app-dashboard-layout {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: flex-start;
+
+  > main,
+  .app-main-content {
+    flex: 1;
+    min-width: 0; 
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+}
+
+/* Grilla Bento Base (3 Columnas Virtuales) */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}

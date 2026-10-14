@@ -1,0 +1,17 @@
+@use '../abstracts' as *;
+
+h1, .text-title { @include text-title; }
+h2, h3, .text-heading { @include text-heading; }
+body, p, .text-body { @include text-body; }
+
+.text-small { font-size: $text-small; }
+.text-caption { font-size: $text-caption; }
+
+// Colores de texto
+.brand-text, .text-accent { color: $accent; }
+.text-muted { color: $text-muted; }
+
+// .text-danger, .text-success, .text-warning, .text-info
+@each $name, $color in $status-colors {
+  .text-#{$name} { color: $color; }
+}

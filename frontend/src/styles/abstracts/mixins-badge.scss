@@ -1,0 +1,45 @@
+@use 'sass:map';
+@use 'variables' as *;
+@use 'mixins-core' as *;
+
+// 1. Estructura base
+@mixin badge-base {
+  @include flex-center($inline: true);
+  gap: 0.35rem;
+  font-weight: $font-semibold;
+  border-radius: $radius-full;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: $transition-base;
+  user-select: none;
+}
+
+// 2. Tamaño (map $badge-sizes)
+@mixin badge-size($size: md) {
+  @include apply-size($badge-sizes, $size);
+}
+
+// 3. Color: fondo translúcido + texto + borde
+@mixin badge-variant($bg-color, $text-color: $bg-color, $border-opacity: 0.35) {
+  background: rgba($bg-color, 0.15);
+  color: $text-color;
+  border: 1px solid rgba($bg-color, $border-opacity);
+}
+
+// 4. Genera .badge-sm / -md / -lg
+@mixin badge-size-classes {
+  @each $name in map.keys($badge-sizes) {
+    &-#{$name} { @include badge-size($name); }
+  }
+}
+
+// 5. Genera .badge-success / -warning / ... desde $badge-variants
+@mixin badge-variants {
+  @each $name, $cfg in $badge-variants {
+    $border: 0.35;
+    @if map.has-key($cfg, border) { $border: map.get($cfg, border); }
+    &-#{$name} {
+      @include badge-variant(map.get($cfg, bg), map.get($cfg, text), $border);
+    }
+  }
+}

@@ -1,0 +1,16 @@
+// Punto de entrada único: @use 'abstracts' as *;
+@forward 'variables';
+@forward 'breakpoints';
+@forward 'mixins-core';
+@forward 'mixins-effects';
+@forward 'mixins-typography';
+@forward 'mixins-scrollbar';
+@forward 'mixins-buttons';
+@forward 'mixins-avatar';
+@forward 'mixins-forms';
+@forward 'mixins-icon';
+@forward 'mixins-badge';
+@forward 'mixins-layout';
+@forward 'mixins-card';
+@forward 'mixins-sidebar';
+@forward 'mixins-modal';

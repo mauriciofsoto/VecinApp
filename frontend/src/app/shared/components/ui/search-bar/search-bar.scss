@@ -1,0 +1,11 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.search-bar-container { @include form-field-container; }
+.search-icon          { @include icon-base; }
+.search-input         { @include form-input-base; }
+.clear-button         { @include button-icon-clear; }

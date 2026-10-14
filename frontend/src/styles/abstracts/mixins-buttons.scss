@@ -1,0 +1,127 @@
+@use 'sass:color';
+@use 'sass:map';
+@use 'variables' as *;
+@use 'mixins-core' as *;
+
+// ========================================
+// SISTEMA DE BOTONES
+// ========================================
+
+// 1. Estructura y transiciones base
+@mixin button-base {
+  padding: 7px;
+  @include flex-center($inline: true);
+  @include hover-lift;
+  gap: $space-2;
+  font-family: $font-primary;
+  font-weight: $font-medium;
+  cursor: pointer;
+  transition: $transition-base;
+  user-select: none;
+  white-space: nowrap;
+  border-radius: $radius-sm;
+  outline: none;
+  border: 1px solid transparent;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// 2. Tamaños (salen del map $button-sizes)
+@mixin button-size($size: md) {
+  @include apply-size($button-sizes, $size);
+}
+
+// Genera .btn-sm / -md / -lg
+@mixin button-size-classes {
+  @each $name in map.keys($button-sizes) {
+    &-#{$name} { @include button-size($name); }
+  }
+}
+
+// 3. Mixin maestro de variantes
+@mixin button-variant($bg, $border, $color, $hover-bg, $hover-color: $color, $glow: null) {
+  background: $bg;
+  border-color: $border;
+  color: $color;
+  @if $glow { box-shadow: 0 0 15px $glow; }
+
+  &:hover:not(:disabled) {
+    background: $hover-bg;
+    color: $hover-color;
+    @if $glow { box-shadow: 0 0 20px rgba($glow, 0.6); }
+  }
+}
+
+// 4. Variante de estado (danger, success, warning...) en un solo mixin
+@mixin button-status($color) {
+  @include button-variant(
+    rgba($color, 0.2), $color, $color, $color, $white, rgba($color, 0.4)
+  );
+}
+
+// 5. Variantes concretas
+@mixin button-primary {
+  @include button-variant(
+    $primary, $primary, $white,
+    color.adjust($primary, $lightness: 5%), $white, $primary-glow
+  );
+}
+
+@mixin button-secondary {
+  @include button-variant($surface-2, $glass-border, $text-main, $surface-3, $text-main);
+}
+
+@mixin button-danger  { @include button-status($danger); }
+@mixin button-success { @include button-status($success); }
+@mixin button-warning { @include button-status($warning); }
+
+@mixin button-outline {
+  @include button-variant(transparent, $glass-border, $text-main, transparent, $accent);
+  &:hover:not(:disabled) { border-color: $accent; }
+}
+
+@mixin button-ghost($color: $text-muted, $hover-bg: $surface-2, $hover-color: $text-main) {
+  @include button-variant(transparent, transparent, $color, $hover-bg, $hover-color);
+}
+
+// Ghost en rojo (logout, eliminar)
+@mixin button-ghost-danger {
+  @include button-ghost($danger, rgba($danger, 0.15), $danger);
+}
+
+// 6. Estado seleccionado (sin !important: aplicalo DESPUÉS de la variante)
+@mixin button-selected {
+  @include active-state($accent);
+  color: $accent;
+}
+
+// 7. Botón circular chico (limpiar inputs / cerrar modales)
+@mixin button-icon-clear($size: 1.5rem) {
+  @include button-base;
+  width: $size;
+  height: $size;
+  padding: 0;
+  border: none;
+  border-radius: $radius-circle;
+  background: transparent;
+  color: $text-muted;
+  font-size: $text-caption;
+
+  &:hover:not(:disabled) {
+    color: $white;
+    background: $surface-3;
+    transform: none;
+  }
+}
+
+// 8. Compatibilidad con la clase global .btn-action
+@mixin button-visual-glass {
+  @include button-base;
+  @include button-secondary;
+  &.primary { @include button-primary; }
+}

@@ -1,0 +1,23 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: inline-block;
+
+  &.w-full { width: 100%; }
+}
+
+.btn {
+  @include button-base;
+  @include button-size-classes; // .btn-sm / -md / -lg
+
+  // VARIANTES
+  &-primary   { @include button-primary; }
+  &-secondary { @include button-secondary; }
+  &-danger    { @include button-danger; }
+  &-success   { @include button-success; }
+  &-outline   { @include button-outline; }
+  &-ghost     { @include button-ghost; }
+
+  // ESTADO SELECCIONADO
+  &.btn-selected { @include button-selected; }
+}

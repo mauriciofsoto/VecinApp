@@ -1,0 +1,1 @@
+El admin general un qr con token, para solo los user, para que generen sus datos y puedan acceder a la comunidad del edificio, con esos datos ya genera su usuario. y le llega un email o msj donde aparece el link para la pagina del, pedir las coockis para acceder desde el mismo 

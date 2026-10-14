@@ -1,0 +1,19 @@
+@use 'variables' as *;
+
+@mixin text-title {
+  font-family: $font-title;
+  font-size: $text-title;
+  line-height: $line-tight;
+}
+
+@mixin text-heading {
+  font-family: $font-primary;
+  font-size: $text-heading;
+  font-weight: $font-semibold;
+  line-height: $line-tight;
+}
+
+@mixin text-body {
+  font-size: $text-body;
+  line-height: $line-normal;
+}

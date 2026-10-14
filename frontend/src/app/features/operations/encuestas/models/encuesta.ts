@@ -1,0 +1,2 @@
+export interface Encuesta {
+}

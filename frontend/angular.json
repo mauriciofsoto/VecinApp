@@ -2,8 +2,12 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
+<<<<<<< HEAD
     "packageManager": "npm",
     "analytics": false
+=======
+    "packageManager": "npm"
+>>>>>>> 7a6ef32a2dc4a268ab5c6b2b69be25d0c3c3e31b
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -32,8 +36,12 @@
             ],
             "styles": [
               "src/styles/styles.scss"
+<<<<<<< HEAD
             ],
             "polyfills": []
+=======
+            ]
+>>>>>>> 7a6ef32a2dc4a268ab5c6b2b69be25d0c3c3e31b
           },
           "configurations": {
             "production": {
@@ -77,4 +85,8 @@
       }
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7a6ef32a2dc4a268ab5c6b2b69be25d0c3c3e31b

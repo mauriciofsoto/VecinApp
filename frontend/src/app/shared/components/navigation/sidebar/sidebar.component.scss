@@ -1,0 +1,56 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+}
+
+.mobile-toggle-btn {
+  @include mobile-toggle-button;
+  display: none;
+
+  @include tablet { display: flex; }
+}
+
+.sidebar-backdrop {
+  @include sidebar-backdrop;
+}
+
+.app-sidebar {
+  @include sidebar-container(260px);
+
+  .sidebar-header {
+    @include flex-row($space-3);
+    padding: $space-2;
+    margin-bottom: $space-6;
+
+    .brand-logo  { width: 2rem; height: 2rem; }
+    .brand-title {
+      @include text-heading;
+      color: $text-main;
+    }
+  }
+
+  .sidebar-nav {
+    @include flex-col(0.35rem);
+    flex: 1;
+    overflow-y: auto;
+    @include custom-scrollbar(4px);
+
+    .nav-item { @include sidebar-nav-item; }
+  }
+
+  .sidebar-footer {
+    @include flex-col($space-3);
+    padding-top: $space-4;
+    border-top: 1px solid $glass-border;
+
+    .user-profile { @include sidebar-user-profile; }
+
+    .btn-logout {
+      @include button-base;
+      @include button-ghost-danger;
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+}

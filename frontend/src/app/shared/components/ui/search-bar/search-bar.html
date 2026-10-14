@@ -1,0 +1,31 @@
+<div class="search-bar-container">
+  
+  <!-- ÍCONO DE LUPA / BUSCADOR -->
+  <span class="search-icon" aria-hidden="true">
+    @if (loading) {
+      <span class="spinner"></span>
+    } @else {
+      🔍
+    }
+  </span>
+
+  <!-- INPUT PRINCIPAL -->
+  <input
+    type="text"
+    [value]="searchTerm"
+    (input)="onInput($any($event.target).value)"
+    [placeholder]="placeholder"
+    class="search-input" />
+
+  <!-- BOTÓN LIMPIAR (Solo aparece cuando hay texto) -->
+  @if (searchTerm) {
+    <button 
+      type="button" 
+      class="clear-button" 
+      (click)="clearSearch()"
+      title="Limpiar búsqueda">
+      ✕
+    </button>
+  }
+
+</div>

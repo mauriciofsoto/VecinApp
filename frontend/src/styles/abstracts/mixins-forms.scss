@@ -1,0 +1,57 @@
+@use 'variables' as *;
+@use 'mixins-core' as *;
+@use 'mixins-effects' as *;
+
+// ========================================
+// FORMULARIOS E INPUTS
+// ========================================
+
+// 1. Contenedor del input (SearchBar, CommentInput, etc.)
+@mixin form-field-container($padding: 0.55rem 0.85rem, $radius: $radius-sm) {
+  @include glass-panel-effect;
+  @include flex-row;
+  width: 100%;
+  padding: $padding;
+  border-radius: $radius;
+  transition: $transition-base;
+
+  &:focus-within {
+    border-color: rgba($primary, 0.5);
+    box-shadow: 0 0 12px rgba($primary, 0.2);
+    background: $surface-2;
+  }
+}
+
+// 2. Wrapper en columna (Textarea + acciones)
+@mixin form-input-column-wrapper($gap: $space-2) {
+  @include flex-col($gap);
+  flex: 1;
+  min-width: 0;
+}
+
+// 3. Estilos base para inputs y textareas
+@mixin form-input-base {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: $text-main;
+  font-family: $font-primary;
+  font-size: $text-small;
+
+  &::placeholder { color: $text-muted; opacity: 0.7; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// 4. Textarea
+@mixin form-textarea-base($resize: none, $line-height: 1.4) {
+  @include form-input-base;
+  resize: $resize;
+  line-height: $line-height;
+}
+
+// 5. Acciones secundarias
+@mixin form-actions($justify: flex-end) {
+  @include flex-row;
+  justify-content: $justify;
+}

@@ -1,0 +1,93 @@
+@use 'variables' as *;
+@use 'mixins-core' as *;
+@use 'mixins-effects' as *;
+@use 'mixins-scrollbar' as *;
+@use 'mixins-buttons' as *;
+@use 'mixins-typography' as *;
+
+// ========================================
+// MODAL (carcasa sobre <dialog> nativo)
+// ========================================
+
+// 1. El <dialog>: centrado, ancho por tamaño (map $modal-sizes), fondo oscurecido
+@mixin modal-dialog {
+  margin: auto; // el reset global pone margin:0 y descentraría el dialog
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: $text-main;
+  overflow: visible;
+  max-width: calc(100vw - #{$space-6});
+  max-height: calc(100dvh - #{$space-6});
+
+  @each $name, $width in $modal-sizes {
+    &[data-size="#{$name}"] { width: $width; }
+  }
+
+  &[open] { animation: modalIn $transition-normal $ease-out; }
+
+  &::backdrop {
+    @include backdrop-blur(4px);
+    background: rgba(0, 0, 0, 0.6);
+    animation: fadeIn $transition-fast ease-out;
+  }
+}
+
+// 2. Panel de vidrio
+@mixin modal-panel {
+  @include flex-col;
+  @include glass-panel-effect;
+  border-radius: $radius-md;
+  overflow: hidden;
+  max-height: calc(100dvh - #{$space-6});
+}
+
+// 3. Cabecera: título + botón cerrar
+@mixin modal-header {
+  @include flex-row($space-3);
+  justify-content: space-between;
+  padding: $space-4 $space-5;
+  border-bottom: 1px solid $glass-border;
+
+  .modal-title {
+    @include text-heading;
+    @include truncate;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .modal-close {
+    @include button-icon-clear(2rem);
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}
+
+// 4. Cuerpo con scroll
+@mixin modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $space-5;
+  @include custom-scrollbar(4px);
+}
+
+// 5. Pie de acciones (se oculta solo si no hay nada proyectado)
+@mixin modal-footer {
+  @include flex-row;
+  justify-content: flex-end;
+  padding: $space-4 $space-5;
+  border-top: 1px solid $glass-border;
+
+  &:empty { display: none; }
+}
+
+// Todo junto: se usa sobre el <dialog>
+@mixin modal-shell {
+  @include modal-dialog;
+
+  .modal-panel  { @include modal-panel; }
+  .modal-header { @include modal-header; }
+  .modal-body   { @include modal-body; }
+  .modal-footer { @include modal-footer; }
+}
