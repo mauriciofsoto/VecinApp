@@ -1,0 +1,25 @@
+<dialog
+  #dialog
+  class="modal"
+  [attr.data-size]="size()"
+  [attr.aria-labelledby]="heading() ? titleId : null"
+  (close)="onNativeClose()"
+  (click)="onDialogClick($event)"
+>
+  <div class="modal-panel">
+    <header class="modal-header">
+      @if (heading()) {
+        <h2 class="modal-title" [id]="titleId">{{ heading() }}</h2>
+      }
+      @if (showClose()) {
+        <button type="button" class="modal-close" aria-label="Cerrar" (click)="close()">✕</button>
+      }
+    </header>
+
+    <div class="modal-body">
+      <ng-content />
+    </div>
+
+    <footer class="modal-footer"><ng-content select="[modal-footer]" /></footer>
+  </div>
+</dialog>

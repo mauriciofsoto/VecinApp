@@ -1,0 +1,40 @@
+@use 'variables' as *;
+
+// ========================================
+// SCROLLBAR PERSONALIZADO Y SUTIL
+// ========================================
+@mixin custom-scrollbar(
+  $width: 6px,
+  $thumb-color: rgba(255, 255, 255, 0.2),
+  $hover-color: rgba($primary, 0.6)
+) {
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: $thumb-color transparent;
+
+  // Chrome, Edge, Safari
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: $radius-full;
+    transition: background $transition-fast ease;
+
+    &:hover { background: $hover-color; }
+  }
+}
+
+// Ocultar la barra pero permitir scroll
+@mixin hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar { display: none; }
+}

@@ -1,0 +1,20 @@
+<div [class]="cardClasses" [style.backgroundImage]="backgroundImageStyle">
+  
+  <!-- Encabezado / Titulo  -->
+  <div class="card-header w-full">
+    <ng-content select="[card-title]"></ng-content>
+  </div>
+
+  <!-- Informacion / Cuerpo -->
+  <div class="card-body w-full ">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Pie / Acciones  -->
+  <div class="card-actions w-full">
+    <ng-content select="[card-actions]"></ng-content>
+  </div>
+  
+
+</div>
+

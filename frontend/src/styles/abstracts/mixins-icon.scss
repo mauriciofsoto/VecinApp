@@ -1,0 +1,10 @@
+@use 'variables' as *;
+@use 'mixins-core' as *;
+
+@mixin icon-base($size: 0.875rem, $color: $text-muted) {
+  @include flex-center;
+  font-size: $size;
+  color: $color;
+  user-select: none;
+  flex-shrink: 0;
+}

@@ -1,0 +1,11 @@
+@use '../../../../../styles/abstracts/' as *;
+
+:host {
+  display: inline-flex;
+}
+
+.badge {
+  @include badge-base;
+  @include badge-size-classes; // .badge-sm / -md / -lg
+  @include badge-variants;     // .badge-success / -warning / -danger / -info / -accent / -purple / -neutral
+}

@@ -1,0 +1,19 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.comment-input-container {
+  @include form-field-container($space-3, $radius-md);
+  align-items: flex-start;
+}
+
+.avatar-wrapper  { flex-shrink: 0; }
+.avatar-img      { @include avatar-image; }
+.avatar-fallback { @include avatar-fallback; }
+
+.input-wrapper    { @include form-input-column-wrapper; }
+.comment-textarea { @include form-textarea-base; }
+.actions          { @include form-actions; }

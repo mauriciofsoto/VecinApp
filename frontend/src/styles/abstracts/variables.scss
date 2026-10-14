@@ -1,0 +1,153 @@
+// ========================================
+// 1. COLORES & GRADIENTES (Tema Glass)
+// ========================================
+$bg-dark: #0f172a;
+$bg-dark-alpha: rgba($bg-dark, 0.6);
+$glass-bg: rgba(30, 41, 59, 0.65);
+$glass-border: rgba(255, 255, 255, 0.12);
+$glass-hover: rgba(51, 65, 85, 0.7);
+
+$primary: #2563eb;
+$primary-light: #818cf8;
+$primary-glow: rgba(37, 99, 235, 0.35);
+$accent: #38bdf8;
+
+$white: #fff;
+$text-main: #f8fafc;
+$text-muted: #94a3b8;
+
+// Superficies translúcidas (fondos y bordes sutiles sobre el glass)
+$surface-1: rgba(255, 255, 255, 0.04);
+$surface-2: rgba(255, 255, 255, 0.08);
+$surface-3: rgba(255, 255, 255, 0.15);
+$border-subtle: rgba(255, 255, 255, 0.05);
+
+// Gradientes
+$bg-gradient: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+$avatar-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+
+// ========================================
+// 2. ESTADOS DE COLOR
+// ========================================
+$danger: #ef4444;
+$success: #22c55e;
+$warning: #eab308;
+$info: #3b82f6;
+
+// ========================================
+// 3. TIPOGRAFIA (Jerarquia Visual)
+// ========================================
+$font-primary: 'Poppins', sans-serif;
+$font-title: 'Playfair Display', serif;
+
+$text-title: clamp(2.25rem, 5vw, 3rem);     // 36px → 48px
+$text-heading: clamp(1.25rem, 2vw, 1.5rem); // 20px → 24px
+$text-body: 1rem;                           // 16px
+$text-small: 0.875rem;                      // 14px
+$text-caption: 0.75rem;                     // 12px
+$text-tiny: 0.7rem;                         // 11px
+
+$font-regular: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+
+$line-tight: 1.2;
+$line-normal: 1.5;
+
+// ========================================
+// 4. ESPACIADO
+// ========================================
+$space-1: 0.25rem; // 4px
+$space-2: 0.5rem;  // 8px
+$space-3: 0.75rem; // 12px
+$space-4: 1rem;    // 16px
+$space-5: 1.25rem; // 20px
+$space-6: 1.5rem;  // 24px
+
+// ========================================
+// 5. RADIOS DE BORDE
+// ========================================
+$radius-sm: 0.625rem;  // 10px
+$radius-md: 1.25rem;   // 20px
+$radius-lg: 1.875rem;  // 30px
+$radius-full: 9999px;  // pills / badges
+$radius-circle: 50%;   // avatars / botones redondos
+
+// ========================================
+// 6. SOMBRAS
+// ========================================
+$shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 8px 32px rgba(0, 0, 0, 0.37);
+$shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.4);
+$shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+
+// ========================================
+// 7. TRANSICIONES
+// ========================================
+$transition-fast: 0.2s;
+$transition-normal: 0.3s;
+$transition-base: all $transition-fast ease;
+
+// ========================================
+// 8. BREAKPOINTS (max-width)
+// ========================================
+$mobile: 640px;
+$tablet: 768px;
+$laptop: 1024px;
+$desktop: 1200px;
+
+// ========================================
+// 9. MAPS (de acá salen badges, textos, botones)
+// ========================================
+$status-colors: (
+  danger: $danger,
+  success: $success,
+  warning: $warning,
+  info: $info,
+);
+
+$button-sizes: (
+  sm: (padding: 0.35rem 0.85rem, font-size: $text-caption),
+  md: (padding: 0.5rem 1.25rem, font-size: $text-small),
+  lg: (padding: 0.75rem 1.75rem, font-size: $text-body),
+);
+
+$badge-sizes: (
+  sm: (padding: 0.15rem 0.55rem, font-size: $text-tiny),
+  md: (padding: 0.25rem 0.75rem, font-size: $text-caption),
+  lg: (padding: 0.35rem 0.95rem, font-size: 0.85rem),
+);
+
+// ========================================
+// 10. EXTRAS (colores de variantes, easing, cards)
+// ========================================
+$purple: #c084fc;
+$ease-out: cubic-bezier(0, 0, 0.2, 1);
+$transition-drag: transform 250ms $ease-out;
+
+// Variantes de badge: bg = color base, text = color del texto, border = opacidad del borde (opcional)
+$badge-variants: (
+  success: (bg: $success, text: #4ade80),
+  warning: (bg: $warning, text: #fbbf24),
+  danger:  (bg: $danger,  text: #f87171),
+  info:    (bg: $info,    text: $accent),
+  accent:  (bg: $primary, text: $primary-light, border: 0.4),
+  purple:  (bg: $purple,  text: $purple),
+  neutral: (bg: $white,   text: $text-muted, border: 0.12),
+);
+
+// Tamaños de card (las keys son propiedades CSS)
+$card-sizes: (
+  sm:   (padding: $space-3, max-width: 320px),
+  md:   (padding: $space-5, max-width: 480px),
+  lg:   (padding: 2rem,     max-width: 640px),
+  full: (padding: $space-6, max-width: 100%),
+);
+
+// Anchos de modal
+$modal-sizes: (
+  sm: 400px,
+  md: 560px,
+  lg: 760px,
+);

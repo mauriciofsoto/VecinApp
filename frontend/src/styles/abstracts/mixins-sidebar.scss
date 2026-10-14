@@ -1,0 +1,122 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+@use 'mixins-core' as *;
+@use 'mixins-effects' as *;
+@use 'mixins-card' as *;
+@use 'mixins-avatar' as *;
+@use 'mixins-layout' as *;
+
+// ========================================
+// NAVEGACIÓN LATERAL (SIDEBAR)
+// ========================================
+
+@mixin sidebar-container($width: 260px) {
+  @include glass-panel-effect;
+  @include vertical-panel($width, $radius-md);
+
+  @include tablet {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+
+    &.is-open { transform: translateX(0); }
+  }
+}
+
+@mixin sidebar-nav-item {
+  @include flex-row(0.85rem);
+  padding: $space-3 $space-4;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
+  color: $text-muted;
+  font-family: $font-primary;
+  font-size: $text-small;
+  font-weight: $font-medium;
+  text-decoration: none;
+  cursor: pointer;
+  transition: $transition-base;
+  user-select: none;
+
+  .nav-icon {
+    display: flex;
+    font-size: 1.25rem;
+    transition: color $transition-fast ease;
+  }
+
+  &:hover {
+    color: $text-main;
+    background: $surface-2;
+    transform: translateX(4px);
+  }
+
+  &.active {
+    @include active-state;
+    color: $white;
+    .nav-icon { color: $accent; }
+  }
+}
+
+@mixin sidebar-user-profile {
+  @include card-base;
+  @include card-hover-effect;
+  flex-direction: row;
+  align-items: center;
+  height: auto;
+  gap: $space-3;
+  padding: $space-3;
+  background: $surface-1;
+  border: 1px solid $glass-border;
+
+  .avatar {
+    @include avatar-image(2.5rem);
+    border-color: rgba($primary, 0.5);
+  }
+
+  .user-info {
+    @include flex-col;
+    min-width: 0;
+
+    .user-name {
+      @include truncate;
+      color: $text-main;
+      font-size: $text-small;
+      font-weight: $font-medium;
+    }
+
+    .user-role {
+      color: $text-muted;
+      font-size: $text-caption;
+    }
+  }
+}
+
+@mixin mobile-toggle-button {
+  @include flex-center;
+  @include backdrop-blur(12px);
+  position: fixed;
+  top: $space-4;
+  left: $space-4;
+  z-index: 60;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: $radius-sm;
+  background: rgba($bg-dark, 0.85);
+  border: 1px solid $glass-border;
+  color: $text-main;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: $shadow-sm;
+  transition: background $transition-fast ease;
+
+  &:hover { background: rgba(255, 255, 255, 0.1); }
+}
+
+@mixin sidebar-backdrop {
+  @include backdrop-blur(4px);
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 45;
+  animation: fadeIn 200ms ease-out; // keyframes en base/_animations.scss
+}

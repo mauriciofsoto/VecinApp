@@ -1,0 +1,134 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+@use 'mixins-core' as *;
+@use 'mixins-scrollbar' as *;
+
+// ========================================
+// LAYOUTS, PANELES Y BENTO GRIDS
+// ========================================
+
+// 1. Pantalla completa y contenedor con scroll
+@mixin full-screen-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@mixin main-scroll-container($padding: $space-6, $gap: $space-6) {
+  @include flex-col($gap);
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: $padding;
+  @include custom-scrollbar(6px);
+}
+
+// 2. Panel vertical (base de sidebars y paneles laterales)
+@mixin vertical-panel($width: 260px, $radius: 0, $z-index: 50) {
+  @include flex-col;
+  justify-content: space-between;
+  width: $width;
+  height: 100vh;
+  padding: $space-6 $space-4;
+  border-radius: $radius;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  z-index: $z-index;
+  transition: width $transition-fast ease, transform $transition-fast ease;
+}
+
+// 3. Bento grid (3, 4 o 5 columnas)
+@mixin bento-grid-custom($columns: 3, $gap: $space-6, $tablet-cols: 2) {
+  display: grid;
+  grid-template-columns: repeat($columns, minmax(0, 1fr));
+  gap: $gap;
+  width: 100%;
+  box-sizing: border-box;
+
+  @include desktop {
+    @if $columns > 3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @include laptop {
+    grid-template-columns: repeat($tablet-cols, minmax(0, 1fr));
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+// 4. Clases .col-span-N para los items del bento
+@mixin bento-span-classes($max-columns: 5) {
+  @for $i from 1 through $max-columns {
+    &.col-span-#{$i} {
+      grid-column: span $i / span $i;
+    }
+  }
+
+  @include mobile {
+    @for $i from 1 through $max-columns {
+      &.col-span-#{$i} {
+        grid-column: span 1 / span 1;
+      }
+    }
+  }
+}
+
+// 5. Feedback para CDK Drag & Drop
+@mixin cdk-drag-preview-style($variant: 'glass') {
+  border-radius: $radius-md;
+  box-sizing: border-box;
+  cursor: grabbing;
+
+  @if $variant == 'glass' {
+    @include backdrop-blur;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba($primary, 0.5);
+    box-shadow: $shadow-xl, 0 0 20px rgba($primary, 0.3);
+    opacity: 0.95;
+  } @else if $variant == 'solid' {
+    background: #1e1e2f;
+    border: 1px solid $glass-border;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+    opacity: 0.98;
+  }
+}
+
+@mixin cdk-drag-placeholder-style($variant: 'dashed') {
+  border-radius: $radius-md;
+
+  @if $variant == 'dashed' {
+    opacity: 0.2;
+    border: 2px dashed rgba($accent, 0.6);
+    background: rgba($accent, 0.05);
+  } @else if $variant == 'solid' {
+    opacity: 0.1;
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+// 6. Item de bento (ocupa columnas con .col-span-N)
+@mixin bento-item($max-columns: 5) {
+  @include flex-col;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  transition: $transition-drag;
+  @include bento-span-classes($max-columns);
+}
+
+// 7. Todo el feedback de CDK Drag & Drop junto (usar a nivel raíz del archivo)
+@mixin cdk-drag-feedback($item: '.bento-item', $preview: 'glass', $placeholder: 'dashed') {
+  .cdk-drag-preview { @include cdk-drag-preview-style($preview); }
+  .cdk-drag-placeholder { @include cdk-drag-placeholder-style($placeholder); }
+  .cdk-drop-list-dragging #{$item}:not(.cdk-drag-placeholder) {
+    transition: $transition-drag;
+  }
+}

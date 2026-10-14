@@ -1,0 +1,23 @@
+// ========================================================
+// CONTENEDORES Y PANELES VERTICALES (DRY)
+// ========================================================
+
+@mixin vertical-panel(
+  $width: 260px, 
+  $height: 100vh, 
+  $padding: 1.5rem 1rem, 
+  $radius: 0px, 
+  $z-index: 50
+) {
+  width: $width;
+  height: $height;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: $padding;
+  border-radius: $radius;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  z-index: $z-index;
+  transition: width $transition-fast ease, transform $transition-fast ease;
+}
