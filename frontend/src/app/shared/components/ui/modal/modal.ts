@@ -51,13 +51,13 @@ export class Modal {
     this.open.set(false);
   }
 
-  /** El evento 'close' del <dialog> salta con Esc y también con dialog.close() */
+  // El evento 'close' del <dialog> salta con Esc y también con dialog.close() 
   protected onNativeClose(): void {
     this.open.set(false);
     this.closed.emit();
   }
 
-  /** Click en el fondo: el target es el propio <dialog> (el panel ocupa todo su contenido) */
+  //Click en el fondo: el target es el propio <dialog> (el panel ocupa todo su contenido) 
   protected onDialogClick(event: MouseEvent): void {
     if (this.closeOnBackdrop() && event.target === this.dialogRef()?.nativeElement) {
       this.close();

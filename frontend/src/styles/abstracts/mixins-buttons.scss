@@ -9,6 +9,7 @@
 
 // 1. Estructura y transiciones base
 @mixin button-base {
+  padding: 7px;
   @include flex-center($inline: true);
   @include hover-lift;
   gap: $space-2;
