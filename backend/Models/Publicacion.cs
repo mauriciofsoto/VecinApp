@@ -1,10 +1,11 @@
+
 namespace VecinApp.Models;
 
 public class Publicacion
 {
     public int IdPublicacion { get; set; }
 
-    public int IdUsuario { get; set; }
+    public string IdUsuario { get; set; } = string.Empty;
 
     public int IdEdificio { get; set; }
 

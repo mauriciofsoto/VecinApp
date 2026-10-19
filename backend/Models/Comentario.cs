@@ -6,7 +6,7 @@ public class Comentario
 
     public int IdPublicacion { get; set; }
 
-    public int IdUsuario { get; set; }
+    public string IdUsuario { get; set; } = string.Empty;
 
     public string Contenido { get; set; } = string.Empty;
 

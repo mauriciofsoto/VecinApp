@@ -4,7 +4,7 @@ public class Evento
 {
     public int IdEvento { get; set; }
 
-    public int IdUsuario { get; set; }
+    public string IdUsuario { get; set; } = string.Empty;
 
     public int IdEdificio { get; set; }
 

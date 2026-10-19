@@ -15,7 +15,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     }
 
     // Tablas de negocio
-    public new DbSet<Rol> Roles { get; set; }
+    public DbSet<Rol> RolesAplicacion { get; set; }
     public DbSet<Edificio> Edificios { get; set; }
     //public DbSet<Usuario> Usuarios { get; set; } -- lo maneja Identity
     public DbSet<Unidad> Unidades { get; set; }
@@ -112,47 +112,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
         // =========================
         // USUARIO (Identity + Relaciones)
         // =========================
-        modelBuilder.Entity<Usuario>(entity =>
-        {
-            entity.ToTable("usuario");
-
-            entity.Property(e => e.Nombre)
-                .HasColumnName("nombre")
-                .HasMaxLength(100)
-                .IsRequired();
-
-            entity.Property(e => e.Apellido)
-                .HasColumnName("apellido")
-                .HasMaxLength(100)
-                .IsRequired();
-
-            entity.Property(e => e.Estado)
-                .HasColumnName("estado")
-                .HasConversion<string>()
-                .HasMaxLength(20)
-                .IsRequired();
-
-            entity.Property(e => e.FechaRegistro)
-                .HasColumnName("fecha_registro")
-                .IsRequired();
-
-            entity.Property(e => e.IdRol)
-                .HasColumnName("id_rol");
-
-            entity.Property(e => e.IdEdificio)
-                .HasColumnName("id_edificio");
-
-            entity.HasOne(e => e.Rol)
-                .WithMany(e => e.Usuarios)
-                .HasForeignKey(e => e.IdRol)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Edificio)
-                .WithMany(e => e.Usuarios)
-                .HasForeignKey(e => e.IdEdificio)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
+      
         // =========================
         // UNIDAD
         // =========================
@@ -184,6 +144,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany(e => e.UsuariosUnidades)
+                 .HasForeignKey(e => e.IdUsuario)   
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Unidad)
@@ -209,6 +170,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Edificio)
@@ -245,15 +207,43 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
         modelBuilder.Entity<Incidencia>(entity =>
         {
             entity.ToTable("incidencia");
+
             entity.HasKey(e => e.IdIncidencia);
-            entity.Property(e => e.IdIncidencia).HasColumnName("id_incidencia");
-            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
-            entity.Property(e => e.IdEstadoIncidencia).HasColumnName("id_estado_incidencia");
-            entity.Property(e => e.IdCategoriaIncidencia).HasColumnName("id_categoria_incidencia");
-            entity.Property(e => e.Titulo).HasColumnName("titulo").IsRequired();
-            entity.Property(e => e.Descripcion).HasColumnName("descripcion").IsRequired();
-            entity.Property(e => e.Prioridad).HasColumnName("prioridad").IsRequired();
-            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").IsRequired();
+
+            entity.Property(e => e.IdIncidencia)
+                .HasColumnName("id_incidencia");
+
+            entity.Property(e => e.IdEdificio)
+                .HasColumnName("id_edificio");
+
+            entity.Property(e => e.IdUsuarioReportante)
+                .HasColumnName("id_usuario_reportante")
+                .IsRequired();
+
+            entity.Property(e => e.IdUsuarioResponsable)
+                .HasColumnName("id_usuario_responsable");
+
+            entity.Property(e => e.IdEstadoIncidencia)
+                .HasColumnName("id_estado_incidencia");
+
+            entity.Property(e => e.IdCategoriaIncidencia)
+                .HasColumnName("id_categoria_incidencia");
+
+            entity.Property(e => e.Titulo)
+                .HasColumnName("titulo")
+                .IsRequired();
+
+            entity.Property(e => e.Descripcion)
+                .HasColumnName("descripcion")
+                .IsRequired();
+
+            entity.Property(e => e.Prioridad)
+                .HasColumnName("prioridad")
+                .IsRequired();
+
+            entity.Property(e => e.FechaCreacion)
+                .HasColumnName("fecha_creacion")
+                .IsRequired();
 
             entity.HasOne(e => e.Edificio)
                 .WithMany(e => e.Incidencias)
@@ -262,10 +252,12 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.UsuarioReportante)
                 .WithMany()
+                .HasForeignKey(e => e.IdUsuarioReportante)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.UsuarioResponsable)
                 .WithMany()
+                .HasForeignKey(e => e.IdUsuarioResponsable)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.EstadoIncidencia)
@@ -307,6 +299,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Edificio)
@@ -339,6 +332,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -360,6 +354,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Edificio)
@@ -428,6 +423,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -452,6 +448,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.UsuarioRegistro)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuarioRegistro)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -470,6 +467,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

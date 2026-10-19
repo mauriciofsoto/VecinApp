@@ -8,7 +8,7 @@ public class RespuestaEncuesta
 
     public int IdOpcion { get; set; }
 
-    public int IdUsuario { get; set; }
+    public string IdUsuario { get; set; } = string.Empty;
 
     public DateTime FechaRespuesta { get; set; }
 
