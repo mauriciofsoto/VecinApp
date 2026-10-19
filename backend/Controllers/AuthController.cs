@@ -63,7 +63,15 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Credenciales incorrectas" });
         }
 
-        var (accessToken, expiresAt) = _tokenService.GenerateAccessToken(user);
+        var rolNombre = user.IdRol.HasValue
+    ? await _context.RolesAplicacion
+        .Where(r => r.IdRol == user.IdRol.Value)
+        .Select(r => r.Nombre)
+        .FirstOrDefaultAsync()
+    : null;
+
+        var (accessToken, expiresAt) =
+            _tokenService.GenerateAccessToken(user, rolNombre);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
         _context.RefreshTokens.Add(new RefreshToken
@@ -98,7 +106,15 @@ public class AuthController : ControllerBase
         // rotación de refresh tokens
         savedToken.IsRevoked = true;
 
-        var (newAccessToken, expiresAt) = _tokenService.GenerateAccessToken(savedToken.User);
+        var rolNombre = savedToken.User.IdRol.HasValue
+    ? await _context.RolesAplicacion
+        .Where(r => r.IdRol == savedToken.User.IdRol.Value)
+        .Select(r => r.Nombre)
+        .FirstOrDefaultAsync()
+    : null;
+
+        var (newAccessToken, expiresAt) =
+            _tokenService.GenerateAccessToken(savedToken.User, rolNombre);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
 
         _context.RefreshTokens.Add(new RefreshToken
