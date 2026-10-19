@@ -1,3 +1,4 @@
+
 namespace VecinApp.Models;
 
 public class Paquete
@@ -6,7 +7,7 @@ public class Paquete
 
     public int IdUnidad { get; set; }
 
-    public int IdUsuarioRegistro { get; set; }
+    public string IdUsuarioRegistro { get; set; } = string.Empty;
 
     public string Identificacion { get; set; } = string.Empty;
 

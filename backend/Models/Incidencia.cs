@@ -1,3 +1,4 @@
+
 namespace VecinApp.Models;
 
 public class Incidencia
@@ -6,9 +7,9 @@ public class Incidencia
 
     public int IdEdificio { get; set; }
 
-    public int IdUsuarioReportante { get; set; }
+    public string IdUsuarioReportante { get; set; } = string.Empty;
 
-    public int? IdUsuarioResponsable { get; set; }
+    public string? IdUsuarioResponsable { get; set; }
 
     public int IdEstadoIncidencia { get; set; }
 
