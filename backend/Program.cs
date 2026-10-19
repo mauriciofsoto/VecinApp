@@ -92,46 +92,146 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed inicial de usuario de prueba y generación de token para Juan González
+
+
+
 using (var scope = app.Services.CreateScope())
 {
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
-    var testEmail = "vecino@vecinapp.com";
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<Usuario>>();
+    var context = services.GetRequiredService<AppDbContext>();
 
-    var user = await userManager.FindByEmailAsync(testEmail);
+    // 1. Obtener o crear un edificio para pruebas.
+    var edificio = await context.Edificios.FirstOrDefaultAsync();
 
-    if (user == null)
+    if (edificio == null)
     {
-        user = new Usuario
+        edificio = new Edificio
         {
-            UserName = testEmail,
-            Email = testEmail,
+            Nombre = "Edificio de prueba",
+            Direccion = "Av. Corrientes 1234",
+            Estado = "Activo"
+        };
+
+        context.Edificios.Add(edificio);
+        await context.SaveChangesAsync();
+    }
+
+    // 2. Obtener los roles de la aplicación.
+    var rolAdministrador = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "Administrador");
+
+    var rolInquilino = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "Inquilino");
+
+    if (rolAdministrador == null || rolInquilino == null)
+    {
+        throw new InvalidOperationException(
+            "Falta el rol Administrador o Inquilino en la tabla rol.");
+    }
+
+    // 3. Crear o actualizar el usuario Administrador.
+    const string emailAdmin = "vecino@vecinapp.com";
+    const string passwordAdmin = "Password123";
+
+    var admin = await userManager.FindByEmailAsync(emailAdmin);
+
+    if (admin == null)
+    {
+        admin = new Usuario
+        {
+            UserName = emailAdmin,
+            Email = emailAdmin,
             EmailConfirmed = true,
             Nombre = "Juan",
             Apellido = "Gonzalez",
             Estado = EstadoUsuario.Activo,
-            FechaRegistro = DateTime.UtcNow
+            FechaRegistro = DateTime.UtcNow,
+            IdRol = rolAdministrador.IdRol,
+            IdEdificio = edificio.IdEdificio
         };
 
-        await userManager.CreateAsync(user, "Password123");
+        var resultado = await userManager.CreateAsync(admin, passwordAdmin);
+
+        if (!resultado.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultado.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo crear el administrador: {errores}");
+        }
+    }
+    else
+    {
+        admin.IdRol = rolAdministrador.IdRol;
+        admin.IdEdificio = edificio.IdEdificio;
+        admin.Estado = EstadoUsuario.Activo;
+
+        var resultado = await userManager.UpdateAsync(admin);
+
+        if (!resultado.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultado.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo actualizar el administrador: {errores}");
+        }
     }
 
-   // Token de prueba para reset password (6 dígitos usando Email)
-    if (user != null)
-    {   
-        var clientBaseUrl = "http://localhost:4200";
-        var resetUrl = $"{clientBaseUrl}/reset-password?email={Uri.EscapeDataString(user.Email!)}";
-        var resetToken = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
+    // 4. Crear o actualizar el usuario Inquilino.
+    const string emailInquilino = "inquilino@vecinapp.com";
+    const string passwordInquilino = "Inquilino123";
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n==================================================");
-        Console.WriteLine("CÓDIGO DE 6 DÍGITOS PARA JUAN GONZÁLEZ:");
-        Console.WriteLine($"{resetToken}");
-        Console.WriteLine($"Link: {resetUrl}");
-        Console.WriteLine("==================================================\n");
-        Console.ResetColor();
+    var inquilino = await userManager.FindByEmailAsync(emailInquilino);
+
+    if (inquilino == null)
+    {
+        inquilino = new Usuario
+        {
+            UserName = emailInquilino,
+            Email = emailInquilino,
+            EmailConfirmed = true,
+            Nombre = "Maria",
+            Apellido = "Perez",
+            Estado = EstadoUsuario.Activo,
+            FechaRegistro = DateTime.UtcNow,
+            IdRol = rolInquilino.IdRol,
+            IdEdificio = edificio.IdEdificio
+        };
+
+        var resultado = await userManager.CreateAsync(
+            inquilino, passwordInquilino);
+
+        if (!resultado.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultado.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo crear el inquilino: {errores}");
+        }
     }
+    else
+    {
+        inquilino.IdRol = rolInquilino.IdRol;
+        inquilino.IdEdificio = edificio.IdEdificio;
+        inquilino.Estado = EstadoUsuario.Activo;
+
+        var resultado = await userManager.UpdateAsync(inquilino);
+
+        if (!resultado.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultado.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo actualizar el inquilino: {errores}");
+        }
+    }
+}
+
 
 app.Run();
 
-}
