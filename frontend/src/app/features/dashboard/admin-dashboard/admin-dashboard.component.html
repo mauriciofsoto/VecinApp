@@ -1,131 +1,131 @@
 <div class="app-dashboard-layout">
 
-  <!-- SIDEBAR DE NAVEGACIÓN LATERAL -->
+  <!-- SIDEBAR -->
   <app-sidebar></app-sidebar>
 
-  <!-- ÁREA PRINCIPAL CON SCROLL CONTROLADO -->
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="app-main-content space-y-6">
 
-    <!-- HEADER DEL DASHBOARD CON BÚSQUEDA -->
+    <!-- HEADER Y BUSCADOR -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
       <div>
         <h1 class="text-2xl font-bold text-white">Panel de Administración</h1>
         <p class="text-sm text-muted">Gestión integral del consorcio VecinApp</p>
       </div>
 
-      <!-- BUSCADOR PRINCIPAL REUTILIZABLE -->
       <div class="w-full md:w-80">
         <app-search-bar
-          placeholder="Buscar reclamo, departamento o vecino..."
+          placeholder="Buscar..."
           (search)="onBuscar($event)">
         </app-search-bar>
       </div>
     </header>
 
-    <!-- BARRA DE ACCIONES Y RESUMEN DE ESTADOS -->
+    <!-- BARRA DE ACCIONES Y BADGES -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-md">
-
-      <!-- RESUMEN EN BADGES -->
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs text-muted font-medium mr-1">Estado general:</span>
-        <app-badge variant="danger" size="sm">🚨 2 Urgentes</app-badge>
+      <div class="flex items-center gap-2">
+        <app-badge variant="danger" size="sm">2 Urgentes</app-badge>
         <app-badge variant="warning" size="sm">3 En Proceso</app-badge>
-        <app-badge variant="info" size="sm">📦 4 En Portería</app-badge>
       </div>
 
-      <!-- BOTONES DE ACCIÓN RÁPIDA -->
       <div class="flex items-center gap-3">
-        <app-button variant="ghost" size="sm" (buttonClick)="resetLayout()">
-          🔄 Restablecer Orden
-        </app-button>
-        <app-button variant="outline" size="sm" (buttonClick)="openQr()">
-          <span>📲</span> Asignar QR
-        </app-button>
-        <app-button variant="primary" size="sm">
-          <span>➕</span> Nueva Incidencia
-        </app-button>
+        <app-button variant="ghost" size="sm" (buttonClick)="resetLayout()">Restablecer</app-button>
+        <app-button variant="outline" size="sm" (buttonClick)="openQr()">Asignar QR</app-button>
+        <app-button variant="primary" size="sm" (buttonClick)="showNuevaIncidencia.set(true)">Nueva Incidencia</app-button>
       </div>
     </div>
 
-    <!-- BENTO GRID CONTAINER -->
-    <section
-      cdkDropList
-      cdkDropListOrientation="mixed"
-      (cdkDropListDropped)="onDrop($event)"
-      class="bento-grid">
+    
+<!-- BENTO GRID REUTILIZABLE -->
+<app-bento-grid
+  [widgets]="widgets"
+  (layoutChange)="onLayoutChange($event)"
+>
+  <!-- 1. MURO -->
+  <ng-template bentoItem="muro">
+    <app-card variant="glass" size="full" align="between" [hover]="true">
+      <div card-title class="font-semibold text-white">
+        Muro de la Comunidad
+      </div>
 
-      @for (widget of widgets; track widget.id) {
+      <div class="py-3 w-full space-y-2">
+        <p class="text-sm text-muted">
+          Últimos avisos del edificio.
+        </p>
 
-        <div
-          cdkDrag
-          [class]="'bento-item col-span-' + widget.cols">
+        <app-comment-input
+          placeholder="Escribir comentario..."
+          userInitials="AD"
+          (submitComment)="onNuevoComentario($event, 'muro')"
+        />
+      </div>
+    </app-card>
+  </ng-template>
 
-          <app-card [variant]="widget.variant" size="full" align="between" [hover]="true">
+  <!-- 2. ENCUESTA ACTIVA -->
+  <ng-template bentoItem="encuesta_activa">
+    <app-card variant="glass" size="full" align="between" [hover]="true">
+      <div card-title class="font-semibold text-white">
+        Encuesta Anual
+      </div>
 
-            <!-- HEADER DE LA CARD CON HANDLE DE DRAG -->
-            <div card-title class="flex justify-between items-center w-full cursor-grab active:cursor-grabbing select-none">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-white">{{ widget.title }}</span>
-                <!-- Badge opcional de la tarjeta -->
-                @if (widget.id === 'incidencias') {
-                  <app-badge variant="danger" size="sm">Activas</app-badge>
-                }
-              </div>
-              <span class="text-xs opacity-60 hover:opacity-100 transition-opacity">⋮⋮</span>
-            </div>
+      <div class="py-3 w-full">
+        <p class="text-sm text-muted">
+          Participá de la votación del consorcio.
+        </p>
+      </div>
+    </app-card>
+  </ng-template>
 
-            <!-- CUERPO SEGÚN EL TIPO DE WIDGET -->
-            <div class="py-3 w-full space-y-4">
+  <!-- 3. INCIDENCIAS ACTIVAS -->
+  <ng-template bentoItem="incidencias">
+    <app-card variant="solid" size="full" align="between" [hover]="true">
+      <div card-title class="font-semibold text-white">
+        Incidencias Activas
+      </div>
 
-              <!-- EJEMPLO WIDGET: MURO / INCIDENCIAS CON COMENTARIOS -->
-              @if (widget.id === 'muro' || widget.id === 'incidencias') {
-                <div class="bg-white/5 p-3 rounded-lg border border-white/5 space-y-2">
-                  <div class="flex justify-between items-center">
-                    <span class="text-xs font-semibold text-accent">Dpto 4B - Caño con pérdida</span>
-                    <app-badge variant="warning" size="sm">En Proceso</app-badge>
-                  </div>
-                  <p class="text-xs text-muted">Se notificó al plomero para la revisión de mañana a las 10:00 hs.</p>
-                </div>
+      <div class="py-3 w-full">
+        <p class="text-sm text-muted">
+          Sin incidencias críticas.
+        </p>
+      </div>
+    </app-card>
+  </ng-template>
 
-                <!-- CAMPO DE COMENTARIOS INTEGRADO EN EL BENTO -->
-                <app-comment-input
-                  placeholder="Responder o agregar nota interna..."
-                  userInitials="AD"
-                  (submitComment)="onNuevoComentario($event, widget.id)">
-                </app-comment-input>
-              }
+  <!-- 4. PAQUETES -->
+  <ng-template bentoItem="paquetes">
+    <app-card variant="glass" size="full" align="between" [hover]="true">
+      <div card-title class="font-semibold text-white">
+        Paquetes en Portería
+      </div>
 
-              <!-- WIDGETS GENÉRICOS -->
-              @else {
-                <p class="text-sm text-muted">Contenido e indicadores de {{ widget.title }}</p>
-              }
+      <div class="py-3 w-full">
+        <p class="text-sm text-muted">
+          4 paquetes pendientes de retiro.
+        </p>
+      </div>
+    </app-card>
+  </ng-template>
+</app-bento-grid>
 
-            </div>
-
-            <!-- FOOTER DE LA CARD -->
-            <div card-actions class="flex justify-end gap-2 w-full pt-2 border-t border-white/5">
-              <app-button variant="ghost" size="sm">Detalles</app-button>
-              <app-button variant="outline" size="sm">Gestionar</app-button>
-            </div>
-
-          </app-card>
-
-        </div>
-
-      }
-
-    </section>
 
   </main>
-
 </div>
 
-<!-- MODALES (van fuera del layout, al final) -->
+<!-- MODAL QR -->
 <app-modal heading="Asignar QR" size="sm" [(open)]="showQr">
-  <p class="text-sm text-muted">Contenido…</p>
-
-  <ng-container ngProjectAs="[modal-footer]">
+  <p class="text-sm text-muted">Seleccione el departamento para vincular el QR.</p>
+  <div modal-footer class="flex justify-end gap-2">
     <app-button variant="ghost" size="sm" (buttonClick)="closeQr()">Cancelar</app-button>
     <app-button variant="primary" size="sm" (buttonClick)="guardarQr()">Guardar</app-button>
-  </ng-container>
+  </div>
+</app-modal>
+
+<!-- MODAL NUEVA INCIDENCIA -->
+<app-modal heading="Nueva Incidencia" size="md" [(open)]="showNuevaIncidencia">
+  <p class="text-sm text-muted">Complete los datos del reclamo.</p>
+  <div modal-footer class="flex justify-end gap-2">
+    <app-button variant="ghost" size="sm" (buttonClick)="showNuevaIncidencia.set(false)">Cancelar</app-button>
+    <app-button variant="primary" size="sm" (buttonClick)="crearIncidencia()">Crear</app-button>
+  </div>
 </app-modal>

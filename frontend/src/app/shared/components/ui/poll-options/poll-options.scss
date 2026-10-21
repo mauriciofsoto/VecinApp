@@ -1,0 +1,40 @@
+@use '../../../../../styles/abstracts' as *;
+
+.poll-wrapper {
+  @include poll-wrapper;
+}
+
+.poll-question {
+  font-size: $text-small;
+  font-weight: $font-semibold;
+  color: $text-main;
+  margin-bottom: $space-2;
+}
+
+.poll-options-list {
+  @include flex-col($space-2);
+  width: 100%;
+}
+
+.poll-option-item {
+  @include poll-option-item;
+}
+
+.poll-bar {
+  @include poll-progress-bar;
+}
+
+.poll-content {
+  @include poll-content-layout;
+}
+
+.poll-text {
+  font-size: $text-small;
+  color: $text-main;
+}
+
+.poll-percentage {
+  font-size: $text-small;
+  font-weight: $font-semibold;
+  color: $primary-light;
+}

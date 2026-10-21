@@ -1,0 +1,206 @@
+@use '../../../../../styles/abstracts' as *;
+
+// ========================================
+// CONTENEDOR
+// ========================================
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.bento-grid {
+  @include bento-grid-custom($columns: 4);
+
+  align-items: stretch;
+  min-width: 0;
+}
+
+// ========================================
+// TARJETAS
+// ========================================
+
+.bento-item {
+  @include bento-item(4, 3);
+  @include glass-border;
+
+  position: relative;
+  isolation: isolate;
+  min-height: 0;
+  border-radius: $radius-md;
+
+  transition:
+    transform 250ms $ease-out,
+    border-color $transition-normal $ease-out,
+    box-shadow $transition-normal $ease-out;
+
+  &--glass {
+    @include backdrop-blur;
+
+    background: $glass-bg;
+    box-shadow: $shadow-md;
+  }
+
+  &--solid {
+    background: $bg-dark;
+  }
+
+  &:hover {
+    border-color: rgba($accent, 0.65);
+    @include glow($accent, 18px, 0.18);
+  }
+
+  &:focus-within {
+    border-color: rgba($accent, 0.8);
+  }
+}
+
+.bento-item__content {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+// ========================================
+// CONTROLES DE REDIMENSIONAMIENTO
+// ========================================
+
+.resize-handle {
+  position: absolute;
+  z-index: 30;
+
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: $radius-full;
+
+  background: transparent;
+  opacity: 0;
+  touch-action: none;
+
+  transition:
+    opacity $transition-normal $ease-out,
+    background-color $transition-normal $ease-out,
+    box-shadow $transition-normal $ease-out;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    background-color: rgba($accent, 0.16);
+    @include glow($accent, 12px, 0.25);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+
+  &:active {
+    background-color: rgba($accent, 0.28);
+  }
+}
+
+.bento-item:hover .resize-handle,
+.bento-item:focus-within .resize-handle {
+  opacity: 1;
+}
+
+// Laterales verticales
+.resize-handle--right,
+.resize-handle--left {
+  top: $space-3;
+  bottom: $space-3;
+  width: 8px;
+  cursor: ew-resize;
+}
+
+.resize-handle--right {
+  right: 0;
+}
+
+.resize-handle--left {
+  left: 0;
+}
+
+// Laterales horizontales
+.resize-handle--top,
+.resize-handle--bottom {
+  right: $space-3;
+  left: $space-3;
+  height: 8px;
+  cursor: ns-resize;
+}
+
+.resize-handle--top {
+  top: 0;
+}
+
+.resize-handle--bottom {
+  bottom: 0;
+}
+
+// Esquinas
+.resize-handle--top-left,
+.resize-handle--top-right,
+.resize-handle--bottom-left,
+.resize-handle--corner {
+  width: 16px;
+  height: 16px;
+}
+
+.resize-handle--top-left {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.resize-handle--top-right {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.resize-handle--bottom-left {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.resize-handle--corner {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+
+// ========================================
+// DRAG & DROP
+// ========================================
+
+@include cdk-drag-feedback(
+  $item: '.bento-item',
+  $preview: 'glass',
+  $placeholder: 'dashed'
+);
+
+// ========================================
+// ACCESIBILIDAD Y RESPONSIVE
+// ========================================
+
+@media (hover: none) {
+  .resize-handle {
+    opacity: 0.65;
+    background-color: $surface-2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-item,
+  .resize-handle {
+    transition: none;
+  }
+}

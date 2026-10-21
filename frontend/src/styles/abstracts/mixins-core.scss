@@ -1,5 +1,6 @@
 @use 'sass:map';
 @use 'variables' as *;
+@use 'mixins-scrollbar' as *; 
 
 // ========================================
 // MIXINS PRIMITIVOS (los ladrillos de todo lo demás)
@@ -43,6 +44,26 @@
 @mixin glow($color, $size: 15px, $alpha: 0.25) {
   box-shadow: 0 0 $size rgba($color, $alpha);
 }
+
+
+
+// Mixin unificado para bordes de vidrio
+@mixin glass-border {
+  border: 1px solid $glass-border;
+}
+
+
+// Mixin unificado para contenedores con scroll vertical
+@mixin scrollable-container($padding: 0) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @if $padding != 0 { padding: $padding; }
+  @include custom-scrollbar(4px);
+}
+
+
 
 // Fondo tintado + borde + texto del mismo color (badges, botones de estado)
 @mixin status-tint($color, $bg-alpha: 0.2, $border-alpha: 1) {

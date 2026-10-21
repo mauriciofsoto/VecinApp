@@ -65,19 +65,19 @@
 
 // 4. Cuerpo con scroll
 @mixin modal-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: $space-5;
-  @include custom-scrollbar(4px);
+  @include scrollable-container($space-5);
 }
 
 // 5. Pie de acciones (se oculta solo si no hay nada proyectado)
 @mixin modal-footer {
-  @include flex-row;
+ @include flex-row;
   justify-content: flex-end;
   padding: $space-4 $space-5;
+  @include glass-border;
   border-top: 1px solid $glass-border;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
 
   &:empty { display: none; }
 }

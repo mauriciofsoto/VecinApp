@@ -42,11 +42,7 @@
 
 // 4. Cuerpo scrolleable
 @mixin card-scrollable-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  @include custom-scrollbar(4px);
+  @include scrollable-container(0);
 }
 
 // 5. Genera .card-size-sm / -md / -lg / -full
@@ -63,12 +59,12 @@
 
 @mixin card-skin-solid {
   background-color: rgba($bg-dark, 0.85);
-  border: 1px solid $glass-border;
+  @include glass-border;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 @mixin card-skin-image {
-  border: 1px solid $glass-border;
+  @include glass-border;
 
   &::before {
     content: '';

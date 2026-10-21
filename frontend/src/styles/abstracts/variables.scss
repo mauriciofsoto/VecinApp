@@ -128,13 +128,13 @@ $transition-drag: transform 250ms $ease-out;
 
 // Variantes de badge: bg = color base, text = color del texto, border = opacidad del borde (opcional)
 $badge-variants: (
-  success: (bg: $success, text: #4ade80),
-  warning: (bg: $warning, text: #fbbf24),
-  danger:  (bg: $danger,  text: #f87171),
-  info:    (bg: $info,    text: $accent),
-  accent:  (bg: $primary, text: $primary-light, border: 0.4),
-  purple:  (bg: $purple,  text: $purple),
-  neutral: (bg: $white,   text: $text-muted, border: 0.12),
+  'success': (bg: $success, text: #4ade80),
+  'warning': (bg: $warning, text: #fbbf24),
+  'danger':  (bg: $danger,  text: #f87171),
+  'info':    (bg: $info,    text: $accent),
+  'accent':  (bg: $primary, text: $primary-light, border: 0.4),
+  'purple':  (bg: $purple,  text: $purple),
+  'neutral': (bg: $white,   text: $text-muted, border: 0.12),
 );
 
 // Tamaños de card (las keys son propiedades CSS)

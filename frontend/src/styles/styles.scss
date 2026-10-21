@@ -33,7 +33,7 @@
 
 .building-selector {
   background: $bg-dark-alpha;
-  border: 1px solid $glass-border;
+  @include glass-border;
   color: $text-main;
 }
 
