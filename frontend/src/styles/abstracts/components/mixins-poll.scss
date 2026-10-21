@@ -1,5 +1,5 @@
-@use 'variables' as *;
-@use 'mixins-core' as *;
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
 
 // Contenedor principal de la encuesta
 @mixin poll-wrapper {

@@ -1,1 +1,14 @@
 <p>empty-state works!</p>
+ <div class="empty-state">
+  <div class="empty-state__icon">
+    <ng-content select="[emptyIcon]"></ng-content>
+  </div>
+
+  <h3>{{ title() }}</h3>
+
+  <p>{{ description() }}</p>
+
+  <div class="empty-state__action">
+    <ng-content select="[emptyAction]"></ng-content>
+  </div>
+</div>

@@ -1,10 +1,10 @@
-@use 'variables' as *;
-@use 'breakpoints' as *;
-@use 'mixins-core' as *;
-@use 'mixins-effects' as *;
-@use 'mixins-card' as *;
-@use 'mixins-avatar' as *;
-@use 'mixins-layout' as *;
+@use '../variables' as *;
+@use '../breakpoints' as *;
+@use '../global/mixins-core' as *;
+@use '../global/mixins-effects' as *;
+@use './mixins-card' as *;
+@use './mixins-avatar' as *;
+@use '../global/mixins-layout' as *;
 
 // ========================================
 // NAVEGACIÓN LATERAL (SIDEBAR)

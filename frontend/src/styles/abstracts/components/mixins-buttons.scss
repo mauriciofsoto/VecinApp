@@ -1,7 +1,7 @@
 @use 'sass:color';
 @use 'sass:map';
-@use 'variables' as *;
-@use 'mixins-core' as *;
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
 
 // ========================================
 // SISTEMA DE BOTONES

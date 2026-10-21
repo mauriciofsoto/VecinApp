@@ -1,0 +1,21 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.quick-replies {
+  @include flex-row;
+  flex-wrap: wrap;
+  margin-bottom: $space-2;
+}
+
+.chip { @include chip-base; }
+
+.message-field { @include form-field-container; }
+
+.message-input {
+  min-width: 0;
+  @include form-input-base;
+}

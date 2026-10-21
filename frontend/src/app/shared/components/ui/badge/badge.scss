@@ -6,6 +6,6 @@
 
 .badge {
   @include badge-base;
-  @include badge-size-classes; // .badge-sm / -md / -lg
-  @include badge-variants;     // .badge-success / -warning / -danger / -info / -accent / -purple / -neutral
+  @include badge-size-classes;
+  @include badge-variant-classes;
 }

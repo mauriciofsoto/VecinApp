@@ -1,7 +1,7 @@
-@use 'variables' as *;
-@use 'breakpoints' as *;
-@use 'mixins-core' as *;
-@use 'mixins-scrollbar' as *;
+@use '../variables' as *;
+@use '../breakpoints' as *;
+@use './mixins-core' as *;
+@use './mixins-scrollbar' as *;
 
 // ========================================
 // LAYOUTS, PANELES Y BENTO GRIDS

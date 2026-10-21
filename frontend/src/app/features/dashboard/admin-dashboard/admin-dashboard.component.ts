@@ -1,3 +1,4 @@
+import { ReactionBar,Reaction } from './../../../shared/components/ui/reaction-bar/reaction-bar';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -12,6 +13,10 @@ import { SidebarComponent } from '../../../shared/components/navigation/sidebar/
 import { BentoGridComponent, BentoWidget } from '../../../shared/components/layout/bento-grid/bento-grid';
 import { BentoItemDirective } from '../../../shared/components/layout/bento-grid/bento-item.directive';
 import { PollOptionMock } from '../../../shared/components/ui/poll-options/poll-options';
+
+import { MessageInput } from '../../../shared/components/ui/message-input/message-input';
+import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
+
 
 const DEFAULT_WIDGETS: BentoWidget[] = [
   { id: 'muro', title: 'Muro', variant: 'glass', cols: 2, rows: 2, visible: true },
@@ -34,8 +39,11 @@ const LAYOUT_STORAGE_KEY = 'bento_layout_sample';
     SearchBar,
     SidebarComponent,
     Modal,
+    MessageInput,
     BentoGridComponent,
     BentoItemDirective,
+    ReactionBar,
+    EmptyState,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
@@ -50,6 +58,13 @@ export class AdminDashboardComponent implements OnInit {
     { id: 'opt2', text: 'Sábado 26 - 11:00 hs', percentage: 35 },
     { id: 'opt3', text: 'Domingo 27 - 18:00 hs', percentage: 20 },
   ];
+
+  readonly reaccionesMuro: Reaction[] = [
+  { emoji: '👍', count: 4, reacted: false },
+  { emoji: '❤️', count: 2, reacted: false },
+  { emoji: '😂', count: 1, reacted: false },
+];
+
 
   protected readonly showQr = signal(false);
   protected readonly showNuevaIncidencia = signal(false);
@@ -151,4 +166,27 @@ export class AdminDashboardComponent implements OnInit {
       new Set(value.map((item: BentoWidget) => item.id)).size === value.length
     );
   }
+
+  protected onEnviarMensaje(mensaje: string): void {
+  console.log('Mensaje de prueba:', mensaje);
+  }
+
+  onReaccionMuro(emoji: string): void {
+  const existente = this.reaccionesMuro.find(
+    (reaction) => reaction.emoji === emoji
+  );
+
+  if (existente) {
+    existente.count += existente.reacted ? -1 : 1;
+    existente.reacted = !existente.reacted;
+    return;
+  }
+
+  this.reaccionesMuro.push({
+    emoji,
+    count: 1,
+    reacted: true,
+  });
+  }
+
 }

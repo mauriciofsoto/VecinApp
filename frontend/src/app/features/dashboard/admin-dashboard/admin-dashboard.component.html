@@ -1,131 +1,198 @@
-<div class="app-dashboard-layout">
 
+<div class="app-dashboard-layout">
   <!-- SIDEBAR -->
   <app-sidebar></app-sidebar>
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="app-main-content space-y-6">
 
-    <!-- HEADER Y BUSCADOR -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
-      <div>
-        <h1 class="text-2xl font-bold text-white">Panel de Administración</h1>
-        <p class="text-sm text-muted">Gestión integral del consorcio VecinApp</p>
+    <!-- HEADER -->
+    <header class="admin-header">
+      <div class="admin-header__title">
+        <h1>Panel de Administración</h1>
+        <p>Gestioná las actividades de tu comunidad.</p>
       </div>
 
-      <div class="w-full md:w-80">
-        <app-search-bar
-          placeholder="Buscar..."
-          (search)="onBuscar($event)">
-        </app-search-bar>
-      </div>
+      <app-search-bar
+        placeholder="Buscar..."
+        (search)="onBuscar($event)"
+      ></app-search-bar>
     </header>
 
-    <!-- BARRA DE ACCIONES Y BADGES -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-md">
-      <div class="flex items-center gap-2">
-        <app-badge variant="danger" size="sm">2 Urgentes</app-badge>
-        <app-badge variant="warning" size="sm">3 En Proceso</app-badge>
-      </div>
+    <!-- WIDGETS DEL DASHBOARD -->
+    <section class="admin-widgets">
+      <app-bento-grid
+        [widgets]="widgets"
+        (layoutChange)="onLayoutChange($event)"
+      >
 
-      <div class="flex items-center gap-3">
-        <app-button variant="ghost" size="sm" (buttonClick)="resetLayout()">Restablecer</app-button>
-        <app-button variant="outline" size="sm" (buttonClick)="openQr()">Asignar QR</app-button>
-        <app-button variant="primary" size="sm" (buttonClick)="showNuevaIncidencia.set(true)">Nueva Incidencia</app-button>
-      </div>
-    </div>
+        <!-- MURO DE LA COMUNIDAD -->
+        <ng-template bentoItem="muro">
+          <app-card>
+            <div class="widget-header">
+              <div>
+                <h2>Muro de la comunidad</h2>
+                <p>Compartí novedades con los vecinos.</p>
+              </div>
+            </div>
 
-    
-<!-- BENTO GRID REUTILIZABLE -->
-<app-bento-grid
-  [widgets]="widgets"
-  (layoutChange)="onLayoutChange($event)"
->
-  <!-- 1. MURO -->
-  <ng-template bentoItem="muro">
-    <app-card variant="glass" size="full" align="between" [hover]="true">
-      <div card-title class="font-semibold text-white">
-        Muro de la Comunidad
-      </div>
+            <!-- PUBLICACIÓN DE PRUEBA -->
+            <article class="community-post">
+              <div class="community-post__header">
+                <div class="message-demo__avatar">AD</div>
 
-      <div class="py-3 w-full space-y-2">
-        <p class="text-sm text-muted">
-          Últimos avisos del edificio.
-        </p>
+                <div>
+                  <h3>Administración</h3>
+                  <p>Publicación de prueba</p>
+                </div>
+              </div>
 
-        <app-comment-input
-          placeholder="Escribir comentario..."
-          userInitials="AD"
-          (submitComment)="onNuevoComentario($event, 'muro')"
-        />
-      </div>
-    </app-card>
-  </ng-template>
+              <div class="community-post__content">
+                <p>
+                  ¡Hola, vecinos! Les recordamos que mañana
+                  se realizarán tareas de mantenimiento en los
+                  espacios comunes.
+                </p>
+              </div>
 
-  <!-- 2. ENCUESTA ACTIVA -->
-  <ng-template bentoItem="encuesta_activa">
-    <app-card variant="glass" size="full" align="between" [hover]="true">
-      <div card-title class="font-semibold text-white">
-        Encuesta Anual
-      </div>
+              <!-- BARRA DE REACCIONES -->
+              <app-reaction-bar
+                [reactions]="reaccionesMuro"
+                (toggled)="onReaccionMuro($event)"
+              ></app-reaction-bar>
+            </article>
 
-      <div class="py-3 w-full">
-        <p class="text-sm text-muted">
-          Participá de la votación del consorcio.
-        </p>
-      </div>
-    </app-card>
-  </ng-template>
+            <!-- NUEVO COMENTARIO -->
+            <app-comment-input
+              placeholder="Escribir un comentario..."
+              userInitials="AD"
+              (submitComment)="onNuevoComentario($event, 'muro')"
+            ></app-comment-input>
+          </app-card>
+        </ng-template>
 
-  <!-- 3. INCIDENCIAS ACTIVAS -->
-  <ng-template bentoItem="incidencias">
-    <app-card variant="solid" size="full" align="between" [hover]="true">
-      <div card-title class="font-semibold text-white">
-        Incidencias Activas
-      </div>
+        <!-- ENCUESTA -->
+        <ng-template bentoItem="encuesta_activa">
+          <app-card>
+            <div class="widget-header">
+              <div>
+                <h2>Encuesta activa</h2>
+                <p>Consultas y decisiones de la comunidad.</p>
+              </div>
+            </div>
 
-      <div class="py-3 w-full">
-        <p class="text-sm text-muted">
-          Sin incidencias críticas.
-        </p>
-      </div>
-    </app-card>
-  </ng-template>
+            <!-- ESTADO VACÍO REUTILIZABLE -->
+            <app-empty-state
+              title="No hay encuestas activas"
+              description="Cuando haya una encuesta disponible, aparecerá acá."
+            ></app-empty-state>
+          </app-card>
+        </ng-template>
 
-  <!-- 4. PAQUETES -->
-  <ng-template bentoItem="paquetes">
-    <app-card variant="glass" size="full" align="between" [hover]="true">
-      <div card-title class="font-semibold text-white">
-        Paquetes en Portería
-      </div>
+        <!-- INCIDENCIAS -->
+        <ng-template bentoItem="incidencias">
+          <app-card>
+            <div class="widget-header">
+              <div>
+                <h2>Incidencias</h2>
+                <p>Seguimiento de reportes del edificio.</p>
+              </div>
 
-      <div class="py-3 w-full">
-        <p class="text-sm text-muted">
-          4 paquetes pendientes de retiro.
-        </p>
-      </div>
-    </app-card>
-  </ng-template>
-</app-bento-grid>
+              <app-badge>5 pendientes</app-badge>
+            </div>
 
+            <app-empty-state
+              title="Seguimiento de incidencias"
+              description="Acá se mostrarán las incidencias registradas."
+            ></app-empty-state>
+          </app-card>
+        </ng-template>
 
+        <!-- PAQUETES -->
+        <ng-template bentoItem="paquetes">
+          <app-card>
+            <div class="widget-header">
+              <div>
+                <h2>Paquetes</h2>
+                <p>Comunicaciones sobre entregas recibidas.</p>
+              </div>
+            </div>
+
+            <!-- EJEMPLO VISUAL DEL MESSAGE INPUT -->
+            <div class="message-demo">
+              <div class="message-demo__heading">
+                <span class="message-demo__avatar">AD</span>
+
+                <div>
+                  <h3>Notificar a un vecino</h3>
+                  <p>
+                    Probá las respuestas rápidas o escribí un mensaje.
+                  </p>
+                </div>
+              </div>
+
+              <app-message-input
+                [quickReplies]="[
+                  'Llegó tu paquete',
+                  'Pasá por portería',
+                  'Paquete retirado'
+                ]"
+                placeholder="Escribí un mensaje..."
+                (send)="onEnviarMensaje($event)"
+              ></app-message-input>
+            </div>
+          </app-card>
+        </ng-template>
+
+      </app-bento-grid>
+    </section>
   </main>
 </div>
 
-<!-- MODAL QR -->
-<app-modal heading="Asignar QR" size="sm" [(open)]="showQr">
-  <p class="text-sm text-muted">Seleccione el departamento para vincular el QR.</p>
-  <div modal-footer class="flex justify-end gap-2">
-    <app-button variant="ghost" size="sm" (buttonClick)="closeQr()">Cancelar</app-button>
-    <app-button variant="primary" size="sm" (buttonClick)="guardarQr()">Guardar</app-button>
+<!-- MODAL: ASIGNAR QR -->
+<app-modal [(open)]="showQr">
+  <div class="modal-content">
+    <h2>Asignar código QR</h2>
+    <p>Acá irá el formulario para generar o asignar un QR.</p>
+
+    <div class="modal-actions">
+      <app-button
+        variant="secondary"
+        (buttonClick)="closeQr()"
+      >
+        Cancelar
+      </app-button>
+
+      <app-button
+        variant="primary"
+        (buttonClick)="guardarQr()"
+      >
+        Guardar
+      </app-button>
+    </div>
   </div>
 </app-modal>
 
-<!-- MODAL NUEVA INCIDENCIA -->
-<app-modal heading="Nueva Incidencia" size="md" [(open)]="showNuevaIncidencia">
-  <p class="text-sm text-muted">Complete los datos del reclamo.</p>
-  <div modal-footer class="flex justify-end gap-2">
-    <app-button variant="ghost" size="sm" (buttonClick)="showNuevaIncidencia.set(false)">Cancelar</app-button>
-    <app-button variant="primary" size="sm" (buttonClick)="crearIncidencia()">Crear</app-button>
+<!-- MODAL: NUEVA INCIDENCIA -->
+<app-modal [(open)]="showNuevaIncidencia">
+  <div class="modal-content">
+    <h2>Nueva incidencia</h2>
+    <p>Acá irá el formulario para registrar una incidencia.</p>
+
+    <div class="modal-actions">
+      <app-button
+        variant="secondary"
+        (buttonClick)="showNuevaIncidencia.set(false)"
+      >
+        Cancelar
+      </app-button>
+
+      <app-button
+        variant="primary"
+        (buttonClick)="crearIncidencia()"
+      >
+        Crear incidencia
+      </app-button>
+    </div>
   </div>
 </app-modal>

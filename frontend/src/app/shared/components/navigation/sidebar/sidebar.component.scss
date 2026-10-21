@@ -32,9 +32,7 @@
 
   .sidebar-nav {
     @include flex-col(0.35rem);
-    flex: 1;
-    overflow-y: auto;
-    @include custom-scrollbar(4px);
+    @include scrollable-container(0);
 
     .nav-item { @include sidebar-nav-item; }
   }

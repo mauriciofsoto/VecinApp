@@ -1,0 +1,38 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.empty-state {
+  @include flex-col($space-2);
+
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: $space-6;
+  box-sizing: border-box;
+  text-align: center;
+  color: $text-muted;
+
+  h3 {
+    @include text-heading;
+
+    margin: 0;
+    color: $text-main;
+  }
+
+  p {
+    @include text-body;
+
+    max-width: 32rem;
+    margin: 0;
+  }
+
+  &__icon,
+  &__action {
+    @include flex-center;
+  }
+}

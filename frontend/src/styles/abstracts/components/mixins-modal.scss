@@ -1,9 +1,9 @@
-@use 'variables' as *;
-@use 'mixins-core' as *;
-@use 'mixins-effects' as *;
-@use 'mixins-scrollbar' as *;
-@use 'mixins-buttons' as *;
-@use 'mixins-typography' as *;
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
+@use '../global/mixins-effects' as *;
+@use '../global/mixins-scrollbar' as *;
+@use './mixins-buttons' as *;
+@use '../global/mixins-typography' as *;
 
 // ========================================
 // MODAL (carcasa sobre <dialog> nativo)
@@ -73,11 +73,8 @@
  @include flex-row;
   justify-content: flex-end;
   padding: $space-4 $space-5;
-  @include glass-border;
   border-top: 1px solid $glass-border;
-  border-bottom: none;
-  border-left: none;
-  border-right: none;
+
 
   &:empty { display: none; }
 }

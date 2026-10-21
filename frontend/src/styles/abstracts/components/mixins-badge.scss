@@ -1,6 +1,6 @@
 @use 'sass:map';
-@use 'variables' as *;
-@use 'mixins-core' as *;
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
 
 // 1. Estructura base
 @mixin badge-base {
@@ -34,12 +34,20 @@
 }
 
 // 5. Genera .badge-success / -warning / ... desde $badge-variants
-@mixin badge-variants {
+@mixin badge-variant-classes {
   @each $name, $cfg in $badge-variants {
     $border: 0.35;
-    @if map.has-key($cfg, border) { $border: map.get($cfg, border); }
+
+    @if map.has-key($cfg, border) {
+      $border: map.get($cfg, border);
+    }
+
     &-#{$name} {
-      @include badge-variant(map.get($cfg, bg), map.get($cfg, text), $border);
+      @include badge-variant(
+        map.get($cfg, bg),
+        map.get($cfg, text),
+        $border
+      );
     }
   }
 }

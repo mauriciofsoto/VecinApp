@@ -1,5 +1,5 @@
-@use 'variables' as *;
-@use 'mixins-core' as *;
+@use '../variables' as *;
+@use './mixins-core' as *;
 
 @mixin glass-panel-effect {
   @include backdrop-blur;

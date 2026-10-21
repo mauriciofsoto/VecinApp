@@ -1,6 +1,6 @@
 @use 'sass:map';
-@use 'variables' as *;
-@use 'mixins-scrollbar' as *; 
+@use '../variables' as *;
+@use './mixins-scrollbar' as *; 
 
 // ========================================
 // MIXINS PRIMITIVOS (los ladrillos de todo lo demás)
@@ -45,6 +45,12 @@
   box-shadow: 0 0 $size rgba($color, $alpha);
 }
 
+@mixin touch-target($size: 2.75rem) {
+  @media (pointer: coarse) {
+    min-width: $size;
+    min-height: $size;
+  }
+}
 
 
 // Mixin unificado para bordes de vidrio

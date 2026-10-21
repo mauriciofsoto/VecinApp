@@ -1,0 +1,34 @@
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
+
+// ========================================
+// CHIP: botón en forma de píldora (reacciones, respuestas rápidas)
+// ========================================
+@mixin chip-base {
+  @include flex-center($inline: true);
+  gap: $space-1;
+  padding: $space-1 $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-full;
+  background: $surface-1;
+  color: $text-main;
+  font-family: $font-primary;
+  font-size: $text-small;
+  cursor: pointer;
+  user-select: none;
+  transition: $transition-base;
+
+  @include touch-target;
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) { background: $surface-2; }
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// Chip activo (por ejemplo, una reacción que ya hice)
+@mixin chip-selected {
+  @include active-state($accent);
+  color: $accent;
+}

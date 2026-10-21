@@ -1,7 +1,7 @@
-@use 'variables' as *;
-@use 'mixins-core' as *;
-@use 'mixins-effects' as *;
-@use 'mixins-scrollbar' as *;
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
+@use '../global/mixins-effects' as *;
+@use '../global/mixins-scrollbar' as *;
 
 // ========================================
 // TARJETAS Y CONTENEDORES

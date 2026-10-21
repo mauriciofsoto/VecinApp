@@ -1,1 +1,23 @@
-<p>reaction-bar works!</p>
+<div class="reactions">
+  @for (reaction of reactions(); track reaction.emoji) {
+    <button
+      type="button"
+      class="chip"
+      [class.is-selected]="reaction.reacted"
+      [attr.aria-pressed]="reaction.reacted"
+      [disabled]="disabled()"
+      (click)="toggled.emit(reaction.emoji)"
+    >
+      <span class="emoji">{{ reaction.emoji }}</span>
+      <span class="count">{{ reaction.count }}</span>
+    </button>
+  }
+
+  <button type="button" class="chip chip-add" aria-label="Agregar reacción" [disabled]="disabled()" (click)="openPicker()">＋</button>
+</div>
+
+<app-modal heading="Elegí una reacción" size="sm" [(open)]="pickerOpen">
+  @if (pickerOpen()) {
+    <emoji-picker class="dark" (emoji-click)="onEmojiClick($event)"></emoji-picker>
+  }
+</app-modal>

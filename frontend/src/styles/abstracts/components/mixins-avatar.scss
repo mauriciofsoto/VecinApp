@@ -1,5 +1,5 @@
-@use 'variables' as *;
-@use 'mixins-core' as *;
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
 
 // Estructura circular y tamaño
 @mixin avatar-base($size: 2.25rem) {
