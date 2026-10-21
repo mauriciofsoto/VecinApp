@@ -14,7 +14,7 @@
 @mixin avatar-image($size: 2.25rem) {
   @include avatar-base($size);
   object-fit: cover;
-  border: 1px solid $glass-border;
+  @include glass-border;
 }
 
 // Fallback de iniciales (sin foto)

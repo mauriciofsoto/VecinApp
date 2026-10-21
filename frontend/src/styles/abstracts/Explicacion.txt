@@ -1,0 +1,29 @@
+// 1. FUNDAMENTOS (Variables y Medidas)
+// Todos los demás archivos usan colores, breakpoints y dimensiones de acá.
+@forward 'variables';
+@forward 'breakpoints';
+
+// 2. MIXINS PRIMITIVOS E INDEPENDIENTES
+// No dependen de nadie más (excepto variables).
+@forward 'mixins-scrollbar'; 
+
+// 3. MIXINS CORE (Ladrillos del sistema)
+// Ahora sí puede usar custom-scrollbar() sin tirar error porque se cargó en el paso 2.
+@forward 'mixins-core';
+
+// 4. EFECTOS Y TIPOGRAFÍA
+// Usan variables y mixins de core (backdrop-blur, glass-border).
+@forward 'mixins-effects';
+@forward 'mixins-typography';
+
+// 5. COMPONENTES Y ÁMBITOS ESPECÍFICOS
+// Dependen de todo lo anterior para construir botones, tarjetas, modales, etc.
+@forward 'mixins-buttons';
+@forward 'mixins-avatar';
+@forward 'mixins-forms';
+@forward 'mixins-icon';
+@forward 'mixins-badge';
+@forward 'mixins-layout';
+@forward 'mixins-card';
+@forward 'mixins-sidebar';
+@forward 'mixins-modal';

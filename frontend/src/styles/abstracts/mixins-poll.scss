@@ -1,0 +1,62 @@
+@use 'variables' as *;
+@use 'mixins-core' as *;
+
+// Contenedor principal de la encuesta
+@mixin poll-wrapper {
+  @include flex-col($space-3);
+  width: 100%;
+}
+
+// Opción individual de la encuesta (aprovecha glass-border y active-state del core)
+@mixin poll-option-item {
+  position: relative;
+  width: 100%;
+  padding: $space-3 $space-4;
+  border-radius: $radius-sm;
+  background: $surface-1;
+  @include glass-border;
+  overflow: hidden;
+  transition: $transition-base;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover:not(:disabled) {
+    background: $surface-2;
+    border-color: rgba($accent, 0.4);
+    @include hover-lift(-1px);
+  }
+
+  &.selected {
+    @include active-state($accent);
+
+    .poll-text {
+      color: $accent;
+      font-weight: $font-semibold;
+    }
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+// Barra de progreso translúcida (lo único estrictamente nuevo y específico de polls)
+@mixin poll-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba($primary, 0.25);
+  border-right: 2px solid $primary-light;
+  transition: width 0.4s $ease-out;
+  z-index: 1;
+}
+
+// Contenedor interno para que el texto quede sobre la barra
+@mixin poll-content-layout {
+  position: relative;
+  z-index: 2;
+  @include flex-row;
+  justify-content: space-between;
+  width: 100%;
+}

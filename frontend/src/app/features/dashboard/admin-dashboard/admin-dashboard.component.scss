@@ -15,9 +15,3 @@
     @include main-scroll-container;
   }
 }
-
-.bento-grid { @include bento-grid-custom; }
-.bento-item { @include bento-item; }
-
-// Feedback visual CDK Drag & Drop (preview + placeholder + transición)
-@include cdk-drag-feedback;

@@ -4,34 +4,22 @@ export type ModalSize = 'sm' | 'md' | 'lg';
 
 let nextId = 0;
 
-/** MODAL EL PROCESO, SIGO MÑN. 
- * Carcasa reutilizable de modal (usa el <dialog> nativo: Esc, foco y backdrop vienen gratis).
- *
- * Uso:
- *   <app-modal heading='Asignar QR' size='sm' [(open)]='showQr'>
- *     ...contenido...
- *     <ng-container ngProjectAs='[modal-footer]'>
- *       <button (click)='showQr.set(false)'>Cancelar</button>
- *     </ng-container>
- *   </app-modal>
- * 
- *  tengo que seguir viendo: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
- */
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.html',
   styleUrl: './modal.scss',
 })
 export class Modal {
-  /** Visibilidad. Se enlaza con [(open)]='miSignal' */
+
   readonly open = model(false);
-  /** Título (no se llama 'title' para que el navegador no muestre un tooltip) */
   readonly heading = input('');
   readonly size = input<ModalSize>('md');
   readonly closeOnBackdrop = input(true);
   readonly showClose = input(true);
-  /** Se emite siempre que se cierra: botón, Esc, backdrop o cierre desde afuera */
+  readonly preventClose = input(false);
+
   readonly closed = output<void>();
+  readonly closeBlocked = output<void>();
 
   protected readonly titleId = `modal-title-${nextId++}`;
   private readonly dialogRef = viewChild<ElementRef<HTMLDialogElement>>('dialog');
@@ -47,20 +35,42 @@ export class Modal {
     });
   }
 
-  protected close(): void {
+  /** Cierre pedido por el usuario con la ✕ o el click afuera */
+  protected requestClose(): void {
+    if (this.preventClose()) {
+      this.closeBlocked.emit();
+      return;
+    }
     this.open.set(false);
   }
 
-  // El evento 'close' del <dialog> salta con Esc y también con dialog.close() 
+  /** Tecla Esc: el evento "cancel" se puede frenar con preventDefault */
+  protected onCancel(event: Event): void {
+    if (this.preventClose()) {
+      event.preventDefault();
+      this.closeBlocked.emit();
+    }
+  }
+
+  /** El evento "close" del <dialog> salta con Esc y también con dialog.close() */
   protected onNativeClose(): void {
+    const dialog = this.dialogRef()?.nativeElement;
+    // Red de seguridad: si el navegador cerró igual (algunos ignoran preventDefault en Esc)
+    // y todavía no se pidió cerrar por código, lo reabrimos.
+    if (dialog && this.open() && this.preventClose()) {
+      dialog.showModal();
+      this.closeBlocked.emit();
+      return;
+    }
     this.open.set(false);
     this.closed.emit();
   }
 
-  //Click en el fondo: el target es el propio <dialog> (el panel ocupa todo su contenido) 
+  /** Click en el fondo: el target es el propio <dialog> (el panel ocupa todo su contenido) */
   protected onDialogClick(event: MouseEvent): void {
     if (this.closeOnBackdrop() && event.target === this.dialogRef()?.nativeElement) {
-      this.close();
+      this.requestClose();
     }
   }
+
 }

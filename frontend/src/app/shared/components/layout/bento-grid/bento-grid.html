@@ -1,0 +1,49 @@
+<section
+  cdkDropList
+  class="bento-grid"
+  [cdkDropListData]="visibleWidgets()"
+  cdkDropListOrientation="mixed"
+  (cdkDropListDropped)="onDrop($event)"
+>
+  @for (widget of visibleWidgets(); track widget.id) {
+    <article
+      cdkDrag
+      class="bento-item"
+      [cdkDragData]="widget"
+      [class.bento-item--glass]="widget.variant === 'glass'"
+      [class.bento-item--solid]="widget.variant === 'solid'"
+      [class.col-span-1]="widget.cols === 1"
+      [class.col-span-2]="widget.cols === 2"
+      [class.col-span-3]="widget.cols === 3"
+      [class.col-span-4]="widget.cols === 4"
+      [class.row-span-1]="(widget.rows ?? 1) === 1"
+      [class.row-span-2]="widget.rows === 2"
+      [class.row-span-3]="widget.rows !== undefined && widget.rows >= 3"
+      [attr.aria-label]="widget.title"
+    >
+      <div class="bento-item__content">
+        @if (getTemplate(widget.id); as template) {
+          <ng-container [ngTemplateOutlet]="template" />
+        }
+      </div>
+
+      @for (handle of resizeHandles; track handle.direction) {
+        <button
+          type="button"
+          class="resize-handle"
+          [class]="handle.className"
+          [attr.aria-label]="
+            'Redimensionar ' + widget.title + ' desde ' + handle.direction
+          "
+          (pointerdown)="initResize(widget, $event, handle.direction)"
+        ></button>
+      }
+
+      <ng-template cdkDragPlaceholder>
+        <div class="bento-item__placeholder"></div>
+      </ng-template>
+    </article>
+  }
+</section>
+
+<ng-content />

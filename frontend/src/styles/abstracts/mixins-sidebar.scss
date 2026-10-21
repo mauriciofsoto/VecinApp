@@ -9,7 +9,6 @@
 // ========================================
 // NAVEGACIÓN LATERAL (SIDEBAR)
 // ========================================
-
 @mixin sidebar-container($width: 260px) {
   @include glass-panel-effect;
   @include vertical-panel($width, $radius-md);
@@ -19,7 +18,6 @@
     top: 0;
     left: 0;
     transform: translateX(-100%);
-
     &.is-open { transform: translateX(0); }
   }
 }
@@ -66,7 +64,7 @@
   gap: $space-3;
   padding: $space-3;
   background: $surface-1;
-  border: 1px solid $glass-border;
+  @include glass-border;
 
   .avatar {
     @include avatar-image(2.5rem);
@@ -102,7 +100,7 @@
   height: 2.5rem;
   border-radius: $radius-sm;
   background: rgba($bg-dark, 0.85);
-  border: 1px solid $glass-border;
+  @include glass-border;
   color: $text-main;
   font-size: 1.25rem;
   cursor: pointer;
@@ -118,5 +116,5 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   z-index: 45;
-  animation: fadeIn 200ms ease-out; // keyframes en base/_animations.scss
+  animation: fadeIn 200ms ease-out;
 }
