@@ -1,241 +1,239 @@
 <div class="surveys-page">
-  <!-- ENCABEZADO -->
-  <header class="surveys-header">
-    <div class="surveys-header__intro">
-      <span class="surveys-eyebrow">OPERACIONES / COMUNIDAD</span>
+  <!-- HISTORIAL Y EVENTO DE APERTURA -->
+   <app-historial-encuestas (solicitarCrear)="abrirModalCrear()"></app-historial-encuestas>
+  
+   <!-- MODAL DE CREACIÓN -->
+  <app-modal
+    [open]="modalCrearAbierto()"
+    (openChange)="cambiarEstadoModal($event)"
+    heading="Crear encuesta"
+    size="lg"
+  >
 
-      <h1>Gestión de encuestas</h1>
 
-      <p>
-        Creá consultas, organizá votaciones y conocé la opinión
-        de los vecinos.
-      </p>
-    </div>
-  </header>
 
-  <!-- CREAR ENCUESTA -->
-  <section class="survey-create-section">
-    <app-card size="full" variant="glass" align="left">
+    <div class="survey-form">
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="survey-main-fields">
 
-      <!-- CONTENEDOR GRID DE 2 COLUMNAS (Formulario + Configuración) -->
-      <div class="survey-form">
-        
-        <!-- COLUMNA IZQUIERDA: CAMPOS Y OPCIONES -->
-        <div class="survey-main-fields">
-          
-          <!-- ENCABEZADO DEL FORMULARIO -->
-          <div class="section-heading">
-            <div>
-              <span class="surveys-eyebrow">NUEVA PUBLICACIÓN</span>
-              <h2>Crear encuesta</h2>
-              <p>
-                Definí la consulta y las opciones que podrán elegir
-                los vecinos.
-              </p>
-            </div>
-          </div>
 
-          <!-- DATOS GENERALES -->
-          <div class="form-field">
-            <label for="survey-title">Título de la encuesta *</label>
-
-            <app-input
-              id="survey-title"
-              name="titulo"
-              [value]="titulo"
-              (valueChange)="titulo = $event"
-              placeholder="Ej. ¿Qué día hacemos la reunión?"
-              [required]="true"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="survey-description">Descripción *</label>
-
-            <app-input
-              id="survey-description"
-              name="descripcion"
-              [value]="descripcion"
-              (valueChange)="descripcion = $event"
-              [multiline]="true"
-              [rows]="4"
-              [required]="true"
-              placeholder="Explicá el tema y qué necesitan decidir los vecinos..."
-            />
-          </div>
-
-          <!-- OPCIONES DE RESPUESTA -->
-          <section class="survey-options">
-            @if (votacionActiva) {
-              <div class="subsection-heading">
-                <div>
-                  <h3>Opciones de respuesta</h3>
-                  <p>
-                    Agregá las alternativas que los vecinos podrán votar.
-                  </p>
-                </div>
-
-                <span class="options-count">
-                  {{ opciones.length }} opciones
-                </span>
-              </div>
-
-              <div class="options-list">
-                @for (opcion of opciones; track $index; let i = $index) {
-                  <div class="option-field">
-                    <span class="option-field__number">
-                      {{ i + 1 }}
-                    </span>
-
-                    <app-input
-                      [id]="'survey-option-' + i"
-                      [name]="'opcion-' + i"
-                      [value]="opcion"
-                      (valueChange)="opciones[i] = $event"
-                      placeholder="Escribí una opción..."
-                      [required]="true"
-                    />
-
-                    <button
-                      type="button"
-                      class="icon-button"
-                      [disabled]="opciones.length <= 2"
-                      [attr.aria-label]="'Eliminar opción ' + (i + 1)"
-                      title="Eliminar opción"
-                      (click)="eliminarOpcion(i)"
-                    >
-                      ×
-                    </button>
-                  </div>
-                }
-              </div>
-
-              <app-button
-                variant="outline"
-                (buttonClick)="agregarOpcion()"
-              >
-                + Agregar otra opción
-              </app-button>
-            } @else {
-              <p class="options-disabled">
-                La votación está desactivada. La publicación será informativa.
-              </p>
-            }
-          </section>
-
-          <!-- ERRORES -->
-          @if (errorFormulario) {
-            <p class="form-error" role="alert">
-              {{ errorFormulario }}
+        <div class="section-heading">
+          <div>
+            <span class="surveys-eyebrow">NUEVA PUBLICACIÓN</span>
+            <h2>Crear encuesta</h2>
+            <p>
+              Definí la consulta y las opciones que podrán elegir los vecinos.
             </p>
-          }
-
+          </div>
         </div>
 
-        <!-- COLUMNA DERECHA: SOLO CONFIGURACIÓN -->
-        <aside class="survey-sidebar">
-          <details class="survey-settings-accordion" open>
-            <summary class="subsection-heading collapsible-header">
+        <!--INPUT TITULO-->
+        <div class="form-field">
+          <label for="survey-title">Título de la encuesta *</label>
+          <app-input
+            id="survey-title"
+            name="titulo"
+            [value]="titulo"
+            (valueChange)="titulo = $event"
+            placeholder="Ej. ¿Qué día hacemos la reunión?"
+            [required]="true"
+          />
+        </div>
+
+        <!--INPUT DESCRIPCION-->
+        <div class="form-field">
+          <label for="survey-description">Descripción *</label>
+          <app-input
+            id="survey-description"
+            name="descripcion"
+            [value]="descripcion"
+            (valueChange)="descripcion = $event"
+            [multiline]="true"
+            [rows]="4"
+            [required]="true"
+            placeholder="Explicá el tema y qué necesitan decidir los vecinos..."
+          />
+        </div>
+
+
+
+
+
+
+
+      <!--=====================================================================-->
+
+        <!-- OPCIONES DE VOTACIÓN ESTA PARTE SE ESCONDE  -->
+        <section class="survey-options">
+          @if (votacionActiva) {
+            <div class="subsection-heading">
               <div>
-                <h3>Configuración</h3>
-                <p>Opciones de publicación.</p>
+                <h3>Opciones de respuesta</h3>
+                <p>Agregá las alternativas que los vecinos podrán votar.</p>
               </div>
-              <span class="accordion-icon" aria-hidden="true">▼</span>
-            </summary>
+              <span class="options-count">
+                {{ opciones.length }} opciones
+              </span>
+            </div>
 
-            <div class="survey-settings-content">
-              <label class="setting-option">
-                <input
-                  type="checkbox"
-                  name="votacionActiva"
-                  [(ngModel)]="votacionActiva"
-                />
+            <div class="options-list">
+              @for (opcion of opciones; track $index; let i = $index) {
+                <div class="option-field">
+                  <span class="option-field__number">{{ i + 1 }}</span>
 
-                <span class="setting-option__content">
-                  <strong>Activar votación</strong>
-                  <span>Permite elegir una opción.</span>
-                </span>
-              </label>
-
-              <label class="setting-option">
-                <input
-                  type="checkbox"
-                  name="comentariosActivos"
-                  [(ngModel)]="comentariosActivos"
-                />
-
-                <span class="setting-option__content">
-                  <strong>Permitir comentarios</strong>
-                  <span>Opiniones de vecinos.</span>
-                </span>
-              </label>
-
-              <label class="setting-option">
-                <input
-                  type="checkbox"
-                  name="establecerVencimiento"
-                  [(ngModel)]="establecerVencimiento"
-                />
-
-                <span class="setting-option__content">
-                  <strong>Fecha de vencimiento</strong>
-                  <span>Día de cierre.</span>
-                </span>
-              </label>
-
-              @if (establecerVencimiento) {
-                <div class="form-field deadline-field">
-                  <label for="survey-deadline">Fecha límite *</label>
-
-                  <input
-                    id="survey-deadline"
-                    name="fechaLimite"
-                    type="date"
-                    [(ngModel)]="fechaLimite"
-                    [min]="fechaActual"
-                    required
+                  <app-input
+                    [id]="'survey-option-' + i"
+                    [name]="'opcion-' + i"
+                    [value]="opcion"
+                    (valueChange)="opciones[i] = $event"
+                    placeholder="Escribí una opción..."
+                    [required]="true"
                   />
+
+                  <button
+                    type="button"
+                    class="icon-button"
+                    [disabled]="opciones.length <= 2"
+                    (click)="eliminarOpcion(i)"
+                    [attr.aria-label]="'Eliminar opción ' + (i + 1)"
+                  >
+                    ×
+                  </button>
                 </div>
               }
-
-              <label class="setting-option setting-option--priority">
-                <input
-                  type="checkbox"
-                  name="prioritaria"
-                  [(ngModel)]="prioritaria"
-                />
-
-                <span class="setting-option__content">
-                  <strong>Marcar prioritaria</strong>
-                  <span>Destacar en feed.</span>
-                </span>
-
-                <span class="priority-label">TOP</span>
-              </label>
             </div>
-          </details>
-        </aside>
 
-      </div> <!-- FIN DEL GRID DE 2 COLUMNAS -->
+            <app-button
+              variant="outline"
+              (buttonClick)="agregarOpcion()"
+            >
+              + Agregar otra opción
+            </app-button>
+          } @else {
+            <p class="options-disabled">
+              La votación está desactivada. La publicación será informativa.
+            </p>
+          }
+        </section>
 
-
-      <!-- FOOTER GENERAL A LO LARGO (Afuera del grid, abarca todo el ancho de la tarjeta) -->
-      <div class="survey-form__actions">
-
-        <app-button
-          variant="primary"
-          (buttonClick)="publicarEncuesta()"
-        >
-          Publicar encuesta
-        </app-button>
+        @if (errorFormulario) {
+          <p class="form-error" role="alert">
+            {{ errorFormulario }}
+          </p>
+        }
       </div>
 
-    </app-card>
-  </section>
-
-  <app-historial-encuestas></app-historial-encuestas>
 
 
 
+<!--==========================================================================================-->
 
+
+      <!-- COLUMNA DERECHA: CONFIGURACIÓN -->
+      <aside class="survey-sidebar">
+        <details class="survey-settings-accordion" open>
+          <summary class="subsection-heading collapsible-header">
+            <div>
+              <h3>Configuración</h3>
+              <p>Opciones de publicación.</p>
+            </div>
+            <span class="accordion-icon" aria-hidden="true">▼</span>
+          </summary>
+
+
+
+          <div class="survey-settings-content">
+
+            <!--check votacion-->
+            <label class="setting-option">
+              <input
+                type="checkbox"
+                name="votacionActiva"
+                [(ngModel)]="votacionActiva"
+              />
+              <span class="setting-option__content">
+                <strong>Activar votación</strong>
+                <span>Permite elegir una opción.</span>
+              </span>
+            </label>
+
+
+            <!--check coments-->
+            <label class="setting-option">
+              <input
+                type="checkbox"
+                name="comentariosActivos"
+                [(ngModel)]="comentariosActivos"
+              />
+              <span class="setting-option__content">
+                <strong>Permitir comentarios</strong>
+                <span>Opiniones de vecinos.</span>
+              </span>
+            </label>
+
+
+
+            <!--fecha vencimeinto-->
+
+            <label class="setting-option">
+              <input
+                type="checkbox"
+                name="establecerVencimiento"
+                [(ngModel)]="establecerVencimiento"
+              />
+              <span class="setting-option__content">
+                <strong>Fecha de vencimiento</strong>
+                <span>Día de cierre.</span>
+              </span>
+            </label>
+
+            @if (establecerVencimiento) {
+              <div class="form-field deadline-field">
+                <label for="survey-deadline">Fecha límite *</label>
+                <input
+                  id="survey-deadline"
+                  name="fechaLimite"
+                  type="date"
+                  [(ngModel)]="fechaLimite"
+                  [min]="fechaActual"
+                  required
+                />
+              </div>
+            }
+
+
+            <!--prioridad-->
+            <label class="setting-option setting-option--priority">
+              <input
+                type="checkbox"
+                name="prioritaria"
+                [(ngModel)]="prioritaria"
+              />
+              <span class="setting-option__content">
+                <strong>Marcar prioritaria</strong>
+                <span>Destacar en feed.</span>
+              </span>
+              <span class="priority-label">TOP</span>
+            </label>
+          </div>
+        </details>
+      </aside>
+    </div>
+
+    <!-- FOOTER DEL MODAL -->
+    <div modal-footer >
+
+      <app-button
+        variant="primary"
+        (buttonClick)="publicarEncuesta()"
+      >
+        Publicar encuesta
+      </app-button>
+    </div>
+
+
+
+  </app-modal>
+
+  
 </div>

@@ -61,6 +61,8 @@
               ></app-reaction-bar>
             </article>
 
+            
+
             <!-- NUEVO COMENTARIO -->
             <app-comment-input
               placeholder="Escribir un comentario..."
@@ -70,13 +72,33 @@
           </app-card>
         </ng-template>
 
-        <!-- ENCUESTA (CORREGIDO PARA MEJOR VISUALIZACIÓN) -->
-        <ng-template bentoItem="encuesta_activa">
+         <ng-template bentoItem="">
           <app-card size="full"> 
 
             <!-- COMPONENTE DE GESTIÓN DE ENCUESTAS FUERA DEL HEADER -->
             <div class="widget-content">
               <app-gestionar-encuestas></app-gestionar-encuestas>
+            </div>
+          </app-card>
+        </ng-template>
+
+
+
+         <!-- ENCUESTA (CORREGIDO PARA MEJOR VISUALIZACIÓN) -->
+        <ng-template bentoItem="encuesta_activa">
+          <app-card size="full"> 
+
+            <!-- COMPONENTE DE GESTIÓN DE ENCUESTAS FUERA DEL HEADER -->
+            <div class="widget-content">
+
+
+
+
+             <app-responder-encuesta></app-responder-encuesta>
+           
+           
+           
+           
             </div>
           </app-card>
         </ng-template>

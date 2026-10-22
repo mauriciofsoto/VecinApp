@@ -17,6 +17,10 @@ import { MessageInput } from '../../../shared/components/ui/message-input/messag
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
 
 import { GestionarEncuestas } from '../../operations/encuestas/pages/gestionar-encuestas/gestionar-encuestas';
+import { HistorialEncuestas } from '../../operations/encuestas/pages/historial-encuestas/historial-encuestas';
+import { ResponderEncuesta } from '../../operations/encuestas/pages/responder-encuesta/responder-encuesta';
+
+
 
 const DEFAULT_WIDGETS: BentoWidget[] = [
   { id: 'muro', title: 'Muro', variant: 'glass', cols: 2, rows: 2, visible: true },
@@ -45,7 +49,8 @@ const LAYOUT_STORAGE_KEY = 'bento_layout_sample';
     ReactionBar,
     EmptyState,
     GestionarEncuestas,
-  ],
+    ResponderEncuesta
+],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })

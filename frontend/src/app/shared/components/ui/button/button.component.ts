@@ -21,7 +21,7 @@ export class ButtonComponent {
   @Input() disabled = false;
   @Input() isSelected = false;
   @Input() fullWidth = false;
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() size: 'sm' | 'md' | 'lg' | 'xl'  = 'md';
   @Input() customClass = '';
 
   @Output() buttonClick = new EventEmitter<void>();
@@ -31,6 +31,7 @@ export class ButtonComponent {
     sm: 'px-3 py-1.5 text-xs font-medium',
     md: 'px-4 py-2.5 text-sm font-medium',
     lg: 'px-6 py-3 text-base font-semibold',
+    xl: 'px-8 py-4 text-lg font-semibold',
   };
 
   handleClick(): void {

@@ -1,27 +1,17 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, signal,inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { CardComponent } from '../../../../../shared/components/ui/card/card.component';
-import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
-import { Badge } from '../../../../../shared/components/ui/badge/badge';
-import { InputComponent } from '../../../../../shared/components/ui/input/input';
-import { HistorialEncuestas } from '../historial-encuestas/historial-encuestas'; 
-type EstadoEncuesta = 'en-proceso' | 'cerrada';
 
-interface EncuestaAdmin {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  opciones: string[];
-  votacionActiva: boolean;
-  comentariosActivos: boolean;
-  prioritaria: boolean;
-  fechaLimite: string;
-  fechaPublicacion: string;
-  estado: EstadoEncuesta;
-  totalVotos: number;
-}
+import {EncuestaAdmin} from '../../models/encuesta.model' ;
+import { EncuestasService } from '../../services/encuestas';
+
+
+import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
+import { InputComponent } from '../../../../../shared/components/ui/input/input';
+import { Modal } from '../../../../../shared/components/ui/modal/modal';
+import { HistorialEncuestas } from '../historial-encuestas/historial-encuestas';
+
 
 @Component({
   selector: 'app-gestionar-encuestas',
@@ -29,16 +19,19 @@ interface EncuestaAdmin {
   imports: [
     CommonModule,
     FormsModule,
-    CardComponent,
     ButtonComponent,
     InputComponent,
+    Modal,
     HistorialEncuestas,
   ],
   templateUrl: './gestionar-encuestas.html',
   styleUrl: './gestionar-encuestas.scss',
 })
 export class GestionarEncuestas {
-  // Formulario
+  private readonly encuestasService = inject(EncuestasService);
+
+  readonly modalCrearAbierto = signal(false);
+
   titulo = '';
   descripcion = '';
   opciones: string[] = ['', ''];
@@ -48,88 +41,28 @@ export class GestionarEncuestas {
   prioritaria = false;
   establecerVencimiento = false;
   fechaLimite = '';
-
   errorFormulario = '';
 
-  // Filtros
-  readonly estadoFiltro = signal<'todas' | EstadoEncuesta>('todas');
-  readonly fechaDesde = signal('');
-  readonly fechaHasta = signal('');
-
-  // Datos locales de demostración
-  private readonly encuestasState = signal<EncuestaAdmin[]>([
-    {
-      id: 1,
-      titulo: 'Reunión de consorcio',
-      descripcion:
-        'Elegí el día que te resulte más conveniente para participar.',
-      opciones: ['Lunes 18:00', 'Miércoles 19:00', 'Sábado 10:00'],
-      votacionActiva: true,
-      comentariosActivos: true,
-      prioritaria: true,
-      fechaLimite: '',
-      fechaPublicacion: '2026-10-20',
-      estado: 'en-proceso',
-      totalVotos: 18,
-    },
-    {
-      id: 2,
-      titulo: 'Mantenimiento de espacios comunes',
-      descripcion: 'Consulta sobre las mejoras propuestas para el edificio.',
-      opciones: ['Sí, estoy de acuerdo', 'Prefiero otra propuesta'],
-      votacionActiva: true,
-      comentariosActivos: false,
-      prioritaria: false,
-      fechaLimite: '',
-      fechaPublicacion: '2026-10-12',
-      estado: 'cerrada',
-      totalVotos: 24,
-    },
-  ]);
-
-  readonly encuestasFiltradas = computed(() => {
-    const estado = this.estadoFiltro();
-    const desde = this.fechaDesde();
-    const hasta = this.fechaHasta();
-
-    return this.encuestasState().filter((encuesta) => {
-      const coincideEstado =
-        estado === 'todas' || encuesta.estado === estado;
-
-      const coincideDesde =
-        !desde || encuesta.fechaPublicacion >= desde;
-
-      const coincideHasta =
-        !hasta || encuesta.fechaPublicacion <= hasta;
-
-      return coincideEstado && coincideDesde && coincideHasta;
-    });
-  });
-
-  readonly totalEnProceso = computed(
-    () =>
-      this.encuestasState().filter(
-        (encuesta) => encuesta.estado === 'en-proceso',
-      ).length,
-  );
-
-  readonly totalCerradas = computed(
-    () =>
-      this.encuestasState().filter(
-        (encuesta) => encuesta.estado === 'cerrada',
-      ).length,
-  );
+  private readonly encuestasState = this.encuestasService.encuestas;
 
   readonly fechaActual = this.obtenerFechaLocal();
+
+  abrirModalCrear(): void {
+  console.log('PADRE: recibí solicitarCrear');
+  this.errorFormulario = '';
+  this.modalCrearAbierto.set(true);
+  }
+
+  cambiarEstadoModal(abierto: boolean): void {
+    this.modalCrearAbierto.set(abierto);
+  }
 
   agregarOpcion(): void {
     this.opciones = [...this.opciones, ''];
   }
 
   eliminarOpcion(indice: number): void {
-    if (this.opciones.length <= 2) {
-      return;
-    }
+    if (this.opciones.length <= 2) return;
 
     this.opciones = this.opciones.filter(
       (_, index) => index !== indice,
@@ -193,28 +126,10 @@ export class GestionarEncuestas {
       totalVotos: 0,
     };
 
-    this.encuestasState.update((encuestas) => [
-      nuevaEncuesta,
-      ...encuestas,
-    ]);
+    this.encuestasService.publicar(nuevaEncuesta);
 
     this.limpiarFormulario();
-  }
-
-  cerrarEncuesta(id: number): void {
-    this.encuestasState.update((encuestas) =>
-      encuestas.map((encuesta) =>
-        encuesta.id === id
-          ? { ...encuesta, estado: 'cerrada' }
-          : encuesta,
-      ),
-    );
-  }
-
-  limpiarFiltros(): void {
-    this.estadoFiltro.set('todas');
-    this.fechaDesde.set('');
-    this.fechaHasta.set('');
+    this.modalCrearAbierto.set(false);
   }
 
   private limpiarFormulario(): void {

@@ -1,7 +1,7 @@
 @use '../../../../../../styles/abstracts' as *;
 
 // ========================================
-// ESTRUCTURA PRINCIPAL DE LA PÁGINA
+// ESTRUCTURA PRINCIPAL
 // ========================================
 
 .surveys-page {
@@ -19,6 +19,7 @@
   &__intro {
     @include flex-col($space-2);
     min-width: 0;
+    flex: 1;
   }
 }
 
@@ -41,6 +42,7 @@
 
 .summary-card {
   @include flex-col($space-2);
+  min-width: 0;
 
   &__label,
   &__detail {
@@ -50,11 +52,12 @@
 
   strong {
     @include text-title;
+    overflow-wrap: anywhere;
   }
 }
 
 // ========================================
-// SECCIÓN DE FILTROS Y HISTORIAL
+// FILTROS E HISTORIAL
 // ========================================
 
 .survey-history-section,
@@ -70,6 +73,8 @@
   @include flex-row($space-3);
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .history-count {
@@ -82,6 +87,7 @@
   @include flex-row($space-3);
   align-items: flex-end;
   flex-wrap: wrap;
+  min-width: 0;
 
   .form-field {
     @include flex-col($space-2);
@@ -97,6 +103,7 @@
   input,
   select {
     width: 100%;
+    min-width: 0;
     padding: $space-3;
     border: 1px solid $glass-border;
     border-radius: $radius-sm;
@@ -131,14 +138,17 @@
     align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
+    min-width: 0;
   }
 
   &__title-group {
     @include flex-col($space-2);
-    flex: 1;
+    flex: 1 1 12rem;
+    min-width: 0;
 
     p {
       color: $text-muted;
+      overflow-wrap: anywhere;
     }
   }
 
@@ -158,6 +168,7 @@
 
   &__options {
     @include flex-col($space-2);
+    min-width: 0;
 
     &-label,
     .survey-entry__date {
@@ -196,11 +207,12 @@
 
   .survey-form {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: $space-5;
+    min-width: 0;
 
     @media (min-width: 900px) {
-      grid-template-columns: 1fr 300px;
+      grid-template-columns: minmax(0, 1fr) 300px;
     }
   }
 
@@ -209,18 +221,22 @@
   .survey-options,
   .options-list {
     @include flex-col($space-3);
+    min-width: 0;
   }
 
   .option-field {
     @include flex-row($space-2);
+    min-width: 0;
 
     app-input {
       flex: 1;
+      min-width: 0;
     }
   }
 
   .icon-button {
     @include button-icon-clear(2.5rem);
+    flex-shrink: 0;
     border: 1px solid $glass-border;
     border-radius: $radius-sm;
 
@@ -245,6 +261,7 @@
 
     &__content {
       @include flex-col($space-1);
+      min-width: 0;
 
       strong {
         font-size: $text-small;
@@ -264,13 +281,32 @@
 
 @media (max-width: $mobile) {
   .surveys-summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .surveys-header,
   .section-heading,
+  .subsection-heading,
   .survey-filters {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .survey-filters {
+    .form-field,
+    app-button {
+      width: 100%;
+    }
+  }
+
+  .survey-entry {
+    &__top {
+      flex-direction: column;
+    }
+
+    &__actions {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
   }
 }
