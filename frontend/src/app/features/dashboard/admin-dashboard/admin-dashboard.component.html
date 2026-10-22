@@ -28,7 +28,7 @@
 
         <!-- MURO DE LA COMUNIDAD -->
         <ng-template bentoItem="muro">
-          <app-card>
+          <app-card size="full">
             <div class="widget-header">
               <div>
                 <h2>Muro de la comunidad</h2>
@@ -73,12 +73,9 @@
 
         <!-- ENCUESTA -->
         <ng-template bentoItem="encuesta_activa">
-          <app-card>
+          <app-card size="full" > 
             <div class="widget-header">
-              <div>
-                <h2>Encuesta activa</h2>
-                <p>Consultas y decisiones de la comunidad.</p>
-              </div>
+               <app-gestionar-encuestas></app-gestionar-encuestas>
             </div>
 
             <!-- ESTADO VACÍO REUTILIZABLE -->
@@ -91,7 +88,7 @@
 
         <!-- INCIDENCIAS -->
         <ng-template bentoItem="incidencias">
-          <app-card>
+          <app-card size="full" >
             <div class="widget-header">
               <div>
                 <h2>Incidencias</h2>

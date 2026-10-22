@@ -17,6 +17,7 @@ import { PollOptionMock } from '../../../shared/components/ui/poll-options/poll-
 import { MessageInput } from '../../../shared/components/ui/message-input/message-input';
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
 
+import { GestionarEncuestas } from '../../operations/encuestas/pages/gestionar-encuestas/gestionar-encuestas';
 
 const DEFAULT_WIDGETS: BentoWidget[] = [
   { id: 'muro', title: 'Muro', variant: 'glass', cols: 2, rows: 2, visible: true },
@@ -44,6 +45,7 @@ const LAYOUT_STORAGE_KEY = 'bento_layout_sample';
     BentoItemDirective,
     ReactionBar,
     EmptyState,
+    GestionarEncuestas,
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
