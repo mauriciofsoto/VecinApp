@@ -1,91 +1,452 @@
-
 @use '../../../../../../styles/abstracts' as *;
 
+// ========================================
+// ESTRUCTURA GENERAL
+// ========================================
 
-:host {
-  display: block;
+.surveys-page {
+  @include flex-col($space-6);
   width: 100%;
   min-width: 0;
 }
 
-.encuestas {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
+.surveys-header__intro,
+.survey-create-section,
+.survey-history-section,
+.survey-entry,
+.survey-entry__title-group,
+.survey-empty {
+  @include flex-col($space-3);
+  min-width: 0;
 }
 
-.encuestas__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+.surveys-header__intro {
+  gap: $space-2;
 }
 
-.encuestas__header h2 {
+.surveys-eyebrow {
+  color: $accent;
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+  letter-spacing: 0.08em;
+}
+
+.surveys-header h1,
+.section-heading h2 {
+  @include text-heading;
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
 }
 
-.encuestas__header p {
-  margin: 0.25rem 0 0;
-  opacity: 0.75;
+.surveys-header p,
+.section-heading p,
+.subsection-heading p {
+  @include text-body;
+  color: $text-muted;
+  margin: 0;
 }
 
-.encuestas__form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+// ========================================
+// RESUMEN
+// ========================================
 
-.encuestas__form input,
-.encuestas__form textarea,
-.encuestas__form select {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
-
-.encuestas__form textarea {
-  min-height: 5rem;
-  resize: vertical;
-}
-
-.encuestas__list {
+.surveys-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-4;
 }
 
-.encuestas__item {
-  padding: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
+.summary-card {
+  @include flex-col($space-2);
 }
 
-.encuestas__item h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
+.summary-card__label,
+.summary-card__detail,
+.options-count,
+.history-count,
+.required-hint,
+.field-hint,
+.survey-entry__date,
+.survey-entry__options-label {
+  color: $text-muted;
+  font-size: $text-small;
 }
 
-.encuestas__item p {
-  margin: 0 0 0.75rem;
-  opacity: 0.8;
+.summary-card strong {
+  @include text-title;
 }
 
-.encuestas__status {
-  display: inline-block;
-  margin-bottom: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 999px;
-  background: #dcfce7;
-  color: #166534;
-  font-size: 0.8rem;
+// ========================================
+// FORMULARIO Y SIDEBAR (GRID SYSTEM)
+// ========================================
+
+.survey-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-6;
+  align-items: start;
+  margin-top: $space-5;
+
+  @media (min-width: 1580px) {
+    grid-template-columns: 1fr 340px;
+  }
+  // Cuando la pantalla es grande
+  @media (min-width: 1580px) {
+    grid-template-columns: 1fr auto; // El sidebar toma el ancho de su contenido al cerrarse
+  }
+}
+
+.form-field {
+  @include flex-col($space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.form-field label {
+  font-size: $text-small;
+  font-weight: $font-medium;
+}
+
+.section-heading,
+.subsection-heading,
+.survey-entry__top,
+.survey-entry__details,
+.survey-form__actions {
+  @include flex-row($space-3);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+
+  margin-top: $space-6; 
+  padding-top: $space-4;
+  border-top: 1px solid $glass-border;
+}
+
+.section-heading,
+.subsection-heading {
+  align-items: flex-start;
+}
+
+.section-heading__icon,
+.survey-empty__icon {
+  @include flex-center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: $radius-circle;
+  background: $surface-2;
+  color: $accent;
+  font-size: $text-heading;
+}
+
+// ========================================
+// OPCIONES DE RESPUESTA
+// ========================================
+
+.survey-options,
+.options-list {
+  @include flex-col($space-3);
+  min-width: 0;
+}
+
+.options-list {
+  gap: $space-2;
+}
+
+.option-field {
+  @include flex-row($space-2);
+  min-width: 0;
+}
+
+.option-field app-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.option-field__number {
+  flex-shrink: 0;
+  color: $text-muted;
+  font-size: $text-small;
+}
+
+.icon-button {
+  @include button-icon-clear(2.5rem);
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+
+  &:hover:not(:disabled) {
+    color: $danger;
+    background: rgba($danger, 0.1);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+  }
+}
+
+.options-disabled {
+  color: $text-muted;
+  font-size: $text-small;
+}
+
+// ========================================
+// CONFIGURACIÓN (SIDEBAR)
+// ========================================
+
+.survey-sidebar {
+  align-self: start;
+  width: 100%;
+  @media (min-width: 1580px) {
+    width: auto; // Permite que se contraiga de forma prolija al cerrar el <details>
+    min-width: 280px;
+  }
+  @media (min-width: 1580px) {
+    width: 340px; // Mantiene el espacio reservado para que no salte el layout
+  }
+}
+
+.survey-settings-accordion {
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.survey-settings-content {
+  @include flex-col($space-3);
+  padding-top: $space-3;
+}
+
+.deadline-field input,
+.survey-filters input,
+.survey-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  background: $surface-1;
+  color: $text-main;
+  font: inherit;
+  transition: $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: rgba($primary, 0.7);
+    box-shadow: 0 0 0 2px rgba($primary, 0.15);
+  }
+}
+
+.deadline-field input,
+.survey-filters input {
+  color-scheme: dark;
+}
+
+.setting-option {
+  @include flex-row($space-3);
+  align-items: flex-start;
+  padding: $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  background: $surface-2;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    background: $surface-1;
+  }
+
+  > input {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    accent-color: $primary;
+  }
+}
+
+.setting-option__content {
+  @include flex-col($space-1);
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    font-size: $text-small;
+    font-weight: $font-semibold;
+  }
+
+  > span {
+    color: $text-muted;
+    font-size: $text-small;
+    line-height: $line-normal;
+  }
+}
+
+.setting-option--priority {
+  border-color: rgba($warning, 0.35);
+}
+
+.priority-label {
+  @include status-tint($warning, 0.12, 0.35);
+  flex-shrink: 0;
+  padding: $space-1 $space-2;
+  border-radius: $radius-full;
+  font-size: $text-tiny;
+  font-weight: $font-semibold;
+}
+
+.form-error {
+  @include status-tint($danger, 0.12, 0.4);
+  padding: $space-3;
+  border-radius: $radius-sm;
+  font-size: $text-small;
+}
+
+.survey-form__actions {
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: $space-3;
+  border-top: 1px solid $glass-border;
+}
+
+// ========================================
+// HISTORIAL Y FILTROS
+// ========================================
+
+.history-heading {
+  align-items: flex-start;
+}
+
+.history-count {
+  flex-shrink: 0;
+}
+
+.survey-filters {
+  @include flex-row($space-3);
+  align-items: flex-end;
+  flex-wrap: wrap;
+
+  .form-field {
+    flex: 1 1 10rem;
+  }
+
+  app-button {
+    flex-shrink: 0;
+  }
+}
+
+.survey-list {
+  @include flex-col($space-4);
+  min-width: 0;
+}
+
+.survey-entry__top {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.survey-entry__title-group {
+  flex: 1;
+}
+
+.survey-entry__title-group p {
+  @include text-body;
+  color: $text-muted;
+  margin: 0;
+}
+
+.survey-entry__badges,
+.survey-entry__chips {
+  @include flex-row($space-2);
+  flex-wrap: wrap;
+}
+
+.survey-entry__details {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  color: $text-muted;
+  font-size: $text-small;
+}
+
+.survey-entry__options {
+  @include flex-col($space-2);
+}
+
+.option-chip {
+  @include chip-base;
+  cursor: default;
+  overflow-wrap: anywhere;
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background: $surface-1;
+    }
+  }
+}
+
+.survey-entry__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: $space-3;
+  border-top: 1px solid $glass-border;
+}
+
+.survey-empty {
+  align-items: center;
+  padding: $space-5;
+  text-align: center;
+
+  p {
+    @include text-body;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+
+@media (max-width: $mobile) {
+  .surveys-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading,
+  .subsection-heading,
+  .survey-entry__top,
+  .survey-form__actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .survey-filters {
+    align-items: stretch;
+    flex-direction: column;
+
+    .form-field {
+      flex-basis: auto;
+      width: 100%;
+    }
+
+    app-button {
+      align-self: flex-start;
+    }
+  }
+
+  .priority-label {
+    align-self: flex-start;
+  }
+
+  .survey-entry__details {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

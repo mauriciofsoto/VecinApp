@@ -1,0 +1,27 @@
+@if (multiline()) {
+  <textarea
+    class="input-field input-field--textarea"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [rows]="rows()"
+    [disabled]="disabled()"
+    [required]="required()"
+    [attr.name]="name() || null"
+    [attr.id]="id() || null"
+    (input)="onInput($event)"
+    (keydown)="onKeyDown($event)"
+  ></textarea>
+} @else {
+  <input
+    class="input-field"
+    [type]="type()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [required]="required()"
+    [attr.name]="name() || null"
+    [attr.id]="id() || null"
+    (input)="onInput($event)"
+    (keydown)="onKeyDown($event)"
+  />
+}

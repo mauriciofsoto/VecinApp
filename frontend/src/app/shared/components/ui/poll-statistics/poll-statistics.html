@@ -1,0 +1,40 @@
+<div class="poll-wrapper">
+  @if (question()) {
+    <p class="poll-question">{{ question() }}</p>
+  }
+
+  <ul class="poll-results">
+    @for (option of options(); track option.id) {
+      <li
+        class="poll-option-item"
+        [class.selected]="option.id === myVote()"
+      >
+        <div
+          class="poll-bar"
+          [style.width.%]="option.percentage"
+        ></div>
+
+        <div class="poll-content">
+          <span class="poll-text">
+            {{ option.text }}
+
+            @if (option.id === myVote()) {
+              <span class="text-accent font-semibold">
+                ✓ (Tu voto)
+              </span>
+            }
+          </span>
+
+          <span class="poll-percentage">
+            {{ option.percentage }}%
+          </span>
+        </div>
+      </li>
+    }
+  </ul>
+
+  <p class="poll-total">
+    {{ totalVotes() }}
+    {{ totalVotes() === 1 ? 'voto' : 'votos' }}
+  </p>
+</div>

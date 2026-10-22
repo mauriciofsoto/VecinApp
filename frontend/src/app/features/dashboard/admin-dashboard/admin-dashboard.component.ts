@@ -12,7 +12,6 @@ import { SidebarComponent } from '../../../shared/components/navigation/sidebar/
 
 import { BentoGridComponent, BentoWidget } from '../../../shared/components/layout/bento-grid/bento-grid';
 import { BentoItemDirective } from '../../../shared/components/layout/bento-grid/bento-item.directive';
-import { PollOptionMock } from '../../../shared/components/ui/poll-options/poll-options';
 
 import { MessageInput } from '../../../shared/components/ui/message-input/message-input';
 import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
@@ -55,11 +54,6 @@ export class AdminDashboardComponent implements OnInit {
 
   widgets: BentoWidget[] = DEFAULT_WIDGETS.map((widget) => ({ ...widget }));
 
-  protected readonly mockPollOptions: PollOptionMock[] = [
-    { id: 'opt1', text: 'Viernes 25 - 19:00 hs', percentage: 45 },
-    { id: 'opt2', text: 'Sábado 26 - 11:00 hs', percentage: 35 },
-    { id: 'opt3', text: 'Domingo 27 - 18:00 hs', percentage: 20 },
-  ];
 
   readonly reaccionesMuro: Reaction[] = [
   { emoji: '👍', count: 4, reacted: false },

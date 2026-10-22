@@ -1,0 +1,276 @@
+@use '../../../../../../styles/abstracts' as *;
+
+// ========================================
+// ESTRUCTURA PRINCIPAL DE LA PÁGINA
+// ========================================
+
+.surveys-page {
+  @include flex-col($space-6);
+  width: 100%;
+  min-width: 0;
+}
+
+.surveys-header {
+  @include flex-row($space-4);
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  &__intro {
+    @include flex-col($space-2);
+    min-width: 0;
+  }
+}
+
+.surveys-eyebrow {
+  color: $accent;
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+  letter-spacing: 0.08em;
+}
+
+// ========================================
+// TARJETAS DE RESUMEN
+// ========================================
+
+.surveys-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-4;
+}
+
+.summary-card {
+  @include flex-col($space-2);
+
+  &__label,
+  &__detail {
+    color: $text-muted;
+    font-size: $text-small;
+  }
+
+  strong {
+    @include text-title;
+  }
+}
+
+// ========================================
+// SECCIÓN DE FILTROS Y HISTORIAL
+// ========================================
+
+.survey-history-section,
+.survey-list,
+.survey-entry,
+.survey-empty {
+  @include flex-col($space-4);
+  min-width: 0;
+}
+
+.section-heading,
+.subsection-heading {
+  @include flex-row($space-3);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.history-count {
+  color: $text-muted;
+  font-size: $text-small;
+  flex-shrink: 0;
+}
+
+.survey-filters {
+  @include flex-row($space-3);
+  align-items: flex-end;
+  flex-wrap: wrap;
+
+  .form-field {
+    @include flex-col($space-2);
+    flex: 1 1 10rem;
+    min-width: 0;
+
+    label {
+      font-size: $text-small;
+      font-weight: $font-medium;
+    }
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: $space-3;
+    border: 1px solid $glass-border;
+    border-radius: $radius-sm;
+    background: $surface-1;
+    color: $text-main;
+    font: inherit;
+    transition: $transition-base;
+
+    &:focus {
+      outline: none;
+      border-color: rgba($primary, 0.7);
+      box-shadow: 0 0 0 2px rgba($primary, 0.15);
+    }
+  }
+
+  input {
+    color-scheme: dark;
+  }
+
+  app-button {
+    flex-shrink: 0;
+  }
+}
+
+// ========================================
+// LISTADO DE ENCUESTAS
+// ========================================
+
+.survey-entry {
+  &__top {
+    @include flex-row($space-3);
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__title-group {
+    @include flex-col($space-2);
+    flex: 1;
+
+    p {
+      color: $text-muted;
+    }
+  }
+
+  &__badges,
+  &__chips {
+    @include flex-row($space-2);
+    flex-wrap: wrap;
+  }
+
+  &__details {
+    @include flex-row($space-3);
+    align-items: center;
+    color: $text-muted;
+    font-size: $text-small;
+    flex-wrap: wrap;
+  }
+
+  &__options {
+    @include flex-col($space-2);
+
+    &-label,
+    .survey-entry__date {
+      color: $text-muted;
+      font-size: $text-small;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: $space-3;
+    border-top: 1px solid $glass-border;
+  }
+}
+
+.option-chip {
+  @include chip-base;
+  cursor: default;
+}
+
+.priority-label {
+  @include status-tint($warning, 0.12, 0.35);
+  padding: $space-1 $space-2;
+  border-radius: $radius-full;
+  font-size: $text-tiny;
+  font-weight: $font-semibold;
+}
+
+// ========================================
+// MODAL DE CREACIÓN
+// ========================================
+
+.survey-modal {
+  @include modal-shell;
+
+  .survey-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-5;
+
+    @media (min-width: 900px) {
+      grid-template-columns: 1fr 300px;
+    }
+  }
+
+  .survey-main-fields,
+  .survey-sidebar,
+  .survey-options,
+  .options-list {
+    @include flex-col($space-3);
+  }
+
+  .option-field {
+    @include flex-row($space-2);
+
+    app-input {
+      flex: 1;
+    }
+  }
+
+  .icon-button {
+    @include button-icon-clear(2.5rem);
+    border: 1px solid $glass-border;
+    border-radius: $radius-sm;
+
+    &:hover:not(:disabled) {
+      color: $danger;
+      background: rgba($danger, 0.1);
+    }
+  }
+
+  .survey-settings-content {
+    @include flex-col($space-3);
+  }
+
+  .setting-option {
+    @include flex-row($space-3);
+    align-items: flex-start;
+    padding: $space-3;
+    border: 1px solid $glass-border;
+    border-radius: $radius-sm;
+    background: $surface-2;
+    cursor: pointer;
+
+    &__content {
+      @include flex-col($space-1);
+
+      strong {
+        font-size: $text-small;
+      }
+
+      span {
+        color: $text-muted;
+        font-size: $text-small;
+      }
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+
+@media (max-width: $mobile) {
+  .surveys-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .surveys-header,
+  .section-heading,
+  .survey-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

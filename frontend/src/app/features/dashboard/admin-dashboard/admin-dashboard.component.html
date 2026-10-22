@@ -1,4 +1,3 @@
-
 <div class="app-dashboard-layout">
   <!-- SIDEBAR -->
   <app-sidebar></app-sidebar>
@@ -71,24 +70,20 @@
           </app-card>
         </ng-template>
 
-        <!-- ENCUESTA -->
+        <!-- ENCUESTA (CORREGIDO PARA MEJOR VISUALIZACIÓN) -->
         <ng-template bentoItem="encuesta_activa">
-          <app-card size="full" > 
-            <div class="widget-header">
-               <app-gestionar-encuestas></app-gestionar-encuestas>
-            </div>
+          <app-card size="full"> 
 
-            <!-- ESTADO VACÍO REUTILIZABLE -->
-            <app-empty-state
-              title="No hay encuestas activas"
-              description="Cuando haya una encuesta disponible, aparecerá acá."
-            ></app-empty-state>
+            <!-- COMPONENTE DE GESTIÓN DE ENCUESTAS FUERA DEL HEADER -->
+            <div class="widget-content">
+              <app-gestionar-encuestas></app-gestionar-encuestas>
+            </div>
           </app-card>
         </ng-template>
 
         <!-- INCIDENCIAS -->
         <ng-template bentoItem="incidencias">
-          <app-card size="full" >
+          <app-card size="full">
             <div class="widget-header">
               <div>
                 <h2>Incidencias</h2>

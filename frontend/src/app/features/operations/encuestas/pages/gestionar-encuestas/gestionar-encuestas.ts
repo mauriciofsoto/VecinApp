@@ -1,4 +1,3 @@
-
 import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../../../../shared/components/ui/card/card.component';
 import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
 import { Badge } from '../../../../../shared/components/ui/badge/badge';
-
+import { InputComponent } from '../../../../../shared/components/ui/input/input';
+import { HistorialEncuestas } from '../historial-encuestas/historial-encuestas'; 
 type EstadoEncuesta = 'en-proceso' | 'cerrada';
 
 interface EncuestaAdmin {
@@ -31,13 +31,14 @@ interface EncuestaAdmin {
     FormsModule,
     CardComponent,
     ButtonComponent,
-    Badge,
+    InputComponent,
+    HistorialEncuestas,
   ],
   templateUrl: './gestionar-encuestas.html',
   styleUrl: './gestionar-encuestas.scss',
 })
 export class GestionarEncuestas {
-  // Formulario de creación
+  // Formulario
   titulo = '';
   descripcion = '';
   opciones: string[] = ['', ''];
@@ -119,7 +120,7 @@ export class GestionarEncuestas {
       ).length,
   );
 
-  readonly fechaActual = new Date().toISOString().slice(0, 10);
+  readonly fechaActual = this.obtenerFechaLocal();
 
   agregarOpcion(): void {
     this.opciones = [...this.opciones, ''];
@@ -140,6 +141,7 @@ export class GestionarEncuestas {
 
     const titulo = this.titulo.trim();
     const descripcion = this.descripcion.trim();
+
     const opcionesValidas = this.opciones
       .map((opcion) => opcion.trim())
       .filter(Boolean);
@@ -154,19 +156,13 @@ export class GestionarEncuestas {
       return;
     }
 
-    if (
-      this.votacionActiva &&
-      opcionesValidas.length < 2
-    ) {
+    if (this.votacionActiva && opcionesValidas.length < 2) {
       this.errorFormulario =
         'Agregá al menos dos opciones para habilitar la votación.';
       return;
     }
 
-    if (
-      this.establecerVencimiento &&
-      !this.fechaLimite
-    ) {
+    if (this.establecerVencimiento && !this.fechaLimite) {
       this.errorFormulario =
         'Seleccioná la fecha límite de la encuesta.';
       return;
@@ -232,5 +228,14 @@ export class GestionarEncuestas {
     this.establecerVencimiento = false;
     this.fechaLimite = '';
     this.errorFormulario = '';
+  }
+
+  private obtenerFechaLocal(): string {
+    const fecha = new Date();
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+
+    return `${anio}-${mes}-${dia}`;
   }
 }
