@@ -1,1 +1,66 @@
-<p>crear-incidencia works!</p>
+
+<div class="incidencia-container">
+  <button type="button" class="btn-volver" (click)="volver()">
+    ← Volver a mis incidencias
+  </button>
+
+  <h2>Crear incidencia</h2>
+  <p class="descripcion">Reportá un problema en tu edificio.</p>
+
+  <form (ngSubmit)="crear()" #formIncidencia="ngForm">
+    <div class="campo">
+      <label for="titulo">Título *</label>
+      <input id="titulo"
+             name="titulo"
+             type="text"
+             [(ngModel)]="incidencia.titulo"
+             placeholder="Ej.: Pérdida de agua"
+             required
+             maxlength="150" />
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción *</label>
+      <textarea id="descripcion"
+                name="descripcion"
+                [(ngModel)]="incidencia.descripcion"
+                placeholder="Describí el problema con el mayor detalle posible"
+                rows="5"
+                required></textarea>
+    </div>
+
+    <div class="campo">
+      <label for="categoria">Categoría *</label>
+      <select id="categoria"
+              name="categoria"
+              [(ngModel)]="incidencia.idCategoriaIncidencia"
+              required>
+        <option [ngValue]="0" disabled>Seleccioná una categoría</option>
+        <option *ngFor="let categoria of categorias"
+                [ngValue]="categoria.idCategoriaIncidencia">
+          {{ categoria.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="prioridad">Prioridad *</label>
+      <select id="prioridad"
+              name="prioridad"
+              [(ngModel)]="incidencia.prioridad"
+              required>
+        <option value="Baja">Baja</option>
+        <option value="Media">Media</option>
+        <option value="Alta">Alta</option>
+      </select>
+    </div>
+
+    <p *ngIf="mensaje" class="mensaje-exito">{{ mensaje }}</p>
+    <p *ngIf="error" class="mensaje-error">{{ error }}</p>
+
+    <button type="submit"
+            [disabled]="guardando || formIncidencia.invalid">
+      {{ guardando ? 'Enviando...' : 'Crear incidencia' }}
+    </button>
+  </form>
+</div>

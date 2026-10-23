@@ -1,35 +1,19 @@
+
 <div class="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
-  <!-- Navbar simplificado -->
   <header class="bg-slate-800 border-b border-slate-700 p-4">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      
       <span class="font-bold text-lg">VecinApp</span>
 
-      <!-- Botones de navegación -->
-      <nav class="flex gap-2">
-        <a routerLink="/admin-dashboard" 
-           routerLinkActive="bg-slate-700"
-           class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-sm">
-          Admin
-        </a>
-
-        <a routerLink="/user-dashboard" 
-           routerLinkActive="bg-slate-700"
-           class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-sm">
-          User
-        </a>
-
-        <a routerLink="/porteria-dashboard" 
-           routerLinkActive="bg-slate-700"
-           class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-sm">
-          Porteria
-        </a>
-      </nav>
-
+      <button *ngIf="auth.isAuthenticated()"
+              type="button"
+              (click)="cerrarSesion()"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-600 hover:bg-slate-700 text-sm font-medium transition-colors">
+        <span aria-hidden="true">↪</span>
+        Cerrar sesión
+      </button>
     </div>
   </header>
 
-  <!-- Contenido -->
   <main class="flex-1 p-6 max-w-7xl w-full mx-auto">
     <router-outlet></router-outlet>
   </main>

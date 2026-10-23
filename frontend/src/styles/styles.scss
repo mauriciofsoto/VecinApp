@@ -1,38 +1,44 @@
-<<<<<<< HEAD
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: theme('fontFamily.sans');
-  background-color: #f8fafc;
-}
-=======
-// ========================================
-// STYLES GLOBALES
-// ========================================
 @use './abstracts' as *;
-
-// Base
 @use './base/reset';
 @use './base/typography';
 @use './base/animations';
 
-// 1. Paneles translúcidos
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Estilos globales
+
+html,
+body {
+  min-height: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  background-color: #f8fafc;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+  height: auto;
+  overflow: visible;
+}
+
+
 .glass-panel {
   @include glass-panel-effect;
 }
 
-// 2. Botonera
 .btn-action {
   @include button-visual-glass;
 }
 
-// 3. Elementos específicos
 .nav-link {
   color: $text-muted;
   transition: $transition-base;
@@ -59,4 +65,3 @@ html, body {
   background: $surface-1;
   border: 1px solid $border-subtle;
 }
->>>>>>> 7a6ef32a2dc4a268ab5c6b2b69be25d0c3c3e31b

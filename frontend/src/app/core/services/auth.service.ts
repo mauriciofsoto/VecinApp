@@ -43,6 +43,19 @@ export class AuthService {
     );
   }
 
+  registrar(payload: {
+    nombre: string;
+    apellido: string;
+    email: string;
+    password: string;
+    codigoInvitacion: string;
+  }): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(
+      `${this.API_URL}/registro`,
+      payload
+    );
+  }
+
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem('refresh_token');
     return this.http.post<AuthResponse>(`${this.API_URL}/refresh`, { refreshToken }).pipe(
@@ -78,6 +91,26 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('access_token');
+  }
+  getRole(): string | null {
+    const token = this.getToken();
+
+    if (!token) return null;
+
+    try {
+      const payload = token.split('.')[1];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = JSON.parse(atob(base64));
+
+      return (
+        decoded.role ??
+        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ??
+        decoded.roles ??
+        null
+      );
+    } catch {
+      return null;
+    }
   }
 
   isAuthenticated(): boolean {

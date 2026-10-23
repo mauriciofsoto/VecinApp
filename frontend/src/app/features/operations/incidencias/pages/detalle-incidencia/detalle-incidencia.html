@@ -1,0 +1,106 @@
+<div class="pagina-incidencia">
+
+  <a routerLink="/administrador/incidencias" class="volver">
+    ← Volver a incidencias
+  </a>
+
+  <div *ngIf="cargando" class="mensaje">
+    Cargando incidencia...
+  </div>
+
+  <div *ngIf="error" class="alerta error">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="!cargando && incidencia">
+
+    <header class="encabezado">
+      <div>
+        <p class="subtitulo">
+          Incidencia #{{ incidencia.idIncidencia }}
+        </p>
+        <h1>{{ incidencia.titulo }}</h1>
+        <p class="fecha">
+          Creada el {{ incidencia.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+
+      <span class="estado">
+        {{ incidencia.estado }}
+      </span>
+    </header>
+
+    <div class="contenido">
+
+      <section class="tarjeta">
+        <h2>Descripción de la incidencia</h2>
+
+        <p class="descripcion">
+          {{ incidencia.descripcion }}
+        </p>
+
+        <div class="datos">
+          <div>
+            <span class="etiqueta">Categoría</span>
+            <strong>{{ incidencia.categoria }}</strong>
+          </div>
+
+          <div>
+            <span class="etiqueta">Prioridad</span>
+            <strong>{{ incidencia.prioridad }}</strong>
+          </div>
+
+          <div>
+            <span class="etiqueta">Reportada por</span>
+            <strong>{{ incidencia.reportante }}</strong>
+          </div>
+
+          <div>
+            <span class="etiqueta">Responsable</span>
+            <strong>
+              {{ incidencia.responsable || 'Sin asignar' }}
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="tarjeta gestion">
+        <h2>Gestionar incidencia</h2>
+
+        <p>
+          Seleccioná el estado que corresponda y guardá el cambio.
+        </p>
+
+        <label for="estado">Estado de la incidencia</label>
+
+        <select id="estado"
+                name="estado"
+                [(ngModel)]="estadoSeleccionado"
+                [disabled]="guardando">
+
+          <option *ngFor="let estado of estados"
+                  [ngValue]="estado.idEstadoIncidencia">
+            {{ estado.nombre }}
+          </option>
+        </select>
+
+        <button type="button"
+                (click)="guardarEstado()"
+                [disabled]="guardando || estadoSeleccionado === incidencia.idEstadoIncidencia">
+
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+
+        <p *ngIf="mensaje" class="alerta exito">
+          {{ mensaje }}
+        </p>
+
+        <p *ngIf="error" class="alerta error">
+          {{ error }}
+        </p>
+      </section>
+
+    </div>
+  </ng-container>
+
+</div>

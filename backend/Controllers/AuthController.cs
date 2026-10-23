@@ -30,7 +30,111 @@ public class AuthController : ControllerBase
         _tokenService = tokenService;
     }
 
-   // POST /auth/login
+    // POST /auth/registro
+    [HttpPost("registro")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Registro([FromBody] RegistroRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Nombre) ||
+            string.IsNullOrWhiteSpace(request.Apellido) ||
+            string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.Password) ||
+            string.IsNullOrWhiteSpace(request.CodigoInvitacion))
+        {
+            return BadRequest(new { message = "Todos los campos son obligatorios." });
+        }
+
+        var email = request.Email.Trim();
+        var codigo = request.CodigoInvitacion.Trim().ToUpperInvariant();
+
+        if (await _userManager.FindByEmailAsync(email) != null)
+        {
+            return BadRequest(new { message = "Ya existe una cuenta registrada con ese email." });
+        }
+
+        var invitacion = await _context.CodigosInvitacion
+            .Include(c => c.Rol)
+            .FirstOrDefaultAsync(c => c.Codigo == codigo);
+
+        if (invitacion == null ||
+            !invitacion.Activo ||
+            invitacion.FechaExpiracion <= DateTime.UtcNow ||
+            invitacion.UsosRealizados >= invitacion.UsosMaximos)
+        {
+            return BadRequest(new { message = "El código de invitación es inválido, está vencido o ya no tiene usos disponibles." });
+        }
+
+        var rolNombre = invitacion.Rol?.Nombre;
+
+        if (rolNombre != "Inquilino" &&
+    rolNombre != "Propietario" &&
+    rolNombre != "Administrador")
+        {
+            return BadRequest(new { message = "El código no permite registrar este tipo de usuario." });
+        }
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Reservar un uso del código de forma atómica.
+            var usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos");
+
+            if (usosActualizados != 1)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(new { message = "El código de invitación ya no tiene usos disponibles." });
+            }
+
+            var usuario = new Usuario
+            {
+                UserName = email,
+                Email = email,
+                Nombre = request.Nombre.Trim(),
+                Apellido = request.Apellido.Trim(),
+                IdRol = invitacion.IdRol,
+                IdEdificio = invitacion.IdEdificio,
+                Estado = EstadoUsuario.Activo,
+                FechaRegistro = DateTime.UtcNow
+            };
+
+            var resultado = await _userManager.CreateAsync(usuario, request.Password);
+
+            if (!resultado.Succeeded)
+            {
+                await transaction.RollbackAsync();
+
+                var errores = string.Join(
+                    ", ",
+                    resultado.Errors.Select(e => e.Description));
+
+                return BadRequest(new
+                {
+                    message = $"No se pudo crear la cuenta: {errores}"
+                });
+            }
+
+            await transaction.CommitAsync();
+
+            return Ok(new
+            {
+                message = "Cuenta creada correctamente. Ya podés iniciar sesión."
+            });
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+
+            return StatusCode(500, new
+            {
+                message = "Ocurrió un error al registrar la cuenta."
+            });
+        }
+    }
+
+
+    // POST /auth/login
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {

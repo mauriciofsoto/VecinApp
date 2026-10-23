@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using VecinApp.Data;
 using VecinApp.Models;
 using VecinApp.Services;
-
+using Microsoft.OpenApi;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -72,8 +72,31 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Autenticación mediante token JWT."
+    });
+
+    options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        });
+});
+
+
 
 var app = builder.Build();
 
@@ -81,7 +104,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 
@@ -91,6 +117,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 
 
@@ -118,11 +145,26 @@ using (var scope = app.Services.CreateScope())
     }
 
     // 2. Obtener los roles de la aplicación.
+
     var rolAdministrador = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "Administrador");
 
     var rolInquilino = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "Inquilino");
+
+    var rolSuperAdministrador = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "SuperAdministrador");
+
+    if (rolSuperAdministrador == null)
+    {
+        rolSuperAdministrador = new Rol
+        {
+            Nombre = "SuperAdministrador"
+        };
+
+        context.RolesAplicacion.Add(rolSuperAdministrador);
+        await context.SaveChangesAsync();
+    }
 
     if (rolAdministrador == null || rolInquilino == null)
     {
@@ -230,6 +272,75 @@ using (var scope = app.Services.CreateScope())
                 $"No se pudo actualizar el inquilino: {errores}");
         }
     }
+
+    // 5. Crear o actualizar el SuperAdministrador inicial.
+    const string emailSuperAdmin = "superadmin@vecinapp.com";
+    const string passwordSuperAdmin = "SuperAdmin123";
+
+    var superAdmin = await userManager.FindByEmailAsync(emailSuperAdmin);
+
+    if (superAdmin == null)
+    {
+        superAdmin = new Usuario
+        {
+            UserName = emailSuperAdmin,
+            Email = emailSuperAdmin,
+            EmailConfirmed = true,
+            Nombre = "Super",
+            Apellido = "Administrador",
+            Estado = EstadoUsuario.Activo,
+            FechaRegistro = DateTime.UtcNow,
+            IdRol = rolSuperAdministrador.IdRol,
+            IdEdificio = null
+        };
+
+        var resultado = await userManager.CreateAsync(
+            superAdmin, passwordSuperAdmin);
+
+        if (!resultado.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultado.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo crear el SuperAdministrador: {errores}");
+        }
+    }
+    else
+    {
+        superAdmin.IdRol = rolSuperAdministrador.IdRol;
+        superAdmin.IdEdificio = null;
+        superAdmin.Estado = EstadoUsuario.Activo;
+        superAdmin.EmailConfirmed = true;
+        superAdmin.LockoutEnd = null;
+        superAdmin.AccessFailedCount = 0;
+
+        var resultado = await userManager.UpdateAsync(superAdmin);
+
+        if (!resultado.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultado.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo actualizar el SuperAdministrador: {errores}");
+        }
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(superAdmin);
+
+        var resultadoPassword = await userManager.ResetPasswordAsync(
+            superAdmin, token, passwordSuperAdmin);
+
+        if (!resultadoPassword.Succeeded)
+        {
+            var errores = string.Join(
+                ", ", resultadoPassword.Errors.Select(e => e.Description));
+
+            throw new InvalidOperationException(
+                $"No se pudo restablecer la contraseña del SuperAdministrador: {errores}");
+        }
+    }
+
 }
 
 

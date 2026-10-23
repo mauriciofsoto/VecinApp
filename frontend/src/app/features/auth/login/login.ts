@@ -46,7 +46,18 @@ export class Login {
 
         setTimeout(() => {
           this.showSuccessToast.set(false);
-          this.router.navigate(['/']);
+
+          const rol = this.authService.getRole()?.toLowerCase();
+
+          if (rol?.includes('inquilino')) {
+            this.router.navigate(['/inquilino/incidencias']);
+          } else if (rol?.includes('administrador')) {
+            this.router.navigate(['/administrador/incidencias']);
+          } else {
+            this.authService.logout();
+            this.errorMessage.set('El usuario no tiene un rol válido para ingresar.');
+            this.triggerErrorToast();
+          }
         }, 1500);
       },
       error: (err) => {

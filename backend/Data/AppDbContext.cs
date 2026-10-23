@@ -17,6 +17,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     // Tablas de negocio
     public DbSet<Rol> RolesAplicacion { get; set; }
     public DbSet<Edificio> Edificios { get; set; }
+    public DbSet<CodigoInvitacion> CodigosInvitacion { get; set; }
     //public DbSet<Usuario> Usuarios { get; set; } -- lo maneja Identity
     public DbSet<Unidad> Unidades { get; set; }
     public DbSet<UsuarioUnidad> UsuariosUnidades { get; set; }
@@ -108,11 +109,64 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.Property(e => e.Direccion).HasColumnName("direccion").IsRequired();
             entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
         });
+        // =========================
+        // CODIGO_INVITACION
+        // =========================
+        modelBuilder.Entity<CodigoInvitacion>(entity =>
+        {
+            entity.ToTable("codigo_invitacion");
+
+            entity.HasKey(e => e.IdCodigoInvitacion);
+
+            entity.Property(e => e.IdCodigoInvitacion)
+                .HasColumnName("id_codigo_invitacion");
+
+            entity.Property(e => e.Codigo)
+                .HasColumnName("codigo")
+                .HasMaxLength(30)
+                .IsRequired();
+
+            entity.HasIndex(e => e.Codigo).IsUnique();
+
+            entity.Property(e => e.IdEdificio)
+                .HasColumnName("id_edificio")
+                .IsRequired();
+
+            entity.Property(e => e.IdRol)
+                .HasColumnName("id_rol")
+                .IsRequired();
+
+            entity.Property(e => e.FechaExpiracion)
+                .HasColumnName("fecha_expiracion")
+                .IsRequired();
+
+            entity.Property(e => e.UsosMaximos)
+                .HasColumnName("usos_maximos")
+                .IsRequired();
+
+            entity.Property(e => e.UsosRealizados)
+                .HasColumnName("usos_realizados")
+                .IsRequired();
+
+            entity.Property(e => e.Activo)
+                .HasColumnName("activo")
+                .IsRequired();
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany()
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Rol)
+                .WithMany()
+                .HasForeignKey(e => e.IdRol)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         // =========================
         // USUARIO (Identity + Relaciones)
         // =========================
-      
+
         // =========================
         // UNIDAD
         // =========================

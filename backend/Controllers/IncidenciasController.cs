@@ -24,6 +24,43 @@ public class IncidenciasController : ControllerBase
         _userManager = userManager;
     }
 
+
+    // GET /api/incidencias/categorias
+    [HttpGet("categorias")]
+    [Authorize(Roles = "Inquilino,Propietario")]
+    public async Task<IActionResult> ListarCategorias()
+    {
+        var categorias = await _context.Set<CategoriaIncidencia>()
+            .AsNoTracking()
+            .Select(c => new
+            {
+                idCategoriaIncidencia = c.IdCategoriaIncidencia,
+                nombre = c.Nombre
+            })
+            .ToListAsync();
+
+        return Ok(categorias);
+    }
+
+
+   
+    // GET /api/incidencias/estados
+    [HttpGet("estados")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> ListarEstados()
+    {
+        var estados = await _context.Set<EstadoIncidencia>()
+            .AsNoTracking()
+            .Select(e => new
+            {
+                idEstadoIncidencia = e.IdEstadoIncidencia,
+                nombre = e.Nombre
+            })
+            .ToListAsync();
+
+        return Ok(estados);
+    }
+
     // POST /api/incidencias
     // Propietarios e inquilinos crean incidencias.
     [HttpPost]
@@ -170,6 +207,97 @@ public class IncidenciasController : ControllerBase
             .ToListAsync();
 
         return Ok(incidencias);
+    }
+
+    // GET /api/incidencias/mis-incidencias
+    // El inquilino o propietario ve únicamente las incidencias que reportó.
+    [HttpGet("mis-incidencias")]
+    [Authorize(Roles = "Inquilino,Propietario")]
+    public async Task<IActionResult> ListarMisIncidencias()
+    {
+        var usuario = await _userManager.GetUserAsync(User);
+
+        if (usuario == null)
+            return Unauthorized();
+
+        if (usuario.Estado != EstadoUsuario.Activo)
+            return Forbid();
+
+        var incidencias = await _context.Set<Incidencia>()
+            .AsNoTracking()
+            .Where(i => i.IdUsuarioReportante == usuario.Id)
+            .OrderByDescending(i => i.FechaCreacion)
+            .Select(i => new
+            {
+                i.IdIncidencia,
+                i.Titulo,
+                i.Descripcion,
+                i.Prioridad,
+                i.FechaCreacion,
+                Estado = i.EstadoIncidencia.Nombre,
+                Categoria = i.CategoriaIncidencia.Nombre,
+                Reportante = i.UsuarioReportante.Nombre + " " +
+                             i.UsuarioReportante.Apellido,
+                Responsable = i.UsuarioResponsable == null
+                    ? null
+                    : i.UsuarioResponsable.Nombre + " " +
+                      i.UsuarioResponsable.Apellido
+            })
+            .ToListAsync();
+
+        return Ok(incidencias);
+    }
+
+    // GET /api/incidencias/{id}
+    [HttpGet("{id:int}")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> ObtenerDetalle(int id)
+    {
+        var usuario = await _userManager.GetUserAsync(User);
+
+        if (usuario == null)
+            return Unauthorized();
+
+        if (usuario.Estado != EstadoUsuario.Activo)
+            return Forbid();
+
+        if (!usuario.IdEdificio.HasValue)
+            return BadRequest(new
+            {
+                mensaje = "El administrador no tiene un edificio asignado."
+            });
+
+        var incidencia = await _context.Incidencias
+            .AsNoTracking()
+            .Where(i => i.IdIncidencia == id &&
+                        i.IdEdificio == usuario.IdEdificio.Value)
+            .Select(i => new
+            {
+                i.IdIncidencia,
+                i.Titulo,
+                i.Descripcion,
+                i.Prioridad,
+                i.FechaCreacion,
+                i.IdEstadoIncidencia,
+                Estado = i.EstadoIncidencia.Nombre,
+                i.IdCategoriaIncidencia,
+                Categoria = i.CategoriaIncidencia.Nombre,
+                Reportante = i.UsuarioReportante.Nombre + " " +
+                             i.UsuarioReportante.Apellido,
+                Responsable = i.UsuarioResponsable == null
+                    ? null
+                    : i.UsuarioResponsable.Nombre + " " +
+                      i.UsuarioResponsable.Apellido
+            })
+            .FirstOrDefaultAsync();
+
+        if (incidencia == null)
+            return NotFound(new
+            {
+                mensaje = "No se encontró la incidencia en tu edificio."
+            });
+
+        return Ok(incidencia);
     }
 
     // PUT /api/incidencias/{id}/estado

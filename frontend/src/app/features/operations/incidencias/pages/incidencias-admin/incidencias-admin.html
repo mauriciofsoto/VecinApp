@@ -1,1 +1,160 @@
-<p>incidencias-admin works!</p>
+
+<section class="pagina">
+
+  <header class="encabezado">
+    <div>
+      <h1>Incidencias del edificio</h1>
+      <p>Consultá los reclamos y actualizá su estado.</p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <button type="button"
+              class="boton-invitar"
+              (click)="abrirInvitacion()">
+        <span aria-hidden="true">＋</span> Invitar vecino
+      </button>
+
+      <button type="button"
+              class="boton-secundario"
+              (click)="cargarIncidencias()">
+        Actualizar
+      </button>
+    </div>
+  </header>
+
+
+
+  <p *ngIf="cargando" class="mensaje">Cargando incidencias...</p>
+
+  <div *ngIf="error" class="mensaje error">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="!cargando && !error">
+    <div class="dashboard">
+      <article class="tarjeta">
+        <span>Total de incidencias</span>
+        <strong>{{ incidencias.length }}</strong>
+      </article>
+
+      <article class="tarjeta pendiente">
+        <span>Pendientes</span>
+        <strong>{{ contarPorEstado('PENDIENTE') }}</strong>
+      </article>
+
+      <article class="tarjeta proceso">
+        <span>En proceso</span>
+        <strong>{{ contarPorEstado('EN PROCESO') }}</strong>
+      </article>
+
+      <article class="tarjeta resuelta">
+        <span>Resueltas / cerradas</span>
+        <strong>{{ contarPorEstado('RESUELTA') + contarPorEstado('CERRADA') }}</strong>
+      </article>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Incidencia</th>
+            <th>Categoría</th>
+            <th>Reportante</th>
+            <th>Prioridad</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let incidencia of incidencias">
+            <td>
+              <strong>{{ incidencia.titulo }}</strong>
+              <small>{{ incidencia.descripcion }}</small>
+            </td>
+            <td>{{ incidencia.categoria }}</td>
+            <td>{{ incidencia.reportante }}</td>
+            <td>
+              <span class="prioridad" [ngClass]="incidencia.prioridad.toLowerCase()">
+                {{ incidencia.prioridad }}
+              </span>
+            </td>
+            <td>
+              <span class="estado">{{ incidencia.estado }}</span>
+            </td>
+            <td>{{ incidencia.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <button class="boton-ver" (click)="verDetalle(incidencia)">
+                Ver detalle
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="incidencias.length === 0">
+            <td colspan="7" class="vacio">
+              Todavía no hay incidencias registradas.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <div class="modal-fondo" *ngIf="modalInvitacion" (click)="cerrarInvitacion()">
+    <section class="modal-invitacion"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="titulo-invitacion"
+             (click)="$event.stopPropagation()">
+
+      <button type="button"
+              class="cerrar-modal"
+              aria-label="Cerrar"
+              (click)="cerrarInvitacion()">
+        ×
+      </button>
+
+      <div class="icono-invitacion">＋</div>
+      <h2 id="titulo-invitacion">Invitar a un inquilino</h2>
+      <p class="descripcion-modal">
+        Generá un código para que un vecino pueda registrarse en tu edificio.
+      </p>
+
+      <div class="informacion-invitacion">
+        <span>Rol asignado</span>
+        <strong>Inquilino</strong>
+        <span>Validez del código</span>
+        <strong>7 días · Un solo uso</strong>
+      </div>
+
+      <button type="button"
+              class="boton-generar"
+              (click)="generarInvitacion()"
+              [disabled]="generandoInvitacion">
+        {{ generandoInvitacion ? 'Generando código...' : 'Generar código de invitación' }}
+      </button>
+
+      <div *ngIf="codigoInvitacion" class="codigo-generado">
+        <span>Código para compartir</span>
+        <strong>{{ codigoInvitacion }}</strong>
+        <p>
+          Vence el {{ fechaExpiracionInvitacion | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+        <button type="button"
+                class="boton-copiar"
+                (click)="copiarCodigoInvitacion()">
+          Copiar código
+        </button>
+      </div>
+
+      <p *ngIf="mensajeInvitacion" class="mensaje-exito">
+        {{ mensajeInvitacion }}
+      </p>
+      <p *ngIf="errorInvitacion" class="mensaje-error">
+        {{ errorInvitacion }}
+      </p>
+    </section>
+  </div>
+
+</section>

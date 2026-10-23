@@ -1,0 +1,69 @@
+
+<main class="registro-container">
+  <section class="registro-card">
+    <h1>Crear cuenta</h1>
+    <p>Registrate en VecinApp con tu código de invitación.</p>
+
+    <form (ngSubmit)="onSubmit()" #formulario="ngForm">
+      <label for="nombre">Nombre</label>
+      <input id="nombre"
+             name="nombre"
+             type="text"
+             [(ngModel)]="nombre"
+             required
+             autocomplete="given-name" />
+
+      <label for="apellido">Apellido</label>
+      <input id="apellido"
+             name="apellido"
+             type="text"
+             [(ngModel)]="apellido"
+             required
+             autocomplete="family-name" />
+
+      <label for="email">Email</label>
+      <input id="email"
+             name="email"
+             type="email"
+             [(ngModel)]="email"
+             required
+             email
+             autocomplete="email" />
+
+      <label for="password">Contraseña</label>
+      <input id="password"
+             name="password"
+             type="password"
+             [(ngModel)]="password"
+             required
+             minlength="6"
+             autocomplete="new-password" />
+
+      <label for="codigoInvitacion">Código de invitación</label>
+      <input id="codigoInvitacion"
+             name="codigoInvitacion"
+             type="text"
+             [(ngModel)]="codigoInvitacion"
+             required
+             autocomplete="off" />
+
+      @if (errorMessage()) {
+      <p class="mensaje error">{{ errorMessage() }}</p>
+      }
+
+      @if (successMessage()) {
+      <p class="mensaje exito">{{ successMessage() }}</p>
+      }
+
+      <button type="submit"
+              [disabled]="isLoading || formulario.invalid">
+        {{ isLoading ? 'Creando cuenta...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="login-link">
+      ¿Ya tenés cuenta?
+      <a routerLink="/login">Iniciá sesión</a>
+    </p>
+  </section>
+</main>
