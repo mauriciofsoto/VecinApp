@@ -1,1 +1,301 @@
-<p>incidencias-admin works!</p>
+<section class="incidencias-admin">
+
+  <!-- ENCABEZADO -->
+  <header class="incidencias-admin__header">
+    <div>
+      <span class="incidencias-admin__eyebrow">
+        ADMINISTRACIÓN / REPORTES
+      </span>
+
+      <h1>Incidencias</h1>
+
+      <p>
+        Gestioná y hacé seguimiento de los reportes del edificio.
+      </p>
+    </div>
+  </header>
+
+  <!-- RESUMEN -->
+  <section class="incidencias-admin__resumen">
+
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
+        <span>Total de incidencias</span>
+        <strong>{{ totalIncidencias() }}</strong>
+      </div>
+    </app-card>
+
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
+        <span>Pendientes</span>
+        <strong>{{ pendientes() }}</strong>
+      </div>
+    </app-card>
+
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
+        <span>En proceso</span>
+        <strong>{{ enProceso() }}</strong>
+      </div>
+    </app-card>
+
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
+        <span>Resueltas</span>
+        <strong>{{ resueltas() }}</strong>
+      </div>
+    </app-card>
+
+  </section>
+
+  <!-- FILTROS -->
+  <section class="incidencias-admin__filtros">
+
+    <div class="incidencias-admin__busqueda">
+      <input
+        type="search"
+        placeholder="Buscar por título, ubicación o usuario..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="actualizarBusqueda($event)"
+        aria-label="Buscar incidencias"
+      />
+    </div>
+
+    <div class="incidencias-admin__categoria">
+      <select
+        [ngModel]="categoriaSeleccionada()"
+        (ngModelChange)="actualizarCategoriaFiltro($event)"
+        aria-label="Filtrar por categoría"
+      >
+        <option value="todas">Todas las categorías</option>
+
+        @for (categoria of categorias(); track categoria) {
+          <option [value]="categoria">
+            {{ categoria }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="incidencias-admin__estado">
+      <select
+        [ngModel]="estadoSeleccionado()"
+        (ngModelChange)="actualizarEstadoFiltro($event)"
+        aria-label="Filtrar por estado"
+      >
+        <option value="todos">Todos los estados</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="en-proceso">En proceso</option>
+        <option value="resuelta">Resuelta</option>
+        <option value="rechazada">Rechazada</option>
+      </select>
+    </div>
+
+    <app-button
+      variant="outline"
+      type="button"
+      (click)="limpiarFiltros()"
+    >
+      Limpiar filtros
+    </app-button>
+
+  </section>
+
+  <!-- TABLA -->
+  <section class="incidencias-admin__contenido">
+
+    <div class="incidencias-admin__tabla-wrapper">
+
+      <table class="incidencias-admin__tabla">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Incidencia</th>
+            <th>Categoría</th>
+            <th>Ubicación</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (
+            incidencia of incidenciasFiltradas();
+            track incidencia.id
+          ) {
+            <tr>
+              <td>#{{ incidencia.id }}</td>
+
+              <td>
+                <span class="incidencias-admin__titulo">
+                  {{ incidencia.titulo }}
+                </span>
+              </td>
+
+              <td>
+                {{ incidencia.categoria }}
+              </td>
+
+              <td>
+                {{ incidencia.ubicacion }}
+              </td>
+
+              <td>
+                {{ incidencia.usuarioNombre }}
+              </td>
+
+              <td>
+                {{ incidencia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+
+              <td>
+                <span
+                  class="incidencia-item__estado"
+                  [attr.data-estado]="incidencia.estado"
+                >
+                  {{ obtenerEstado(incidencia.estado) }}
+                </span>
+              </td>
+
+              <td>
+                <app-button
+                  variant="outline"
+                  type="button"
+                  (click)="verIncidencia(incidencia)"
+                >
+                  Ver incidencia
+                </app-button>
+              </td>
+            </tr>
+          }
+
+          @empty {
+            <tr>
+              <td colspan="8">
+                <div class="incidencias-admin__vacio">
+                  <h3>No hay incidencias</h3>
+                  <p>
+                    No se encontraron reportes con los filtros seleccionados.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- DETALLE DE INCIDENCIA -->
+  <app-modal
+    [open]="modalDetalleAbierto()"
+    (openChange)="modalDetalleAbierto.set($event)"
+    heading="Detalle de incidencia"
+    size="lg"
+  >
+
+    @if (incidenciaSeleccionada(); as incidencia) {
+
+      <div class="incidencia-detalle">
+
+        <div class="incidencia-detalle__encabezado">
+          <span class="incidencia-detalle__id">
+            Incidencia #{{ incidencia.id }}
+          </span>
+
+          <span
+            class="incidencia-item__estado"
+            [attr.data-estado]="incidencia.estado"
+          >
+            {{ obtenerEstado(incidencia.estado) }}
+          </span>
+        </div>
+
+        <h2>{{ incidencia.titulo }}</h2>
+
+        <p class="incidencia-detalle__descripcion">
+          {{ incidencia.descripcion }}
+        </p>
+
+        <div class="incidencia-detalle__metadatos">
+
+          <div>
+            <span>Categoría</span>
+            <strong>{{ incidencia.categoria }}</strong>
+          </div>
+
+          <div>
+            <span>Ubicación</span>
+            <strong>{{ incidencia.ubicacion }}</strong>
+          </div>
+
+          <div>
+            <span>Usuario</span>
+            <strong>{{ incidencia.usuarioNombre }}</strong>
+          </div>
+
+          <div>
+            <span>Fecha de creación</span>
+            <strong>
+              {{ incidencia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
+            </strong>
+          </div>
+
+        </div>
+
+        <div class="incidencia-detalle__seguimiento">
+
+          <h3>Actualizar estado</h3>
+
+          <label for="estado-incidencia">
+            Estado de la incidencia
+          </label>
+
+          <select
+            id="estado-incidencia"
+            [ngModel]="estadoNuevo()"
+            (ngModelChange)="cambiarEstado($event)"
+          >
+            <option value="pendiente">Pendiente</option>
+            <option value="en-proceso">En proceso</option>
+            <option value="resuelta">Resuelta</option>
+            <option value="rechazada">Rechazada</option>
+          </select>
+
+        </div>
+
+        <div class="incidencia-detalle__acciones">
+
+          <app-button
+            variant="outline"
+            type="button"
+            (click)="cerrarDetalle()"
+          >
+            Cerrar
+          </app-button>
+
+          <app-button
+            variant="primary"
+            type="button"
+            (click)="guardarEstado()"
+          >
+            Guardar estado
+          </app-button>
+
+        </div>
+
+      </div>
+
+    }
+
+  </app-modal>
+
+</section>

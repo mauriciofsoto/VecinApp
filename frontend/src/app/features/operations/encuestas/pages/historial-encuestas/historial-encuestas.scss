@@ -1,25 +1,20 @@
+//
 @use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/operations/mixins-operations' as ops;
 
 // ========================================
-// ESTRUCTURA PRINCIPAL
+// ESTRUCTURA
 // ========================================
 
 .surveys-page {
-  @include flex-col($space-6);
-  width: 100%;
-  min-width: 0;
+  @include ops.operation-page;
 }
 
 .surveys-header {
-  @include flex-row($space-4);
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  @include ops.operation-header;
 
   &__intro {
-    @include flex-col($space-2);
-    min-width: 0;
-    flex: 1;
+    @include ops.operation-intro;
   }
 }
 
@@ -31,7 +26,7 @@
 }
 
 // ========================================
-// TARJETAS DE RESUMEN
+// RESUMEN
 // ========================================
 
 .surveys-summary {
@@ -46,8 +41,7 @@
 
   &__label,
   &__detail {
-    color: $text-muted;
-    font-size: $text-small;
+    @include ops.operation-muted-text;
   }
 
   strong {
@@ -57,42 +51,35 @@
 }
 
 // ========================================
-// FILTROS E HISTORIAL
+// HISTORIAL
 // ========================================
 
 .survey-history-section,
 .survey-list,
 .survey-entry,
 .survey-empty {
-  @include flex-col($space-4);
-  min-width: 0;
+  @include ops.operation-stack;
 }
 
 .section-heading,
 .subsection-heading {
-  @include flex-row($space-3);
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  min-width: 0;
+  @include ops.operation-header($space-3);
 }
 
 .history-count {
-  color: $text-muted;
-  font-size: $text-small;
+  @include ops.operation-muted-text;
   flex-shrink: 0;
 }
 
+// ========================================
+// FILTROS
+// ========================================
+
 .survey-filters {
-  @include flex-row($space-3);
-  align-items: flex-end;
-  flex-wrap: wrap;
-  min-width: 0;
+  @include ops.operation-filters;
 
   .form-field {
-    @include flex-col($space-2);
-    flex: 1 1 10rem;
-    min-width: 0;
+    @include ops.operation-filter-field;
 
     label {
       font-size: $text-small;
@@ -102,21 +89,9 @@
 
   input,
   select {
+    @include form-input-base;
     width: 100%;
     min-width: 0;
-    padding: $space-3;
-    border: 1px solid $glass-border;
-    border-radius: $radius-sm;
-    background: $surface-1;
-    color: $text-main;
-    font: inherit;
-    transition: $transition-base;
-
-    &:focus {
-      outline: none;
-      border-color: rgba($primary, 0.7);
-      box-shadow: 0 0 0 2px rgba($primary, 0.15);
-    }
   }
 
   input {
@@ -129,16 +104,12 @@
 }
 
 // ========================================
-// LISTADO DE ENCUESTAS
+// ENCUESTAS
 // ========================================
 
 .survey-entry {
   &__top {
-    @include flex-row($space-3);
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    min-width: 0;
+    @include ops.operation-header($space-3);
   }
 
   &__title-group {
@@ -161,27 +132,28 @@
   &__details {
     @include flex-row($space-3);
     align-items: center;
+    flex-wrap: wrap;
     color: $text-muted;
     font-size: $text-small;
-    flex-wrap: wrap;
   }
 
   &__options {
     @include flex-col($space-2);
     min-width: 0;
 
-    &-label,
-    .survey-entry__date {
-      color: $text-muted;
-      font-size: $text-small;
+    &-label {
+      @include ops.operation-muted-text;
     }
   }
 
+  &__date {
+    @include ops.operation-muted-text;
+    flex-shrink: 0;
+  }
+
   &__actions {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: $space-3;
-    border-top: 1px solid $glass-border;
+    @include ops.operation-actions-divider;
+    @include ops.operation-actions;
   }
 }
 
@@ -199,83 +171,6 @@
 }
 
 // ========================================
-// MODAL DE CREACIÓN
-// ========================================
-
-.survey-modal {
-  @include modal-shell;
-
-  .survey-form {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: $space-5;
-    min-width: 0;
-
-    @media (min-width: 900px) {
-      grid-template-columns: minmax(0, 1fr) 300px;
-    }
-  }
-
-  .survey-main-fields,
-  .survey-sidebar,
-  .survey-options,
-  .options-list {
-    @include flex-col($space-3);
-    min-width: 0;
-  }
-
-  .option-field {
-    @include flex-row($space-2);
-    min-width: 0;
-
-    app-input {
-      flex: 1;
-      min-width: 0;
-    }
-  }
-
-  .icon-button {
-    @include button-icon-clear(2.5rem);
-    flex-shrink: 0;
-    border: 1px solid $glass-border;
-    border-radius: $radius-sm;
-
-    &:hover:not(:disabled) {
-      color: $danger;
-      background: rgba($danger, 0.1);
-    }
-  }
-
-  .survey-settings-content {
-    @include flex-col($space-3);
-  }
-
-  .setting-option {
-    @include flex-row($space-3);
-    align-items: flex-start;
-    padding: $space-3;
-    border: 1px solid $glass-border;
-    border-radius: $radius-sm;
-    background: $surface-2;
-    cursor: pointer;
-
-    &__content {
-      @include flex-col($space-1);
-      min-width: 0;
-
-      strong {
-        font-size: $text-small;
-      }
-
-      span {
-        color: $text-muted;
-        font-size: $text-small;
-      }
-    }
-  }
-}
-
-// ========================================
 // RESPONSIVE
 // ========================================
 
@@ -287,7 +182,8 @@
   .surveys-header,
   .section-heading,
   .subsection-heading,
-  .survey-filters {
+  .survey-filters,
+  .survey-entry__top {
     flex-direction: column;
     align-items: stretch;
   }
@@ -299,14 +195,7 @@
     }
   }
 
-  .survey-entry {
-    &__top {
-      flex-direction: column;
-    }
-
-    &__actions {
-      justify-content: flex-start;
-      flex-wrap: wrap;
-    }
+  .survey-entry__actions {
+    justify-content: flex-start;
   }
 }

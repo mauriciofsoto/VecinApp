@@ -1,0 +1,57 @@
+//poll-card
+@use '../../../../../../styles/abstracts' as *;
+
+.poll-card {
+  @include flex-col($space-4);
+  width: 100%;
+  min-width: 0;
+  padding: $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-lg;
+  background: $surface-1;
+
+  &__header {
+    @include flex-row($space-3);
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__content {
+    @include flex-col($space-2);
+    min-width: 0;
+  }
+
+  &__title {
+    @include text-title;
+    overflow-wrap: anywhere;
+  }
+
+  &__description {
+    color: $text-muted;
+    line-height: 1.6;
+  }
+
+  &__footer {
+    @include flex-row($space-3);
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-top: $space-3;
+    border-top: 1px solid $glass-border;
+    color: $text-muted;
+    font-size: $text-small;
+  }
+
+  &__badge {
+    font-size: $text-caption;
+    font-weight: $font-semibold;
+  }
+
+  &__priority {
+    @include status-tint($success, 0.12, 0.35);
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    font-size: $text-small;
+    font-weight: $font-semibold;
+  }
+}

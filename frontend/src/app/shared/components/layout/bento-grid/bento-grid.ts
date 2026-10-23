@@ -28,8 +28,8 @@ export interface BentoWidget {
   id: string;
   title: string;
   variant: 'glass' | 'solid';
-  cols: 1 | 2 | 3 | 4;
-  rows?: number;
+  cols: 1 | 2 | 3 | 4 | 5 | 6 ;
+  rows?: 1 | 2 | 3 | 4 | 5 | 6 ;
   visible?: boolean;
 }
 
@@ -69,9 +69,10 @@ interface GridMetrics {
 export class BentoGridComponent implements AfterContentInit, OnDestroy {
   // API pública
   readonly widgets = input<BentoWidget[]>([]);
+  readonly editable = input(false);
   readonly layoutChange = output<BentoWidget[]>();
 
-  // Configuración interna de los controles de resize
+  // Controles de redimensionamiento
   readonly resizeHandles: ResizeHandle[] = [
     { direction: 'top', className: 'resize-handle--top' },
     { direction: 'right', className: 'resize-handle--right' },
@@ -153,11 +154,15 @@ export class BentoGridComponent implements AfterContentInit, OnDestroy {
 
   // Drag & drop
   onDrop(event: CdkDragDrop<BentoWidget[]>): void {
-    if (event.previousIndex === event.currentIndex) {
+    if (
+      !this.editable() ||
+      event.previousIndex === event.currentIndex
+    ) {
       return;
     }
 
     const updatedWidgets = [...this.currentWidgets()];
+
     const visibleWidgets = updatedWidgets.filter(
       (widget) => widget.visible !== false,
     );
@@ -179,12 +184,16 @@ export class BentoGridComponent implements AfterContentInit, OnDestroy {
     this.updateLayout(reorderedWidgets);
   }
 
-  // Inicio del resize
+  // Inicio del redimensionamiento
   initResize(
     widget: BentoWidget,
     event: PointerEvent,
     direction: ResizeDirection,
   ): void {
+    if (!this.editable()) {
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -240,7 +249,12 @@ export class BentoGridComponent implements AfterContentInit, OnDestroy {
     const direction = this.resizeDirection;
     const grid = this.resizeGrid;
 
-    if (!widgetId || !direction || !grid) {
+    if (
+      !this.editable() ||
+      !widgetId ||
+      !direction ||
+      !grid
+    ) {
       return;
     }
 
@@ -258,22 +272,24 @@ export class BentoGridComponent implements AfterContentInit, OnDestroy {
       : deltaY;
 
     const cols = this.changesWidth(direction)
-  ? this.clamp(
-      this.startCols +
-        Math.trunc(horizontalDelta / metrics.columnStep),
-      1,
-      Math.min(4, metrics.columns),
-    ) as BentoWidget['cols']
-  : this.startCols;
+      ? (
+          this.clamp(
+            this.startCols +
+              Math.trunc(horizontalDelta / metrics.columnStep),
+            1,
+            Math.min(4, metrics.columns),
+          ) as BentoWidget['cols']
+        )
+      : this.startCols;
 
-const rows = this.changesHeight(direction)
-  ? this.clamp(
-      this.startRows +
-        Math.trunc(verticalDelta / metrics.rowStep),
-      1,
-      3,
-    )
-  : this.startRows;
+    const rows = this.changesHeight(direction)
+      ? this.clamp(
+          this.startRows +
+            Math.trunc(verticalDelta / metrics.rowStep),
+          1,
+          3,
+        )
+      : this.startRows;
 
     const currentWidget = this.currentWidgets().find(
       (item) => item.id === widgetId,
@@ -281,8 +297,10 @@ const rows = this.changesHeight(direction)
 
     if (
       !currentWidget ||
-      (currentWidget.cols === cols &&
-        (currentWidget.rows ?? 1) === rows)
+      (
+        currentWidget.cols === cols &&
+        (currentWidget.rows ?? 1) === rows
+      )
     ) {
       return;
     }
@@ -307,11 +325,11 @@ const rows = this.changesHeight(direction)
     const columnGap = parseFloat(styles.columnGap) || 0;
     const rowGap = parseFloat(styles.rowGap) || 0;
 
-    // grid-auto-rows usa minmax(180px, auto).
-    // El tamaño mínimo de referencia es de 180px.
+    // Altura mínima de referencia de las filas.
     const rowHeight = parseFloat(styles.gridAutoRows) || 180;
 
     const safeColumns = Math.max(columns, 1);
+
     const availableWidth =
       grid.clientWidth - columnGap * (safeColumns - 1);
 
@@ -324,7 +342,7 @@ const rows = this.changesHeight(direction)
     };
   }
 
-  // Dirección de resize
+  // Dirección del redimensionamiento
   private changesWidth(direction: ResizeDirection): boolean {
     return [
       'right',
@@ -348,23 +366,36 @@ const rows = this.changesHeight(direction)
   }
 
   private invertsHorizontal(direction: ResizeDirection): boolean {
-    return ['left', 'top-left', 'bottom-left'].includes(direction);
+    return [
+      'left',
+      'top-left',
+      'bottom-left',
+    ].includes(direction);
   }
 
   private invertsVertical(direction: ResizeDirection): boolean {
-    return ['top', 'top-left', 'top-right'].includes(direction);
+    return [
+      'top',
+      'top-left',
+      'top-right',
+    ].includes(direction);
   }
 
-  private clamp(value: number, min: number, max: number): number {
+  private clamp(
+    value: number,
+    min: number,
+    max: number,
+  ): number {
     return Math.max(min, Math.min(max, value));
   }
 
-  // Actualización del layout y limpieza
+  // Actualización del layout
   private updateLayout(widgets: BentoWidget[]): void {
     this.currentWidgets.set(widgets);
     this.layoutChange.emit(widgets);
   }
 
+  // Limpieza del redimensionamiento
   private stopResize(): void {
     this.removePointerListeners?.();
     this.removePointerListeners = null;

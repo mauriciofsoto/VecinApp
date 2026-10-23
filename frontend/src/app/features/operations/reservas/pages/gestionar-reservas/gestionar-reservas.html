@@ -1,1 +1,110 @@
-<p>gestionar-reservas works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <h1>Gestión de reservas</h1>
+    <p>Administrá las reservas de espacios comunes.</p>
+  </header>
+
+  <section class="panel">
+    <h2>Crear reserva</h2>
+
+    <form (ngSubmit)="crear()" class="form-grid">
+      <label>
+        Título
+        <input name="titulo" [(ngModel)]="titulo" required />
+      </label>
+
+      <label>
+        Lugar o espacio
+        <input name="lugar" [(ngModel)]="lugar" required />
+      </label>
+
+      <label>
+        Fecha y hora
+        <input
+          type="datetime-local"
+          name="fecha"
+          [(ngModel)]="fecha"
+          required
+        />
+      </label>
+
+      <label>
+        Residente
+        <input name="usuarioNombre" [(ngModel)]="usuarioNombre" required />
+      </label>
+
+      <label>
+        ID del residente
+        <input
+          type="number"
+          name="usuarioId"
+          [(ngModel)]="usuarioId"
+          min="1"
+          required
+        />
+      </label>
+
+      <label>
+        ID del edificio
+        <input
+          type="number"
+          name="edificioId"
+          [(ngModel)]="edificioId"
+          min="1"
+          required
+        />
+      </label>
+
+      <label class="full-width">
+        Descripción
+        <textarea
+          name="descripcion"
+          [(ngModel)]="descripcion"
+          required
+          rows="3"
+        ></textarea>
+      </label>
+
+      <button type="submit">Crear reserva</button>
+    </form>
+
+    <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
+  </section>
+
+  <section class="panel">
+    <h2>Historial de reservas</h2>
+
+    <div class="item-list">
+      @for (reserva of servicio.reservas(); track reserva.id) {
+        <article class="item-card">
+          <div>
+            <h3>{{ reserva.titulo }}</h3>
+            <p>Lugar: {{ reserva.lugar }}</p>
+            <p>{{ reserva.descripcion }}</p>
+            <p>Residente: {{ reserva.usuarioNombre }}</p>
+            <p>Fecha: {{ reserva.fecha | date:'short' }}</p>
+            <p>Creada: {{ reserva.fechaCreacion | date:'short' }}</p>
+            <span class="status">{{ reserva.estado }}</span>
+          </div>
+
+          @if (reserva.estado === 'pendiente') {
+            <div class="actions">
+              <button type="button" (click)="cambiarEstado(reserva.id, 'confirmada')">
+                Confirmar
+              </button>
+              <button
+                type="button"
+                class="secondary"
+                (click)="cambiarEstado(reserva.id, 'cancelada')"
+              >
+                Cancelar
+              </button>
+            </div>
+          }
+        </article>
+      } @empty {
+        <p>Todavía no hay reservas registradas.</p>
+      }
+    </div>
+  </section>
+</main>

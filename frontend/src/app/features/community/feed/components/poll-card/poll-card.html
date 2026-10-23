@@ -1,1 +1,55 @@
-<p>poll-card works!</p>
+
+<section class="poll-card">
+  <header class="poll-card__header">
+    <span class="poll-card__badge">
+      Encuesta
+    </span>
+
+    @if (encuesta().prioritaria) {
+      <span class="poll-card__priority">
+        Prioritaria
+      </span>
+    }
+  </header>
+
+  <div class="poll-card__content">
+    <h3 class="poll-card__title">
+      {{ encuesta().titulo }}
+    </h3>
+
+    @if (encuesta().descripcion) {
+      <p class="poll-card__description">
+        {{ encuesta().descripcion }}
+      </p>
+    }
+  </div>
+
+  @if (yaVoto() || encuesta().estado === 'cerrada') {
+    <app-poll-statistics
+      [question]="encuesta().titulo"
+      [options]="opciones()"
+      [myVote]="miVoto()"
+      [totalVotes]="encuesta().totalVotos"
+    />
+  } @else {
+    <app-poll-voting
+      [question]="encuesta().titulo"
+      [options]="opciones()"
+      [disabled]="!encuesta().votacionActiva"
+      (vote)="registrarVoto($event)"
+    />
+  }
+
+  <footer class="poll-card__footer">
+    <span>
+      {{ encuesta().totalVotos }}
+      {{ encuesta().totalVotos === 1 ? 'voto' : 'votos' }}
+    </span>
+
+    @if (encuesta().fechaLimite) {
+      <span>
+        Vence: {{ encuesta().fechaLimite | date:'dd/MM/yyyy' }}
+      </span>
+    }
+  </footer>
+</section>

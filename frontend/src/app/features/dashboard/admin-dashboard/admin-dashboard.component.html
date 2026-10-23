@@ -1,105 +1,90 @@
 <div class="app-dashboard-layout">
+
   <!-- SIDEBAR -->
   <app-sidebar></app-sidebar>
 
   <!-- CONTENIDO PRINCIPAL -->
-  <main class="app-main-content space-y-6">
+  <main class="app-main-content">
 
     <!-- HEADER -->
     <header class="admin-header">
-      <div class="admin-header__title">
-        <h1>Panel de Administración</h1>
-        <p>Gestioná las actividades de tu comunidad.</p>
+      <div class="admin-header__heading">
+        <h1>Panel de administración</h1>
+        <p>
+          Gestioná las actividades y los servicios de tu comunidad.
+        </p>
       </div>
 
-      <app-search-bar
-        placeholder="Buscar..."
-        (search)="onBuscar($event)"
-      ></app-search-bar>
     </header>
 
-    <!-- WIDGETS DEL DASHBOARD -->
-    <section class="admin-widgets">
+    <!-- BIENVENIDA Y ACCIONES -->
+    <section class="admin-welcome">
+      <div class="admin-welcome__actions">
+        <app-button
+          variant="secondary"
+          (buttonClick)="resetLayout()"
+        >
+          Restablecer diseño
+        </app-button>
+
+        <app-button
+          variant="primary"
+          (buttonClick)="toggleLayoutEditing()"
+        >
+          {{ isLayoutEditable() ? 'Finalizar edición' : 'Personalizar diseño' }}
+        </app-button>
+      </div>
+    </section>
+
+    @if (isLayoutEditable()) {
+      <div class="admin-edit-notice">
+        <span aria-hidden="true">✦</span>
+        <p>
+          Modo de personalización activo. Podés mover y redimensionar
+          los widgets.
+        </p>
+      </div>
+    }
+
+    <!-- ÁREA BENTO -->
+    <section class="admin-workspace">
+
       <app-bento-grid
         [widgets]="widgets"
+        [editable]="isLayoutEditable()"
         (layoutChange)="onLayoutChange($event)"
       >
-
-        <!-- MURO DE LA COMUNIDAD -->
+        <!-- MURO -->
         <ng-template bentoItem="muro">
           <app-card size="full">
             <div class="widget-header">
-              <div>
-                <h2>Muro de la comunidad</h2>
-                <p>Compartí novedades con los vecinos.</p>
-              </div>
-            </div>
-
-            <!-- PUBLICACIÓN DE PRUEBA -->
-            <article class="community-post">
-              <div class="community-post__header">
-                <div class="message-demo__avatar">AD</div>
-
+              <div class="widget-heading">
+                <span class="widget-icon widget-icon--community">💬</span>
                 <div>
-                  <h3>Administración</h3>
-                  <p>Publicación de prueba</p>
+                  <h3>Muro de la comunidad</h3>
+                  <p>Publicaciones y avisos del edificio.</p>
                 </div>
               </div>
+            </div>
 
-              <div class="community-post__content">
-                <p>
-                  ¡Hola, vecinos! Les recordamos que mañana
-                  se realizarán tareas de mantenimiento en los
-                  espacios comunes.
-                </p>
+            <app-feed-principal></app-feed-principal>
+          </app-card>
+        </ng-template>
+
+        <!-- ENCUESTAS -->
+        <ng-template bentoItem="encuestas">
+          <app-card size="full">
+            <div class="widget-header">
+              <div class="widget-heading">
+                <span class="widget-icon widget-icon--surveys">📊</span>
+                <div>
+                  <h3>Encuestas</h3>
+                  <p>Creá encuestas y consultá sus resultados.</p>
+                </div>
               </div>
-
-              <!-- BARRA DE REACCIONES -->
-              <app-reaction-bar
-                [reactions]="reaccionesMuro"
-                (toggled)="onReaccionMuro($event)"
-              ></app-reaction-bar>
-            </article>
-
-            
-
-            <!-- NUEVO COMENTARIO -->
-            <app-comment-input
-              placeholder="Escribir un comentario..."
-              userInitials="AD"
-              (submitComment)="onNuevoComentario($event, 'muro')"
-            ></app-comment-input>
-          </app-card>
-        </ng-template>
-
-         <ng-template bentoItem="">
-          <app-card size="full"> 
-
-            <!-- COMPONENTE DE GESTIÓN DE ENCUESTAS FUERA DEL HEADER -->
-            <div class="widget-content">
-              <app-gestionar-encuestas></app-gestionar-encuestas>
             </div>
-          </app-card>
-        </ng-template>
 
-
-
-         <!-- ENCUESTA (CORREGIDO PARA MEJOR VISUALIZACIÓN) -->
-        <ng-template bentoItem="encuesta_activa">
-          <app-card size="full"> 
-
-            <!-- COMPONENTE DE GESTIÓN DE ENCUESTAS FUERA DEL HEADER -->
-            <div class="widget-content">
-
-
-
-
-             <app-responder-encuesta></app-responder-encuesta>
-           
-           
-           
-           
-            </div>
+            <app-gestionar-encuestas></app-gestionar-encuestas>
           </app-card>
         </ng-template>
 
@@ -107,106 +92,46 @@
         <ng-template bentoItem="incidencias">
           <app-card size="full">
             <div class="widget-header">
-              <div>
-                <h2>Incidencias</h2>
-                <p>Seguimiento de reportes del edificio.</p>
+              <div class="widget-heading">
+                <span class="widget-icon widget-icon--incidents">🚨</span>
+                <div>
+                  <h3>Incidencias</h3>
+                  <p>Seguimiento de problemas reportados.</p>
+                </div>
               </div>
+            </div>
 
-              <app-badge>5 pendientes</app-badge>
+            <app-incidencias-admin></app-incidencias-admin>
+          </app-card>
+        </ng-template>
+
+        <!-- PAQUETERÍA -->
+        <ng-template bentoItem="paquetes">
+          <app-card size="full">
+            <div class="widget-header">
+              <div class="widget-heading">
+                <span class="widget-icon widget-icon--packages">📦</span>
+                <div>
+                  <h3>Paquetería</h3>
+                  <p>Control de paquetes recibidos y entregados.</p>
+                </div>
+              </div>
             </div>
 
             <app-empty-state
-              title="Seguimiento de incidencias"
-              description="Acá se mostrarán las incidencias registradas."
+              title="Paquetería"
+              description="La gestión de paquetes se integrará en este espacio."
             ></app-empty-state>
           </app-card>
         </ng-template>
-
-        <!-- PAQUETES -->
-        <ng-template bentoItem="paquetes">
-          <app-card>
-            <div class="widget-header">
-              <div>
-                <h2>Paquetes</h2>
-                <p>Comunicaciones sobre entregas recibidas.</p>
-              </div>
-            </div>
-
-            <!-- EJEMPLO VISUAL DEL MESSAGE INPUT -->
-            <div class="message-demo">
-              <div class="message-demo__heading">
-                <span class="message-demo__avatar">AD</span>
-
-                <div>
-                  <h3>Notificar a un vecino</h3>
-                  <p>
-                    Probá las respuestas rápidas o escribí un mensaje.
-                  </p>
-                </div>
-              </div>
-
-              <app-message-input
-                [quickReplies]="[
-                  'Llegó tu paquete',
-                  'Pasá por portería',
-                  'Paquete retirado'
-                ]"
-                placeholder="Escribí un mensaje..."
-                (send)="onEnviarMensaje($event)"
-              ></app-message-input>
-            </div>
-          </app-card>
-        </ng-template>
-
       </app-bento-grid>
     </section>
+
+    <!-- FOOTER -->
+    <footer class="admin-footer">
+      <span>© {{ currentYear }} VecinApp</span>
+      <span>Panel de administración</span>
+    </footer>
+
   </main>
 </div>
-
-<!-- MODAL: ASIGNAR QR -->
-<app-modal [(open)]="showQr">
-  <div class="modal-content">
-    <h2>Asignar código QR</h2>
-    <p>Acá irá el formulario para generar o asignar un QR.</p>
-
-    <div class="modal-actions">
-      <app-button
-        variant="secondary"
-        (buttonClick)="closeQr()"
-      >
-        Cancelar
-      </app-button>
-
-      <app-button
-        variant="primary"
-        (buttonClick)="guardarQr()"
-      >
-        Guardar
-      </app-button>
-    </div>
-  </div>
-</app-modal>
-
-<!-- MODAL: NUEVA INCIDENCIA -->
-<app-modal [(open)]="showNuevaIncidencia">
-  <div class="modal-content">
-    <h2>Nueva incidencia</h2>
-    <p>Acá irá el formulario para registrar una incidencia.</p>
-
-    <div class="modal-actions">
-      <app-button
-        variant="secondary"
-        (buttonClick)="showNuevaIncidencia.set(false)"
-      >
-        Cancelar
-      </app-button>
-
-      <app-button
-        variant="primary"
-        (buttonClick)="crearIncidencia()"
-      >
-        Crear incidencia
-      </app-button>
-    </div>
-  </div>
-</app-modal>

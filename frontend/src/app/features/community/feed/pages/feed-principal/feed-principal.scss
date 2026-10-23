@@ -1,0 +1,139 @@
+//feed
+@use '../../../../../../styles/abstracts/variables.scss' as *;
+
+.feed {
+
+  &__create-trigger {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    width: 100%;
+    margin-bottom: $space-4;
+    padding: $space-3;
+    border: 1px solid $glass-border;
+    border-radius: $radius-md;
+    background: $surface-1;
+    color: $text-main;
+    text-align: left;
+    cursor: pointer;
+    transition: $transition-base;
+
+    &:hover {
+      background: $surface-2;
+      border-color: rgba($primary, 0.5);
+    }
+  }
+  &__timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+  min-width: 0;
+  }
+
+  &__create-avatar {
+    display: grid;
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: $radius-circle;
+    background: $avatar-gradient;
+    color: $white;
+    font-weight: $font-semibold;
+  }
+
+  &__create-placeholder {
+    flex: 1;
+    min-width: 0;
+    color: $text-muted;
+    font-size: $text-small;
+  }
+
+  &__modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    overflow-y: auto;
+    padding: $space-3 ;
+    background: rgba(2, 6, 23, 0.75);
+    backdrop-filter: blur(8px);
+  }
+
+  &__modal {
+    width: min(100%, 38rem);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    padding: $space-5;
+    border: 1px solid $glass-border;
+    border-radius: $radius-md;
+    background: $bg-dark;
+    box-shadow: $shadow-xl;
+  }
+
+  &__modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3;
+    margin-bottom: $space-4;
+
+    h3 {
+      margin: 0;
+      color: $text-main;
+      font-size: $text-heading;
+    }
+  }
+
+  &__modal-close {
+    display: grid;
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid $glass-border;
+    border-radius: $radius-circle;
+    background: $surface-2;
+    color: $text-main;
+    font-size: 1.5rem;
+    cursor: pointer;
+
+    &:hover {
+      background: $surface-3;
+    }
+  }
+
+  &__scroll-container {
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+  }
+}
+
+.feed__header {
+  padding: $space-3;
+  margin-bottom: $space-4;
+
+  h2 {
+    margin: 0;
+  }
+
+  p {
+    margin: $space-1 0 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .feed {
+    &__modal-backdrop {
+      padding: $space-2;
+    }
+
+    &__modal {
+      padding: $space-4;
+      max-height: calc(100dvh - 1rem);
+    }
+  }
+}

@@ -1,1 +1,101 @@
-<p>crear-incidencia works!</p>
+<div class="incidencia-form-page">
+
+  <header class="incidencia-form-header">
+    <span class="incidencia-eyebrow">COMUNIDAD / REPORTES</span>
+    <h1>Reportar una incidencia</h1>
+    <p>
+      Informá un problema del edificio o de los espacios comunes
+      para que administración pueda darle seguimiento.
+    </p>
+  </header>
+
+  <app-card size="full" variant="glass" align="left">
+    <form class="incidencia-form" (ngSubmit)="publicarIncidencia()">
+      <div class="incidencia-form__intro">
+        <h2>Detalles del reporte</h2>
+      </div>
+
+      <div class="form-field">
+        <label for="titulo">Título *</label>
+        <input
+          id="titulo"
+          name="titulo"
+          type="text"
+          placeholder="Ej. Pérdida de agua en el pasillo"
+          [ngModel]="titulo()"
+          (ngModelChange)="titulo.set($event)"
+          maxlength="100"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="descripcion">Descripción *</label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          placeholder="Describí el problema y cualquier detalle relevante..."
+          [ngModel]="descripcion()"
+          (ngModelChange)="descripcion.set($event)"
+          rows="5"
+          maxlength="1000"
+          required
+        ></textarea>
+      </div>
+
+      <div class="incidencia-form__grid">
+        <div class="form-field">
+          <label for="categoria">Categoría *</label>
+         
+          <select
+            id="categoria"
+            name="categoria"
+            [ngModel]="categoria()"
+            (ngModelChange)="categoria.set($event)"
+            required
+          >
+            <option value="" disabled>Seleccioná una categoría</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="ubicacion">Ubicación *</label>
+          <input
+            id="ubicacion"
+            name="ubicacion"
+            type="text"
+            placeholder="Ej. Piso 3, pasillo"
+            [ngModel]="ubicacion()"
+            (ngModelChange)="ubicacion.set($event)"
+            maxlength="150"
+            required
+          />
+        </div>
+      </div>
+
+
+      @if (error()) {
+        <p class="form-feedback form-feedback--error" role="alert">
+          {{ error() }}
+        </p>
+      }
+
+      @if (mensaje()) {
+        <p class="form-feedback form-feedback--success" role="status">
+          {{ mensaje() }}
+        </p>
+      }
+
+      <div class="incidencia-form__actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          size="lg"
+        >
+          Enviar reporte
+        </app-button>
+      </div>
+    </form>
+  </app-card>
+</div>

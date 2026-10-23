@@ -1,0 +1,239 @@
+//historial-incidencias
+@use '../../../../../../styles/abstracts' as *;
+
+.historial-incidencias {
+  @include flex-col($space-5);
+
+  width: 100%;
+  min-width: 0;
+
+  &__header {
+    @include flex-row($space-4);
+
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__eyebrow {
+    color: $accent;
+    font-size: $text-caption;
+    font-weight: $font-semibold;
+    letter-spacing: 0.1em;
+  }
+
+  h1 {
+    @include text-title;
+
+    color: $text-main;
+    margin: $space-2 0;
+  }
+
+  &__header p,
+  &__list-header p {
+    @include text-body;
+
+    color: $text-muted;
+    margin: 0;
+  }
+
+  &__resumen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $space-3;
+    width: 100%;
+
+    app-card {
+      display: block;
+      min-width: 0;
+      width: 100%;
+    }
+  }
+
+  &__contenido {
+    @include flex-col($space-4);
+
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__list-header h2 {
+    @include text-heading;
+
+    color: $text-main;
+    margin: 0 0 $space-1;
+  }
+
+  &__filtros {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 220px);
+    gap: $space-3;
+  }
+
+  &__busqueda,
+  &__estado {
+    min-width: 0;
+
+    input,
+    select {
+      @include form-input-base;
+
+      box-sizing: border-box;
+      width: 100%;
+      min-width: 0;
+      min-height: 44px;
+      color: $text-main;
+    }
+
+    select option {
+      background: $bg-dark;
+      color: $text-main;
+    }
+  }
+
+  &__lista {
+    @include flex-col($space-3);
+
+    min-width: 0;
+  }
+
+  &__vacio {
+    @include flex-col($space-2);
+
+    align-items: center;
+    text-align: center;
+    padding: $space-6;
+
+    h3 {
+      @include text-heading;
+
+      color: $text-main;
+      margin: 0;
+    }
+
+    p {
+      @include text-body;
+
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+}
+
+/* Estadísticas */
+.incidencia-stat {
+  @include flex-col($space-2);
+
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+
+  span {
+    color: $text-muted;
+    font-size: $text-small;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+
+  strong {
+    color: $text-main;
+    font-size: clamp(1.5rem, 3vw, 1.75rem);
+    font-weight: $font-semibold;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
+/* Tarjetas de incidencias */
+.incidencia-item {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-md;
+
+  &__contenido {
+    @include flex-col($space-3);
+  }
+
+  &__titulo {
+    @include flex-row($space-3);
+
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    h3 {
+      @include text-heading;
+
+      color: $text-main;
+      margin: 0;
+    }
+  }
+
+  &__descripcion {
+    @include text-body;
+
+    color: $text-muted;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__metadatos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-2 $space-4;
+    color: $text-muted;
+    font-size: $text-caption;
+  }
+
+  &__estado {
+    display: inline-flex;
+    align-items: center;
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    font-size: $text-caption;
+    font-weight: $font-medium;
+    background: $surface-2;
+    color: $text-main;
+
+    &[data-estado='pendiente'] {
+      @include status-tint($warning, 0.12, 0.4);
+    }
+
+    &[data-estado='en-proceso'] {
+      @include status-tint($accent, 0.12, 0.4);
+    }
+
+    &[data-estado='resuelta'] {
+      @include status-tint($success, 0.12, 0.4);
+    }
+
+    &[data-estado='rechazada'] {
+      @include status-tint($danger, 0.12, 0.4);
+    }
+  }
+}
+
+/* Responsive */
+@include mobile {
+  .historial-incidencias {
+    gap: $space-4;
+
+    &__header {
+      align-items: stretch;
+    }
+
+    &__resumen {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: $space-3;
+    }
+
+    &__filtros {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+

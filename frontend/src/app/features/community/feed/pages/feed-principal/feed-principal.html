@@ -1,1 +1,83 @@
-<p>feed-principal works!</p>
+
+<section class="feed">
+  <header class="feed__header">
+    <div>
+      <h2>Comunidad</h2>
+      <p>Enterate de las novedades de tu edificio.</p>
+    </div>
+  </header>
+
+  <button
+    type="button"
+    class="feed__create-trigger"
+    (click)="openCreatePost()"
+  >
+    <span class="feed__create-avatar" aria-hidden="true">
+      {{ userRole === 'admin' ? 'A' : 'U' }}
+    </span>
+
+    <span class="feed__create-placeholder">
+      ¿Qué querés compartir hoy?
+    </span>
+  </button>
+
+  @if (isCreatePostOpen()) {
+    <div
+      class="feed__modal-backdrop"
+      (click)="closeCreatePost()"
+    >
+      <section
+        class="feed__modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-post-title"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="feed__modal-header">
+          <h3 id="create-post-title">
+            {{ userRole === 'admin' ? 'Publicar un aviso' : 'Crear publicación' }}
+          </h3>
+
+          <button
+            type="button"
+            class="feed__modal-close"
+            aria-label="Cerrar"
+            (click)="closeCreatePost()"
+          >
+            ×
+          </button>
+        </header>
+
+        <app-create-post-form
+          [role]="userRole"
+          (postCreated)="createPost($event)"
+        />
+      </section>
+    </div>
+  }
+
+  @if (posts().length > 0) {
+    <div class="feed__scroll-container">
+      <div class="feed__timeline">
+        @for (post of posts(); track post.id) {
+          <div class="feed__item">
+            <span
+              class="feed__timeline-dot"
+              aria-hidden="true"
+            ></span>
+
+            <app-post-card
+              [post]="post"
+              (postChange)="updatePost($event)"
+              (commentAdded)="addComment($event)"
+            />
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <p class="feed__empty">
+      Todavía no hay publicaciones. ¡Volvé más tarde!
+    </p>
+  }
+</section>

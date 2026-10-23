@@ -1,1 +1,30 @@
-<p>mis-paquetes works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <h1>Mis paquetes</h1>
+    <p>Consultá las entregas registradas para vos.</p>
+  </header>
+
+  <section class="item-list">
+    @for (paquete of misPaquetes; track paquete.id) {
+      <article class="item-card">
+        <div>
+          <h2>{{ paquete.descripcion }}</h2>
+          <p>Remitente: {{ paquete.remitente }}</p>
+          <p>Edificio: {{ paquete.edificioNombre }}</p>
+          <p>Recepción: {{ paquete.fechaRecepcion | date:'short' }}</p>
+          @if (paquete.fechaEntrega) {
+            <p>Entrega: {{ paquete.fechaEntrega | date:'short' }}</p>
+          }
+        </div>
+
+        <span class="status" [class.delivered]="paquete.estado === 'entregado'">
+          {{ paquete.estado === 'pendiente' ? 'Esperando retiro' : 'Entregado' }}
+        </span>
+      </article>
+    } @empty {
+      <article class="item-card">
+        Todavía no tenés paquetes registrados.
+      </article>
+    }
+  </section>
+</main>

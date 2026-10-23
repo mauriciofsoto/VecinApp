@@ -1,1 +1,24 @@
-<p>mis-reservas works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <h1>Mis reservas</h1>
+    <p>Consultá tus reservas pasadas y futuras.</p>
+  </header>
+
+  <section class="item-list">
+    @for (reserva of reservas; track reserva.id) {
+      <article class="item-card">
+        <div>
+          <h2>{{ reserva.titulo }}</h2>
+          <p>Lugar: {{ reserva.lugar }}</p>
+          <p>{{ reserva.descripcion }}</p>
+          <p>Fecha: {{ reserva.fecha | date:'short' }}</p>
+          <span class="status">{{ reserva.estado }}</span>
+        </div>
+      </article>
+    } @empty {
+      <article class="item-card">
+        No tenés reservas registradas.
+      </article>
+    }
+  </section>
+</main>

@@ -1,1 +1,111 @@
-<p>recepcion-paquetes works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <h1>Recepción de paquetes</h1>
+    <p>Registrá los paquetes recibidos para los residentes.</p>
+  </header>
+
+  <section class="panel">
+    <h2>Registrar paquete</h2>
+
+    <form (ngSubmit)="registrar()" class="form-grid">
+      <label>
+        Nombre del destinatario
+        <input
+          name="destinatarioNombre"
+          [(ngModel)]="destinatarioNombre"
+          required
+          placeholder="Nombre del residente"
+        />
+      </label>
+
+      <label>
+        ID del residente
+        <input
+          type="number"
+          name="destinatarioId"
+          [(ngModel)]="destinatarioId"
+          min="1"
+          required
+        />
+      </label>
+
+      <label>
+        Edificio
+        <input
+          name="edificioNombre"
+          [(ngModel)]="edificioNombre"
+          required
+        />
+      </label>
+
+      <label>
+        ID del edificio
+        <input
+          type="number"
+          name="edificioId"
+          [(ngModel)]="edificioId"
+          min="1"
+          required
+        />
+      </label>
+
+      <label>
+        Remitente o empresa
+        <input
+          name="remitente"
+          [(ngModel)]="remitente"
+          required
+          placeholder="Correo, mensajería..."
+        />
+      </label>
+
+      <label>
+        Descripción
+        <input
+          name="descripcion"
+          [(ngModel)]="descripcion"
+          required
+          placeholder="Sobre, caja, documentación..."
+        />
+      </label>
+
+      <button type="submit">Registrar paquete</button>
+    </form>
+
+    <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
+  </section>
+
+  <section class="panel">
+    <h2>Paquetes recibidos</h2>
+
+    <p>
+      Pendientes: <strong>{{ paqueteria.pendientes().length }}</strong>
+      · Entregados: <strong>{{ paqueteria.entregados().length }}</strong>
+    </p>
+
+    <div class="item-list">
+      @for (paquete of paqueteria.paquetes(); track paquete.id) {
+        <article class="item-card">
+          <div>
+            <h3>{{ paquete.descripcion }}</h3>
+            <p>Destinatario: {{ paquete.destinatarioNombre }}</p>
+            <p>Edificio: {{ paquete.edificioNombre }}</p>
+            <p>Remitente: {{ paquete.remitente }}</p>
+            <p>Recibido: {{ paquete.fechaRecepcion | date:'short' }}</p>
+            <span class="status" [class.delivered]="paquete.estado === 'entregado'">
+              {{ paquete.estado === 'pendiente' ? 'Pendiente de entrega' : 'Entregado' }}
+            </span>
+          </div>
+
+          @if (paquete.estado === 'pendiente') {
+            <button type="button" (click)="paqueteria.entregar(paquete.id)">
+              Confirmar entrega
+            </button>
+          }
+        </article>
+      } @empty {
+        <p>No hay paquetes registrados.</p>
+      }
+    </div>
+  </section>
+</main>

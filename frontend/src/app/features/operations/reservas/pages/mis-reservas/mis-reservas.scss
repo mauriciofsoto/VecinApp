@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+.operations-page {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  color: #e2e8f0;
+}
+
+.page-header p,
+.item-card p {
+  color: #94a3b8;
+}
+
+.item-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.item-card {
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  background: rgba(30, 41, 59, 0.65);
+}
+
+.item-card h2 {
+  margin-top: 0;
+}
+
+.status {
+  color: #7dd3fc;
+}
+
+@media (max-width: 640px) {
+  .operations-page {
+    padding: 1rem;
+  }
+}

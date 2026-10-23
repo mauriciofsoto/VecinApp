@@ -36,28 +36,44 @@ export class ResponderEncuesta {
     this.opcionSeleccionada.set(opcion);
   }
 
-  confirmarVoto(): void {
-    const encuestaId = this.encuestaSeleccionada();
-    const opcion = this.opcionSeleccionada();
+  
 
-    if (
-      !encuestaId ||
-      !opcion ||
-      this.votosEnviados().includes(encuestaId)
-    ) {
-      return;
-    }
+confirmarVoto(): void {
+  const encuestaId = this.encuestaSeleccionada();
+  const opcion = this.opcionSeleccionada();
 
-    const encuesta = this.encuestas().find(
-      (item) => item.id === encuestaId,
-    );
-
-    if (!encuesta || !encuesta.opciones.includes(opcion)) {
-      return;
-    }
-
-    this.encuestasService.registrarVoto(encuestaId);
-    this.votosEnviados.update((ids) => [...ids, encuestaId]);
-    this.opcionSeleccionada.set(null);
+  if (
+    encuestaId === null ||
+    opcion === null ||
+    this.votosEnviados().includes(encuestaId)
+  ) {
+    return;
   }
+
+  const encuesta = this.encuestas().find(
+    item => item.id === encuestaId,
+  );
+
+  if (!encuesta || !encuesta.opciones.includes(opcion)) {
+    return;
+  }
+
+  const opcionIndex = encuesta.opciones.indexOf(opcion);
+  const opcionId = String(opcionIndex);
+
+  const usuarioId = 1; // ID temporal del usuario actual
+
+  const registrado = this.encuestasService.registrarVoto(
+    encuestaId,
+    usuarioId,
+    opcionId,
+  );
+
+  if (!registrado) {
+    return;
+  }
+
+  this.votosEnviados.update(ids => [...ids, encuestaId]);
+  this.opcionSeleccionada.set(null);
+}
 }

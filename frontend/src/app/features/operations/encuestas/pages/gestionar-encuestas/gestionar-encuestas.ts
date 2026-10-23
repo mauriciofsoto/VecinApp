@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 
 import {EncuestaAdmin} from '../../models/encuesta.model' ;
 import { EncuestasService } from '../../services/encuestas';
-
+import { Feed } from '../../../../community/feed/services/feed';
 
 import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
 import { InputComponent } from '../../../../../shared/components/ui/input/input';
@@ -29,6 +29,7 @@ import { HistorialEncuestas } from '../historial-encuestas/historial-encuestas';
 })
 export class GestionarEncuestas {
   private readonly encuestasService = inject(EncuestasService);
+  private readonly feedService = inject(Feed);
 
   readonly modalCrearAbierto = signal(false);
 
@@ -127,6 +128,21 @@ export class GestionarEncuestas {
     };
 
     this.encuestasService.publicar(nuevaEncuesta);
+
+    this.feedService.addPost({
+      id: Date.now(),
+      authorRole: 'admin',
+      type: 'encuesta',
+      encuestaId: nuevaEncuesta.id,
+      userId: 1,
+      userName: 'Administración',
+      title: nuevaEncuesta.titulo,
+      content: nuevaEncuesta.descripcion,
+      createdAt: new Date().toISOString(),
+      reactions: [],
+      comments: [],
+      commentsCount: 0,
+});
 
     this.limpiarFormulario();
     this.modalCrearAbierto.set(false);

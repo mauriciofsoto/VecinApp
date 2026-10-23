@@ -1,0 +1,294 @@
+
+@use '../../../../../../styles/abstracts' as *;
+
+.incidencias-admin {
+  @include flex-col($space-5);
+  min-width: 0;
+
+  &__header {
+    @include flex-row($space-4);
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    h1 {
+      @include text-title;
+      color: $text-main;
+      margin: $space-2 0;
+    }
+
+    p {
+      @include text-body;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  &__eyebrow {
+    color: $accent;
+    font-size: $text-caption;
+    font-weight: $font-semibold;
+    letter-spacing: 0.1em;
+  }
+
+  &__resumen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $space-3;
+
+    app-card {
+      display: block;
+      min-width: 0;
+    }
+  }
+
+  &__filtros {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(160px, 200px)) auto;
+    gap: $space-3;
+    align-items: end;
+    min-width: 0;
+  }
+
+  &__busqueda,
+  &__categoria,
+  &__estado {
+    min-width: 0;
+
+    input,
+    select {
+      @include form-input-base;
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 44px;
+      color: $text-main;
+    }
+  }
+
+  &__categoria select option,
+  &__estado select option,
+  .incidencia-detalle__seguimiento select option {
+    background: $bg-dark;
+    color: $text-main;
+  }
+
+  &__tabla-wrapper {
+    min-width: 0;
+    overflow-x: auto;
+    border: 1px solid $glass-border;
+    border-radius: $radius-lg;
+  }
+
+  &__tabla {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: $space-3 $space-4;
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 1px solid $glass-border;
+      color: $text-main;
+      font-size: $text-small;
+    }
+
+    th {
+      color: $text-muted;
+      font-weight: $font-semibold;
+      white-space: nowrap;
+      background: $surface-2;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.025);
+    }
+  }
+
+  &__titulo {
+    display: block;
+    max-width: 240px;
+    overflow-wrap: anywhere;
+  }
+
+  &__vacio {
+    @include flex-col($space-2);
+    align-items: center;
+    padding: $space-6;
+    text-align: center;
+
+    h3 {
+      @include text-heading;
+      color: $text-main;
+      margin: 0;
+    }
+
+    p {
+      @include text-body;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+}
+
+.incidencia-stat {
+  @include flex-col($space-2);
+  min-width: 0;
+
+  span {
+    color: $text-muted;
+    font-size: $text-small;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+
+  strong {
+    color: $text-main;
+    font-size: clamp(1.5rem, 3vw, 1.75rem);
+    font-weight: $font-semibold;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}
+
+.incidencia-item__estado {
+  display: inline-flex;
+  align-items: center;
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+  font-size: $text-caption;
+  font-weight: $font-medium;
+  background: $surface-2;
+  color: $text-main;
+
+  &[data-estado='pendiente'] {
+    @include status-tint($warning, 0.12, 0.4);
+  }
+
+  &[data-estado='en-proceso'] {
+    @include status-tint($accent, 0.12, 0.4);
+  }
+
+  &[data-estado='resuelta'] {
+    @include status-tint($success, 0.12, 0.4);
+  }
+
+  &[data-estado='rechazada'] {
+    @include status-tint($danger, 0.12, 0.4);
+  }
+}
+
+.incidencia-detalle {
+  @include flex-col($space-4);
+  min-width: 0;
+
+  h2 {
+    @include text-heading;
+    color: $text-main;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__encabezado {
+    @include flex-row($space-3);
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__id {
+    color: $text-muted;
+    font-size: $text-caption;
+  }
+
+  &__descripcion {
+    @include text-body;
+    color: $text-muted;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__metadatos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-3;
+
+    div {
+      @include flex-col($space-1);
+      min-width: 0;
+    }
+
+    span {
+      color: $text-muted;
+      font-size: $text-caption;
+    }
+
+    strong {
+      color: $text-main;
+      font-size: $text-small;
+      font-weight: $font-medium;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__seguimiento {
+    @include flex-col($space-2);
+
+    h3 {
+      @include text-heading;
+      color: $text-main;
+      margin: 0;
+    }
+
+    label {
+      color: $text-muted;
+      font-size: $text-small;
+    }
+
+    select {
+      @include form-input-base;
+      box-sizing: border-box;
+      width: 100%;
+      min-width: 0;
+      min-height: 44px;
+      color: $text-main;
+    }
+  }
+
+  &__acciones {
+    @include flex-row($space-3);
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: $space-2;
+  }
+}
+
+@include mobile {
+  .incidencias-admin {
+    gap: $space-4;
+
+    &__resumen {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__filtros {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .incidencia-detalle {
+    &__metadatos {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__acciones app-button {
+      flex: 1;
+    }
+  }
+}

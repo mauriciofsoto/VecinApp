@@ -1,0 +1,173 @@
+
+<div class="historial-incidencias">
+
+  <header class="historial-incidencias__header">
+    <div>
+      <span class="historial-incidencias__eyebrow">
+        VECINAPP / INCIDENCIAS
+      </span>
+
+      <h1>Mis incidencias</h1>
+
+      <p>
+        Consultá tus reportes y seguí el estado de cada solicitud.
+      </p>
+    </div>
+
+    <app-button
+      type="button"
+      (click)="abrirModal()"
+    >
+      <span>+</span>
+      Nueva incidencia
+    </app-button>
+  </header>
+
+  
+<!-- RESUMEN DE INCIDENCIAS -->
+<section class="historial-incidencias__resumen">
+  <app-card variant="glass" size="full">
+    <div class="incidencia-stat">
+      <span class="incidencia-stat__label">
+        Total de incidencias
+      </span>
+      <strong class="incidencia-stat__value">
+        {{ totalIncidencias() }}
+      </strong>
+    </div>
+  </app-card>
+
+  <app-card variant="glass" size="full">
+    <div class="incidencia-stat">
+      <span class="incidencia-stat__label">
+        Pendientes
+      </span>
+      <strong class="incidencia-stat__value">
+        {{ pendientes() }}
+      </strong>
+    </div>
+  </app-card>
+
+  <app-card variant="glass" size="full">
+    <div class="incidencia-stat">
+      <span class="incidencia-stat__label">
+        En proceso
+      </span>
+      <strong class="incidencia-stat__value">
+        {{ enProceso() }}
+      </strong>
+    </div>
+  </app-card>
+
+  <app-card variant="glass" size="full">
+    <div class="incidencia-stat">
+      <span class="incidencia-stat__label">
+        Resueltas
+      </span>
+      <strong class="incidencia-stat__value">
+        {{ resueltas() }}
+      </strong>
+    </div>
+  </app-card>
+</section>
+
+  <!-- HISTORIAL -->
+  <app-card variant="glass" size="full" align="left">
+
+    <section class="historial-incidencias__contenido">
+
+      <header class="historial-incidencias__list-header">
+        <div>
+          <h2>Historial de reportes</h2>
+          <p>Revisá las incidencias que registraste.</p>
+        </div>
+      </header>
+
+      <!-- BÚSQUEDA Y FILTROS -->
+      <div class="historial-incidencias__filtros">
+
+        <label class="historial-incidencias__busqueda">
+          <span class="sr-only">Buscar incidencias</span>
+
+          <input
+            type="search"
+            placeholder="Buscar por título, categoría o ubicación..."
+            [value]="busqueda()"
+            (input)="actualizarBusqueda($any($event.target).value)"
+          />
+        </label>
+
+        <label class="historial-incidencias__estado">
+          <span class="sr-only">Filtrar por estado</span>
+
+          <select
+            [value]="estadoSeleccionado()"
+            (change)="actualizarEstado($any($event.target).value)"
+          >
+            <option value="todos">Todos los estados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="en-proceso">En proceso</option>
+            <option value="resuelta">Resueltas</option>
+            <option value="rechazada">Rechazadas</option>
+          </select>
+        </label>
+
+      </div>
+
+      <!-- LISTADO -->
+      <div class="historial-incidencias__lista">
+
+        @for (incidencia of incidenciasFiltradas(); track incidencia.id) {
+          <article class="incidencia-item">
+
+            <div class="incidencia-item__contenido">
+              <div class="incidencia-item__titulo">
+                <h3>{{ incidencia.titulo }}</h3>
+
+                <span
+                  class="incidencia-item__estado"
+                  [attr.data-estado]="incidencia.estado"
+                >
+                  {{ obtenerEstado(incidencia.estado) }}
+                </span>
+              </div>
+
+              <p class="incidencia-item__descripcion">
+                {{ incidencia.descripcion }}
+              </p>
+
+              <div class="incidencia-item__metadatos">
+                <span>{{ incidencia.categoria }}</span>
+                <span>{{ incidencia.ubicacion }}</span>
+                <span>{{ incidencia.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+          </article>
+        } @empty {
+          <div class="historial-incidencias__vacio">
+            <h3>No encontramos incidencias</h3>
+            <p>
+              Probá cambiar los filtros o registrá una nueva incidencia.
+            </p>
+          </div>
+        }
+
+      </div>
+
+    </section>
+  </app-card>
+
+
+  
+ 
+<app-modal
+  [open]="modalAbierto()"
+  (openChange)="modalAbierto.set($event)"
+  heading="Nueva incidencia"
+  size="lg"
+>
+  <app-crear-incidencia />
+</app-modal>
+
+</div>
