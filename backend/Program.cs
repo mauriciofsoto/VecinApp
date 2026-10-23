@@ -163,6 +163,7 @@ using (var scope = app.Services.CreateScope())
 
     // 2. Obtener los roles de la aplicación.
 
+
     var rolAdministrador = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "Administrador");
 
@@ -172,6 +173,26 @@ using (var scope = app.Services.CreateScope())
     var rolSuperAdministrador = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "SuperAdministrador");
 
+    if (rolAdministrador == null)
+    {
+        rolAdministrador = new Rol
+        {
+            Nombre = "Administrador"
+        };
+
+        context.RolesAplicacion.Add(rolAdministrador);
+    }
+
+    if (rolInquilino == null)
+    {
+        rolInquilino = new Rol
+        {
+            Nombre = "Inquilino"
+        };
+
+        context.RolesAplicacion.Add(rolInquilino);
+    }
+
     if (rolSuperAdministrador == null)
     {
         rolSuperAdministrador = new Rol
@@ -180,14 +201,10 @@ using (var scope = app.Services.CreateScope())
         };
 
         context.RolesAplicacion.Add(rolSuperAdministrador);
-        await context.SaveChangesAsync();
     }
 
-    if (rolAdministrador == null || rolInquilino == null)
-    {
-        throw new InvalidOperationException(
-            "Falta el rol Administrador o Inquilino en la tabla rol.");
-    }
+    await context.SaveChangesAsync();
+
 
     // 3. Crear o actualizar el usuario Administrador.
     const string emailAdmin = "vecino@vecinapp.com";
