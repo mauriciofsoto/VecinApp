@@ -35,7 +35,21 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 .AddDefaultTokenProviders();
 
 // Configuración de JWT
-var jwtSecret = builder.Configuration["JwtSettings:Secret"] ?? "ClaveSuperSecretaYExtensaParaFirmarTokensVecinApp2026!";
+var jwtSecret = builder.Configuration["JwtSettings:Secret"];
+
+if (string.IsNullOrWhiteSpace(jwtSecret))
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        jwtSecret = "ClaveSuperSecretaYExtensaParaFirmarTokensVecinApp2026!";
+    }
+    else
+    {
+        throw new InvalidOperationException(
+            "Falta configurar JwtSettings:Secret en el entorno.");
+    }
+}
+
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "VecinAppBackend";
 var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "VecinAppFrontend";
 
@@ -62,11 +76,14 @@ builder.Services.AddAuthentication(options =>
 // Servicios y CORS 
 builder.Services.AddScoped<TokenService>();
 
+var frontendUrl = builder.Configuration["FrontendUrl"]
+    ?? "http://localhost:4200";
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(frontendUrl)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

@@ -241,6 +241,57 @@ namespace VecinApp.Migrations
                     b.ToTable("categoria_publicacion", (string)null);
                 });
 
+            modelBuilder.Entity("VecinApp.Models.CodigoInvitacion", b =>
+                {
+                    b.Property<int>("IdCodigoInvitacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_codigo_invitacion");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdCodigoInvitacion"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("codigo");
+
+                    b.Property<DateTime>("FechaExpiracion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_expiracion");
+
+                    b.Property<int>("IdEdificio")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_edificio");
+
+                    b.Property<int>("IdRol")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_rol");
+
+                    b.Property<int>("UsosMaximos")
+                        .HasColumnType("integer")
+                        .HasColumnName("usos_maximos");
+
+                    b.Property<int>("UsosRealizados")
+                        .HasColumnType("integer")
+                        .HasColumnName("usos_realizados");
+
+                    b.HasKey("IdCodigoInvitacion");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique();
+
+                    b.HasIndex("IdEdificio");
+
+                    b.HasIndex("IdRol");
+
+                    b.ToTable("codigo_invitacion", (string)null);
+                });
+
             modelBuilder.Entity("VecinApp.Models.Comentario", b =>
                 {
                     b.Property<int>("IdComentario")
@@ -947,6 +998,25 @@ namespace VecinApp.Migrations
                     b.Navigation("Edificio");
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("VecinApp.Models.CodigoInvitacion", b =>
+                {
+                    b.HasOne("VecinApp.Models.Edificio", "Edificio")
+                        .WithMany()
+                        .HasForeignKey("IdEdificio")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VecinApp.Models.Rol", "Rol")
+                        .WithMany()
+                        .HasForeignKey("IdRol")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Edificio");
+
+                    b.Navigation("Rol");
                 });
 
             modelBuilder.Entity("VecinApp.Models.Comentario", b =>
