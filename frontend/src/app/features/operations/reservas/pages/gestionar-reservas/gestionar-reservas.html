@@ -1,211 +1,168 @@
-<main class="operations-page">
+<main class="operations-page reservas-module">
   <header class="page-header">
     <h1>Gestión de reservas</h1>
     <p>Administrá las reservas de espacios comunes.</p>
   </header>
 
-  <section class="panel">
-    <h2>Crear reserva</h2>
+  <div class="reservations-layout">
 
-    <form (ngSubmit)="crear()" class="form-grid">
+    <!-- Calendario -->
+    <section class="calendar-section">
+      <app-reserva-calendar-modal
+        [reservas]="reservas()"
+        (fechaSeleccionada)="seleccionarFecha($event)"
+      />
+    </section>
 
-      <label>
-        Título
-        <app-input
-          name="titulo"
-          [(ngModel)]="titulo"
-          [required]="true"
-        />
-      </label>
+    <!-- Sidebar de administración -->
+    <aside class="reservations-panel">
 
-      <label>
-        Espacio común
-        <select
-          name="espacioId"
-          [(ngModel)]="espacioId"
-          required
-        >
-          <option [ngValue]="null" disabled>
-            Seleccioná un espacio
-          </option>
-
-          @for (espacio of servicio.espaciosActivos(); track espacio.id) {
-            <option [ngValue]="espacio.id">
-              {{ espacio.nombre }}
-            </option>
-          }
-        </select>
-      </label>
-
-      <label>
-        Fecha
-        <app-input
-          type="date"
-          name="fecha"
-          [(ngModel)]="fecha"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        Hora de inicio
-        <app-input
-          type="time"
-          name="horaInicio"
-          [(ngModel)]="horaInicio"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        Hora de finalización
-        <app-input
-          type="time"
-          name="horaFin"
-          [(ngModel)]="horaFin"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        Cantidad de participantes
-        <app-input
-          type="number"
-          name="cantidadParticipantes"
-          [(ngModel)]="cantidadParticipantes"
-          min="1"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        Residente
-        <app-input
-          name="usuarioNombre"
-          [(ngModel)]="usuarioNombre"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        ID del residente
-        <app-input
-          name="usuarioId"
-          [(ngModel)]="usuarioId"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        ID de la unidad
-        <app-input
-          type="number"
-          name="unidadId"
-          [(ngModel)]="unidadId"
-          min="1"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        Unidad
-        <app-input
-          name="unidadNombre"
-          [(ngModel)]="unidadNombre"
-          placeholder="Ej. 2° A"
-          [required]="true"
-        />
-      </label>
-
-      <label>
-        Tipo de evento
-        <select
-          name="tipoEvento"
-          [(ngModel)]="tipoEvento"
-        >
-          <option value="privado">Privado</option>
-          <option value="publico">Público</option>
-        </select>
-      </label>
-
-      @if (tipoEvento === 'publico') {
-        <label>
-          Categoría del evento
-          <select
-            name="categoriaEvento"
-            [(ngModel)]="categoriaEvento"
-            required
-          >
-            <option [ngValue]="null" disabled>
-              Seleccioná una categoría
-            </option>
-            <option value="reunion-consorcio">Reunión de consorcio</option>
-            <option value="asamblea">Asamblea</option>
-            <option value="actividad-comunitaria">Actividad comunitaria</option>
-            <option value="celebracion">Celebración</option>
-            <option value="otro">Otro</option>
-          </select>
-        </label>
-      }
-
-      <label class="full-width">
-        Descripción
-        <app-input
-          [multiline]="true"
-          name="descripcion"
-          [(ngModel)]="descripcion"
-          [required]="true"
-          [rows]="3"
-        />
-      </label>
-
-      <button type="submit">Crear reserva</button>
-    </form>
-
-    <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
-  </section>
-
-  <section class="panel">
-    <h2>Historial de reservas</h2>
-
-    <div class="item-list">
-      @for (reserva of servicio.reservas(); track reserva.id) {
-        <article class="item-card">
+      <!-- Nueva reserva -->
+      <section class="reservation-form">
+        <header class="panel-header">
           <div>
-            <h3>{{ reserva.titulo }}</h3>
-            <p>Espacio: {{ nombreEspacio(reserva.espacioId) }}</p>
-            <p>{{ reserva.descripcion }}</p>
-            <p>Residente: {{ reserva.usuarioNombre }}</p>
-            <p>Unidad: {{ reserva.unidadNombre }}</p>
-            <p>Fecha: {{ reserva.fecha | date:'shortDate' }}</p>
-            <p>Horario: {{ reserva.horaInicio }} - {{ reserva.horaFin }}</p>
-            <p>Participantes: {{ reserva.cantidadParticipantes }}</p>
-            <p>Creada: {{ reserva.fechaCreacion | date:'short' }}</p>
-            <span class="status">{{ reserva.estado }}</span>
+            <h2>Nueva reserva</h2>
+            <p>Registrá una reserva para un residente.</p>
+          </div>
+        </header>
+
+        <button
+          type="button"
+          class="primary"
+          (click)="reservaForm.abrir()"
+        >
+          Nueva reserva
+        </button>
+
+        <!-- Formulario compartido con modal interno -->
+        <app-reserva-form
+          #reservaForm
+          [espacios]="reservasService.espaciosActivos()"
+          [creadaPorAdministracion]="true"
+          (guardar)="crearReserva($event)"
+        />
+
+        @if (mensajeFormulario()) {
+          <p
+            class="form-feedback form-feedback--error"
+            aria-live="polite"
+          >
+            {{ mensajeFormulario() }}
+          </p>
+        }
+
+        @if (exitoFormulario()) {
+          <p
+            class="form-feedback form-feedback--success"
+            aria-live="polite"
+          >
+            {{ exitoFormulario() }}
+          </p>
+        }
+      </section>
+
+      <!-- Historial del día -->
+      <section class="daily-reservations">
+        <header class="panel-header">
+          <div>
+            <h2>Reservas del día</h2>
+            <p>{{ fechaSeleccionada() | date: 'fullDate' }}</p>
           </div>
 
-          @if (reserva.estado === 'pendiente') {
-            <div class="actions">
-              <button
-                type="button"
-                (click)="cambiarEstado(reserva.id, 'confirmada')"
-              >
-                Confirmar
-              </button>
+          <span class="reservation-count">
+            {{ reservasDelDia().length }}
+          </span>
+        </header>
 
+        @for (reserva of reservasDelDia(); track reserva.id) {
+          <article
+            class="item-card"
+            [class.item-card--selected]="reservaSeleccionada()?.id === reserva.id"
+          >
+            <div class="reservation-information">
+              <h3>{{ reserva.titulo }}</h3>
+
+              <div class="reservation-information__facts">
+                <p class="reservation-fact">
+                  <span>Espacio común</span>
+                  <strong>{{ nombreEspacio(reserva.espacioId) }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Residente</span>
+                  <strong>{{ reserva.usuarioNombre }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Unidad</span>
+                  <strong>{{ reserva.unidadNombre }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Horario</span>
+                  <strong>{{ reserva.horaInicio }} – {{ reserva.horaFin }}</strong>
+                </p>
+              </div>
+
+              <span
+                class="status"
+                [attr.data-status]="reserva.estado"
+              >
+                {{ reserva.estado }}
+              </span>
+            </div>
+
+            <div class="reservation-actions">
               <button
                 type="button"
                 class="secondary"
-                (click)="cambiarEstado(reserva.id, 'rechazada')"
+                (click)="seleccionarReserva(reserva)"
               >
-                Rechazar
+                Ver conversación
               </button>
+
+              @if (reserva.estado === 'pendiente') {
+                <button
+                  type="button"
+                  class="primary"
+                  (click)="cambiarEstado(reserva.id, 'confirmada')"
+                >
+                  Confirmar
+                </button>
+
+                <button
+                  type="button"
+                  class="danger"
+                  (click)="cambiarEstado(reserva.id, 'rechazada')"
+                >
+                  Rechazar
+                </button>
+              }
             </div>
-          }
+          </article>
+        } @empty {
+          <article class="item-card empty-state">
+            <p>No hay reservas registradas para esta fecha.</p>
+          </article>
+        }
+      </section>
+    </aside>
+
+    <!-- Chat -->
+    <section class="chat-section">
+      @if (reservaSeleccionada(); as reserva) {
+        <app-reserva-chat
+          [reserva]="reserva"
+          [emisorId]="usuario()?.id ?? ''"
+          [emisorNombre]="usuario()?.nombre ?? 'Administración'"
+        />
+      } @else {
+        <article class="item-card chat-placeholder">
+          <h2>Conversaciones</h2>
+          <p>
+            Seleccioná una reserva para consultar o responder los mensajes
+            del residente.
+          </p>
         </article>
-      } @empty {
-        <p>Todavía no hay reservas registradas.</p>
       }
-    </div>
-  </section>
+    </section>
+
+  </div>
 </main>

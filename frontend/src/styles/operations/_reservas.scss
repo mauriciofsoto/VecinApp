@@ -1,0 +1,356 @@
+@use '../abstracts' as *;
+@use '../abstracts/operations/mixins-operations' as ops;
+
+.reservas-module {
+  &.operations-page {
+    @include ops.operation-page($space-5);
+    padding: 0;
+  }
+
+  .page-header {
+    @include ops.operation-intro($space-1);
+
+    h1,
+    p { margin: 0; }
+
+    h1 {
+      color: $text-main;
+      font-size: $text-title;
+      line-height: $line-tight;
+    }
+
+    p { @include ops.operation-muted-text; }
+  }
+
+  .reservations-layout {
+    display: grid;
+    grid-template-columns: minmax(17rem, 1fr) minmax(18rem, 1.08fr) minmax(19rem, 1.1fr);
+    align-items: stretch;
+    gap: $space-4;
+    min-width: 0;
+  }
+
+  .calendar-section,
+  .reservations-panel,
+  .chat-section { min-width: 0; }
+
+  .reservations-panel { @include ops.operation-stack($space-4); }
+
+  .reservation-form,
+  .daily-reservations {
+    @include ops.operation-stack($space-4);
+    min-width: 0;
+    padding: $space-4;
+    border: 1px solid $glass-border;
+    border-radius: $radius-md;
+  }
+
+  .reservation-form { background: rgba($primary, 0.055); }
+  .daily-reservations { background: rgba($bg-dark, 0.38); }
+
+  .panel-header {
+    @include ops.operation-header($space-3);
+    align-items: center;
+
+    h2,
+    p { margin: 0; }
+
+    h2 {
+      color: $text-main;
+      font-size: $text-body;
+      font-weight: $font-semibold;
+    }
+
+    p {
+      @include ops.operation-muted-text($text-caption);
+      margin-top: $space-1;
+      text-transform: capitalize;
+    }
+  }
+
+  .reservation-count {
+    display: grid;
+    place-items: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0 $space-2;
+    border: 1px solid rgba($primary, 0.28);
+    border-radius: $radius-full;
+    background: rgba($primary, 0.12);
+    color: $primary-light;
+    font-size: $text-small;
+    font-weight: $font-semibold;
+  }
+
+  .item-card {
+    @include ops.operation-stack($space-3);
+    min-width: 0;
+    padding: $space-4;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-control;
+    background: $surface-1;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    h3,
+    p { margin: 0; }
+
+    h3 {
+      color: $text-main;
+      font-size: $text-body;
+      font-weight: $font-semibold;
+      overflow-wrap: anywhere;
+    }
+
+    p {
+      color: $text-muted;
+      font-size: $text-small;
+      line-height: $line-normal;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .item-card--selected {
+    border-color: rgba($primary, 0.6);
+    background: rgba($primary, 0.09);
+    box-shadow: inset 3px 0 0 $primary;
+  }
+
+  .empty-state {
+    justify-content: center;
+    min-height: 8rem;
+    border-style: dashed;
+    background: rgba($bg-dark, 0.22);
+    text-align: center;
+  }
+
+  .reservation-information { @include ops.operation-stack($space-3); }
+
+  .reservation-information__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-2;
+  }
+
+  .reservation-fact {
+    @include ops.operation-stack($space-1);
+    min-width: 0;
+    padding: $space-2 $space-3;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-sm;
+    background: rgba($bg-dark, 0.3);
+
+    span { color: $text-muted; font-size: $text-caption; }
+
+    strong {
+      color: $text-page;
+      font-size: $text-small;
+      font-weight: $font-medium;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .status {
+    @include badge-base;
+    @include badge-size(sm);
+    width: fit-content;
+    text-transform: capitalize;
+  }
+
+  .status[data-status='pendiente'] { @include status-tint($warning, 0.12, 0.4); }
+  .status[data-status='confirmada'] { @include status-tint($success, 0.12, 0.4); }
+  .status[data-status='rechazada'] { @include status-tint($danger, 0.12, 0.4); }
+
+  .reservation-actions {
+    @include ops.operation-actions($space-2, flex-start);
+    padding-top: $space-3;
+    border-top: 1px solid $border-subtle;
+  }
+
+  .primary,
+  .secondary,
+  .danger {
+    @include button-base;
+    @include button-size(md);
+    min-height: 2.75rem;
+    white-space: normal;
+    text-align: center;
+    transition: $transition-base;
+
+    &:focus-visible {
+      outline: 2px solid $primary-light;
+      outline-offset: 2px;
+    }
+
+    &:active:not(:disabled) { filter: brightness(0.92); }
+  }
+
+  .primary { @include button-primary; }
+  .secondary { @include button-secondary; }
+  .danger { @include button-danger; }
+  .reservation-form > .primary { width: 100%; }
+
+  .chat-section {
+    @include ops.operation-stack;
+    min-height: 34rem;
+    padding: $space-4;
+    border: 1px solid rgba($accent, 0.22);
+    border-radius: $radius-md;
+    background: linear-gradient(155deg, rgba($accent, 0.075), rgba($bg-dark, 0.42));
+  }
+
+  .chat-section > app-reserva-chat { flex: 1; min-height: 0; }
+
+  .chat-placeholder {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    h2 { margin: 0; color: $text-main; font-size: $text-heading; }
+    p { max-width: 28rem; }
+  }
+
+  .operation-form-grid {
+    @include ops.operation-form-grid($space-4);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form-grid { @include ops.operation-form-grid($space-4); }
+
+  .form-field,
+  .form-grid > label {
+    @include ops.operation-form-label;
+    min-width: 0;
+    color: $text-page;
+    font-size: $text-small;
+  }
+
+  .form-field > span { display: block; }
+
+  .form-field select,
+  .form-grid select {
+    @include ops.operation-form-control;
+    width: 100%;
+    min-width: 0;
+    color: $text-main;
+    color-scheme: dark;
+  }
+
+  .form-fields-inline {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-3;
+  }
+
+  .selected-unit,
+  .space-information {
+    display: grid;
+    gap: $space-2;
+    min-width: 0;
+    padding: $space-3;
+    border: 1px solid $glass-border;
+    border-radius: $radius-control;
+  }
+
+  .selected-unit { background: rgba($primary, 0.075); }
+  .space-information { background: rgba($accent, 0.07); }
+
+  .selected-unit span,
+  .selected-unit small,
+  .space-information small {
+    color: $text-muted;
+    font-size: $text-caption;
+  }
+
+  .space-information p {
+    margin: 0;
+    color: $text-page;
+    font-size: $text-small;
+    line-height: $line-normal;
+  }
+
+  .form-grid .full-width { grid-column: 1 / -1; }
+
+  .form-feedback,
+  .feedback {
+    margin: 0;
+    color: $text-warning-soft;
+    font-size: $text-small;
+  }
+
+  .form-feedback--error { color: $danger; }
+  .form-feedback--success { color: $success; }
+
+  .form-grid button[type='submit'],
+  .reservation-dialog-footer button {
+    @include button-base;
+    @include button-size(md);
+    min-height: 2.75rem;
+    white-space: normal;
+    text-align: center;
+
+    &:focus-visible {
+      outline: 2px solid $primary-light;
+      outline-offset: 2px;
+    }
+
+    &:active:not(:disabled) { filter: brightness(0.92); }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  .form-grid button[type='submit'],
+  .reservation-dialog-footer .primary { @include button-primary; }
+  .reservation-dialog-footer .secondary { @include button-secondary; }
+
+  .reservation-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+    flex-wrap: wrap;
+    padding-top: $space-3;
+    border-top: 1px solid $border-subtle;
+  }
+}
+
+@include laptop {
+  .reservas-module .reservations-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reservas-module .chat-section { grid-column: 1 / -1; min-height: 28rem; }
+}
+
+@include tablet {
+  .reservas-module .reservations-layout { grid-template-columns: minmax(0, 1fr); }
+  .reservas-module .chat-section { grid-column: auto; min-height: 25rem; }
+}
+
+@include mobile {
+  .reservas-module.operations-page { gap: $space-4; }
+
+  .reservas-module .reservation-form,
+  .reservas-module .daily-reservations,
+  .reservas-module .chat-section { padding: $space-3; }
+
+  .reservas-module .reservation-information__facts,
+  .reservas-module .form-grid,
+  .reservas-module .form-fields-inline { grid-template-columns: minmax(0, 1fr); }
+
+  .reservas-module .form-grid .full-width { grid-column: auto; }
+
+  .reservas-module .reservation-actions {
+    align-items: stretch;
+    flex-direction: column;
+
+    button { width: 100%; }
+  }
+
+  .reservas-module .reservation-dialog-footer {
+    flex-direction: column-reverse;
+
+    button { width: 100%; }
+  }
+}

@@ -39,23 +39,31 @@
 .calendar-today {
   display: grid;
   place-items: center;
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   padding: $space-2;
   border: 1px solid $glass-border;
   border-radius: $radius-control;
-  background: $surface-1;
-  color: $text-main;
   cursor: pointer;
-  transition: background $transition-fast;
+  font: inherit;
+  transition: $transition-base;
 
-  &:hover {
-    background: $surface-2;
+  &:focus-visible {
+    outline: 2px solid $primary-light;
+    outline-offset: 2px;
   }
+
+  &:active:not(:disabled) { filter: brightness(0.92); }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
 }
 
 .calendar-nav-button {
+  @include button-variant($surface-2, $glass-border, $text-main, $surface-3);
   font-size: $text-heading;
+}
+
+.calendar-today {
+  @include button-variant(transparent, $glass-border, $text-main, $surface-2);
 }
 
 .calendar-month {
@@ -94,6 +102,14 @@
   transition:
     background $transition-fast,
     border-color $transition-fast;
+
+  &:focus-visible {
+    outline: 2px solid $primary-light;
+    outline-offset: 2px;
+  }
+
+  &:active:not(:disabled) { filter: brightness(0.92); }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
 
   &:hover {
     background: $surface-2;

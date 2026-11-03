@@ -1,0 +1,38 @@
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.app-background {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.app-layout-content {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.app-layout-notifications {
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 5;
+}
+
+.app-layout-content > * {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}

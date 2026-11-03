@@ -13,14 +13,6 @@
 @mixin sidebar-container($width: 260px) {
   @include glass-panel-effect;
   @include vertical-panel($width, $radius-md);
-
-  @include tablet {
-    position: fixed;
-    top: 0;
-    left: 0;
-    transform: translateX(-100%);
-    &.is-open { transform: translateX(0); }
-  }
 }
 
 @mixin sidebar-nav-item {
@@ -46,7 +38,11 @@
   &:hover {
     color: $text-main;
     background: $surface-2;
-    transform: translateX(4px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary-light;
+    outline-offset: 2px;
   }
 
   &.active {

@@ -1,7 +1,10 @@
 <div class="app-background">
   <div class="app-background__overlay"></div>
 
+  <app-sidebar></app-sidebar>
+
   <div class="app-layout-content">
+    <div class="app-layout-notifications"><app-notification-bell /></div>
     <router-outlet></router-outlet>
   </div>
 </div>

@@ -1,96 +1,84 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
 
-import { Reservas } from '../../services/reservas';
-import {
-  CategoriaEvento,
-  EstadoReserva,
-  TipoEvento,
-} from '../../models/reserva';
+import { AuthService } from '../../../../../core/services/auth';
 
-import { InputComponent } from '../../../../../shared/components/atoms/input/input';
+import { Reservas, CrearReserva } from '../../services/reservas';
+import { Reserva } from '../../models/reserva';
+
+import { ReservaChat } from '../../components/reserva-chat/reserva-chat';
+import { ReservaCalendarModal } from '../../components/reserva-calendar-modal/reserva-calendar-modal';
+import { FormReservas } from '../../components/form-reservas/form-reservas';
 
 @Component({
   selector: 'app-gestionar-reservas',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputComponent],
+  imports: [
+    CommonModule,
+    FormReservas,
+    ReservaChat,
+    ReservaCalendarModal,
+  ],
   templateUrl: './gestionar-reservas.html',
   styleUrl: './gestionar-reservas.scss',
 })
 export class GestionarReservas {
-  readonly servicio = inject(Reservas);
+  private readonly authService = inject(AuthService);
+  readonly reservasService = inject(Reservas);
 
-  titulo = '';
-  descripcion = '';
-  fecha = '';
-  horaInicio = '';
-  horaFin = '';
-  cantidadParticipantes = 1;
+  readonly usuario = this.authService.currentUser;
 
-  usuarioId = 'USR-001';
-  usuarioNombre = '';
-  unidadId = 101;
-  unidadNombre = '';
-  edificioId = 1;
+  readonly fechaSeleccionada = signal(this.formatearFecha(new Date()));
 
-  espacioId: number | null = null;
+  readonly reservaSeleccionada = signal<Reserva | null>(null);
 
-  tipoEvento: TipoEvento = 'privado';
-  categoriaEvento: CategoriaEvento | null = null;
+  readonly mensajeFormulario = signal<string | null>(null);
+  readonly exitoFormulario = signal<string | null>(null);
 
-  readonly mensaje = signal('');
+  // Todas las reservas registradas
+  readonly reservas = this.reservasService.reservas;
 
-  crear(): void {
-    if (
-      !this.titulo.trim() ||
-      !this.descripcion.trim() ||
-      !this.fecha ||
-      !this.horaInicio ||
-      !this.horaFin ||
-      !this.usuarioId.trim() ||
-      !this.usuarioNombre.trim() ||
-      !this.unidadNombre.trim() ||
-      !this.espacioId
-    ) {
-      this.mensaje.set('Completá todos los campos obligatorios.');
-      return;
-    }
+  // Reservas correspondientes a la fecha seleccionada
+  readonly reservasDelDia = computed(() =>
+    this.reservas().filter(
+      reserva =>
+        reserva.fecha.slice(0, 10) === this.fechaSeleccionada(),
+    ),
+  );
 
-    const fechaReserva = new Date(`${this.fecha}T00:00:00`);
+  seleccionarFecha(fecha: string): void {
+    this.fechaSeleccionada.set(fecha);
+    this.reservaSeleccionada.set(null);
+  }
 
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+  seleccionarReserva(reserva: Reserva): void {
+    this.reservaSeleccionada.set(reserva);
+  }
 
-    if (fechaReserva < hoy) {
-      this.mensaje.set('La fecha de reserva no puede ser pasada.');
-      return;
-    }
+  crearReserva(datos: CrearReserva): void {
+    this.mensajeFormulario.set(null);
+    this.exitoFormulario.set(null);
 
     try {
-      this.servicio.crear({
-        usuarioId: this.usuarioId.trim(),
-        usuarioNombre: this.usuarioNombre.trim(),
-        unidadId: this.unidadId,
-        unidadNombre: this.unidadNombre.trim(),
-        edificioId: this.edificioId,
-        espacioId: this.espacioId,
-        titulo: this.titulo.trim(),
-        descripcion: this.descripcion.trim(),
-        fecha: this.fecha,
-        horaInicio: this.horaInicio,
-        horaFin: this.horaFin,
-        cantidadParticipantes: this.cantidadParticipantes,
-        tipoEvento: this.tipoEvento,
-        categoriaEvento:
-          this.tipoEvento === 'publico' ? this.categoriaEvento : null,
-        creadaPorAdministracion: true,
-      });
+      this.reservasService.crear(datos);
 
-      this.limpiarFormulario();
-      this.mensaje.set('Reserva creada correctamente.');
+      this.fechaSeleccionada.set(datos.fecha);
+
+      const nuevaReserva = this.reservas().find(
+        reserva =>
+          reserva.usuarioId === datos.usuarioId &&
+          reserva.fecha === datos.fecha &&
+          reserva.titulo === datos.titulo &&
+          reserva.espacioId === datos.espacioId,
+      );
+
+      if (nuevaReserva) {
+        this.reservaSeleccionada.set(nuevaReserva);
+      }
+
+      this.exitoFormulario.set('La reserva fue creada correctamente.');
     } catch (error) {
-      this.mensaje.set(
+      this.mensajeFormulario.set(
         error instanceof Error
           ? error.message
           : 'No se pudo crear la reserva.',
@@ -98,33 +86,32 @@ export class GestionarReservas {
     }
   }
 
-  limpiarFormulario(): void {
-    this.titulo = '';
-    this.descripcion = '';
-    this.fecha = '';
-    this.horaInicio = '';
-    this.horaFin = '';
-    this.cantidadParticipantes = 1;
+  cambiarEstado(
+    reservaId: number,
+    estado: 'confirmada' | 'rechazada',
+  ): void {
+    this.reservasService.cambiarEstado(reservaId, estado);
 
-    this.usuarioId = 'USR-001';
-    this.usuarioNombre = '';
-    this.unidadId = 101;
-    this.unidadNombre = '';
-    this.espacioId = null;
+    const reservaActualizada = this.reservas().find(
+      reserva => reserva.id === reservaId,
+    );
 
-    this.tipoEvento = 'privado';
-    this.categoriaEvento = null;
-  }
-
-  cambiarEstado(id: number, estado: EstadoReserva): void {
-    this.servicio.cambiarEstado(id, estado);
+    if (reservaActualizada) {
+      this.reservaSeleccionada.set(reservaActualizada);
+    }
   }
 
   nombreEspacio(espacioId: number): string {
-    return (
-      this.servicio.espacios().find(
-        espacio => espacio.id === espacioId,
-      )?.nombre ?? 'Espacio no encontrado'
-    );
+    return this.reservasService.espacios().find(
+      espacio => espacio.id === espacioId,
+    )?.nombre ?? 'Espacio no encontrado';
+  }
+
+  private formatearFecha(fecha: Date): string {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+
+    return `${anio}-${mes}-${dia}`;
   }
 }

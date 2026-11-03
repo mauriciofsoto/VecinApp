@@ -1,0 +1,172 @@
+<section class="reservation-form-shell">
+  <h2 class="reservation-form-shell__label">Crear reserva</h2>
+
+  <app-modal
+  [(open)]="modalAbierto"
+  heading="Nueva reserva"
+  size="lg"
+  [closeOnBackdrop]="true">
+  <form (ngSubmit)="crear()" class="form-grid">
+
+    <label>
+      Título
+      <app-input
+        name="titulo"
+        [(ngModel)]="titulo"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Espacio común
+      <select
+        name="espacioId"
+        [(ngModel)]="espacioId"
+        required
+      >
+        <option [ngValue]="null" disabled>
+          Seleccioná un espacio
+        </option>
+
+        @for (espacio of espacios(); track espacio.id) {
+          <option [ngValue]="espacio.id">
+            {{ espacio.nombre }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Fecha
+      <app-input
+        type="date"
+        name="fecha"
+        [(ngModel)]="fecha"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Hora de inicio
+      <app-input
+        type="time"
+        name="horaInicio"
+        [(ngModel)]="horaInicio"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Hora de finalización
+      <app-input
+        type="time"
+        name="horaFin"
+        [(ngModel)]="horaFin"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Cantidad de participantes
+      <app-input
+        type="number"
+        name="cantidadParticipantes"
+        [(ngModel)]="cantidadParticipantes"
+        min="1"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Residente
+      <app-input
+        name="usuarioNombre"
+        [(ngModel)]="usuarioNombre"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      ID del residente
+      <app-input
+        name="usuarioId"
+        [(ngModel)]="usuarioId"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      ID de la unidad
+      <app-input
+        type="number"
+        name="unidadId"
+        [(ngModel)]="unidadId"
+        min="1"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Unidad
+      <app-input
+        name="unidadNombre"
+        [(ngModel)]="unidadNombre"
+        placeholder="Ej. 2° A"
+        [required]="true"
+      />
+    </label>
+
+    <label>
+      Tipo de evento
+      <select name="tipoEvento" [(ngModel)]="tipoEvento">
+        <option value="privado">Privado</option>
+        <option value="publico">Público</option>
+      </select>
+    </label>
+
+    @if (tipoEvento === 'publico') {
+      <label>
+        Categoría del evento
+        <select
+          name="categoriaEvento"
+          [(ngModel)]="categoriaEvento"
+          required
+        >
+          <option [ngValue]="null" disabled>
+            Seleccioná una categoría
+          </option>
+          <option value="reunion-consorcio">Reunión de consorcio</option>
+          <option value="asamblea">Asamblea</option>
+          <option value="actividad-comunitaria">Actividad comunitaria</option>
+          <option value="celebracion">Celebración</option>
+          <option value="otro">Otro</option>
+        </select>
+      </label>
+    }
+
+    <label class="full-width">
+      Descripción
+      <app-input
+        [multiline]="true"
+        name="descripcion"
+        [(ngModel)]="descripcion"
+        [required]="true"
+        [rows]="3"
+      />
+    </label>
+
+    <button type="submit">Crear reserva</button>
+  </form>
+
+  <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
+  <div modal-footer class="reservation-dialog-footer">
+    <button type="button" class="secondary" (click)="cerrar()">
+      Cancelar
+    </button>
+
+    <button type="submit" form="reserva-form" class="primary">
+      Crear reserva
+    </button>
+  </div>
+</app-modal>
+</section>

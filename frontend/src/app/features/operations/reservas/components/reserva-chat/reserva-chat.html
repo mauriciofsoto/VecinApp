@@ -5,15 +5,22 @@
       <p>{{ reserva().titulo }}</p>
     </div>
 
-    <span class="reserva-chat__status">
+    <span class="reserva-chat__status" [attr.data-status]="reserva().estado">
       {{ reserva().estado }}
     </span>
   </header>
 
   <div class="reserva-chat__details">
-    <span>{{ reserva().fecha | date: 'dd/MM/yyyy' }}</span>
-    <span>{{ reserva().horaInicio }}–{{ reserva().horaFin }}</span>
+    <span><small>Fecha</small>{{ reserva().fecha | date: 'dd/MM/yyyy' }}</span>
+    <span><small>Horario</small>{{ reserva().horaInicio }}–{{ reserva().horaFin }}</span>
   </div>
+
+  @if (reserva().descripcion) {
+    <section class="reserva-chat__description" aria-label="Descripción de la reserva">
+      <h4>Descripción de la reserva</h4>
+      <p>{{ reserva().descripcion }}</p>
+    </section>
+  }
 
   <div class="reserva-chat__messages" aria-live="polite">
     @if (mensajes().length === 0) {

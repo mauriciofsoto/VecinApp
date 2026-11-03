@@ -1,0 +1,49 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + #{$space-2});
+  right: 0;
+  width: min(24rem, calc(100vw - 2rem));
+  overflow: hidden;
+  color: $text-main;
+  background: $bg-dark;
+  border: 1px solid $border-control;
+  border-radius: $radius-control;
+  box-shadow: $shadow-md;
+}
+
+.notification-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $border-subtle;
+
+  h2 { margin: 0; font-size: $text-body; }
+  button { color: $primary-light; background: transparent; border: 0; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+}
+
+.notification-panel__items { max-height: 22rem; overflow-y: auto; }
+
+.notification-item {
+  display: grid;
+  width: 100%;
+  gap: $space-1;
+  padding: $space-3 $space-4;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid $border-subtle;
+  cursor: pointer;
+
+  &:hover, &--unread { background: $surface-2; }
+  time { color: $text-muted; font-size: $text-caption; }
+}
+
+.notification-item__title { font-weight: $font-semibold; }
+.notification-item__message { color: $text-page; font-size: $text-small; }
+.notification-empty { margin: 0; padding: $space-5; color: $text-muted; text-align: center; }

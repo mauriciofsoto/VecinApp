@@ -50,6 +50,7 @@ export class MisReservas implements OnInit {
 
   readonly errorFormulario = signal<string | null>(null);
   readonly exitoFormulario = signal<string | null>(null);
+  readonly formularioVisible = signal(false);
 
   readonly formulario = {
     titulo: '',

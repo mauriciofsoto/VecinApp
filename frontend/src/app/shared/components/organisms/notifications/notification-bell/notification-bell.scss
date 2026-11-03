@@ -1,0 +1,31 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.notification-control {
+  position: relative;
+}
+
+.notification-trigger {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: $text-main;
+  background: $surface-2;
+  border: 1px solid $border-control;
+  border-radius: $radius-full;
+  cursor: pointer;
+}
+
+.notification-count {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.35rem;
+  min-width: 1.2rem;
+  padding: 0.1rem 0.25rem;
+  color: $bg-dark;
+  background: $primary-light;
+  border-radius: $radius-full;
+  font-size: $text-tiny;
+  font-weight: $font-bold;
+}

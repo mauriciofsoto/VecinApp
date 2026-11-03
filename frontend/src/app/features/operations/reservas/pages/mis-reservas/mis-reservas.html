@@ -1,4 +1,4 @@
-<main class="operations-page">
+<main class="operations-page reservas-module">
   <header class="page-header">
     <h1>Mis reservas</h1>
     <p>Organizá tus espacios y consultá tus reservas.</p>
@@ -23,18 +23,32 @@
             <h2>Nueva reserva</h2>
             <p>Solicitá un espacio común.</p>
           </div>
+          <button
+            type="button"
+            class="primary"
+            [attr.aria-expanded]="formularioVisible()"
+            aria-controls="reserva-creation-content"
+            (click)="formularioVisible.set(!formularioVisible())"
+          >
+            {{ formularioVisible() ? 'Ocultar formulario' : 'Crear reserva' }}
+          </button>
         </header>
 
-        @if (cargandoUnidades()) {
-          <p>Cargando tus unidades...</p>
-        } @else if (errorUnidades()) {
-          <p class="form-feedback form-feedback--error">
-            {{ errorUnidades() }}
-          </p>
-        } @else if (unidades().length === 0) {
-          <p>No tenés unidades asociadas a tu cuenta.</p>
-        } @else {
-          <form (ngSubmit)="crearReserva()" class="operation-form-grid">
+        <div
+          id="reserva-creation-content"
+          class="reservation-form-content"
+          [hidden]="!formularioVisible()"
+        >
+            @if (cargandoUnidades()) {
+              <p>Cargando tus unidades...</p>
+            } @else if (errorUnidades()) {
+              <p class="form-feedback form-feedback--error">
+                {{ errorUnidades() }}
+              </p>
+            } @else if (unidades().length === 0) {
+              <p>No tenés unidades asociadas a tu cuenta.</p>
+            } @else {
+              <form (ngSubmit)="crearReserva()" class="operation-form-grid">
 
             @if (unidades().length > 1) {
               <label class="form-field">
@@ -222,8 +236,9 @@
             >
               Solicitar reserva
             </button>
-          </form>
-        }
+              </form>
+            }
+        </div>
       </section>
 
       <!-- Reservas del día -->
@@ -244,11 +259,27 @@
             class="item-card"
             [class.item-card--selected]="reservaSeleccionada()?.id === reserva.id"
           >
-            <div>
+            <div class="reservation-information">
               <h3>{{ reserva.titulo }}</h3>
-              <p>{{ nombreEspacio(reserva.espacioId) }}</p>
-              <p>{{ reserva.horaInicio }} - {{ reserva.horaFin }}</p>
-              <span class="status">{{ reserva.estado }}</span>
+              <div class="reservation-information__facts">
+                <p class="reservation-fact">
+                  <span>Espacio común</span>
+                  <strong>{{ nombreEspacio(reserva.espacioId) }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Unidad</span>
+                  <strong>{{ reserva.unidadNombre }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Fecha</span>
+                  <strong>{{ reserva.fecha | date: 'dd/MM/yyyy' }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Horario</span>
+                  <strong>{{ reserva.horaInicio }} – {{ reserva.horaFin }}</strong>
+                </p>
+              </div>
+              <span class="status" [attr.data-status]="reserva.estado">{{ reserva.estado }}</span>
             </div>
 
             <button

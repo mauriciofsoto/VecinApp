@@ -4,7 +4,6 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ButtonComponent } from '../../../shared/components/atoms/button/button.component';
 import { SearchBar } from '../../../shared/components/molecules/search-bar/search-bar';
 import { CardComponent } from '../../../shared/components/atoms/card/card.component';
-import { SidebarComponent } from '../../../shared/components/navigation/sidebar/sidebar.component';
 import { InputComponent } from '../../../shared/components/atoms/input/input'
 import { EmptyState } from '../../../shared/components/molecules/empty-state/empty-state';
 
@@ -71,7 +70,7 @@ const LAYOUT_STORAGE_KEY = 'vecinapp_admin_bento_layout';
     CommonModule,
     CardComponent,
     SearchBar,
-    EmptyState, SidebarComponent,
+    EmptyState,
     HistorialEncuestas,
     FeedPrincipal,
     IncidenciasAdmin,
