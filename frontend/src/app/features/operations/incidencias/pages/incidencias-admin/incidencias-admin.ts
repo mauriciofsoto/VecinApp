@@ -2,6 +2,7 @@ import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia';
 
 import {
@@ -24,6 +25,7 @@ import { SelectComponent, SelectOption } from '../../../../../shared/components/
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     ButtonComponent,
     CardComponent,
     Modal,

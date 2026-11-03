@@ -138,7 +138,7 @@ export class SidebarComponent {
           label: 'Incidencias',
           icon: '◈',
           route: '/admin/incidencias',
-          roles: ['Administrador', 'SuperAdministrador'],
+          roles: ['Administrador'],
         },
         {
           label: 'Mis incidencias',

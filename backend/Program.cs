@@ -207,6 +207,46 @@ using (var scope = app.Services.CreateScope())
 
     await context.SaveChangesAsync();
 
+    // Catálogos requeridos por la creación, visualización y transición de incidencias.
+    // Se agregan solo los valores faltantes para no alterar catálogos existentes.
+    var estadosIncidenciaPredeterminados = new[]
+    {
+        "Pendiente",
+        "En proceso",
+        "Resuelta",
+        "Rechazada"
+    };
+    var estadosIncidenciaExistentes = await context.EstadosIncidencia
+        .Select(estado => estado.Nombre)
+        .ToListAsync();
+
+    foreach (var nombre in estadosIncidenciaPredeterminados)
+    {
+        if (!estadosIncidenciaExistentes.Contains(nombre, StringComparer.OrdinalIgnoreCase))
+            context.EstadosIncidencia.Add(new EstadoIncidencia { Nombre = nombre });
+    }
+
+    var categoriasIncidenciaPredeterminadas = new[]
+    {
+        "Plomería",
+        "Electricidad",
+        "Ascensor",
+        "Limpieza",
+        "Seguridad",
+        "Otro"
+    };
+    var categoriasIncidenciaExistentes = await context.CategoriasIncidencia
+        .Select(categoria => categoria.Nombre)
+        .ToListAsync();
+
+    foreach (var nombre in categoriasIncidenciaPredeterminadas)
+    {
+        if (!categoriasIncidenciaExistentes.Contains(nombre, StringComparer.OrdinalIgnoreCase))
+            context.CategoriasIncidencia.Add(new CategoriaIncidencia { Nombre = nombre });
+    }
+
+    await context.SaveChangesAsync();
+
 
     // 3. Crear o actualizar el usuario Administrador.
     const string emailAdmin = "vecino@vecinapp.com";

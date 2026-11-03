@@ -14,10 +14,22 @@ const RESIDENT_ROLES = ['Inquilino', 'Propietario'];
 
 export const routes: Routes = [
   {
+    path: 'registro',
+    loadComponent: () => import('./pages/registro/registro').then(m => m.Registro),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login')
         .then(m => m.Login),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./features/auth/forgot-password/forgot-password').then(m => m.ForgotPassword),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password').then(m => m.ResetPassword),
   },
 
   {
@@ -73,7 +85,7 @@ export const routes: Routes = [
           {
             path: 'incidencias',
             canActivate: [roleGuard],
-            data: { roles: ADMIN_ROLES },
+            data: { roles: ['Administrador'] },
             loadComponent: () =>
               import('./features/operations/incidencias/pages/incidencias-admin/incidencias-admin')
                 .then(m => m.IncidenciasAdmin),
@@ -143,9 +155,14 @@ export const routes: Routes = [
 
       // INCIDENCIAS
       {
+        path: 'incidencias/admin',
+        redirectTo: 'admin/incidencias',
+        pathMatch: 'full',
+      },
+      {
         path: 'incidencias',
         canActivate: [roleGuard],
-        data: { roles: ADMIN_ROLES },
+        data: { roles: ['Administrador'] },
         loadComponent: () =>
           import('./features/operations/incidencias/pages/incidencias-admin/incidencias-admin')
             .then(m => m.IncidenciasAdmin),
@@ -157,6 +174,30 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/operations/incidencias/pages/mis-incidencias/mis-incidencias')
             .then(m => m.MisIncidencias),
+      },
+      {
+        path: 'incidencias/crear',
+        canActivate: [roleGuard],
+        data: { roles: RESIDENT_ROLES },
+        loadComponent: () => import('./features/operations/incidencias/pages/crear-incidencia/crear-incidencia').then(m => m.CrearIncidencia),
+      },
+      {
+        path: 'administrador/incidencias',
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador'] },
+        loadComponent: () => import('./features/operations/incidencias/pages/incidencias-admin/incidencias-admin').then(m => m.IncidenciasAdmin),
+      },
+      {
+        path: 'administrador/incidencias/:id',
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador'] },
+        loadComponent: () => import('./features/operations/incidencias/pages/detalle-incidencia/detalle-incidencia').then(m => m.DetalleIncidenciaComponent),
+      },
+      {
+        path: 'inquilino/incidencias',
+        canActivate: [roleGuard],
+        data: { roles: RESIDENT_ROLES },
+        loadComponent: () => import('./features/operations/incidencias/pages/incidencias-inquilino/incidencias-inquilino').then(m => m.IncidenciasInquilinoComponent),
       },
 
       // PAQUETERÍA

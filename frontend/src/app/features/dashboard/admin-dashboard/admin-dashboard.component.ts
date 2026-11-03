@@ -101,6 +101,7 @@ export class AdminDashboardComponent {
   }
 
   private normalizeStatus(status: string): string {
-    return status.trim().toLocaleLowerCase('es-AR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return status.trim().toLocaleLowerCase('es-AR')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-\s]+/g, ' ');
   }
 }

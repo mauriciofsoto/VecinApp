@@ -1,0 +1,54 @@
+
+<section class="mis-incidencias">
+  <header class="encabezado">
+    <div>
+      <h1>Mis incidencias</h1>
+      <p>Consultá el estado de los problemas que reportaste en tu edificio.</p>
+    </div>
+
+    <button type="button" class="btn-crear" (click)="crearIncidencia()">
+      + Crear incidencia
+    </button>
+  </header>
+
+  <p *ngIf="cargando" class="mensaje">
+    Cargando tus incidencias...
+  </p>
+
+  <div *ngIf="!cargando && error" class="mensaje error">
+    {{ error }}
+    <button type="button" (click)="cargarIncidencias()">Reintentar</button>
+  </div>
+
+  <div *ngIf="!cargando && !error && incidencias.length === 0" class="vacio">
+    <h2>Todavía no reportaste incidencias</h2>
+    <p>Cuando informes un problema, vas a poder consultar acá su estado.</p>
+    <button type="button" class="btn-crear" (click)="crearIncidencia()">
+      Crear mi primera incidencia
+    </button>
+  </div>
+
+  <div *ngIf="!cargando && !error && incidencias.length > 0" class="lista">
+    <article class="incidencia" *ngFor="let incidencia of incidencias">
+      <div class="incidencia-superior">
+        <h2>{{ incidencia.titulo }}</h2>
+        <span class="estado">{{ incidencia.estado }}</span>
+      </div>
+
+      <p class="descripcion">{{ incidencia.descripcion }}</p>
+
+      <div class="datos">
+        <span><strong>Categoría:</strong> {{ incidencia.categoria }}</span>
+        <span><strong>Prioridad:</strong> {{ incidencia.prioridad }}</span>
+        <span>
+          <strong>Fecha:</strong>
+          {{ incidencia.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+        <span>
+          <strong>Responsable:</strong>
+          {{ incidencia.responsable || 'Todavía sin asignar' }}
+        </span>
+      </div>
+    </article>
+  </div>
+</section>

@@ -45,7 +45,7 @@
 
     <ng-template bentoItem="incidents">
       <section class="dashboard-widget" aria-labelledby="incidents-title">
-        <header class="widget-heading"><div><span class="widget-kicker">OPERACIONES</span><h2 id="incidents-title">Incidencias</h2></div><a class="widget-link" routerLink="/admin/incidencias">Gestionar <span aria-hidden="true">↗</span></a></header>
+        <header class="widget-heading"><div><span class="widget-kicker">OPERACIONES</span><h2 id="incidents-title">Incidencias</h2></div>@if (currentUser()?.rol === 'Administrador') { <a class="widget-link" routerLink="/admin/incidencias">Gestionar <span aria-hidden="true">↗</span></a> }</header>
         @if (incidentsLoading()) {
           <p class="widget-state" role="status">Cargando incidencias…</p>
         } @else if (incidentsError()) {

@@ -3,16 +3,13 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
-import { Incidencia } from '../models/incidencia';
+import { DetalleIncidencia, EstadoIncidenciaDto, Incidencia } from '../models/incidencia';
 import { MensajeIncidencia, RolEmisorMensaje } from '../models/mensaje-incidencia';
+
+export type { DetalleIncidencia, EstadoIncidencia, EstadoIncidenciaDto } from '../models/incidencia';
 
 export interface CategoriaIncidenciaDto {
   idCategoriaIncidencia: number;
-  nombre: string;
-}
-
-export interface EstadoIncidenciaDto {
-  idEstadoIncidencia: number;
   nombre: string;
 }
 
@@ -106,9 +103,9 @@ export class Incidencias {
     return this.http.get<EstadoIncidenciaDto[]>(`${this.apiUrl}/estados`);
   }
 
-  obtenerDetalle(id: number): Observable<Incidencia> {
+  obtenerDetalle(id: number): Observable<DetalleIncidencia> {
     return this.http.get<IncidenciaApiDto>(`${this.apiUrl}/${id}`).pipe(
-      map(item => this.mapIncidencia(item)),
+      map(item => this.mapIncidencia(item) as DetalleIncidencia),
     );
   }
 
@@ -119,7 +116,8 @@ export class Incidencias {
     );
   }
 
-  cambiarEstado(id: number, idEstadoIncidencia: number): Observable<CambiarEstadoResponse> {
+  cambiarEstado(id: number, value: number | { idEstadoIncidencia: number }): Observable<CambiarEstadoResponse> {
+    const idEstadoIncidencia = typeof value === 'number' ? value : value.idEstadoIncidencia;
     return this.http.put<CambiarEstadoResponse>(`${this.apiUrl}/${id}/estado`, {
       idEstadoIncidencia,
     }).pipe(
@@ -130,6 +128,14 @@ export class Incidencias {
         ));
       }),
     );
+  }
+
+  listarMisIncidencias(): Observable<Incidencia[]> {
+    return this.cargarMisIncidencias();
+  }
+
+  listarEstados(): Observable<EstadoIncidenciaDto[]> {
+    return this.cargarEstados();
   }
 
   cargarMensajes(incidenciaId: number): Observable<MensajeIncidencia[]> {
@@ -148,6 +154,8 @@ export class Incidencias {
   private mapIncidencia(item: IncidenciaApiDto): Incidencia {
     return {
       id: item.idIncidencia,
+      idIncidencia: item.idIncidencia,
+      idEstadoIncidencia: item.idEstadoIncidencia,
       titulo: item.titulo,
       descripcion: item.descripcion,
       categoria: item.categoria,
@@ -160,6 +168,9 @@ export class Incidencias {
       usuarioNombre: item.reportante,
       responsableId: item.idUsuarioResponsable,
       responsableNombre: item.responsable,
+      responsable: item.responsable,
+      reportante: item.reportante,
+      idCategoriaIncidencia: item.idCategoriaIncidencia,
     };
   }
 

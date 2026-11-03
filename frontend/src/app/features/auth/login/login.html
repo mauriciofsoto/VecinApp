@@ -36,6 +36,11 @@
         />
       </div>
 
+      <div class="login-links">
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+        <a routerLink="/registro">Crear cuenta con código de invitación</a>
+      </div>
+
       @if (errorMessage()) {
         <p class="login-error" role="alert">
           {{ errorMessage() }}
