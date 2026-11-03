@@ -1,0 +1,9 @@
+# .NET
+bin/
+obj/
+
+# Node
+node_modules/
+
+# Configuración local
+appsettings.Development.json

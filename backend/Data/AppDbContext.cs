@@ -1,0 +1,615 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using VecinApp.Models;
+
+namespace VecinApp.Data;
+
+public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
+// Se especifican los tres tipos genéricos para evitar que EF intente mapear IdentityUser y Usuario por duplicado en el modelo
+
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    {
+    }
+
+    
+
+    // Tablas de negocio
+    public DbSet<Rol> RolesAplicacion { get; set; }
+    public DbSet<Edificio> Edificios { get; set; }
+    public DbSet<CodigoInvitacion> CodigosInvitacion { get; set; }
+    //public DbSet<Usuario> Usuarios { get; set; } -- lo maneja Identity
+    public DbSet<Unidad> Unidades { get; set; }
+    public DbSet<UsuarioUnidad> UsuariosUnidades { get; set; }
+    public DbSet<Aviso> Avisos { get; set; }
+    public DbSet<Incidencia> Incidencias { get; set; }
+    public DbSet<EstadoIncidencia> EstadosIncidencia { get; set; }
+    public DbSet<CategoriaIncidencia> CategoriasIncidencia { get; set; }
+    public DbSet<MensajeIncidencia> MensajesIncidencia { get; set; }
+    public DbSet<Publicacion> Publicaciones { get; set; }
+    public DbSet<CategoriaPublicacion> CategoriasPublicacion { get; set; }
+    public DbSet<Comentario> Comentarios { get; set; }
+    public DbSet<Evento> Eventos { get; set; }
+    public DbSet<Encuesta> Encuestas { get; set; }
+    public DbSet<OpcionEncuesta> OpcionesEncuesta { get; set; }
+    public DbSet<RespuestaEncuesta> RespuestasEncuesta { get; set; }
+    public DbSet<MensajePaquete> MensajesPaquete { get; set; }
+    public DbSet<Paquete> Paquetes { get; set; }
+    public DbSet<Notificacion> Notificaciones { get; set; }
+
+    // Tabla de autenticación
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // =========================
+        // TABLA BASE IDENTITY
+        // =========================
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.ToTable("usuario");
+
+            entity.Property(e => e.Nombre)
+                .HasColumnName("nombre")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.Apellido)
+                .HasColumnName("apellido")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(e => e.Estado)
+                .HasColumnName("estado")
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(e => e.FechaRegistro)
+                .HasColumnName("fecha_registro")
+                .IsRequired();
+
+            entity.Property(e => e.IdRol)
+                .HasColumnName("id_rol");
+
+            entity.Property(e => e.IdEdificio)
+                .HasColumnName("id_edificio");
+
+            entity.HasOne(e => e.Rol)
+                .WithMany(e => e.Usuarios)
+                .HasForeignKey(e => e.IdRol)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Usuarios)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // ROL
+        // =========================
+        modelBuilder.Entity<Rol>(entity =>
+        {
+            entity.ToTable("rol");
+            entity.HasKey(e => e.IdRol);
+            entity.Property(e => e.IdRol).HasColumnName("id_rol");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
+        });
+
+        // =========================
+        // EDIFICIO
+        // =========================
+        modelBuilder.Entity<Edificio>(entity =>
+        {
+            entity.ToTable("edificio");
+            entity.HasKey(e => e.IdEdificio);
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
+            entity.Property(e => e.Direccion).HasColumnName("direccion").IsRequired();
+            entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
+        });
+        // =========================
+        // CODIGO_INVITACION
+        // =========================
+        modelBuilder.Entity<CodigoInvitacion>(entity =>
+        {
+            entity.ToTable("codigo_invitacion");
+
+            entity.HasKey(e => e.IdCodigoInvitacion);
+
+            entity.Property(e => e.IdCodigoInvitacion)
+                .HasColumnName("id_codigo_invitacion");
+
+            entity.Property(e => e.Codigo)
+                .HasColumnName("codigo")
+                .HasMaxLength(30)
+                .IsRequired();
+
+            entity.HasIndex(e => e.Codigo).IsUnique();
+
+            entity.Property(e => e.IdEdificio)
+                .HasColumnName("id_edificio")
+                .IsRequired();
+
+            entity.Property(e => e.IdRol)
+                .HasColumnName("id_rol")
+                .IsRequired();
+
+            entity.Property(e => e.FechaExpiracion)
+                .HasColumnName("fecha_expiracion")
+                .IsRequired();
+
+            entity.Property(e => e.UsosMaximos)
+                .HasColumnName("usos_maximos")
+                .IsRequired();
+
+            entity.Property(e => e.UsosRealizados)
+                .HasColumnName("usos_realizados")
+                .IsRequired();
+
+            entity.Property(e => e.Activo)
+                .HasColumnName("activo")
+                .IsRequired();
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany()
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Rol)
+                .WithMany()
+                .HasForeignKey(e => e.IdRol)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // USUARIO (Identity + Relaciones)
+        // =========================
+
+        // =========================
+        // UNIDAD
+        // =========================
+        modelBuilder.Entity<Unidad>(entity =>
+        {
+            entity.ToTable("unidad");
+            entity.HasKey(e => e.IdUnidad);
+            entity.Property(e => e.IdUnidad).HasColumnName("id_unidad");
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
+            entity.Property(e => e.Piso).HasColumnName("piso").IsRequired();
+            entity.Property(e => e.Identificacion).HasColumnName("identificacion").IsRequired();
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Unidades)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // USUARIO_UNIDAD
+        // =========================
+        modelBuilder.Entity<UsuarioUnidad>(entity =>
+        {
+            entity.ToTable("usuario_unidad");
+            entity.HasKey(e => e.IdUsuarioUnidad);
+            entity.Property(e => e.IdUsuarioUnidad).HasColumnName("id_usuario_unidad");
+            entity.Property(e => e.IdUnidad).HasColumnName("id_unidad");
+            entity.Property(e => e.TipoRelacion).HasColumnName("tipo_relacion").IsRequired();
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany(e => e.UsuariosUnidades)
+                 .HasForeignKey(e => e.IdUsuario)   
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Unidad)
+                .WithMany(e => e.UsuariosUnidades)
+                .HasForeignKey(e => e.IdUnidad)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // AVISO
+        // =========================
+        modelBuilder.Entity<Aviso>(entity =>
+        {
+            entity.ToTable("aviso");
+            entity.HasKey(e => e.IdAviso);
+            entity.Property(e => e.IdAviso).HasColumnName("id_aviso");
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
+            entity.Property(e => e.Titulo).HasColumnName("titulo").IsRequired();
+            entity.Property(e => e.Descripcion).HasColumnName("descripcion").IsRequired();
+            entity.Property(e => e.Prioridad).HasColumnName("prioridad").IsRequired();
+            entity.Property(e => e.FechaPublicacion).HasColumnName("fecha_publicacion").IsRequired();
+            entity.Property(e => e.FechaVencimiento).HasColumnName("fecha_vencimiento");
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Avisos)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // ESTADO_INCIDENCIA
+        // =========================
+        modelBuilder.Entity<EstadoIncidencia>(entity =>
+        {
+            entity.ToTable("estado_incidencia");
+            entity.HasKey(e => e.IdEstadoIncidencia);
+            entity.Property(e => e.IdEstadoIncidencia).HasColumnName("id_estado_incidencia");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
+        });
+
+        // =========================
+        // CATEGORIA_INCIDENCIA
+        // =========================
+        modelBuilder.Entity<CategoriaIncidencia>(entity =>
+        {
+            entity.ToTable("categoria_incidencia");
+            entity.HasKey(e => e.IdCategoriaIncidencia);
+            entity.Property(e => e.IdCategoriaIncidencia).HasColumnName("id_categoria_incidencia");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
+        });
+
+        // =========================
+        // INCIDENCIA
+        // =========================
+        modelBuilder.Entity<Incidencia>(entity =>
+        {
+            entity.ToTable("incidencia");
+
+            entity.HasKey(e => e.IdIncidencia);
+
+            entity.Property(e => e.IdIncidencia)
+                .HasColumnName("id_incidencia");
+
+            entity.Property(e => e.IdEdificio)
+                .HasColumnName("id_edificio");
+
+            entity.Property(e => e.IdUsuarioReportante)
+                .HasColumnName("id_usuario_reportante")
+                .IsRequired();
+
+            entity.Property(e => e.IdUsuarioResponsable)
+                .HasColumnName("id_usuario_responsable");
+
+            entity.Property(e => e.IdEstadoIncidencia)
+                .HasColumnName("id_estado_incidencia");
+
+            entity.Property(e => e.IdCategoriaIncidencia)
+                .HasColumnName("id_categoria_incidencia");
+
+            entity.Property(e => e.Titulo)
+                .HasColumnName("titulo")
+                .IsRequired();
+
+            entity.Property(e => e.Descripcion)
+                .HasColumnName("descripcion")
+                .IsRequired();
+
+            entity.Property(e => e.Ubicacion)
+                .HasColumnName("ubicacion")
+                .HasMaxLength(150);
+
+            entity.Property(e => e.Prioridad)
+                .HasColumnName("prioridad")
+                .IsRequired();
+
+            entity.Property(e => e.FechaCreacion)
+                .HasColumnName("fecha_creacion")
+                .IsRequired();
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Incidencias)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.UsuarioReportante)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioReportante)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.UsuarioResponsable)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioResponsable)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.EstadoIncidencia)
+                .WithMany(e => e.Incidencias)
+                .HasForeignKey(e => e.IdEstadoIncidencia)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CategoriaIncidencia)
+                .WithMany(e => e.Incidencias)
+                .HasForeignKey(e => e.IdCategoriaIncidencia)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // MENSAJE INCIDENCIA
+        // =========================
+        modelBuilder.Entity<MensajeIncidencia>(entity =>
+        {
+            entity.ToTable("mensaje_incidencia");
+            entity.HasKey(e => e.IdMensajeIncidencia);
+            entity.Property(e => e.IdMensajeIncidencia).HasColumnName("id_mensaje_incidencia");
+            entity.Property(e => e.IdIncidencia).HasColumnName("id_incidencia");
+            entity.Property(e => e.IdUsuarioEmisor).HasColumnName("id_usuario_emisor").IsRequired();
+            entity.Property(e => e.Contenido).HasColumnName("contenido").HasMaxLength(2000).IsRequired();
+            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").IsRequired();
+
+            entity.HasOne(e => e.Incidencia)
+                .WithMany(e => e.Mensajes)
+                .HasForeignKey(e => e.IdIncidencia)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.UsuarioEmisor)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioEmisor)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // CATEGORIA_PUBLICACION
+        // =========================
+        modelBuilder.Entity<CategoriaPublicacion>(entity =>
+        {
+            entity.ToTable("categoria_publicacion");
+            entity.HasKey(e => e.IdCategoriaPublicacion);
+            entity.Property(e => e.IdCategoriaPublicacion).HasColumnName("id_categoria_publicacion");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
+        });
+
+        // =========================
+        // PUBLICACION
+        // =========================
+        modelBuilder.Entity<Publicacion>(entity =>
+        {
+            entity.ToTable("publicacion");
+            entity.HasKey(e => e.IdPublicacion);
+            entity.Property(e => e.IdPublicacion).HasColumnName("id_publicacion");
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
+            entity.Property(e => e.IdCategoriaPublicacion).HasColumnName("id_categoria_publicacion");
+            entity.Property(e => e.Titulo).HasColumnName("titulo").IsRequired();
+            entity.Property(e => e.Contenido).HasColumnName("contenido").IsRequired();
+            entity.Property(e => e.FechaPublicacion).HasColumnName("fecha_publicacion").IsRequired();
+            entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Publicaciones)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.CategoriaPublicacion)
+                .WithMany(e => e.Publicaciones)
+                .HasForeignKey(e => e.IdCategoriaPublicacion)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // COMENTARIO
+        // =========================
+        modelBuilder.Entity<Comentario>(entity =>
+        {
+            entity.ToTable("comentario");
+            entity.HasKey(e => e.IdComentario);
+            entity.Property(e => e.IdComentario).HasColumnName("id_comentario");
+            entity.Property(e => e.IdPublicacion).HasColumnName("id_publicacion");
+            entity.Property(e => e.Contenido).HasColumnName("contenido").IsRequired();
+            entity.Property(e => e.Fecha).HasColumnName("fecha").IsRequired();
+
+            entity.HasOne(e => e.Publicacion)
+                .WithMany(e => e.Comentarios)
+                .HasForeignKey(e => e.IdPublicacion)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // EVENTO
+        // =========================
+        modelBuilder.Entity<Evento>(entity =>
+        {
+            entity.ToTable("evento");
+            entity.HasKey(e => e.IdEvento);
+            entity.Property(e => e.IdEvento).HasColumnName("id_evento");
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
+            entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
+            entity.Property(e => e.Descripcion).HasColumnName("descripcion").IsRequired();
+            entity.Property(e => e.Fecha).HasColumnName("fecha").IsRequired();
+            entity.Property(e => e.Hora).HasColumnName("hora").IsRequired();
+            entity.Property(e => e.Ubicacion).HasColumnName("ubicacion").IsRequired();
+            entity.Property(e => e.CantidadParticipantes).HasColumnName("cantidad_participantes").IsRequired();
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany(e => e.Eventos)
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // ENCUESTA
+        // =========================
+        modelBuilder.Entity<Encuesta>(entity =>
+        {
+            entity.ToTable("encuesta");
+            entity.HasKey(e => e.IdEncuesta);
+            entity.Property(e => e.IdEncuesta).HasColumnName("id_encuesta");
+            entity.Property(e => e.IdPublicacion).HasColumnName("id_publicacion");
+            entity.Property(e => e.FechaInicio).HasColumnName("fecha_inicio").IsRequired();
+            entity.Property(e => e.FechaFin).HasColumnName("fecha_fin").IsRequired();
+            entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
+
+            entity.HasOne(e => e.Publicacion)
+                .WithOne(e => e.Encuesta)
+                .HasForeignKey<Encuesta>(e => e.IdPublicacion)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // OPCION_ENCUESTA
+        // =========================
+        modelBuilder.Entity<OpcionEncuesta>(entity =>
+        {
+            entity.ToTable("opcion_encuesta");
+            entity.HasKey(e => e.IdOpcion);
+            entity.Property(e => e.IdOpcion).HasColumnName("id_opcion");
+            entity.Property(e => e.IdEncuesta).HasColumnName("id_encuesta");
+            entity.Property(e => e.Texto).HasColumnName("texto").IsRequired();
+
+            entity.HasOne(e => e.Encuesta)
+                .WithMany(e => e.Opciones)
+                .HasForeignKey(e => e.IdEncuesta)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // RESPUESTA_ENCUESTA
+        // =========================
+        modelBuilder.Entity<RespuestaEncuesta>(entity =>
+        {
+            entity.ToTable("respuesta_encuesta");
+            entity.HasKey(e => e.IdRespuesta);
+            entity.Property(e => e.IdRespuesta).HasColumnName("id_respuesta");
+            entity.Property(e => e.IdEncuesta).HasColumnName("id_encuesta");
+            entity.Property(e => e.IdOpcion).HasColumnName("id_opcion");
+            entity.Property(e => e.FechaRespuesta).HasColumnName("fecha_respuesta").IsRequired();
+
+            entity.HasOne(e => e.Encuesta)
+                .WithMany(e => e.Respuestas)
+                .HasForeignKey(e => e.IdEncuesta)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Opcion)
+                .WithMany(e => e.Respuestas)
+                .HasForeignKey(e => e.IdOpcion)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // PAQUETE
+        // =========================
+        modelBuilder.Entity<Paquete>(entity =>
+        {
+            entity.ToTable("paquete");
+            entity.HasKey(e => e.IdPaquete);
+            entity.Property(e => e.IdPaquete).HasColumnName("id_paquete");
+            entity.Property(e => e.IdUnidad).HasColumnName("id_unidad");
+            entity.Property(e => e.Identificacion).HasColumnName("identificacion").IsRequired();
+            entity.Property(e => e.FechaRecepcion).HasColumnName("fecha_recepcion").IsRequired();
+            entity.Property(e => e.Observaciones).HasColumnName("observaciones");
+            entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
+            entity.Property(e => e.IdUsuarioRegistro).HasColumnName("id_usuario_registro").IsRequired();
+            
+            entity.Property(e => e.IdUsuarioDestinatario).HasColumnName("id_usuario_destinatario").IsRequired();
+            entity.Property(e => e.FechaConfirmacion).HasColumnName("fecha_confirmacion");
+            entity.Property(e => e.FechaEliminacion).HasColumnName("fecha_eliminacion");
+
+            entity.HasOne(e => e.Unidad)
+                .WithMany(e => e.Paquetes)
+                .HasForeignKey(e => e.IdUnidad)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.UsuarioRegistro)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioRegistro)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Mensajes)
+                .WithOne(e => e.Paquete)
+                .HasForeignKey(e => e.IdPaquete)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.UsuarioDestinatario)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioDestinatario)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+                // =========================
+        // MENSAJE PAQUETE
+        // =========================
+        modelBuilder.Entity<MensajePaquete>(entity =>
+        {
+            entity.ToTable("mensaje_paquete");
+
+            entity.HasKey(e => e.IdMensajePaquete);
+
+            entity.Property(e => e.IdMensajePaquete)
+                .HasColumnName("id_mensaje_paquete");
+
+            entity.Property(e => e.IdPaquete)
+                .HasColumnName("id_paquete");
+
+            entity.Property(e => e.IdUsuarioEmisor)
+                .HasColumnName("id_usuario_emisor")
+                .IsRequired();
+
+            entity.Property(e => e.Contenido)
+                .HasColumnName("contenido")
+                .IsRequired();
+
+            entity.Property(e => e.FechaEnvio)
+                .HasColumnName("fecha_envio")
+                .IsRequired();
+
+            entity.HasOne(e => e.UsuarioEmisor)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioEmisor)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+
+
+        // =========================
+        // NOTIFICACION
+        // =========================
+        modelBuilder.Entity<Notificacion>(entity =>
+        {
+            entity.ToTable("notificacion");
+            entity.HasKey(e => e.IdNotificacion);
+            entity.Property(e => e.IdNotificacion).HasColumnName("id_notificacion");
+            entity.Property(e => e.Tipo).HasColumnName("tipo").IsRequired();
+            entity.Property(e => e.Titulo).HasColumnName("titulo").HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Mensaje).HasColumnName("mensaje").IsRequired();
+            entity.Property(e => e.Fecha).HasColumnName("fecha").IsRequired();
+            entity.Property(e => e.Leida).HasColumnName("leida").IsRequired();
+            entity.Property(e => e.Ruta).HasColumnName("ruta").HasMaxLength(500);
+            entity.HasIndex(e => new { e.IdUsuario, e.Leida, e.Fecha });
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                 .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+}
