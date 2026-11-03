@@ -1,53 +1,78 @@
-//variables
-// ========================================
-// 1. COLORES & GRADIENTES (Tema Glass)
-// ========================================
-$bg-dark: #0f172a;
-$bg-dark-alpha: rgba($bg-dark, 0.6);
-$glass-bg: rgba(30, 41, 59, 0.65);
-$glass-border: rgba(255, 255, 255, 0.12);
-$glass-hover: rgba(51, 65, 85, 0.7);
 
-$primary: #2563eb;
-$primary-hover: #1d4ed8;
-$surface-button-secondary: #475569;
+// ========================================
+// 1. COLORES & GRADIENTES — MIDNIGHT LAVENDER
+// ========================================
+
+// Fondos
+$bg-dark: #171923;
+$bg-dark-alpha: rgba($bg-dark, 0.72);
+
+$glass-bg: rgba(4, 17, 51, 0.341);
+$glass-border: rgba(226, 220, 255, 0.10);
+$glass-hover: rgba(52, 51, 70, 0.82);
+
+// Identidad principal
+$primary: #A78BFA;
+$primary-hover: #9275E8;
+$primary-light: #C4B5FD;
+$primary-glow: rgba(167, 139, 250, 0.24);
+
+// Acento secundario
+$accent: #78B8A5;
+
+// Botones
+$surface-button-secondary: #454457;
 $button-padding-compact: 0.7rem 1rem;
-$primary-light: #818cf8;
-$primary-glow: rgba(37, 99, 235, 0.35);
-$accent: #38bdf8;
 
-$white: #fff;
-$text-main: #f8fafc;
-$text-muted: #94a3b8;
+// Textos
+$white: #FFFFFF;
+$text-main: #F4F1FA;
+$text-muted: #AAA8B9;
 $text-form-label: 0.9rem;
-$text-page: #e2e8f0;
-$text-success-soft: #4ade80;
-$text-warning-soft: #fbbf24;
-$text-danger-soft: #f87171;
-$text-info-soft: #7dd3fc;
+$text-page: #E5E1EE;
 
-// Superficies translúcidas (fondos y bordes sutiles sobre el glass)
-$surface-1: rgba(255, 255, 255, 0.04);
-$surface-2: rgba(255, 255, 255, 0.08);
-$surface-3: rgba(255, 255, 255, 0.15);
-$surface-dashboard-table: rgba(255, 255, 255, 0.03);
-$surface-dashboard-progress: rgba(255, 255, 255, 0.05);
-$border-subtle: rgba(255, 255, 255, 0.05);
-$border-control: rgba(255, 255, 255, 0.15);
-$surface-control-dark: rgba($bg-dark, 0.7);
-$surface-control-solid: #172033;
+// Estados suaves
+$text-success-soft: #91CDB5;
+$text-warning-soft: #E7B878;
+$text-danger-soft: #D98C91;
+$text-info-soft: #A6B9DB;
+
+// Superficies translúcidas
+$surface-1: rgba(255, 255, 255, 0.035);
+$surface-2: rgba(255, 255, 255, 0.065);
+$surface-3: rgba(255, 255, 255, 0.11);
+
+$surface-dashboard-table: rgba(255, 255, 255, 0.025);
+$surface-dashboard-progress: rgba(255, 255, 255, 0.045);
+
+$border-subtle: rgba(226, 220, 255, 0.055);
+$border-control: rgba(226, 220, 255, 0.14);
+
+$surface-control-dark: rgba($bg-dark, 0.8);
+$surface-control-solid: #3a2b3c;
 
 // Gradientes
-$bg-gradient: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
-$avatar-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+$bg-gradient: radial-gradient(
+  circle at 12% 8%,
+  #302943 0%,
+  #1B1C29 48%,
+  #12131B 100%
+);
+
+$avatar-gradient: linear-gradient(
+  135deg,
+  #A78BFA,
+  #78B8A5
+);
 
 // ========================================
 // 2. ESTADOS DE COLOR
 // ========================================
-$danger: #ef4444;
-$success: #22c55e;
-$warning: #eab308;
-$info: #3b82f6;
+
+$danger: #D98C91;
+$success: #78B8A5;
+$warning: #E7B878;
+$info: #91A9CE;
 
 // ========================================
 // 3. TIPOGRAFIA (Jerarquia Visual)
@@ -162,10 +187,10 @@ $transition-drag: transform 250ms $ease-out;
 
 // Variantes de badge: bg = color base, text = color del texto, border = opacidad del borde (opcional)
 $badge-variants: (
-  'success': (bg: $success, text: #4ade80),
-  'warning': (bg: $warning, text: #fbbf24),
-  'danger':  (bg: $danger,  text: #f87171),
-  'info':    (bg: $info,    text: $accent),
+  'success': (bg: $success, text: #A9DCC6),
+  'warning': (bg: $warning, text: #F2D09B),
+  'danger':  (bg: $danger,  text: #E8A9AD),
+  'info':    (bg: $info,    text: #B8C9E5),
   'accent':  (bg: $primary, text: $primary-light, border: 0.4),
   'purple':  (bg: $purple,  text: $purple),
   'neutral': (bg: $white,   text: $text-muted, border: 0.12),

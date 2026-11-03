@@ -1,5 +1,5 @@
 <div class="app-dashboard-layout">
-  
+
   <!-- SIDEBAR -->
   <app-sidebar></app-sidebar>
 
@@ -9,159 +9,183 @@
     <!-- HEADER -->
     <header class="admin-header">
       <div class="admin-header__heading">
+        <span class="admin-header__eyebrow">
+          ADMINISTRACIÓN
+        </span>
+
         <h1>Panel de administración</h1>
+
         <p>
           Gestioná las actividades y los servicios de tu comunidad.
         </p>
       </div>
-      <app-search-bar></app-search-bar>
 
+      <app-search-bar
+        placeholder="Buscar..."
+        (search)="onBuscar($event)"
+      ></app-search-bar>
     </header>
 
-    <!-- BIENVENIDA Y ACCIONES -->
-    <section class="admin-welcome">
-      <div class="admin-welcome__actions">
-        <app-button
-          variant="secondary"
-          (buttonClick)="resetLayout()"
-        >
-          Restablecer diseño
-        </app-button>
+    <!-- RESUMEN GENERAL -->
+    <section class="admin-section" aria-labelledby="overview-title">
 
-        <app-button
-          variant="primary"
-          (buttonClick)="toggleLayoutEditing()"
-        >
-          {{ isLayoutEditable() ? 'Finalizar edición' : 'Personalizar diseño' }}
-        </app-button>
-      </div>
-    </section>
-
-    <!-- GALERÍA DE COMPONENTES SHARED -->
-    <section class="shared-preview" aria-labelledby="shared-preview-title">
-      <header class="shared-preview__header">
+      <header class="admin-section__header">
         <div>
-          <span class="shared-preview__eyebrow">UI / COMPONENTES</span>
-          <h2 id="shared-preview-title">Galería de componentes compartidos</h2>
-          <p>Vista de validación para átomos y moléculas de Shared.</p>
+          <h2 id="overview-title">Resumen general</h2>
+          <p>Un vistazo al estado actual del edificio.</p>
         </div>
       </header>
 
-      <div class="shared-preview__grid">
-        <article class="shared-preview__group">
-          <h3>Botones</h3>
-          <div class="shared-preview__buttons">
-            <app-button variant="primary" size="sm">Primario</app-button>
-            <app-button variant="secondary" size="sm">Secundario</app-button>
-            <app-button variant="outline" size="sm">Outline</app-button>
-            <app-button variant="danger" size="sm">Peligro</app-button>
-          </div>
-        </article>
+      <div class="admin-overview">
 
-        <article class="shared-preview__group">
-          <h3>Input</h3>
-          <app-input
-            placeholder="Escribí para probar el input"
-            [value]="previewInput"
-            
-          />
-        </article>
+        <app-card variant="glass" size="full">
+          <div class="admin-overview__item">
+            <span class="admin-overview__label">
+              Usuarios
+            </span>
 
-        <article class="shared-preview__group">
-          
-        </article>
+            <strong class="admin-overview__value">--</strong>
 
-        <article class="shared-preview__group">
-          <h3>Search bar</h3>
-          <app-search-bar
-            placeholder="Buscar componentes..."
-            [debounceMs]="150"
-            (search)="onBuscar($event)"
-          />
-        </article>
-
-        <app-card variant="glass" size="full" customClass="shared-preview__card">
-          <div class="shared-preview__card-content">
-            <h3>Card compartida</h3>
-            <p>Contenedor glass con contenido proyectado.</p>
+            <span class="admin-overview__description">
+              Residentes registrados
+            </span>
           </div>
         </app-card>
 
+        <app-card variant="glass" size="full">
+          <div class="admin-overview__item">
+            <span class="admin-overview__label">
+              Incidencias
+            </span>
 
+            <strong class="admin-overview__value">--</strong>
 
+            <span class="admin-overview__description">
+              Reportes pendientes
+            </span>
+          </div>
+        </app-card>
 
+        <app-card variant="glass" size="full">
+          <div class="admin-overview__item">
+            <span class="admin-overview__label">
+              Encuestas
+            </span>
+
+            <strong class="admin-overview__value">--</strong>
+
+            <span class="admin-overview__description">
+              Votaciones activas
+            </span>
+          </div>
+        </app-card>
+
+        <app-card variant="glass" size="full">
+          <div class="admin-overview__item">
+            <span class="admin-overview__label">
+              mis reservas
+            </span>
+
+            <app-mis-reservas></app-mis-reservas>
+
+            <strong class="admin-overview__value">--</strong>
+
+            <span class="admin-overview__description">
+              Paquetes registrados
+            </span>
+          </div>
+        </app-card>
 
       </div>
     </section>
 
-    @if (isLayoutEditable()) {
-      <div class="admin-edit-notice">
-        <span aria-hidden="true">✦</span>
-        <p>
-          Modo de personalización activo. Podés mover y redimensionar
-          los widgets.
-        </p>
-      </div>
-    }
+    <!-- COMUNIDAD -->
+    <section class="admin-section" aria-labelledby="community-title">
 
-    <!-- ÁREA BENTO -->
-    <section class="admin-workspace">
+      <header class="admin-section__header">
+        <div>
+          <h2 id="community-title">Comunidad</h2>
+          <p>Publicaciones y novedades del edificio.</p>
+          <app-gestionar-reservas></app-gestionar-reservas>
+        </div>
+      </header>
 
-      <app-bento-grid
-        [widgets]="widgets"
-        [editable]="isLayoutEditable()"
-        (layoutChange)="onLayoutChange($event)"
-      >
-        <!-- MURO -->
-        <ng-template bentoItem="muro">
-          <app-card size="full">
+      <app-card variant="glass" size="full">
+        <app-feed-principal></app-feed-principal>
+      </app-card>
 
-            <app-feed-principal></app-feed-principal>
-          </app-card>
-        </ng-template>
+    </section>
 
-        <!-- ENCUESTAS -->
-        <ng-template bentoItem="encuestas">
-          <app-card size="full">
+    <!-- INCIDENCIAS -->
+    <section class="admin-section" aria-labelledby="incidents-title">
 
-            <app-historial-encuestas></app-historial-encuestas>
-          </app-card>
-        </ng-template>
+      <header class="admin-section__header">
+        <div>
+          <h2 id="incidents-title">Gestión de incidencias</h2>
+          <p>
+            Supervisá los reportes y gestioná las solicitudes de los residentes.
+          </p>
+        </div>
+      </header>
 
-        <!-- INCIDENCIAS -->
-        <ng-template bentoItem="incidencias">
-          <app-card size="full">
-            <div class="widget-header">
-              <div class="widget-heading">
-                <span class="widget-icon widget-icon--incidents">🚨</span>
-                <div>
-                  <h3>Incidencias</h3>
-                  <p>Seguimiento de problemas reportados.</p>
-                </div>
-              </div>
-            </div>
+      <app-card variant="glass" size="full">
+        <app-incidencias-admin></app-incidencias-admin>
+      </app-card>
 
-            <app-mis-incidencias></app-mis-incidencias>
-          </app-card>
-        </ng-template>
+    </section>
 
-        <!-- PAQUETERÍA -->
-        <ng-template bentoItem="paquetes">
-          <app-card size="full">
-            <div class="widget-header">
-              <div class="widget-heading">
-                <app-incidencias-admin></app-incidencias-admin>
-               
-              </div>
-            </div>
+    <!-- ENCUESTAS -->
+    <section class="admin-section" aria-labelledby="surveys-title">
 
-            <app-empty-state
-              title="Paquetería"
-              description="La gestión de paquetes se integrará en este espacio."
-            ></app-empty-state>
-          </app-card>
-        </ng-template>
-      </app-bento-grid>
+      <header class="admin-section__header">
+        <div>
+          <h2 id="surveys-title">Encuestas</h2>
+          <p>Administrá las votaciones y consultá sus resultados.</p>
+        </div>
+      </header>
+
+      <app-card variant="glass" size="full">
+        <app-historial-encuestas></app-historial-encuestas>
+      </app-card>
+
+    </section>
+
+    <!-- PAQUETERÍA -->
+    <section class="admin-section" aria-labelledby="packages-title">
+
+      <header class="admin-section__header">
+        <div>
+          <h2 id="packages-title">Paquetería</h2>
+          <p>Controlá los paquetes recibidos en el edificio.</p>
+        </div>
+      </header>
+
+      <app-card variant="glass" size="full">
+        <app-empty-state
+          title="Gestión de paquetería"
+          description="Desde acá vas a poder registrar paquetes y controlar su entrega a los residentes."
+        ></app-empty-state>
+      </app-card>
+
+    </section>
+
+    <!-- USUARIOS Y UNIDADES -->
+    <section class="admin-section" aria-labelledby="residents-title">
+
+      <header class="admin-section__header">
+        <div>
+          <h2 id="residents-title">Usuarios y unidades</h2>
+          <p>Administrá la información de los residentes del edificio.</p>
+        </div>
+      </header>
+
+      <app-card variant="glass" size="full">
+        <app-empty-state
+          title="Gestión de residentes"
+          description="En este espacio vas a poder consultar usuarios, propietarios, inquilinos y sus unidades."
+        ></app-empty-state>
+      </app-card>
+
     </section>
 
     <!-- FOOTER -->

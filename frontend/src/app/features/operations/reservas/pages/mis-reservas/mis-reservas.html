@@ -1,24 +1,288 @@
 <main class="operations-page">
   <header class="page-header">
     <h1>Mis reservas</h1>
-    <p>Consultá tus reservas pasadas y futuras.</p>
+    <p>Organizá tus espacios y consultá tus reservas.</p>
   </header>
 
-  <section class="item-list">
-    @for (reserva of reservas; track reserva.id) {
-      <article class="item-card">
-        <div>
-          <h2>{{ reserva.titulo }}</h2>
-          <p>Lugar: {{ reserva.lugar }}</p>
-          <p>{{ reserva.descripcion }}</p>
-          <p>Fecha: {{ reserva.fecha | date:'short' }}</p>
-          <span class="status">{{ reserva.estado }}</span>
-        </div>
-      </article>
-    } @empty {
-      <article class="item-card">
-        No tenés reservas registradas.
-      </article>
-    }
-  </section>
+  <div class="reservations-layout">
+    <!-- Calendario -->
+    <section class="calendar-section">
+      <app-reserva-calendar-modal
+        [reservas]="reservas()"
+        (fechaSeleccionada)="seleccionarFecha($event)"
+      />
+    </section>
+
+    <!-- Panel lateral -->
+    <aside class="reservations-panel">
+
+      <!-- Nueva reserva -->
+      <section class="reservation-form">
+        <header class="panel-header">
+          <div>
+            <h2>Nueva reserva</h2>
+            <p>Solicitá un espacio común.</p>
+          </div>
+        </header>
+
+        @if (cargandoUnidades()) {
+          <p>Cargando tus unidades...</p>
+        } @else if (errorUnidades()) {
+          <p class="form-feedback form-feedback--error">
+            {{ errorUnidades() }}
+          </p>
+        } @else if (unidades().length === 0) {
+          <p>No tenés unidades asociadas a tu cuenta.</p>
+        } @else {
+          <form (ngSubmit)="crearReserva()" class="operation-form-grid">
+
+            @if (unidades().length > 1) {
+              <label class="form-field">
+                <span>Unidad</span>
+                <select
+                  [ngModel]="unidadSeleccionadaId()"
+                  (ngModelChange)="seleccionarUnidad(+$event)"
+                  name="unidad"
+                  required
+                >
+                  <option [ngValue]="null" disabled>
+                    Seleccioná una unidad
+                  </option>
+
+                  @for (unidad of unidades(); track unidad.id) {
+                    <option [ngValue]="unidad.id">
+                      {{ unidad.piso }} {{ unidad.identificacion }}
+                      — {{ unidad.edificioNombre }}
+                    </option>
+                  }
+                </select>
+              </label>
+            } @else {
+              <div class="selected-unit">
+                <span>Unidad seleccionada</span>
+                <strong>
+                  {{ unidadSeleccionada()?.piso }}
+                  {{ unidadSeleccionada()?.identificacion }}
+                </strong>
+                <small>{{ unidadSeleccionada()?.edificioNombre }}</small>
+              </div>
+            }
+
+            <label class="form-field">
+              <span>Espacio común</span>
+              <select
+                [ngModel]="espacioSeleccionadoId()"
+                (ngModelChange)="seleccionarEspacio(+$event)"
+                name="espacio"
+                required
+                [disabled]="!unidadSeleccionada()"
+              >
+                <option [ngValue]="null" disabled>
+                  Seleccioná un espacio
+                </option>
+
+                @for (espacio of espaciosDisponibles(); track espacio.id) {
+                  <option [ngValue]="espacio.id">
+                    {{ espacio.nombre }} · Capacidad {{ espacio.capacidadMaxima }}
+                  </option>
+                }
+              </select>
+
+              @if (unidadSeleccionada() && espaciosDisponibles().length === 0) {
+                <small>No hay espacios disponibles para este edificio.</small>
+              }
+            </label>
+
+            @if (espacioSeleccionado(); as espacio) {
+              <div class="space-information">
+                <p>{{ espacio.descripcion }}</p>
+                <small>
+                  Horario: {{ espacio.horaApertura }} a {{ espacio.horaCierre }}
+                </small>
+              </div>
+            }
+
+            <label class="form-field">
+              <span>Título</span>
+              <app-input
+                name="titulo"
+                placeholder="Ej. Cumpleaños familiar"
+                [(ngModel)]="formulario.titulo"
+                [required]="true"
+                [maxlength]="100"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>Descripción</span>
+              <app-input
+                name="descripcion"
+                placeholder="Contanos sobre el evento..."
+                [(ngModel)]="formulario.descripcion"
+                [multiline]="true"
+                [rows]="3"
+                [required]="true"
+                [maxlength]="500"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>Fecha</span>
+              <app-input
+                name="fecha"
+                type="date"
+                [(ngModel)]="formulario.fecha"
+                [min]="fechaMinima"
+                [required]="true"
+              />
+            </label>
+
+            <div class="form-fields-inline">
+              <label class="form-field">
+                <span>Desde</span>
+                <app-input
+                  name="horaInicio"
+                  type="time"
+                  [(ngModel)]="formulario.horaInicio"
+                  [required]="true"
+                />
+              </label>
+
+              <label class="form-field">
+                <span>Hasta</span>
+                <app-input
+                  name="horaFin"
+                  type="time"
+                  [(ngModel)]="formulario.horaFin"
+                  [required]="true"
+                />
+              </label>
+            </div>
+
+            <label class="form-field">
+              <span>Cantidad de participantes</span>
+              <app-input
+                name="cantidadParticipantes"
+                type="number"
+                [(ngModel)]="formulario.cantidadParticipantes"
+                [min]="1"
+                [max]="espacioSeleccionado()?.capacidadMaxima ?? 50"
+                [required]="true"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>Tipo de evento</span>
+              <select
+                [(ngModel)]="formulario.tipoEvento"
+                name="tipoEvento"
+                [required]="true"
+              >
+                <option value="privado">Privado</option>
+                <option value="publico">Público</option>
+              </select>
+            </label>
+
+            @if (formulario.tipoEvento === 'publico') {
+              <label class="form-field">
+                <span>Categoría del evento</span>
+                <select
+                  [(ngModel)]="formulario.categoriaEvento"
+                  name="categoriaEvento"
+                  required
+                >
+                  <option [ngValue]="null" disabled>
+                    Seleccioná una categoría
+                  </option>
+                  <option value="reunion-consorcio">Reunión de consorcio</option>
+                  <option value="asamblea">Asamblea</option>
+                  <option value="actividad-comunitaria">Actividad comunitaria</option>
+                  <option value="celebracion">Celebración</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </label>
+            }
+
+            @if (errorFormulario()) {
+              <p class="form-feedback form-feedback--error">
+                {{ errorFormulario() }}
+              </p>
+            }
+
+            @if (exitoFormulario()) {
+              <p class="form-feedback form-feedback--success">
+                {{ exitoFormulario() }}
+              </p>
+            }
+
+            <button
+              type="submit"
+              class="primary"
+              [disabled]="!unidadSeleccionada() || !espacioSeleccionado()"
+            >
+              Solicitar reserva
+            </button>
+          </form>
+        }
+      </section>
+
+      <!-- Reservas del día -->
+      <section class="daily-reservations">
+        <header class="panel-header">
+          <div>
+            <h2>Reservas del día</h2>
+            <p>{{ fechaSeleccionada() | date: 'fullDate' }}</p>
+          </div>
+
+          <span class="reservation-count">
+            {{ reservasDelDia().length }}
+          </span>
+        </header>
+
+        @for (reserva of reservasDelDia(); track reserva.id) {
+          <article
+            class="item-card"
+            [class.item-card--selected]="reservaSeleccionada()?.id === reserva.id"
+          >
+            <div>
+              <h3>{{ reserva.titulo }}</h3>
+              <p>{{ nombreEspacio(reserva.espacioId) }}</p>
+              <p>{{ reserva.horaInicio }} - {{ reserva.horaFin }}</p>
+              <span class="status">{{ reserva.estado }}</span>
+            </div>
+
+            <button
+              type="button"
+              class="secondary"
+              (click)="seleccionarReserva(reserva)"
+            >
+              Ver conversación
+            </button>
+          </article>
+        } @empty {
+          <article class="item-card empty-state">
+            <p>No tenés reservas para esta fecha.</p>
+          </article>
+        }
+      </section>
+    </aside>
+
+    <!-- Chat -->
+    <section class="chat-section">
+      @if (reservaSeleccionada(); as reserva) {
+        <app-reserva-chat
+          [reserva]="reserva"
+          [emisorId]="usuario()?.id ?? ''"
+          [emisorNombre]="usuario()?.nombre ?? 'Residente'"
+        />
+      } @else {
+        <article class="item-card chat-placeholder">
+          <h2>Conversaciones</h2>
+          <p>
+            Seleccioná una reserva para consultar o continuar su conversación.
+          </p>
+        </article>
+      }
+    </section>
+  </div>
 </main>

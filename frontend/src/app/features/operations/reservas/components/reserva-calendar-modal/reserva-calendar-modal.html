@@ -1,1 +1,85 @@
-<p>reserva-calendar-modal works!</p>
+<section class="reservation-calendar">
+  <header class="calendar-header">
+    <div>
+      <h2>Calendario</h2>
+      <p>Consultá tus reservas por fecha.</p>
+    </div>
+
+    <div class="calendar-navigation">
+      <button
+        type="button"
+        class="calendar-nav-button"
+        aria-label="Mes anterior"
+        (click)="anteriorMes()"
+      >
+        ‹
+      </button>
+
+      <button
+        type="button"
+        class="calendar-today"
+        (click)="volverAHoy()"
+      >
+        Hoy
+      </button>
+
+      <button
+        type="button"
+        class="calendar-nav-button"
+        aria-label="Mes siguiente"
+        (click)="siguienteMes()"
+      >
+        ›
+      </button>
+    </div>
+  </header>
+
+  <div class="calendar-month">
+    {{ nombreMes() }}
+  </div>
+
+  <div class="calendar-grid">
+    @for (dia of ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']; track dia) {
+      <div class="calendar-weekday">{{ dia }}</div>
+    }
+
+    @for (dia of dias(); track dia.fecha) {
+      <button
+        type="button"
+        class="calendar-day"
+        [class.calendar-day--outside]="!dia.esMesActual"
+        [class.calendar-day--today]="dia.esHoy"
+        [class.calendar-day--selected]="fechaActiva() === dia.fecha"
+        [class.calendar-day--has-reservations]="dia.cantidadReservas > 0"
+        [attr.aria-label]="dia.fecha + ', ' + dia.cantidadReservas + ' reservas'"
+        [attr.aria-pressed]="fechaActiva() === dia.fecha"
+        (click)="seleccionarFecha(dia.fecha)"
+      >
+        <span class="calendar-day__number">{{ dia.numero }}</span>
+
+        @if (dia.cantidadReservas > 0) {
+          <span class="calendar-day__count">
+            {{ dia.cantidadReservas }}
+          </span>
+
+          <span class="calendar-day__indicators">
+            @for (estado of dia.estados; track $index) {
+              <span
+                class="calendar-day__dot"
+                [class.calendar-day__dot--confirmed]="estado === 'confirmada'"
+                [class.calendar-day__dot--pending]="estado === 'pendiente'"
+                [class.calendar-day__dot--rejected]="estado === 'rechazada'"
+              ></span>
+            }
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  <footer class="calendar-legend">
+    <span><i class="legend-dot legend-dot--pending"></i> Pendiente</span>
+    <span><i class="legend-dot legend-dot--confirmed"></i> Confirmada</span>
+    <span><i class="legend-dot legend-dot--rejected"></i> Rechazada</span>
+  </footer>
+</section>

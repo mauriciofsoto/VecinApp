@@ -1,0 +1,47 @@
+<section class="reserva-chat">
+  <header class="reserva-chat__header">
+    <div>
+      <h3>Conversación</h3>
+      <p>{{ reserva().titulo }}</p>
+    </div>
+
+    <span class="reserva-chat__status">
+      {{ reserva().estado }}
+    </span>
+  </header>
+
+  <div class="reserva-chat__details">
+    <span>{{ reserva().fecha | date: 'dd/MM/yyyy' }}</span>
+    <span>{{ reserva().horaInicio }}–{{ reserva().horaFin }}</span>
+  </div>
+
+  <div class="reserva-chat__messages" aria-live="polite">
+    @if (mensajes().length === 0) {
+      <div class="reserva-chat__empty">
+        <p>Todavía no hay mensajes.</p>
+        <span>Podés iniciar la conversación desde acá.</span>
+      </div>
+    } @else {
+      @for (mensaje of mensajes(); track mensaje.id) {
+        <article
+          class="reserva-chat__message"
+          [class.reserva-chat__message--own]="esMensajePropio(mensaje.emisorId)"
+        >
+          <div class="reserva-chat__meta">
+            <strong>{{ mensaje.emisorNombre }}</strong>
+            <time>{{ mensaje.fechaEnvio | date: 'dd/MM/yyyy HH:mm' }}</time>
+          </div>
+
+          <p>{{ mensaje.contenido }}</p>
+        </article>
+      }
+    }
+  </div>
+
+  <footer class="reserva-chat__composer">
+    <app-message-input
+      placeholder="Escribí un mensaje..."
+      (send)="enviarMensaje($event)"
+    />
+  </footer>
+</section>

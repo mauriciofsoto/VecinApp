@@ -1,0 +1,134 @@
+@use '../../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+.reserva-chat {
+  @include flex-col($space-3);
+  min-width: 0;
+  height: 100%;
+}
+
+.reserva-chat__header {
+  @include flex-row($space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: $space-3;
+  border-bottom: 1px solid $glass-border;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  p {
+    margin-top: $space-1;
+    color: $text-muted;
+    font-size: $text-small;
+  }
+}
+
+.reserva-chat__status {
+  padding: $space-1 $space-3;
+  border-radius: $radius-full;
+  background: $surface-1;
+  color: $text-muted;
+  font-size: $text-caption;
+  text-transform: capitalize;
+}
+
+.reserva-chat__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  color: $text-muted;
+  font-size: $text-small;
+}
+
+.reserva-chat__messages {
+  @include flex-col($space-3);
+  flex: 1;
+  min-height: 220px;
+  overflow-y: auto;
+  padding: $space-3;
+  border-radius: $radius-md;
+  background: rgba($bg-dark, 0.25);
+}
+
+.reserva-chat__empty {
+  @include flex-col($space-1);
+  margin: auto;
+  color: $text-muted;
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: $text-main;
+  }
+
+  span {
+    font-size: $text-small;
+  }
+}
+
+.reserva-chat__message {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 85%;
+  padding: $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-md $radius-md $radius-md 4px;
+  background: $surface-1;
+  overflow-wrap: anywhere;
+
+  p {
+    margin: 0;
+    color: $text-main;
+    white-space: pre-wrap;
+  }
+}
+
+.reserva-chat__message--own {
+  align-self: flex-end;
+  border-color: rgba($primary, 0.35);
+  border-radius: $radius-md $radius-md 4px $radius-md;
+  background: rgba($primary, 0.12);
+}
+
+.reserva-chat__meta {
+  @include flex-row($space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $space-2;
+
+  strong {
+    color: $text-main;
+    font-size: $text-small;
+  }
+
+  time {
+    color: $text-muted;
+    font-size: $text-caption;
+  }
+}
+
+.reserva-chat__composer {
+  padding-top: $space-3;
+  border-top: 1px solid $glass-border;
+}
+
+@media (max-width: 480px) {
+  .reserva-chat__message {
+    max-width: 95%;
+  }
+
+  .reserva-chat__meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

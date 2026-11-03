@@ -22,6 +22,10 @@ import { FeedPrincipal } from '../../community/feed/pages/feed-principal/feed-pr
 import { IncidenciasAdmin } from '../../operations/incidencias/pages/incidencias-admin/incidencias-admin';
 import { CrearIncidencia } from '../../operations/incidencias/pages/crear-incidencia/crear-incidencia';
 import { MisIncidencias } from '../../operations/incidencias/pages/mis-incidencias/mis-incidencias';
+import { RecepcionPaquetes } from '../../operations/paqueteria/pages/recepcion-paquetes/recepcion-paquetes';
+import { MisPaquetes } from '../../operations/paqueteria/pages/mis-paquetes/mis-paquetes';
+import { MisReservas } from '../../operations/reservas/pages/mis-reservas/mis-reservas';
+import { GestionarReservas } from '../../operations/reservas/pages/gestionar-reservas/gestionar-reservas';
 
 const DEFAULT_WIDGETS: BentoWidget[] = [
   {
@@ -65,18 +69,14 @@ const LAYOUT_STORAGE_KEY = 'vecinapp_admin_bento_layout';
   standalone: true,
   imports: [
     CommonModule,
-    ButtonComponent,
     CardComponent,
-    InputComponent,
     SearchBar,
     EmptyState, SidebarComponent,
-    BentoGridComponent,
-    BentoItemDirective,
     HistorialEncuestas,
     FeedPrincipal,
     IncidenciasAdmin,
-    CrearIncidencia,
-    MisIncidencias
+    GestionarReservas,
+    MisReservas
 ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',

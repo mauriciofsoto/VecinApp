@@ -1,0 +1,96 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.confirmation-content {
+  display: grid;
+  justify-items: center;
+  gap: $space-3;
+  text-align: center;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: $text-main;
+  }
+
+  > p {
+    color: $text-muted;
+  }
+}
+
+.confirmation-icon {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border: 1px solid $glass-border;
+  border-radius: 50%;
+  background: rgba($primary, 0.12);
+
+  span {
+    font-size: 1.6rem;
+  }
+}
+
+.package-summary {
+  display: grid;
+  width: 100%;
+  gap: $space-2;
+  padding: $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-md;
+  background: rgba($bg-dark, 0.25);
+  text-align: left;
+
+  strong {
+    color: $text-main;
+  }
+
+  span {
+    color: $text-muted;
+    font-size: 0.875rem;
+  }
+}
+
+.confirmation-note {
+  font-size: 0.85rem;
+}
+
+.confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-3;
+  width: 100%;
+}
+
+.button-primary,
+.button-secondary {
+  padding: $space-3 $space-4;
+  border: 1px solid transparent;
+  border-radius: $radius-control;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+
+.button-primary {
+  color: $white;
+  background: $primary;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.button-secondary {
+  color: $text-main;
+  border-color: $glass-border;
+  background: transparent;
+
+  &:hover {
+    background: rgba($white, 0.06);
+  }
+}

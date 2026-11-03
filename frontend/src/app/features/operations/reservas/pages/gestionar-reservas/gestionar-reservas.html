@@ -8,20 +8,39 @@
     <h2>Crear reserva</h2>
 
     <form (ngSubmit)="crear()" class="form-grid">
+
       <label>
         Título
-        <app-input name="titulo" [(ngModel)]="titulo" [required]="true" />
-      </label>
-
-      <label>
-        Lugar o espacio
-        <app-input name="lugar" [(ngModel)]="lugar" [required]="true" />
-      </label>
-
-      <label>
-        Fecha y hora
         <app-input
-          type="datetime-local"
+          name="titulo"
+          [(ngModel)]="titulo"
+          [required]="true"
+        />
+      </label>
+
+      <label>
+        Espacio común
+        <select
+          name="espacioId"
+          [(ngModel)]="espacioId"
+          required
+        >
+          <option [ngValue]="null" disabled>
+            Seleccioná un espacio
+          </option>
+
+          @for (espacio of servicio.espaciosActivos(); track espacio.id) {
+            <option [ngValue]="espacio.id">
+              {{ espacio.nombre }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Fecha
+        <app-input
+          type="date"
           name="fecha"
           [(ngModel)]="fecha"
           [required]="true"
@@ -29,31 +48,105 @@
       </label>
 
       <label>
+        Hora de inicio
+        <app-input
+          type="time"
+          name="horaInicio"
+          [(ngModel)]="horaInicio"
+          [required]="true"
+        />
+      </label>
+
+      <label>
+        Hora de finalización
+        <app-input
+          type="time"
+          name="horaFin"
+          [(ngModel)]="horaFin"
+          [required]="true"
+        />
+      </label>
+
+      <label>
+        Cantidad de participantes
+        <app-input
+          type="number"
+          name="cantidadParticipantes"
+          [(ngModel)]="cantidadParticipantes"
+          min="1"
+          [required]="true"
+        />
+      </label>
+
+      <label>
         Residente
-        <app-input name="usuarioNombre" [(ngModel)]="usuarioNombre" [required]="true" />
+        <app-input
+          name="usuarioNombre"
+          [(ngModel)]="usuarioNombre"
+          [required]="true"
+        />
       </label>
 
       <label>
         ID del residente
         <app-input
-          type="number"
           name="usuarioId"
           [(ngModel)]="usuarioId"
+          [required]="true"
+        />
+      </label>
+
+      <label>
+        ID de la unidad
+        <app-input
+          type="number"
+          name="unidadId"
+          [(ngModel)]="unidadId"
           min="1"
           [required]="true"
         />
       </label>
 
       <label>
-        ID del edificio
+        Unidad
         <app-input
-          type="number"
-          name="edificioId"
-          [(ngModel)]="edificioId"
-          min="1"
+          name="unidadNombre"
+          [(ngModel)]="unidadNombre"
+          placeholder="Ej. 2° A"
           [required]="true"
         />
       </label>
+
+      <label>
+        Tipo de evento
+        <select
+          name="tipoEvento"
+          [(ngModel)]="tipoEvento"
+        >
+          <option value="privado">Privado</option>
+          <option value="publico">Público</option>
+        </select>
+      </label>
+
+      @if (tipoEvento === 'publico') {
+        <label>
+          Categoría del evento
+          <select
+            name="categoriaEvento"
+            [(ngModel)]="categoriaEvento"
+            required
+          >
+            <option [ngValue]="null" disabled>
+              Seleccioná una categoría
+            </option>
+            <option value="reunion-consorcio">Reunión de consorcio</option>
+            <option value="asamblea">Asamblea</option>
+            <option value="actividad-comunitaria">Actividad comunitaria</option>
+            <option value="celebracion">Celebración</option>
+            <option value="otro">Otro</option>
+          </select>
+        </label>
+      }
 
       <label class="full-width">
         Descripción
@@ -80,25 +173,32 @@
         <article class="item-card">
           <div>
             <h3>{{ reserva.titulo }}</h3>
-            <p>Lugar: {{ reserva.lugar }}</p>
+            <p>Espacio: {{ nombreEspacio(reserva.espacioId) }}</p>
             <p>{{ reserva.descripcion }}</p>
             <p>Residente: {{ reserva.usuarioNombre }}</p>
-            <p>Fecha: {{ reserva.fecha | date:'short' }}</p>
+            <p>Unidad: {{ reserva.unidadNombre }}</p>
+            <p>Fecha: {{ reserva.fecha | date:'shortDate' }}</p>
+            <p>Horario: {{ reserva.horaInicio }} - {{ reserva.horaFin }}</p>
+            <p>Participantes: {{ reserva.cantidadParticipantes }}</p>
             <p>Creada: {{ reserva.fechaCreacion | date:'short' }}</p>
             <span class="status">{{ reserva.estado }}</span>
           </div>
 
           @if (reserva.estado === 'pendiente') {
             <div class="actions">
-              <button type="button" (click)="cambiarEstado(reserva.id, 'confirmada')">
+              <button
+                type="button"
+                (click)="cambiarEstado(reserva.id, 'confirmada')"
+              >
                 Confirmar
               </button>
+
               <button
                 type="button"
                 class="secondary"
-                (click)="cambiarEstado(reserva.id, 'cancelada')"
+                (click)="cambiarEstado(reserva.id, 'rechazada')"
               >
-                Cancelar
+                Rechazar
               </button>
             </div>
           }
