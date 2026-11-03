@@ -10,61 +10,61 @@
     <form (ngSubmit)="registrar()" class="form-grid">
       <label>
         Nombre del destinatario
-        <input
+        <app-input
           name="destinatarioNombre"
           [(ngModel)]="destinatarioNombre"
-          required
+          [required]="true"
           placeholder="Nombre del residente"
         />
       </label>
 
       <label>
         ID del residente
-        <input
+        <app-input
           type="number"
           name="destinatarioId"
           [(ngModel)]="destinatarioId"
           min="1"
-          required
+          [required]="true"
         />
       </label>
 
       <label>
         Edificio
-        <input
+        <app-input
           name="edificioNombre"
           [(ngModel)]="edificioNombre"
-          required
+          [required]="true"
         />
       </label>
 
       <label>
         ID del edificio
-        <input
+        <app-input
           type="number"
           name="edificioId"
           [(ngModel)]="edificioId"
           min="1"
-          required
+          [required]="true"
         />
       </label>
 
       <label>
         Remitente o empresa
-        <input
+        <app-input
           name="remitente"
           [(ngModel)]="remitente"
-          required
+          [required]="true"
           placeholder="Correo, mensajería..."
         />
       </label>
 
       <label>
         Descripción
-        <input
+        <app-input
           name="descripcion"
           [(ngModel)]="descripcion"
-          required
+          [required]="true"
           placeholder="Sobre, caja, documentación..."
         />
       </label>

@@ -55,21 +55,14 @@
   &__estado {
     min-width: 0;
 
-    input,
-    select {
-      @include form-input-base;
+    app-input,
+    app-select {
+      display: block;
       box-sizing: border-box;
       width: 100%;
       min-height: 44px;
       color: $text-main;
     }
-  }
-
-  &__categoria select option,
-  &__estado select option,
-  .incidencia-detalle__seguimiento select option {
-    background: $bg-dark;
-    color: $text-main;
   }
 
   &__tabla-wrapper {
@@ -251,8 +244,8 @@
       font-size: $text-small;
     }
 
-    select {
-      @include form-input-base;
+    app-select {
+      display: block;
       box-sizing: border-box;
       width: 100%;
       min-width: 0;
@@ -268,6 +261,15 @@
     margin-top: $space-2;
   }
 }
+
+.incidencia-detalle {
+  &__conversacion {
+    min-width: 0;
+    padding-top: $space-4;
+    border-top: 1px solid $glass-border;
+  }
+}
+
 
 @include mobile {
   .incidencias-admin {

@@ -3,7 +3,7 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { DatePipe } from '@angular/common';
 
 import { Post } from '../../models/post';
-import { ReactionBar } from '../../../../../shared/components/ui/reaction-bar/reaction-bar';
+import { ReactionBar } from '../../../../../shared/components/organisms/reaction-bar/reaction-bar';
 import { PostComments } from '../post-comments/post-comments';
 import { PollCard } from '../poll-card/poll-card';
 

@@ -17,52 +17,52 @@
       <form (ngSubmit)="registrar()" class="form-grid">
         <label>
           Nombre
-          <input name="nombre" [(ngModel)]="nombre" required />
+          <app-input name="nombre" [(ngModel)]="nombre" [required]="true" />
         </label>
 
         <label>
           Apellido
-          <input name="apellido" [(ngModel)]="apellido" required />
+          <app-input name="apellido" [(ngModel)]="apellido" [required]="true" />
         </label>
 
         <label>
           Email
-          <input
+          <app-input
             type="email"
             name="email"
             [(ngModel)]="email"
-            required
+            [required]="true"
           />
         </label>
 
         <label>
           Documento
-          <input name="documento" [(ngModel)]="documento" required />
+          <app-input name="documento" [(ngModel)]="documento" [required]="true" />
         </label>
 
         <label>
           Edificio
-          <input
+          <app-input
             name="edificioNombre"
             [(ngModel)]="edificioNombre"
-            required
+            [required]="true"
           />
         </label>
 
         <label>
           ID del edificio
-          <input
+          <app-input
             type="number"
             name="edificioId"
             [(ngModel)]="edificioId"
             min="1"
-            required
+            [required]="true"
           />
         </label>
 
         <label>
           Unidad / departamento
-          <input name="unidad" [(ngModel)]="unidad" required />
+          <app-input name="unidad" [(ngModel)]="unidad" [required]="true" />
         </label>
 
         <button type="submit">Guardar residente</button>
@@ -74,18 +74,18 @@
 
   <section class="panel">
     <div class="toolbar">
-      <input
+      <app-input
         name="busqueda"
         [(ngModel)]="busqueda"
         placeholder="Buscar por nombre, email, documento o unidad..."
       />
 
-      <select name="edificio" [(ngModel)]="filtroEdificio">
-        <option value="todos">Todos los edificios</option>
-        @for (edificio of edificios; track edificio.id) {
-          <option [value]="edificio.id">{{ edificio.nombre }}</option>
-        }
-      </select>
+      <app-select
+        name="edificio"
+        ariaLabel="Filtrar por edificio"
+        [options]="opcionesEdificio"
+        [(ngModel)]="filtroEdificio"
+      />
     </div>
 
     <p>Total de residentes: <strong>{{ filtrados.length }}</strong></p>

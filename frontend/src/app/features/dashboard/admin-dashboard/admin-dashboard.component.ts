@@ -1,10 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 
-import { ButtonComponent } from '../../../shared/components/ui/button/button.component';
-import { SearchBar } from '../../../shared/components/ui/search-bar/search-bar';
-import { CardComponent } from '../../../shared/components/ui/card/card.component';
+import { ButtonComponent } from '../../../shared/components/atoms/button/button.component';
+import { SearchBar } from '../../../shared/components/molecules/search-bar/search-bar';
+import { CardComponent } from '../../../shared/components/atoms/card/card.component';
 import { SidebarComponent } from '../../../shared/components/navigation/sidebar/sidebar.component';
+import { InputComponent } from '../../../shared/components/atoms/input/input'
+import { EmptyState } from '../../../shared/components/molecules/empty-state/empty-state';
+
+import { ReactionBar, type Reaction } from '../../../shared/components/organisms/reaction-bar/reaction-bar';
+import { PollOption } from '../../../shared/models/poll-option.model';
+import { HistorialEncuestas } from '../../operations/encuestas/pages/historial-encuestas/historial-encuestas';
 
 import {
   BentoGridComponent,
@@ -12,11 +18,10 @@ import {
 } from '../../../shared/components/layout/bento-grid/bento-grid';
 import { BentoItemDirective } from '../../../shared/components/layout/bento-grid/bento-item.directive';
 
-import { EmptyState } from '../../../shared/components/ui/empty-state/empty-state';
-
-import { GestionarEncuestas } from '../../operations/encuestas/pages/gestionar-encuestas/gestionar-encuestas';
 import { FeedPrincipal } from '../../community/feed/pages/feed-principal/feed-principal';
 import { IncidenciasAdmin } from '../../operations/incidencias/pages/incidencias-admin/incidencias-admin';
+import { CrearIncidencia } from '../../operations/incidencias/pages/crear-incidencia/crear-incidencia';
+import { MisIncidencias } from '../../operations/incidencias/pages/mis-incidencias/mis-incidencias';
 
 const DEFAULT_WIDGETS: BentoWidget[] = [
   {
@@ -62,18 +67,39 @@ const LAYOUT_STORAGE_KEY = 'vecinapp_admin_bento_layout';
     CommonModule,
     ButtonComponent,
     CardComponent,
-    SidebarComponent,
+    InputComponent,
+    SearchBar,
+    EmptyState, SidebarComponent,
     BentoGridComponent,
     BentoItemDirective,
-    GestionarEncuestas,
+    HistorialEncuestas,
     FeedPrincipal,
     IncidenciasAdmin,
-    EmptyState,
-  ],
+    CrearIncidencia,
+    MisIncidencias
+],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss',
 })
 export class AdminDashboardComponent implements OnInit {
+  // Propiedad agregada para la galería de validación de Shared
+  previewInput = '';
+  previewComment = '';
+  previewMessage = '';
+  previewVote = '';
+  previewReaction = '';
+  isPreviewModalOpen = false;
+
+  readonly previewPollOptions: PollOption[] = [
+    { id: 'approve', text: 'Aprobar propuesta', percentage: 68, votes: 17 },
+    { id: 'reject', text: 'Revisar más adelante', percentage: 32, votes: 8 },
+  ];
+
+  readonly previewReactions: Reaction[] = [
+    { emoji: '👍', count: 8, reacted: true },
+    { emoji: '🎉', count: 3, reacted: false },
+  ];
+
   widgets: BentoWidget[] = DEFAULT_WIDGETS.map((widget) => ({
     ...widget,
   }));
@@ -106,6 +132,22 @@ export class AdminDashboardComponent implements OnInit {
   // Búsqueda
   onBuscar(termino: string): void {
     console.log('Buscar:', termino);
+  }
+
+  onPreviewComment(comment: string): void {
+    this.previewComment = comment;
+  }
+
+  onPreviewMessage(message: string): void {
+    this.previewMessage = message;
+  }
+
+  onPreviewVote(optionId: string): void {
+    this.previewVote = optionId;
+  }
+
+  onPreviewReaction(emoji: string): void {
+    this.previewReaction = emoji;
   }
 
   // Recuperación del diseño guardado

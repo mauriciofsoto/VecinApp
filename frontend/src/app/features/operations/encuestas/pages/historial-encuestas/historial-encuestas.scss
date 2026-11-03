@@ -56,8 +56,7 @@
 
 .survey-history-section,
 .survey-list,
-.survey-entry,
-.survey-empty {
+.survey-entry {
   @include ops.operation-stack;
 }
 
@@ -69,38 +68,6 @@
 .history-count {
   @include ops.operation-muted-text;
   flex-shrink: 0;
-}
-
-// ========================================
-// FILTROS
-// ========================================
-
-.survey-filters {
-  @include ops.operation-filters;
-
-  .form-field {
-    @include ops.operation-filter-field;
-
-    label {
-      font-size: $text-small;
-      font-weight: $font-medium;
-    }
-  }
-
-  input,
-  select {
-    @include form-input-base;
-    width: 100%;
-    min-width: 0;
-  }
-
-  input {
-    color-scheme: dark;
-  }
-
-  app-button {
-    flex-shrink: 0;
-  }
 }
 
 // ========================================
@@ -182,17 +149,9 @@
   .surveys-header,
   .section-heading,
   .subsection-heading,
-  .survey-filters,
   .survey-entry__top {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .survey-filters {
-    .form-field,
-    app-button {
-      width: 100%;
-    }
   }
 
   .survey-entry__actions {

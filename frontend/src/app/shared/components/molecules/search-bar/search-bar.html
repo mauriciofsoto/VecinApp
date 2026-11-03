@@ -1,0 +1,93 @@
+<div class="search-bar" [attr.aria-busy]="loading">
+  <div class="search-bar__query">
+    <label class="search-bar__visually-hidden" [for]="idPrefix + '-query'">
+      Buscar
+    </label>
+    <app-input
+      [id]="idPrefix + '-query'"
+      [value]="searchTerm"
+      [placeholder]="placeholder"
+      prefixIcon="🔍"
+      [clearable]="true"
+      (valueChange)="onInput($event)"
+    />
+
+    @if (loading) {
+      <span class="search-bar__spinner" role="status" aria-label="Buscando"></span>
+    }
+  </div>
+
+  @if (showFilters || showSort) {
+    <div class="search-bar__filters">
+      @if (showFilters) {
+        @if (statusOptions.length) {
+          <div class="search-bar__field">
+            <label class="search-bar__visually-hidden" [for]="idPrefix + '-status'">
+              Filtrar por estado
+            </label>
+            <app-select
+              [id]="idPrefix + '-status'"
+              ariaLabel="Filtrar por estado"
+              [options]="statusOptions"
+              [value]="status"
+              placeholder="Todos los estados"
+              (valueChange)="updateStatus($event)"
+            />
+          </div>
+        }
+
+        <div class="search-bar__field">
+          <label class="search-bar__visually-hidden" [for]="idPrefix + '-date-from'">
+            Fecha desde
+          </label>
+          <app-input
+            [id]="idPrefix + '-date-from'"
+            type="date"
+            [value]="dateFrom"
+            [max]="dateTo || null"
+            (valueChange)="updateDateFrom($event)"
+          />
+        </div>
+
+        <div class="search-bar__field">
+          <label class="search-bar__visually-hidden" [for]="idPrefix + '-date-to'">
+            Fecha hasta
+          </label>
+          <app-input
+            [id]="idPrefix + '-date-to'"
+            type="date"
+            [value]="dateTo"
+            [min]="dateFrom || null"
+            (valueChange)="updateDateTo($event)"
+          />
+        </div>
+      }
+
+      @if (showSort) {
+        <div class="search-bar__field">
+          <label class="search-bar__visually-hidden" [for]="idPrefix + '-sort'">
+            Ordenar resultados
+          </label>
+          <app-select
+            [id]="idPrefix + '-sort'"
+            ariaLabel="Ordenar resultados"
+            [options]="sortOptions"
+            [value]="sort"
+            (valueChange)="updateSort($event)"
+          />
+        </div>
+      }
+    </div>
+  }
+
+  @if (hasActiveFilters) {
+    <app-button
+      variant="ghost"
+      size="sm"
+      type="button"
+      (buttonClick)="clearFilters()"
+    >
+      Limpiar filtros
+    </app-button>
+  }
+</div>

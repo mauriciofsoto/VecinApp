@@ -1,5 +1,5 @@
 <div class="app-dashboard-layout">
-
+  
   <!-- SIDEBAR -->
   <app-sidebar></app-sidebar>
 
@@ -14,6 +14,7 @@
           Gestioná las actividades y los servicios de tu comunidad.
         </p>
       </div>
+      <app-search-bar></app-search-bar>
 
     </header>
 
@@ -33,6 +34,63 @@
         >
           {{ isLayoutEditable() ? 'Finalizar edición' : 'Personalizar diseño' }}
         </app-button>
+      </div>
+    </section>
+
+    <!-- GALERÍA DE COMPONENTES SHARED -->
+    <section class="shared-preview" aria-labelledby="shared-preview-title">
+      <header class="shared-preview__header">
+        <div>
+          <span class="shared-preview__eyebrow">UI / COMPONENTES</span>
+          <h2 id="shared-preview-title">Galería de componentes compartidos</h2>
+          <p>Vista de validación para átomos y moléculas de Shared.</p>
+        </div>
+      </header>
+
+      <div class="shared-preview__grid">
+        <article class="shared-preview__group">
+          <h3>Botones</h3>
+          <div class="shared-preview__buttons">
+            <app-button variant="primary" size="sm">Primario</app-button>
+            <app-button variant="secondary" size="sm">Secundario</app-button>
+            <app-button variant="outline" size="sm">Outline</app-button>
+            <app-button variant="danger" size="sm">Peligro</app-button>
+          </div>
+        </article>
+
+        <article class="shared-preview__group">
+          <h3>Input</h3>
+          <app-input
+            placeholder="Escribí para probar el input"
+            [value]="previewInput"
+            
+          />
+        </article>
+
+        <article class="shared-preview__group">
+          
+        </article>
+
+        <article class="shared-preview__group">
+          <h3>Search bar</h3>
+          <app-search-bar
+            placeholder="Buscar componentes..."
+            [debounceMs]="150"
+            (search)="onBuscar($event)"
+          />
+        </article>
+
+        <app-card variant="glass" size="full" customClass="shared-preview__card">
+          <div class="shared-preview__card-content">
+            <h3>Card compartida</h3>
+            <p>Contenedor glass con contenido proyectado.</p>
+          </div>
+        </app-card>
+
+
+
+
+
       </div>
     </section>
 
@@ -57,15 +115,6 @@
         <!-- MURO -->
         <ng-template bentoItem="muro">
           <app-card size="full">
-            <div class="widget-header">
-              <div class="widget-heading">
-                <span class="widget-icon widget-icon--community">💬</span>
-                <div>
-                  <h3>Muro de la comunidad</h3>
-                  <p>Publicaciones y avisos del edificio.</p>
-                </div>
-              </div>
-            </div>
 
             <app-feed-principal></app-feed-principal>
           </app-card>
@@ -74,17 +123,8 @@
         <!-- ENCUESTAS -->
         <ng-template bentoItem="encuestas">
           <app-card size="full">
-            <div class="widget-header">
-              <div class="widget-heading">
-                <span class="widget-icon widget-icon--surveys">📊</span>
-                <div>
-                  <h3>Encuestas</h3>
-                  <p>Creá encuestas y consultá sus resultados.</p>
-                </div>
-              </div>
-            </div>
 
-            <app-gestionar-encuestas></app-gestionar-encuestas>
+            <app-historial-encuestas></app-historial-encuestas>
           </app-card>
         </ng-template>
 
@@ -101,7 +141,7 @@
               </div>
             </div>
 
-            <app-incidencias-admin></app-incidencias-admin>
+            <app-mis-incidencias></app-mis-incidencias>
           </app-card>
         </ng-template>
 
@@ -110,11 +150,8 @@
           <app-card size="full">
             <div class="widget-header">
               <div class="widget-heading">
-                <span class="widget-icon widget-icon--packages">📦</span>
-                <div>
-                  <h3>Paquetería</h3>
-                  <p>Control de paquetes recibidos y entregados.</p>
-                </div>
+                <app-incidencias-admin></app-incidencias-admin>
+               
               </div>
             </div>
 

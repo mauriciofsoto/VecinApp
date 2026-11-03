@@ -52,7 +52,8 @@
 
 
 
-  <div class="post-card__body">
+
+<div class="post-card__body">
   @if (post().type === 'encuesta') {
     @if (encuesta()) {
       <app-poll-card [encuesta]="encuesta()!" />
@@ -76,7 +77,33 @@
       />
     }
   }
+
+  @if (post().attachments?.length) {
+    <div class="post-card__attachments">
+      @for (attachment of post().attachments; track attachment.id) {
+        <div class="post-card__attachment">
+          @if (attachment.type === 'image') {
+            <img
+              class="post-card__image"
+              [src]="attachment.url"
+              [alt]="attachment.name"
+              loading="lazy"
+            />
+          } @else {
+            <video
+              class="post-card__video"
+              [src]="attachment.url"
+              controls
+              preload="metadata"
+              [attr.aria-label]="'Video adjunto: ' + attachment.name"
+            ></video>
+          }
+        </div>
+      }
+    </div>
+  }
 </div>
+
 
 
 

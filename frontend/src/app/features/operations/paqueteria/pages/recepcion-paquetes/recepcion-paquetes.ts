@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Paqueteria } from '../../services/paqueteria';
+import { InputComponent } from '../../../../../shared/components/atoms/input/input';
 
 @Component({
   selector: 'app-recepcion-paquetes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InputComponent],
   templateUrl: './recepcion-paquetes.html',
   styleUrl: './recepcion-paquetes.scss',
 })

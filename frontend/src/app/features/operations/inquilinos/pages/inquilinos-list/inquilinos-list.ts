@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Inquilinos } from '../../services/inquilinos';
+import { InputComponent } from '../../../../../shared/components/atoms/input/input';
+import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
 
 @Component({
   selector: 'app-inquilinos-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InputComponent, SelectComponent],
   templateUrl: './inquilinos-list.html',
   styleUrl: './inquilinos-list.scss',
 })
@@ -35,6 +37,13 @@ export class InquilinosList {
     }
 
     return Array.from(unicos, ([id, nombre]) => ({ id, nombre }));
+  }
+
+  get opcionesEdificio(): SelectOption<string>[] {
+    return [
+      { label: 'Todos los edificios', value: 'todos' },
+      ...this.edificios.map(edificio => ({ label: edificio.nombre, value: String(edificio.id) })),
+    ];
   }
 
   get filtrados() {

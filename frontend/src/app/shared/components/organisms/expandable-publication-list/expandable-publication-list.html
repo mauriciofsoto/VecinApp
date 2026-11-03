@@ -1,0 +1,67 @@
+
+<div class="publication-list">
+  @for (post of posts(); track post.id) {
+    <article class="publication-list__item">
+      <button
+        class="publication-list__trigger"
+        type="button"
+        [attr.aria-expanded]="isExpanded(post.id)"
+        [attr.aria-controls]="'publication-content-' + post.id"
+        (click)="toggle(post.id)"
+      >
+        <span class="publication-list__summary">
+          <span class="publication-list__badges">
+            @switch (post.type) {
+              @case ('aviso') {
+                <span class="publication-list__badge publication-list__badge--notice">
+                  Aviso
+                </span>
+              }
+              @case ('encuesta') {
+                <span class="publication-list__badge publication-list__badge--poll">
+                  Encuesta
+                </span>
+              }
+              @default {
+                <span class="publication-list__badge">
+                  Publicación
+                </span>
+              }
+            }
+          </span>
+
+          <strong>{{ post.title || 'Sin título' }}</strong>
+
+          <span class="publication-list__description">
+            {{ post.content }}
+          </span>
+
+          <time [attr.datetime]="post.createdAt">
+            {{ post.createdAt | date:'dd/MM/yyyy' }}
+          </time>
+        </span>
+
+        <span class="publication-list__chevron" aria-hidden="true">
+          {{ isExpanded(post.id) ? '−' : '+' }}
+        </span>
+      </button>
+
+      @if (isExpanded(post.id)) {
+        <div
+          class="publication-list__content"
+          [id]="'publication-content-' + post.id"
+        >
+          <app-post-card
+            [post]="post"
+            (postChange)="postChange.emit($event)"
+            (commentAdded)="commentAdded.emit($event)"
+          />
+        </div>
+      }
+    </article>
+  } @empty {
+    <p class="publication-list__empty">
+      {{ emptyMessage() }}
+    </p>
+  }
+</div>

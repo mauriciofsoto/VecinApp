@@ -2,6 +2,7 @@
 export type PostType = 'publicacion' | 'aviso' | 'encuesta';
 export type AuthorRole = 'admin' | 'vecino';
 
+
 export interface PostReaction {
   emoji: string;
   count: number;
@@ -29,10 +30,22 @@ export interface Post {
   title?: string;
   content: string;
   imageUrl?: string;
+  attachments?: PostAttachment[];
 
   createdAt: string;
   reactions: PostReaction[];
   comments: PostComment[];
 
   commentsCount: number;
+
+    prioritaria?: boolean;
+  comentariosActivos?: boolean;
+  fechaLimite?: string;
+}
+
+export interface PostAttachment {
+  id: string;
+  url: string;
+  type: 'image' | 'video';
+  name: string;
 }

@@ -1,0 +1,19 @@
+<section class="form-layout">
+  <header class="form-layout__header">
+    <h2 class="form-layout__title">{{ title() }}</h2>
+
+    @if (description()) {
+      <p class="form-layout__description">
+        {{ description() }}
+      </p>
+    }
+  </header>
+
+  <div class="form-layout__content">
+    <ng-content></ng-content>
+  </div>
+
+  <footer class="form-layout__actions">
+    <ng-content select="[form-actions]"></ng-content>
+  </footer>
+</section>

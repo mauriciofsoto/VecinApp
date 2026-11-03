@@ -1,91 +1,124 @@
-import { Component, computed, signal, output } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
-import { Badge } from '../../../../../shared/components/ui/badge/badge';
-import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
-import { CardComponent } from '../../../../../shared/components/ui/card/card.component';
+import { Badge } from '../../../../../shared/components/atoms/badge/badge';
+import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
+import { CardComponent } from '../../../../../shared/components/atoms/card/card.component';
+import { SelectOption } from '../../../../../shared/components/atoms/select/select';
+import { EmptyState } from '../../../../../shared/components/molecules/empty-state/empty-state';
+import { PollStatistics } from '../../../../../shared/components/organisms/poll-statistics/poll-statistics';
+import { PollOption } from '../../../../../shared/models/poll-option.model';
+import {
+  SearchBar,
+  SearchBarFilters,
+} from '../../../../../shared/components/molecules/search-bar/search-bar';
+import { Modal } from '../../../../../shared/components/organisms/modal/modal';
 
-import { EventEmitter, Output } from '@angular/core';
-
-type EstadoEncuesta = 'en-proceso' | 'cerrada';
-
-export interface Encuesta {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  estado: EstadoEncuesta;
-  fechaPublicacion: string;
-  fechaLimite: string | null;
-  votacionActiva: boolean;
-  comentariosActivos: boolean;
-  prioritaria: boolean;
-  totalVotos: number;
-  opciones: string[];
-}
+import { EncuestaAdmin, EstadoEncuesta } from '../../models/encuesta.model';
+import { EncuestasService } from '../../services/encuestas';
+import { FormularioPublicacion } from '../../components/formulario-publicacion/formulario-publicacion';
 
 @Component({
   selector: 'app-historial-encuestas',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     Badge,
     ButtonComponent,
     CardComponent,
+    EmptyState,
+    SearchBar,
+    PollStatistics,
+    Modal,
+    FormularioPublicacion,
   ],
   templateUrl: './historial-encuestas.html',
   styleUrl: './historial-encuestas.scss',
 })
 export class HistorialEncuestas {
-  // Evento que avisa al componente padre que debe abrir el modal
-  readonly solicitarCrear = output<void>();
+  private readonly encuestasService = inject(EncuestasService);
 
+  readonly isModalCrearOpen = signal(false);
 
-  readonly encuestas = signal<Encuesta[]>([]);
+  readonly encuestas = this.encuestasService.encuestas;
 
-  readonly estadoFiltro = signal<'todas' | EstadoEncuesta>('todas');
-  readonly fechaDesde = signal('');
-  readonly fechaHasta = signal('');
+  readonly filtros = signal<SearchBarFilters>({
+    search: '',
+    status: null,
+    dateFrom: '',
+    dateTo: '',
+    sort: 'recent',
+  });
+
+  readonly estadosFiltro: SelectOption<EstadoEncuesta>[] = [
+    { label: 'En proceso', value: 'en-proceso' },
+    { label: 'Cerradas', value: 'cerrada' },
+  ];
 
   readonly totalEnProceso = computed(
-    () => this.encuestas().filter((e) => e.estado === 'en-proceso').length,
+    () => this.encuestas().filter(e => e.estado === 'en-proceso').length,
   );
 
   readonly totalCerradas = computed(
-    () => this.encuestas().filter((e) => e.estado === 'cerrada').length,
+    () => this.encuestas().filter(e => e.estado === 'cerrada').length,
   );
 
   readonly encuestasFiltradas = computed(() => {
-    const estado = this.estadoFiltro();
-    const desde = this.fechaDesde();
-    const hasta = this.fechaHasta();
+    const { search, status, dateFrom, dateTo, sort } = this.filtros();
+    const termino = search.trim().toLocaleLowerCase();
 
-    return this.encuestas().filter((e) => {
-      const coincideEstado = estado === 'todas' || e.estado === estado;
-      const coincideDesde = !desde || e.fechaPublicacion >= desde;
-      const coincideHasta = !hasta || e.fechaPublicacion <= hasta;
-      return coincideEstado && coincideDesde && coincideHasta;
-    });
+    return this.encuestas()
+      .filter(encuesta => {
+        const coincideTexto = [encuesta.titulo, encuesta.descripcion]
+          .some(valor => valor.toLocaleLowerCase().includes(termino));
+
+        const sinEstado =
+          status === null || status === undefined || status === '';
+
+        const coincideEstado = sinEstado || encuesta.estado === status;
+        const coincideDesde = !dateFrom || encuesta.fechaPublicacion >= dateFrom;
+        const coincideHasta = !dateTo || encuesta.fechaPublicacion <= dateTo;
+
+        return coincideTexto && coincideEstado && coincideDesde && coincideHasta;
+      })
+      .sort((a, b) => {
+        const comparacion = a.fechaPublicacion.localeCompare(b.fechaPublicacion);
+        return sort === 'oldest' ? comparacion : -comparacion;
+      });
   });
 
+  actualizarFiltros(filtros: SearchBarFilters): void {
+    this.filtros.set(filtros);
+  }
+
   abrirModalCrear(): void {
-    this.solicitarCrear.emit();
+    this.isModalCrearOpen.set(true);
   }
 
-  agregarEncuestaCreada(nuevaEncuesta: Encuesta): void {
-    this.encuestas.update((list) => [nuevaEncuesta, ...list]);
+  cerrarModalCrear(): void {
+    this.isModalCrearOpen.set(false);
   }
 
-  cerrarEncuesta(id: string): void {
-    this.encuestas.update((list) =>
-      list.map((e) => (e.id === id ? { ...e, estado: 'cerrada' } : e)),
+  cerrarEncuesta(id: number): void {
+    this.encuestasService.cerrar(id);
+  }
+
+  opcionesConResultados(encuesta: EncuestaAdmin): PollOption[] {
+    const opciones = encuesta.votosPorOpcion ?? encuesta.opciones.map(
+      (texto, index) => ({
+        id: String(index),
+        texto,
+        votos: 0,
+      }),
     );
-  }
 
-  limpiarFiltros(): void {
-    this.estadoFiltro.set('todas');
-    this.fechaDesde.set('');
-    this.fechaHasta.set('');
+    return opciones.map(opcion => ({
+      id: opcion.id,
+      text: opcion.texto,
+      votes: opcion.votos,
+      percentage: encuesta.totalVotos > 0
+        ? Math.round(opcion.votos / encuesta.totalVotos * 100)
+        : 0,
+    }));
   }
 }

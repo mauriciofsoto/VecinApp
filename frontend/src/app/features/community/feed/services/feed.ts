@@ -5,11 +5,13 @@ import { environment } from '../../../../../environments/environment';
 import { Post, PostComment } from '../models/post';
 
 import { CreatePostData } from '../components/create-post-form/create-post-form';
+type CreatePostPayload = Omit<CreatePostData, 'attachments'>;
 
 @Injectable({
   providedIn: 'root',
 })
 export class Feed {
+  
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiUrl;
 
@@ -83,7 +85,7 @@ export class Feed {
   }
 
 
-createPost(data: CreatePostData) {
+createPost(data: CreatePostPayload) {
   this.errorState.set(null);
 
   return this.http.post<Post>(`${this.apiUrl}/publicaciones`, {

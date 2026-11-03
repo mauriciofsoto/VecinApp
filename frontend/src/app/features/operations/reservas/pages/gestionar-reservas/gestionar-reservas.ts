@@ -3,11 +3,12 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Reservas } from '../../services/reservas';
 import { EstadoReserva } from '../../models/reserva';
+import { InputComponent } from '../../../../../shared/components/atoms/input/input';
 
 @Component({
   selector: 'app-gestionar-reservas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InputComponent],
   templateUrl: './gestionar-reservas.html',
   styleUrl: './gestionar-reservas.scss',
 })

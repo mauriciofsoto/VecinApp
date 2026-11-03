@@ -1,3 +1,4 @@
+
 import {
   Component,
   computed,
@@ -6,9 +7,8 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
-import { PollVoting } from '../../../../../shared/components/ui/poll-voting/poll-voting';
-import { PollStatistics } from '../../../../../shared/components/ui/poll-statistics/poll-statistics';
-import { PollOption } from '../../../../../shared/components/ui/poll-option.model';
+import { PollVoting } from '../../../../../shared/components/organisms/poll-voting/poll-voting';
+import { PollOption } from '../../../../../shared/models/poll-option.model';
 
 import { EncuestaAdmin } from '../../../../operations/encuestas/models/encuesta.model';
 import { EncuestasService } from '../../../../operations/encuestas/services/encuestas';
@@ -16,15 +16,14 @@ import { EncuestasService } from '../../../../operations/encuestas/services/encu
 @Component({
   selector: 'app-poll-card',
   standalone: true,
-  imports: [DatePipe, PollVoting, PollStatistics],
+  imports: [DatePipe, PollVoting],
   templateUrl: './poll-card.html',
   styleUrl: './poll-card.scss',
 })
 export class PollCard {
   readonly encuesta = input.required<EncuestaAdmin>();
 
-  // ID temporal para la demostración.
-  // Después lo obtenemos desde la sesión del usuario.
+  // Temporal hasta integrar la sesión real del usuario.
   readonly userId = input(1);
 
   private readonly encuestasService = inject(EncuestasService);

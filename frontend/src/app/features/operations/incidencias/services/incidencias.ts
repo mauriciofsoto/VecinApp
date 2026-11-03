@@ -1,128 +1,204 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Injectable, computed, signal } from '@angular/core';
+import { Observable, delay, of, tap } from 'rxjs';
 
+import { MensajeIncidencia } from '../models/mensaje-incidencia';
 import {
   Incidencia,
   EstadoIncidencia,
   PrioridadIncidencia,
 } from '../models/incidencia';
 
-interface IncidenciaApi {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  prioridad: string;
-  fechaCreacion: string;
-  edificio?: string;
-  reportante?: string;
-  estado: string;
-  categoria: string;
-}
-
-interface CrearIncidenciaRequest {
+export interface CrearIncidenciaRequest {
   titulo: string;
   descripcion: string;
   categoria: string;
-  prioridad: string;
+  ubicacion: string;
+  prioridad: PrioridadIncidencia;
+  adjuntos?: File[];
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class Incidencias {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:5062/incidencias';
+  // Usuario simulado para probar la experiencia de usuario.
+  private readonly usuarioActualId = 1;
+  private readonly usuarioActualNombre = 'Usuario de prueba';
 
-  private readonly incidenciasState = signal<Incidencia[]>([]);
+  private readonly incidenciasState = signal<Incidencia[]>([
+    {
+      id: 1,
+      titulo: 'Filtración en el techo',
+      descripcion: 'Hay una filtración de agua en el techo del pasillo.',
+      categoria: 'Mantenimiento',
+      ubicacion: 'Unidad 2B',
+      estado: 'pendiente',
+      prioridad: 'alta',
+      fechaCreacion: '2026-10-28T10:30:00',
+      usuarioId: 1,
+      usuarioNombre: 'Usuario de prueba',
+    },
+    {
+      id: 2,
+      titulo: 'Problema con el ascensor',
+      descripcion: 'El ascensor se detiene entre los pisos.',
+      categoria: 'Mantenimiento',
+      ubicacion: 'Torre A',
+      estado: 'en-proceso',
+      prioridad: 'alta',
+      fechaCreacion: '2026-10-27T15:20:00',
+      usuarioId: 1,
+      usuarioNombre: 'Usuario de prueba',
+    },
+    {
+      id: 3,
+      titulo: 'Luces apagadas',
+      descripcion: 'Las luces de la entrada principal no funcionan.',
+      categoria: 'Mantenimiento',
+      ubicacion: 'Entrada principal',
+      estado: 'resuelta',
+      prioridad: 'media',
+      fechaCreacion: '2026-10-25T09:00:00',
+      usuarioId: 2,
+      usuarioNombre: 'Carlos Fernández',
+    },
+    {
+      id: 4,
+      titulo: 'Limpieza de espacios comunes',
+      descripcion: 'Solicito revisar la limpieza del sector de cocheras.',
+      categoria: 'Mantenimiento',
+      ubicacion: 'Cocheras',
+      estado: 'pendiente',
+      prioridad: 'baja',
+      fechaCreacion: '2026-10-24T12:00:00',
+      usuarioId: 2,
+      usuarioNombre: 'Carlos Fernández',
+    },
+  ]);
+
+  private readonly mensajesState = signal<MensajeIncidencia[]>([]);
+
   readonly incidencias = this.incidenciasState.asReadonly();
+  readonly mensajes = this.mensajesState.asReadonly();
 
-  readonly totalIncidencias = computed(() => this.incidenciasState().length);
+  // Incidencias del usuario simulado.
+  readonly misIncidencias = computed(() =>
+    this.incidenciasState().filter(
+      (incidencia) => incidencia.usuarioId === this.usuarioActualId,
+    ),
+  );
+
+  // Estadísticas generales para administración.
+  readonly totalIncidencias = computed(
+    () => this.incidenciasState().length,
+  );
 
   readonly totalPendientes = computed(
-    () => this.incidenciasState().filter(
-      (i) => i.estado === 'pendiente',
-    ).length,
+    () =>
+      this.incidenciasState().filter(
+        (i) => i.estado === 'pendiente',
+      ).length,
   );
 
   readonly totalEnProceso = computed(
-    () => this.incidenciasState().filter(
-      (i) => i.estado === 'en-proceso',
-    ).length,
+    () =>
+      this.incidenciasState().filter(
+        (i) => i.estado === 'en-proceso',
+      ).length,
   );
 
   readonly totalResueltas = computed(
-    () => this.incidenciasState().filter(
-      (i) => i.estado === 'resuelta',
-    ).length,
+    () =>
+      this.incidenciasState().filter(
+        (i) => i.estado === 'resuelta',
+      ).length,
   );
 
-  cargar(): Observable<IncidenciaApi[]> {
-    return this.http.get<IncidenciaApi[]>(this.apiUrl).pipe(
-      tap((respuesta) => {
-        const incidencias: Incidencia[] = respuesta.map((item) => ({
-          id: item.id,
-          titulo: item.titulo,
-          descripcion: item.descripcion,
-          categoria: item.categoria,
-          ubicacion: item.edificio ?? '',
-          estado: this.normalizarEstado(item.estado),
-          prioridad: this.normalizarPrioridad(item.prioridad),
-          fechaCreacion: item.fechaCreacion,
-          usuarioId: 0,
-          usuarioNombre: item.reportante ?? '',
-        }));
+  // Simula la carga de incidencias sin realizar peticiones HTTP.
+  cargar(): Observable<Incidencia[]> {
+    return of(this.incidenciasState()).pipe(delay(200));
+  }
 
-        this.incidenciasState.set(incidencias);
+  // Devuelve los mensajes de una incidencia.
+  cargarMensajes(
+    incidenciaId: number,
+  ): Observable<MensajeIncidencia[]> {
+    const mensajes = this.mensajesState().filter(
+      (mensaje) => mensaje.incidenciaId === incidenciaId,
+    );
+
+    return of(mensajes).pipe(delay(200));
+  }
+
+  // Guarda un mensaje en memoria.
+  enviarMensaje(
+    datos: Omit<MensajeIncidencia, 'id' | 'fechaCreacion'>,
+  ): Observable<MensajeIncidencia> {
+    const nuevoMensaje: MensajeIncidencia = {
+      ...datos,
+      id: this.generarIdMensaje(),
+      fechaCreacion: new Date().toISOString(),
+    };
+
+    return of(nuevoMensaje).pipe(
+      delay(200),
+      tap((mensaje) => {
+        this.mensajesState.update((lista) => [...lista, mensaje]);
       }),
     );
   }
 
-  crear(datos: CrearIncidenciaRequest): Observable<IncidenciaApi> {
-    return this.http.post<IncidenciaApi>(this.apiUrl, datos).pipe(
-      tap(() => {
-        // Se recarga la lista después de crear la incidencia.
-        this.cargar().subscribe({
-          error: (error) => {
-            console.error('Error al actualizar las incidencias:', error);
-          },
-        });
+  // Crea una incidencia en memoria.
+  crear(datos: CrearIncidenciaRequest): Observable<Incidencia> {
+    const nuevaIncidencia: Incidencia = {
+      id: this.generarId(),
+      titulo: datos.titulo,
+      descripcion: datos.descripcion,
+      categoria: datos.categoria,
+      ubicacion: datos.ubicacion,
+      prioridad: datos.prioridad,
+      estado: 'pendiente',
+      fechaCreacion: new Date().toISOString(),
+      usuarioId: this.usuarioActualId,
+      usuarioNombre: this.usuarioActualNombre,
+    };
+
+    return of(nuevaIncidencia).pipe(
+      delay(200),
+      tap((incidencia) => {
+        this.incidenciasState.update((lista) => [
+          incidencia,
+          ...lista,
+        ]);
       }),
     );
   }
 
-  cambiarEstado(id: number, estado: EstadoIncidencia): void {
+  // Actualiza el estado de una incidencia.
+  cambiarEstado(
+    id: number,
+    estado: EstadoIncidencia,
+  ): void {
     this.incidenciasState.update((lista) =>
       lista.map((incidencia) =>
-        incidencia.id === id ? { ...incidencia, estado } : incidencia,
+        incidencia.id === id
+          ? { ...incidencia, estado }
+          : incidencia,
       ),
     );
   }
 
-  private normalizarEstado(estado: string): EstadoIncidencia {
-    const valor = estado.toLowerCase().trim();
-
-    const estados: Record<string, EstadoIncidencia> = {
-      pendiente: 'pendiente',
-      'en proceso': 'en-proceso',
-      'en-proceso': 'en-proceso',
-      resuelta: 'resuelta',
-      resuelto: 'resuelta',
-      rechazada: 'rechazada',
-    };
-
-    return estados[valor] ?? 'pendiente';
+  private generarId(): number {
+    return Math.max(
+      0,
+      ...this.incidenciasState().map((incidencia) => incidencia.id),
+    ) + 1;
   }
 
-  private normalizarPrioridad(
-    prioridad: string,
-  ): PrioridadIncidencia {
-    const valor = prioridad.toLowerCase().trim();
-
-    if (valor === 'alta' || valor === 'baja') {
-      return valor;
-    }
-
-    return 'media';
+  private generarIdMensaje(): number {
+    return Math.max(
+      0,
+      ...this.mensajesState().map((mensaje) => mensaje.id),
+    ) + 1;
   }
 }

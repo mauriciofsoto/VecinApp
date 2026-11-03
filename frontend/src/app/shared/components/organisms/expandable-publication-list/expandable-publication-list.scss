@@ -1,0 +1,80 @@
+@use '../../../../../styles/abstracts' as *;
+
+.publication-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.publication-list__item {
+  overflow: hidden;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  border-radius: 1rem;
+}
+
+.publication-list__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.publication-list__summary {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.publication-list__summary strong,
+.publication-list__description {
+  overflow-wrap: anywhere;
+}
+
+.publication-list__description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.publication-list__summary time,
+.publication-list__empty {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.publication-list__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.publication-list__badge {
+  width: fit-content;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+}
+
+.publication-list__chevron {
+  flex-shrink: 0;
+  font-size: 1.3rem;
+}
+
+.publication-list__content {
+  padding: 0 0.75rem 0.75rem;
+}
+
+.publication-list__empty {
+  margin: 0;
+  padding: 0.75rem 0;
+}

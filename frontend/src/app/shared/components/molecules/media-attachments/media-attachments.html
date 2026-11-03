@@ -1,0 +1,86 @@
+
+<section class="media-attachments" aria-label="Archivos adjuntos">
+  <div class="media-attachments__toolbar">
+    <input
+      #fileInput
+      class="media-attachments__input"
+      type="file"
+      accept="image/*,video/*"
+      multiple
+      (change)="handleFiles($event)"
+    />
+
+    <app-button
+      type="button"
+      variant="outline"
+      size="sm"
+      (buttonClick)="openFilePicker(fileInput)"
+    >
+      Adjuntar fotos o videos
+    </app-button>
+
+    <input
+      #cameraInput
+      class="media-attachments__input"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      (change)="handleFiles($event)"
+    />
+
+    <app-button
+      type="button"
+      variant="ghost"
+      size="sm"
+      (buttonClick)="openFilePicker(cameraInput)"
+    >
+      Sacar foto
+    </app-button>
+  </div>
+
+  @if (attachments().length > 0) {
+    <div class="media-attachments__grid">
+      @for (item of attachments(); track item.id) {
+        <article class="media-attachments__item">
+          @if (item.type === 'image') {
+            <img
+              class="media-attachments__preview"
+              [src]="item.previewUrl"
+              [alt]="'Vista previa de ' + item.file.name"
+            />
+          } @else {
+            <video
+              class="media-attachments__preview"
+              [src]="item.previewUrl"
+              controls
+              preload="metadata"
+            ></video>
+          }
+
+          <button
+            type="button"
+            class="media-attachments__remove"
+            [attr.aria-label]="'Quitar ' + item.file.name"
+            (click)="removeAttachment(item.id)"
+          >
+            ×
+          </button>
+
+          <span class="media-attachments__filename">
+            {{ item.file.name }}
+          </span>
+        </article>
+      }
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <p class="media-attachments__error" role="alert">
+      {{ errorMessage() }}
+    </p>
+  }
+
+  <p class="media-attachments__hint">
+    Hasta {{ maxFiles }} archivos, de máximo 50 MB cada uno.
+  </p>
+</section>

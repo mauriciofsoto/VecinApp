@@ -1,0 +1,81 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  width: 100%;
+  min-width: 0;
+
+  &__query {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex: 1 1 16rem;
+    min-width: 0;
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    align-items: center;
+    gap: $space-2;
+    flex: 2 1 24rem;
+    min-width: 0;
+  }
+
+  &__field {
+    min-width: 0;
+  }
+
+  app-input,
+  app-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__spinner {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid $glass-border;
+    border-top-color: $primary;
+    border-radius: $radius-full;
+    animation: search-bar-spin 700ms linear infinite;
+  }
+
+  &__visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@keyframes search-bar-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: $tablet) {
+  .search-bar {
+    align-items: stretch;
+    flex-direction: column;
+
+    &__query,
+    &__filters {
+      flex-basis: auto;
+    }
+  }
+}

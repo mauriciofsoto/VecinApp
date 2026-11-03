@@ -1,0 +1,269 @@
+@use '../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.user-dashboard,
+.user-dashboard * {
+  font-family: $font-dashboard;
+}
+
+.user-dashboard {
+  display: flex;
+  min-height: 100vh;
+  color: $text-main;
+  background: $bg-gradient;
+}
+
+.glass-panel {
+  @include glass-panel-effect;
+  border-radius: $radius-dashboard-panel;
+}
+
+.sidebar {
+  @include flex-col($space-7);
+  flex: 0 0 $sidebar-width;
+  width: $sidebar-width;
+  margin: $space-4;
+  padding: $space-6 $space-4;
+}
+
+.brand {
+  @include flex-row($space-3);
+  padding-left: $space-2;
+  color: $accent;
+  font-size: $text-dashboard-brand;
+  font-weight: $font-bold;
+}
+
+.nav-list {
+  @include flex-col($space-2);
+  list-style: none;
+}
+
+.nav-item a {
+  @include flex-row($space-3);
+  padding: $space-3 $space-4;
+  border-radius: $radius-control;
+  color: $text-muted;
+  font-size: $text-dashboard-nav;
+  text-decoration: none;
+  transition: $transition-base;
+}
+
+.nav-item.active a,
+.nav-item a:hover {
+  background: $primary;
+  color: $white;
+  box-shadow: 0 0 15px $primary-glow;
+}
+
+.main-content {
+  @include flex-col($space-5);
+  flex: 1;
+  min-width: 0;
+  padding: $space-4 $space-6 $space-6 $space-2;
+}
+
+.topbar {
+  @include flex-row;
+  justify-content: space-between;
+  padding: $space-3 $space-6;
+}
+
+.building-label {
+  color: $text-muted;
+  font-size: $text-dashboard-stat-label;
+}
+
+.building-selector {
+  padding: $space-2 $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  color: $text-main;
+  background: $bg-dark-alpha;
+  font-size: $text-dashboard-building;
+}
+
+.user-profile {
+  @include flex-row($space-3);
+}
+
+.profile-copy { text-align: right; }
+.profile-name { font-size: $text-dashboard-building; font-weight: $font-semibold; }
+.profile-role { color: $accent; font-size: $text-caption; }
+
+.avatar {
+  @include flex-center;
+  width: $avatar-dashboard-size;
+  height: $avatar-dashboard-size;
+  border-radius: $radius-circle;
+  background: $avatar-gradient;
+  font-weight: $font-bold;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-4;
+}
+
+.stat-card {
+  @include flex-col($space-2);
+  padding: $space-5;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  color: $text-muted;
+  font-size: $text-dashboard-stat-label;
+}
+
+.stat-value {
+  color: $white;
+  font-size: $text-dashboard-stat-value;
+  font-weight: $font-bold;
+}
+
+.stat-value--danger { color: $danger; }
+.stat-value--accent { color: $accent; }
+.stat-value--warning { color: $warning; }
+
+.stat-footer {
+  color: $accent;
+  font-size: $text-dashboard-small;
+}
+
+.stat-footer--success { color: $success; }
+
+.quick-actions {
+  @include flex-row($space-4);
+  padding: $space-4 $space-6;
+}
+
+.quick-actions-label {
+  margin-right: $space-2;
+  font-size: $text-dashboard-building;
+  font-weight: $font-semibold;
+}
+
+.btn-action {
+  @include flex-row($space-2);
+  padding: $space-dashboard-action-y $space-dashboard-action-x;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  color: $text-main;
+  background: $surface-2;
+  cursor: pointer;
+  font-size: $text-dashboard-building;
+  transition: $transition-base;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $primary;
+    background: $primary;
+  }
+
+  &.primary {
+    border-color: $primary;
+    background: $primary;
+
+    &:hover:not(:disabled) {
+      border-color: $primary;
+      background: $primary;
+      box-shadow: none;
+      color: $text-main;
+    }
+  }
+
+  &--compact {
+    padding: $space-dashboard-xs $space-3;
+    font-size: $text-dashboard-small;
+  }
+
+  &--muted { opacity: 0.5; }
+
+  &--full {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $space-5;
+}
+
+.content-panel { padding: $space-5; }
+
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: $space-4;
+  font-size: $text-dashboard-card-title;
+  font-weight: $font-semibold;
+}
+
+.card-link {
+  color: $accent;
+  font-size: $text-dashboard-stat-label;
+  text-decoration: none;
+}
+
+.badge {
+  padding: $space-1 $space-dashboard-badge-x;
+  border-radius: $radius-full;
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+}
+
+.badge-danger { @include status-tint($danger, 0.2, 1); }
+.badge-warning { @include status-tint($warning, 0.2, 1); }
+.badge-success { @include status-tint($success, 0.2, 1); }
+
+.table-list { @include flex-col($space-3); }
+
+.table-item {
+  @include flex-row;
+  justify-content: space-between;
+  padding: $space-3 $space-4;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-control;
+  background: $surface-dashboard-table;
+}
+
+.item-info { @include flex-col($space-dashboard-xs); }
+.item-title { font-size: $text-dashboard-nav; font-weight: $font-semibold; }
+.item-sub { color: $text-muted; font-size: $text-dashboard-small; }
+
+.survey-question {
+  margin-bottom: $space-3;
+  color: $text-muted;
+  font-size: $text-dashboard-stat-label;
+}
+
+.survey-progress {
+  height: $space-dashboard-action-y;
+  margin-bottom: $space-2;
+  overflow: hidden;
+  border-radius: $radius-dashboard-progress;
+  background: $surface-dashboard-progress;
+}
+
+.survey-progress__fill {
+  width: 78%;
+  height: 100%;
+  background: $accent;
+}
+
+.survey-results-summary {
+  @include flex-row;
+  justify-content: space-between;
+  margin-bottom: $space-4;
+  color: $text-muted;
+  font-size: $text-dashboard-small;
+}

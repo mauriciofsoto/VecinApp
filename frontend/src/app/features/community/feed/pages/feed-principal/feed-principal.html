@@ -1,4 +1,3 @@
-
 <section class="feed">
   <header class="feed__header">
     <div>
@@ -7,77 +6,126 @@
     </div>
   </header>
 
-  <button
-    type="button"
-    class="feed__create-trigger"
-    (click)="openCreatePost()"
-  >
-    <span class="feed__create-avatar" aria-hidden="true">
-      {{ userRole === 'admin' ? 'A' : 'U' }}
-    </span>
+  <div class="feed__layout">
+    <!-- FEED PRINCIPAL -->
+    <main class="feed__main" aria-label="Publicaciones de la comunidad">
 
-    <span class="feed__create-placeholder">
-      ¿Qué querés compartir hoy?
-    </span>
-  </button>
-
-  @if (isCreatePostOpen()) {
-    <div
-      class="feed__modal-backdrop"
-      (click)="closeCreatePost()"
-    >
-      <section
-        class="feed__modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="create-post-title"
-        (click)="$event.stopPropagation()"
+      <!-- BOTÓN PARA CREAR PUBLICACIONES -->
+      <app-card
+        variant="glass"
+        size="full"
+        customClass="feed__create-card"
       >
-        <header class="feed__modal-header">
-          <h3 id="create-post-title">
-            {{ userRole === 'admin' ? 'Publicar un aviso' : 'Crear publicación' }}
-          </h3>
+        <app-button
+          variant="ghost"
+          size="lg"
+          [fullWidth]="true"
+          customClass="feed__create-trigger-btn"
+          (buttonClick)="openCreatePost()"
+        >
+          <span class="feed__create-avatar" aria-hidden="true">
+            {{ userRole === 'admin' ? 'A' : 'U' }}
+          </span>
 
-          <button
-            type="button"
-            class="feed__modal-close"
-            aria-label="Cerrar"
-            (click)="closeCreatePost()"
-          >
-            ×
-          </button>
-        </header>
+          <span class="feed__create-placeholder">
+            ¿Qué querés compartir hoy?
+          </span>
+        </app-button>
+      </app-card>
 
-        <app-create-post-form
-          [role]="userRole"
-          (postCreated)="createPost($event)"
-        />
-      </section>
-    </div>
-  }
+      <!-- PUBLICACIONES -->
+      <div class="feed__scroll-container">
+        <div class="feed__timeline">
+          @for (post of postsVisibles(); track post.id) {
+            <div class="feed__item">
+              <span
+                class="feed__timeline-dot"
+                aria-hidden="true"
+              ></span>
 
-  @if (posts().length > 0) {
-    <div class="feed__scroll-container">
-      <div class="feed__timeline">
-        @for (post of posts(); track post.id) {
-          <div class="feed__item">
-            <span
-              class="feed__timeline-dot"
-              aria-hidden="true"
-            ></span>
-
-            <app-post-card
-              [post]="post"
-              (postChange)="updatePost($event)"
-              (commentAdded)="addComment($event)"
+              <app-post-card
+                [post]="post"
+                (postChange)="updatePost($event)"
+                (commentAdded)="addComment($event)"
+              />
+            </div>
+          } @empty {
+            <app-empty-state
+              title="Todavía no hay publicaciones"
+              description="Sé el primero en compartir algo con la comunidad o volvé más tarde."
             />
-          </div>
-        }
+          }
+        </div>
       </div>
-    </div>
-  } @else {
-    <p class="feed__empty">
-      Todavía no hay publicaciones. ¡Volvé más tarde!
-    </p>
-  }
+    </main>
+
+    <!-- BARRA LATERAL -->
+    <aside
+      class="feed__sidebar"
+      aria-label="Información de la comunidad"
+    >
+      <!-- AVISOS -->
+      <app-card
+        variant="glass"
+        size="full"
+        align="left"
+      >
+        <app-expandable-publication-list
+          [posts]="avisosOficiales()"
+          emptyMessage="No hay avisos oficiales publicados."
+          (postChange)="updatePost($event)"
+          (commentAdded)="addComment($event)"
+        />
+      </app-card>
+
+      <!-- ENCUESTAS -->
+      <app-card
+        variant="glass"
+        size="full"
+        align="left"
+      >
+        <app-expandable-publication-list
+          [posts]="encuestasParaLista()"
+          emptyMessage="Todavía no hay encuestas publicadas."
+          (postChange)="updatePost($event)"
+          (commentAdded)="addComment($event)"
+        />
+      </app-card>
+    </aside>
+  </div>
+
+  <!-- MODAL DE CREACIÓN -->
+  <app-modal
+    [open]="isCreatePostOpen()"
+    (openChange)="closeCreatePost()"
+    heading="Crear publicación"
+    size="lg"
+  >
+    @if (userRole === 'admin') {
+      <!-- ADMINISTRACIÓN: AVISOS Y ENCUESTAS -->
+      <app-formulario-publicacion
+        (publicada)="closeCreatePost()"
+      />
+    } @else {
+      <!-- USUARIO: PUBLICACIÓN NORMAL -->
+      <app-create-post-form
+        [role]="userRole"
+        (postCreated)="createPost($event)"
+      />
+    }
+  </app-modal>
+
+  <!-- MODAL DE HISTORIAL DE ENCUESTAS -->
+  <app-modal
+    [open]="isPollsOpen()"
+    (openChange)="closePolls()"
+    heading="Historial de Encuestas"
+    size="lg"
+  >
+    <app-historial-encuestas
+  (solicitarCrear)="openCreatePost()"/>
+  </app-modal>
+
+
+
 </section>

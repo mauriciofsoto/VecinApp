@@ -1,0 +1,93 @@
+
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.media-attachments {
+  @include flex-col($space-3);
+  min-width: 0;
+}
+
+.media-attachments__toolbar {
+  @include flex-row($space-2);
+  flex-wrap: wrap;
+}
+
+.media-attachments__input {
+  display: none;
+}
+
+.media-attachments__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: $space-3;
+}
+
+.media-attachments__item {
+  @include flex-col($space-1);
+  position: relative;
+  min-width: 0;
+  padding: $space-2;
+  border-radius: $radius-sm;
+  @include glass-border;
+  background: $surface-1;
+}
+
+.media-attachments__preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: $radius-sm;
+  background: $bg-dark;
+}
+
+.media-attachments__remove {
+  position: absolute;
+  top: $space-3;
+  right: $space-3;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid $glass-border;
+  border-radius: 50%;
+  background: rgba($bg-dark, 0.85);
+  color: $text-main;
+  cursor: pointer;
+
+  &:hover {
+    @include glow($danger, 8px, 0.25);
+  }
+}
+
+.media-attachments__filename {
+  overflow: hidden;
+  color: $text-muted;
+  font-size: $text-caption;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-attachments__error {
+  margin: 0;
+  color: $danger;
+  font-size: $text-small;
+}
+
+.media-attachments__hint {
+  margin: 0;
+  color: $text-muted;
+  font-size: $text-caption;
+}
+
+@media (max-width: 480px) {
+  .media-attachments__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

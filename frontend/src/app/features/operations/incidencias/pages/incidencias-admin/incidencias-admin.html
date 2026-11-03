@@ -52,43 +52,31 @@
   <section class="incidencias-admin__filtros">
 
     <div class="incidencias-admin__busqueda">
-      <input
+      <app-input
         type="search"
         placeholder="Buscar por título, ubicación o usuario..."
         [ngModel]="busqueda()"
-        (ngModelChange)="actualizarBusqueda($event)"
+        (valueChange)="actualizarBusqueda($any($event).toString())"
         aria-label="Buscar incidencias"
       />
     </div>
 
     <div class="incidencias-admin__categoria">
-      <select
-        [ngModel]="categoriaSeleccionada()"
-        (ngModelChange)="actualizarCategoriaFiltro($event)"
-        aria-label="Filtrar por categoría"
-      >
-        <option value="todas">Todas las categorías</option>
-
-        @for (categoria of categorias(); track categoria) {
-          <option [value]="categoria">
-            {{ categoria }}
-          </option>
-        }
-      </select>
+      <app-select
+        ariaLabel="Filtrar por categoría"
+        [options]="opcionesCategoria"
+        [value]="categoriaSeleccionada()"
+        (valueChange)="actualizarCategoriaFiltro($any($event).toString())"
+      />
     </div>
 
     <div class="incidencias-admin__estado">
-      <select
-        [ngModel]="estadoSeleccionado()"
-        (ngModelChange)="actualizarEstadoFiltro($event)"
-        aria-label="Filtrar por estado"
-      >
-        <option value="todos">Todos los estados</option>
-        <option value="pendiente">Pendiente</option>
-        <option value="en-proceso">En proceso</option>
-        <option value="resuelta">Resuelta</option>
-        <option value="rechazada">Rechazada</option>
-      </select>
+      <app-select
+        ariaLabel="Filtrar por estado"
+        [options]="opcionesEstado"
+        [value]="estadoSeleccionado()"
+        (valueChange)="actualizarEstadoFiltro($any($event).toString())"
+      />
     </div>
 
     <app-button
@@ -259,16 +247,13 @@
             Estado de la incidencia
           </label>
 
-          <select
+          <app-select
             id="estado-incidencia"
-            [ngModel]="estadoNuevo()"
-            (ngModelChange)="cambiarEstado($event)"
-          >
-            <option value="pendiente">Pendiente</option>
-            <option value="en-proceso">En proceso</option>
-            <option value="resuelta">Resuelta</option>
-            <option value="rechazada">Rechazada</option>
-          </select>
+            ariaLabel="Estado de la incidencia"
+            [options]="opcionesEstadoEdicion"
+            [value]="estadoNuevo()"
+            (valueChange)="cambiarEstado($any($event))"
+          />
 
         </div>
 
@@ -291,6 +276,15 @@
           </app-button>
 
         </div>
+        <!-- CONVERSACIÓN -->
+        @if (incidencia.estado === 'en-proceso') {
+          <div class="incidencia-detalle__conversacion">
+            <app-chat-incidencia
+              [incidencia]="incidencia"
+              rolVista="administrador"
+            />
+          </div>
+        }
 
       </div>
 

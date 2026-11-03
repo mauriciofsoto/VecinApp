@@ -10,59 +10,60 @@
     <form (ngSubmit)="crear()" class="form-grid">
       <label>
         Título
-        <input name="titulo" [(ngModel)]="titulo" required />
+        <app-input name="titulo" [(ngModel)]="titulo" [required]="true" />
       </label>
 
       <label>
         Lugar o espacio
-        <input name="lugar" [(ngModel)]="lugar" required />
+        <app-input name="lugar" [(ngModel)]="lugar" [required]="true" />
       </label>
 
       <label>
         Fecha y hora
-        <input
+        <app-input
           type="datetime-local"
           name="fecha"
           [(ngModel)]="fecha"
-          required
+          [required]="true"
         />
       </label>
 
       <label>
         Residente
-        <input name="usuarioNombre" [(ngModel)]="usuarioNombre" required />
+        <app-input name="usuarioNombre" [(ngModel)]="usuarioNombre" [required]="true" />
       </label>
 
       <label>
         ID del residente
-        <input
+        <app-input
           type="number"
           name="usuarioId"
           [(ngModel)]="usuarioId"
           min="1"
-          required
+          [required]="true"
         />
       </label>
 
       <label>
         ID del edificio
-        <input
+        <app-input
           type="number"
           name="edificioId"
           [(ngModel)]="edificioId"
           min="1"
-          required
+          [required]="true"
         />
       </label>
 
       <label class="full-width">
         Descripción
-        <textarea
+        <app-input
+          [multiline]="true"
           name="descripcion"
           [(ngModel)]="descripcion"
-          required
-          rows="3"
-        ></textarea>
+          [required]="true"
+          [rows]="3"
+        />
       </label>
 
       <button type="submit">Crear reserva</button>

@@ -1,0 +1,33 @@
+<div
+  class="select-control"
+  [class.select-control--invalid]="isInvalid"
+  [class.select-control--disabled]="disabled"
+>
+  <select
+    class="select-field"
+    [class.select-field--success]="variant === 'success'"
+    [class.select-field--warning]="variant === 'warning'"
+    [class.select-field--danger]="variant === 'danger'"
+    [value]="selectedIndex"
+    [disabled]="disabled"
+    [required]="required"
+    [attr.id]="id || null"
+    [attr.name]="name || null"
+    [attr.aria-label]="ariaLabel || null"
+    [attr.aria-invalid]="isInvalid ? 'true' : null"
+    [attr.aria-describedby]="errorId"
+    (change)="handleChange($event)"
+    (blur)="handleBlur()"
+  >
+    <option value="-1" disabled>{{ placeholder }}</option>
+    @for (option of options; track $index) {
+      <option [value]="$index" [disabled]="option.disabled ?? false">
+        {{ option.label }}
+      </option>
+    }
+  </select>
+</div>
+
+@if (errorMessage) {
+  <span class="select-error" [id]="errorId" role="alert">{{ errorMessage }}</span>
+}

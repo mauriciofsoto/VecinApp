@@ -15,3 +15,122 @@
     @include main-scroll-container;
   }
 }
+
+.shared-preview {
+  @include flex-col($space-4);
+  padding: $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-md;
+  background: $surface-1;
+}
+
+.shared-preview__header {
+  @include flex-row;
+  justify-content: space-between;
+}
+
+.shared-preview__eyebrow {
+  color: $accent;
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+  letter-spacing: 0.08em;
+}
+
+.shared-preview__header h2 {
+  @include text-heading;
+  margin: $space-1 0;
+  color: $text-main;
+}
+
+.shared-preview__header p,
+.shared-preview__card-content p {
+  @include text-body;
+  margin: 0;
+  color: $text-muted;
+}
+
+.shared-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-3;
+}
+
+.shared-preview__section { @include flex-col($space-3); }
+
+.shared-preview__section-heading {
+  @include flex-col($space-1);
+
+  h3 {
+    @include text-heading;
+    color: $text-main;
+  }
+
+  p {
+    @include text-body;
+    margin: 0;
+    color: $text-muted;
+  }
+}
+
+.shared-preview__group {
+  @include flex-col($space-3);
+  min-width: 0;
+  padding: $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  background: $surface-1;
+
+  h4 {
+    @include text-heading;
+    color: $text-main;
+  }
+}
+
+.shared-preview__buttons,
+.shared-preview__badges {
+  @include flex-row($space-2);
+  flex-wrap: wrap;
+}
+
+.shared-preview__group app-input,
+.shared-preview__group app-search-bar,
+.shared-preview__group app-comment-input,
+.shared-preview__group app-message-input {
+  display: block;
+  width: 100%;
+}
+
+.shared-preview__card-content {
+  @include flex-col($space-2);
+
+  h4 {
+    @include text-heading;
+    color: $text-main;
+  }
+}
+
+.shared-preview__feedback {
+  margin: 0;
+  color: $text-info-soft;
+  font-size: $text-small;
+}
+
+.shared-preview__qr-placeholder {
+  display: grid;
+  min-height: 4rem;
+  place-items: center;
+  padding: $space-3;
+  border: 1px dashed $glass-border;
+  border-radius: $radius-sm;
+  background: $surface-1;
+}
+
+.shared-preview__component-note {
+  margin: 0;
+  color: $text-muted;
+  font-size: $text-caption;
+}
+
+@include mobile {
+  .shared-preview__grid { grid-template-columns: 1fr; }
+}

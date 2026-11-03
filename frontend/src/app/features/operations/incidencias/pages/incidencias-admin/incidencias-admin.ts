@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia';
 
 import {
   Incidencia,
@@ -9,9 +10,11 @@ import {
 
 import { Incidencias } from '../../services/incidencias';
 
-import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
-import { CardComponent } from '../../../../../shared/components/ui/card/card.component';
-import { Modal } from '../../../../../shared/components/ui/modal/modal';
+import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
+import { CardComponent } from '../../../../../shared/components/atoms/card/card.component';
+import { Modal } from '../../../../../shared/components/organisms/modal/modal';
+import { InputComponent } from '../../../../../shared/components/atoms/input/input';
+import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
 
 @Component({
   selector: 'app-incidencias-admin',
@@ -22,6 +25,9 @@ import { Modal } from '../../../../../shared/components/ui/modal/modal';
     ButtonComponent,
     CardComponent,
     Modal,
+    InputComponent,
+    SelectComponent,
+    ChatIncidencia,
   ],
   templateUrl: './incidencias-admin.html',
   styleUrl: './incidencias-admin.scss',
@@ -42,6 +48,19 @@ export class IncidenciasAdmin {
 
   readonly incidenciaSeleccionada = signal<Incidencia | null>(null);
   readonly estadoNuevo = signal<EstadoIncidencia>('pendiente');
+  readonly opcionesEstado: SelectOption[] = [
+    { label: 'Todos los estados', value: 'todos' },
+    { label: 'Pendiente', value: 'pendiente' },
+    { label: 'En proceso', value: 'en-proceso' },
+    { label: 'Resuelta', value: 'resuelta' },
+    { label: 'Rechazada', value: 'rechazada' },
+  ];
+  readonly opcionesEstadoEdicion: SelectOption<EstadoIncidencia>[] = [
+    { label: 'Pendiente', value: 'pendiente' },
+    { label: 'En proceso', value: 'en-proceso' },
+    { label: 'Resuelta', value: 'resuelta' },
+    { label: 'Rechazada', value: 'rechazada' },
+  ];
 
   readonly modalDetalleAbierto = signal(false);
 
@@ -85,6 +104,13 @@ export class IncidenciasAdmin {
       this.incidencias().map((incidencia) => incidencia.categoria),
     ),
   ]);
+
+  get opcionesCategoria(): SelectOption[] {
+    return [
+      { label: 'Todas las categorías', value: 'todas' },
+      ...this.categorias().map(categoria => ({ label: categoria, value: categoria })),
+    ];
+  }
 
   verIncidencia(incidencia: Incidencia): void {
     this.incidenciaSeleccionada.set(incidencia);

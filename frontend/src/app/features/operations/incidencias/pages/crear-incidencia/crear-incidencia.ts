@@ -1,37 +1,65 @@
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ButtonComponent } from '../../../../../shared/components/ui/button/button.component';
-import { CardComponent } from '../../../../../shared/components/ui/card/card.component';
+import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
+import { InputComponent } from '../../../../../shared/components/atoms/input/input';
+import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
+import { FormLayout } from '../../../../../shared/components/molecules/form-layout/form-layout';
+import { MediaAttachments } from '../../../../../shared/components/molecules/media-attachments/media-attachments';
 
-import {
-  Incidencia,
-  PrioridadIncidencia,
-} from '../../models/incidencia';
-import { Incidencias } from '../../services/incidencias';
+import { PrioridadIncidencia } from '../../models/incidencia';
+
+export interface CrearIncidenciaPayload {
+  titulo: string;
+  descripcion: string;
+  categoria: string;
+  ubicacion: string;
+  prioridad: PrioridadIncidencia;
+  adjuntos: File[];
+}
 
 @Component({
   selector: 'app-crear-incidencia',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, CardComponent],
+  imports: [
+    FormsModule,
+    ButtonComponent,
+    InputComponent,
+    SelectComponent,
+    FormLayout,
+    MediaAttachments,
+  ],
   templateUrl: './crear-incidencia.html',
   styleUrl: './crear-incidencia.scss',
 })
 export class CrearIncidencia {
-  private readonly incidenciasService = inject(Incidencias);
+  readonly guardar = output<CrearIncidenciaPayload>();
 
   protected readonly titulo = signal('');
   protected readonly descripcion = signal('');
   protected readonly categoria = signal('');
   protected readonly ubicacion = signal('');
   protected readonly prioridad = signal<PrioridadIncidencia>('media');
+  protected readonly adjuntos = signal<File[]>([]);
 
-  protected readonly mensaje = signal('');
   protected readonly error = signal('');
 
+  protected readonly categorias: SelectOption[] = [
+    { label: 'Mantenimiento', value: 'Mantenimiento' },
+  ];
+
+  protected readonly prioridades: SelectOption[] = [
+    { label: 'Baja', value: 'baja' },
+    { label: 'Media', value: 'media' },
+    { label: 'Alta', value: 'alta' },
+  ];
+
+  protected actualizarAdjuntos(archivos: File[]): void {
+    this.adjuntos.set(archivos);
+  }
+
   protected publicarIncidencia(): void {
-    this.mensaje.set('');
     this.error.set('');
 
     const titulo = this.titulo().trim();
@@ -44,40 +72,23 @@ export class CrearIncidencia {
       return;
     }
 
-    const nuevaIncidencia: Incidencia = {
-      id: Date.now(),
+    this.guardar.emit({
       titulo,
       descripcion,
       categoria,
       ubicacion,
-      estado: 'pendiente',
       prioridad: this.prioridad(),
-      fechaCreacion: new Date().toISOString(),
-      usuarioId: 1,
-      usuarioNombre: 'Usuario de prueba',
-    };
-
-    this.incidenciasService.crear({
-      titulo,
-      descripcion: `${descripcion}\n\nUbicación: ${ubicacion}`,
-      categoria,
-      prioridad: this.prioridad(),
-    }).subscribe({
-      next: () => {
-        this.titulo.set('');
-        this.descripcion.set('');
-        this.categoria.set('');
-        this.ubicacion.set('');
-        this.prioridad.set('media');
-
-        this.mensaje.set('La incidencia se registró correctamente.');
-      },
-      error: (error) => {
-        console.error('Error al crear la incidencia:', error);
-        this.error.set(
-          'No se pudo registrar la incidencia. Intentá nuevamente.',
-        );
-      },
+      adjuntos: this.adjuntos(),
     });
+  }
+
+  protected limpiarFormulario(): void {
+    this.titulo.set('');
+    this.descripcion.set('');
+    this.categoria.set('');
+    this.ubicacion.set('');
+    this.prioridad.set('media');
+    this.adjuntos.set([]);
+    this.error.set('');
   }
 }

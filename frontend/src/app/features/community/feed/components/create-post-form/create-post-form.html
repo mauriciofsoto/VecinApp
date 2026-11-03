@@ -1,18 +1,35 @@
-<form class="create-post-form" (ngSubmit)="submitPost()">
+<app-form-layout
+  [title]="role() === 'admin' ? 'Crear aviso' : 'Crear publicación'"
+  description="Compartí novedades con la comunidad."
+>
+  <form
+    class="create-post-form"
+    (ngSubmit)="submitPost()"
+  >
+    <textarea
+      id="post-content"
+      name="content"
+      [ngModel]="content()"
+      (ngModelChange)="content.set($event)"
+      [placeholder]="role() === 'admin'
+        ? 'Escribí un aviso para la comunidad'
+        : '¿Qué querés compartir con la comunidad?'"
+      rows="4"
+      required
+    ></textarea>
 
-  <textarea
-    id="post-content"
-    name="content"
-    [ngModel]="content()"
-    (ngModelChange)="content.set($event)"
-    [placeholder]="role() === 'admin'
-      ? 'Escribí un aviso para la comunidad'
-      : '¿Qué querés compartir con la comunidad?'"
-    rows="4"
-    required
-  ></textarea>
+    <app-media-attachments
+      (attachmentsChange)="onAttachmentsChange($event)"
+    />
 
-  <button type="submit" [disabled]="!content().trim()">
-    {{ role() === 'admin' ? 'Publicar aviso' : 'Publicar' }}
-  </button>
-</form>
+    <div form-actions>
+      <app-button
+        type="submit"
+        variant="primary"
+        [disabled]="!content().trim()"
+      >
+        {{ role() === 'admin' ? 'Publicar aviso' : 'Publicar' }}
+      </app-button>
+    </div>
+  </form>
+</app-form-layout>

@@ -28,8 +28,8 @@ export interface BentoWidget {
   id: string;
   title: string;
   variant: 'glass' | 'solid';
-  cols: 1 | 2 | 3 | 4 | 5 | 6 ;
-  rows?: 1 | 2 | 3 | 4 | 5 | 6 ;
+  cols: 1 | 2 | 3 | 4 | 5 ;
+  rows?: number;
   visible?: boolean;
 }
 

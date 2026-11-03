@@ -2,7 +2,7 @@
 import { Component, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { PostComment } from '../../models/post';
-import { CommentInput } from '../../../../../shared/components/ui/comment-input/comment-input';
+import { CommentInput } from '../../../../../shared/components/molecules/comment-input/comment-input';
 
 @Component({
   selector: 'app-post-comments',

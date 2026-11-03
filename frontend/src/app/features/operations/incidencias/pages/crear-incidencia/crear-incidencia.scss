@@ -92,40 +92,11 @@
     font-weight: $font-medium;
   }
 
-  input,
-  textarea,
-  select {
-    @include form-field-container;
-
-    box-sizing: border-box;
+  app-input,
+  app-select {
+    display: block;
+    width: 100%;
     min-width: 0;
-    color: $text-main;
-    font-size: $text-small;
-
-    &:focus-visible {
-      outline: 2px solid rgba($accent, 0.65);
-      outline-offset: 2px;
-    }
-  }
-
-  input,
-  select {
-    min-height: 44px;
-  }
-
-  textarea {
-    @include form-textarea-base($resize: vertical);
-
-    min-height: 130px;
-  }
-
-  select {
-    cursor: pointer;
-
-    option {
-      background: $bg-dark;
-      color: $text-main;
-    }
   }
 }
 

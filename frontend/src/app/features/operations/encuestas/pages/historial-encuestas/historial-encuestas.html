@@ -3,7 +3,7 @@
   <header class="surveys-header">
     <div class="surveys-header__intro">
       <span class="surveys-eyebrow">OPERACIONES / COMUNIDAD</span>
-      <h1>Gestión de encuestas</h1>
+      <h1>Gestión de Publicaciones</h1>
       <p>
         Consultá las publicaciones, revisá su estado y hacé seguimiento
         de la participación de los vecinos.
@@ -12,11 +12,13 @@
 
     <!-- BOTÓN DE CREACIÓN GRANDE -->
     <app-button
-        type="button"
-        variant="primary"
-        size="xl"
-        (buttonClick)="abrirModalCrear()">  Crear encuesta
-    </app-button>
+      type="button"
+      variant="primary"
+      size="xl"
+      (buttonClick)="abrirModalCrear()"
+    >
+      Nueva publicación
+  </app-button>
 
   </header>
 
@@ -54,61 +56,21 @@
       </span>
     </div>
 
-    <app-card size="full" variant="glass" align="left">
-      <div class="survey-filters">
-        <div class="form-field">
-          <label for="filter-status">Estado</label>
-
-          <select
-            id="filter-status"
-            name="estadoFiltro"
-            [ngModel]="estadoFiltro()"
-            (ngModelChange)="estadoFiltro.set($event)"
-          >
-            <option value="todas">Todos los estados</option>
-            <option value="en-proceso">En proceso</option>
-            <option value="cerrada">Cerradas</option>
-          </select>
-        </div>
-
-        <div class="form-field">
-          <label for="filter-from">Publicadas desde</label>
-
-          <input
-            id="filter-from"
-            name="fechaDesde"
-            type="date"
-            [ngModel]="fechaDesde()"
-            (ngModelChange)="fechaDesde.set($event)"
-          />
-        </div>
-
-        <div class="form-field">
-          <label for="filter-to">Publicadas hasta</label>
-
-          <input
-            id="filter-to"
-            name="fechaHasta"
-            type="date"
-            [ngModel]="fechaHasta()"
-            (ngModelChange)="fechaHasta.set($event)"
-          />
-        </div>
-
-        <app-button
-          variant="outline"
-          (buttonClick)="limpiarFiltros()"
-        >
-          Limpiar filtros
-        </app-button>
-      </div>
-    </app-card>
+    <app-search-bar
+      placeholder="Buscar por título o descripción..."
+      [statusOptions]="estadosFiltro"
+      [showFilters]="true"
+      [showSort]="true"
+      (filterChange)="actualizarFiltros($event)"
+    />
 
     <!-- LISTADO DE ENCUESTAS -->
     <div class="survey-list">
       @for (encuesta of encuestasFiltradas(); track encuesta.id) {
         <app-card size="full" variant="glass" align="left">
           <article class="survey-entry">
+
+
             <div class="survey-entry__top">
               <div class="survey-entry__title-group">
                 <div class="survey-entry__badges">
@@ -132,6 +94,13 @@
               </span>
             </div>
 
+
+
+   <!-- -------------------------------------------
+                 4.2 INFORMACIÓN ADICIONAL
+                 ------------------------------------------- -->
+
+
             <div class="survey-entry__details">
               @if (encuesta.votacionActiva) {
                 <span>
@@ -142,6 +111,7 @@
                 <span>Publicación informativa</span>
               }
 
+               <!-- Indica si los comentarios están habilitados -->
               <span>
                 {{
                   encuesta.comentariosActivos
@@ -150,6 +120,8 @@
                 }}
               </span>
 
+
+               <!-- Fecha límite opcional -->
               @if (encuesta.fechaLimite) {
                 <span>Vence: {{ encuesta.fechaLimite }}</span>
               } @else {
@@ -157,6 +129,19 @@
               }
             </div>
 
+
+             <!-- Solo muestra estadísticas si hay opciones -->
+            @if (encuesta.opciones.length) {
+              <app-poll-statistics
+                [question]="encuesta.titulo"
+                [options]="opcionesConResultados(encuesta)"
+                [totalVotes]="encuesta.totalVotos"
+              />
+            }
+
+
+
+            
             @if (encuesta.votacionActiva && encuesta.opciones.length) {
               <div class="survey-entry__options">
                 <span class="survey-entry__options-label">
@@ -185,27 +170,33 @@
         </app-card>
       } @empty {
         <app-card size="full" variant="glass" align="center">
-          <div class="survey-empty">
-            <span class="survey-empty__icon" aria-hidden="true">◎</span>
-
-            <h3>
-              {{
-                encuestas().length === 0
-                  ? 'Todavía no hay encuestas publicadas'
-                  : 'No hay encuestas para mostrar'
-              }}
-            </h3>
-
-            <p>
-              {{
-                encuestas().length === 0
-                  ? 'Cuando publiques una encuesta, aparecerá acá.'
-                  : 'Probá cambiar los filtros para encontrar otras encuestas.'
-              }}
-            </p>
-          </div>
+          <app-empty-state
+            [title]="encuestas().length === 0
+              ? 'Todavía no hay encuestas publicadas'
+              : 'No hay encuestas para mostrar'"
+            [description]="encuestas().length === 0
+              ? 'Cuando publiques una encuesta, aparecerá acá.'
+              : 'Probá cambiar los filtros para encontrar otras encuestas.'"
+          >
+            <span emptyIcon aria-hidden="true">◎</span>
+          </app-empty-state>
         </app-card>
       }
     </div>
   </section>
+
+  <!-- MODAL DE CREACIÓN -->
+  <app-modal
+    [open]="isModalCrearOpen()"
+    (openChange)="isModalCrearOpen.set($event)"
+    heading="Crear publicación"
+    size="lg"
+  >
+    <app-formulario-publicacion
+      (publicada)="isModalCrearOpen.set(false)"
+    />
+  </app-modal>
+
 </div>
+
+  

@@ -1,0 +1,77 @@
+<section class="chat-incidencia">
+  <header class="chat-incidencia__header">
+    <div>
+      <h3>Conversación</h3>
+      <p>{{ incidencia().titulo }}</p>
+    </div>
+
+    <span class="chat-incidencia__status">
+      {{ incidencia().estado }}
+    </span>
+  </header>
+
+  <div class="chat-incidencia__messages" aria-live="polite">
+    @if (cargando()) {
+      <p class="chat-incidencia__feedback">Cargando mensajes...</p>
+    } @else if (mensajes().length === 0) {
+      <div class="chat-incidencia__empty">
+        <p>Todavía no hay mensajes.</p>
+        <span>Podés iniciar la conversación desde acá.</span>
+      </div>
+    } @else {
+      @for (mensaje of mensajes(); track mensaje.id) {
+        <article
+          class="chat-message"
+          [class.chat-message--own]="esMensajePropio(mensaje)"
+        >
+          <div class="chat-message__meta">
+            <strong>{{ mensaje.emisorNombre }}</strong>
+            <time>{{ mensaje.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</time>
+          </div>
+
+          @if (mensaje.contenido) {
+            <p class="chat-message__content">
+              {{ mensaje.contenido }}
+            </p>
+          }
+
+          @if (mensaje.adjuntos.length > 0) {
+            <div class="chat-message__attachments">
+              @for (archivo of mensaje.adjuntos; track $index) {
+                @if (archivo.type.startsWith('image/')) {
+                  <img
+                    [src]="obtenerUrlAdjunto(archivo)"
+                    [alt]="archivo.name"
+                  />
+                } @else if (archivo.type.startsWith('video/')) {
+                  <video
+                    [src]="obtenerUrlAdjunto(archivo)"
+                    controls
+                  ></video>
+                }
+              }
+            </div>
+          }
+        </article>
+      }
+    }
+  </div>
+
+  @if (error()) {
+    <p class="chat-incidencia__error" role="alert">
+      {{ error() }}
+    </p>
+  }
+
+  <footer class="chat-incidencia__composer">
+    <app-media-attachments
+      (attachmentsChange)="actualizarAdjuntos($event)"
+    />
+
+    <app-message-input
+      placeholder="Escribí tu mensaje..."
+      [disabled]="cargando()"
+      (send)="enviarMensaje($event)"
+    />
+  </footer>
+</section>

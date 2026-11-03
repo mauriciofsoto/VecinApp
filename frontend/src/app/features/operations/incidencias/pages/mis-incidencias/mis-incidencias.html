@@ -1,0 +1,54 @@
+<section class="mis-incidencias">
+
+  <header class="mis-incidencias__header">
+    <div>
+      <span class="mis-incidencias__eyebrow">SERVICIOS Y SOPORTE</span>
+      <h1>Mis incidencias</h1>
+      <p>
+        Consultá tus reportes, seguí su evolución y comunicate
+        con administración.
+      </p>
+    </div>
+
+    <app-button variant="primary" (buttonClick)="abrirFormulario()">
+      + Nueva incidencia
+    </app-button>
+  </header>
+
+  @if (mensaje()) {
+    <p class="mis-incidencias__mensaje" role="status">
+      {{ mensaje() }}
+    </p>
+  }
+
+  <app-historial-incidencias
+    [incidencias]="incidencias()"
+    (abrirConversacion)="abrirConversacion($event)"
+  />
+
+</section>
+
+<!-- Modal de creación -->
+<app-modal
+  [(open)]="modalCrearAbierto"
+  heading="Nueva incidencia"
+  size="lg"
+>
+  <app-crear-incidencia
+    (guardar)="guardarIncidencia($event)"
+  />
+</app-modal>
+
+<!-- Modal de conversación -->
+@if (incidenciaSeleccionada(); as incidencia) {
+  <app-modal
+    [(open)]="modalConversacionAbierto"
+    heading="Conversación de incidencia"
+    size="lg"
+  >
+    <app-chat-incidencia
+      [incidencia]="incidencia"
+      rolVista="usuario"
+    />
+  </app-modal>
+}

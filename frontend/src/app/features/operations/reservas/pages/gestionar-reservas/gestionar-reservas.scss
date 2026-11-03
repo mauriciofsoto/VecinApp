@@ -1,104 +1,68 @@
-:host {
-  display: block;
-}
+@use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/operations/mixins-operations' as ops;
+
+:host { display: block; }
 
 .operations-page {
+  @include ops.operation-page;
   display: grid;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  color: #e2e8f0;
+  padding: $space-6;
+  color: $text-page;
 }
 
 .page-header p,
 .item-card p {
-  color: #94a3b8;
+  @include ops.operation-muted-text($text-body);
 }
 
 .panel,
-.item-card {
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 1.25rem;
-  background: rgba(30, 41, 59, 0.65);
-}
+.item-card { @include ops.operation-panel; }
 
 .form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  @include ops.operation-form-grid;
 }
 
-label {
-  display: grid;
-  gap: 0.5rem;
-}
+label { @include ops.operation-form-label; }
 
-input,
-textarea {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 0.75rem;
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.75rem;
-  background: rgba(15, 23, 42, 0.7);
-  font: inherit;
-}
-
-.full-width {
-  grid-column: 1 / -1;
-}
+.full-width { grid-column: 1 / -1; }
 
 button {
-  padding: 0.7rem 1rem;
-  color: white;
+  padding: $button-padding-compact;
+  color: $white;
   border: 0;
-  border-radius: 0.75rem;
-  background: #2563eb;
+  border-radius: $radius-control;
+  background: $primary;
   cursor: pointer;
-}
 
-button.secondary {
-  background: #475569;
+  &.secondary { background: $surface-button-secondary; }
 }
 
 .item-list {
   display: grid;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: $space-4;
+  margin-top: $space-4;
 }
 
 .item-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: $space-4;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: $space-2;
 }
 
 .status,
-.feedback {
-  color: #7dd3fc;
-}
+.feedback { color: $text-info-soft; }
 
-@media (max-width: 640px) {
-  .operations-page {
-    padding: 1rem;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .full-width {
-    grid-column: auto;
-  }
-
+@include mobile {
+  .operations-page { padding: $space-4; }
+  .form-grid { grid-template-columns: 1fr; }
+  .full-width { grid-column: auto; }
   .item-card {
     align-items: flex-start;
     flex-direction: column;

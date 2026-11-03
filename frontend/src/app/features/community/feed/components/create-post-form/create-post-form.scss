@@ -1,99 +1,27 @@
-//create-post
-@use '../../../../../../styles/abstracts/variables.scss' as *;
+@use '../../../../../../styles/abstracts' as *;
 @use '../../../../../../styles/abstracts/components/mixins-forms.scss' as forms;
-@use '../../../../../../styles/abstracts/components/mixins-buttons.scss' as buttons;
-@use '../../../../../../styles/abstracts/global/mixins-core.scss' as core;
-@use '../../../../../../styles/abstracts/components/mixins-card.scss' as card;
 
 .create-post-form {
-  @include card.card-base;
-  @include card.card-skin-glass;
-  @include card.card-size($space-5);
+  @include flex-col($space-4);
 
-  display: flex;
-  flex-direction: column;
-  gap: $space-4;
+  width: 100%;
   min-width: 0;
   color: $text-main;
-
-  // Campos del formulario
-  label {
-    margin-bottom: -$space-2;
-    color: $text-muted;
-    font-family: $font-primary;
-    font-size: $text-small;
-    font-weight: $font-medium;
-  }
-
-  input,
-  select {
-    @include forms.form-input-base;
-
-    width: 100%;
-    min-width: 0;
-    padding: $space-3 $space-4;
-    border: 1px solid $glass-border;
-    border-radius: $radius-sm;
-    background: $surface-1;
-    transition: $transition-base;
-
-    &:focus {
-      border-color: rgba($primary, 0.6);
-      background: $surface-2;
-    }
-  }
-
-  select {
-    cursor: pointer;
-
-    option {
-      background: $bg-dark;
-      color: $text-main;
-    }
-  }
-
-  textarea {
-    @include forms.form-textarea-base;
-
-    width: 100%;
-    min-width: 0;
-    min-height: 6rem;
-    padding: $space-3 $space-4;
-   
-    border-radius: $radius-sm;
-    background: $surface-1;
-    transition: $transition-base;
-
-    &:focus {
-      border-color: rgba($primary, 0.6);
-      background: $surface-2;
-    }
-  }
-
-  // Acción principal
-  button[type='submit'] {
-    @include buttons.button-base;
-    @include buttons.button-size(md);
-    @include buttons.button-primary;
-
-    align-self: flex-end;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-  }
-
-  @media (max-width: $mobile) {
-    @include card.card-size($space-4);
-
-    gap: $space-6;
-
-    button[type='submit'] {
-      width: 100%;
-    }
-  }
 }
 
+.create-post-form textarea {
+  @include forms.form-textarea-base;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 6rem;
+  padding: $space-3 $space-4;
+  border-radius: $radius-sm;
+  background: $surface-1;
+  transition: $transition-base;
+
+  &:focus {
+    border-color: rgba($primary, 0.6);
+    background: $surface-2;
+  }
+}

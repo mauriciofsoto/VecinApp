@@ -1,52 +1,40 @@
-:host {
-  display: block;
-}
+@use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/operations/mixins-operations' as ops;
+
+:host { display: block; }
 
 .operations-page {
+  @include ops.operation-page;
   display: grid;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  color: #e2e8f0;
+  padding: $space-6;
+  color: $text-page;
 }
 
 .page-header p,
 .item-card p {
-  color: #94a3b8;
+  @include ops.operation-muted-text($text-body);
 }
 
 .item-list {
   display: grid;
-  gap: 1rem;
+  gap: $space-4;
 }
 
 .item-card {
+  @include ops.operation-panel;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 1.25rem;
-  background: rgba(30, 41, 59, 0.65);
+  gap: $space-4;
 }
 
-.item-card h2 {
-  margin-top: 0;
-}
+.item-card h2 { margin-top: 0; }
 
-.status {
-  color: #fbbf24;
-}
+.status { color: $text-warning-soft; }
+.status.delivered { color: $text-success-soft; }
 
-.status.delivered {
-  color: #4ade80;
-}
-
-@media (max-width: 640px) {
-  .operations-page {
-    padding: 1rem;
-  }
-
+@include mobile {
+  .operations-page { padding: $space-4; }
   .item-card {
     align-items: flex-start;
     flex-direction: column;
