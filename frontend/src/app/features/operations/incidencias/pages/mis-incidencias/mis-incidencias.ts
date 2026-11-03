@@ -1,4 +1,5 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Incidencia } from '../../models/incidencia';
@@ -51,8 +52,8 @@ export class MisIncidencias implements OnInit {
           this.categorias.set(categorias);
           this.cargandoCategorias.set(false);
         },
-        error: () => {
-          this.categoriasError.set('No se pudieron cargar las categorías.');
+        error: error => {
+          this.categoriasError.set(this.mensajeError(error, 'No se pudieron cargar las categorías.'));
           this.cargandoCategorias.set(false);
         },
       });
@@ -65,11 +66,15 @@ export class MisIncidencias implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => this.cargando.set(false),
-        error: () => {
-          this.errorCarga.set('No se pudieron cargar tus incidencias.');
+        error: error => {
+          this.errorCarga.set(this.mensajeError(error, 'No se pudieron cargar tus incidencias.'));
           this.cargando.set(false);
         },
       });
+  }
+
+  reintentarCarga(): void {
+    this.cargarIncidencias();
   }
 
   abrirFormulario(): void {
@@ -84,14 +89,16 @@ export class MisIncidencias implements OnInit {
     this.mensaje.set('');
     this.enviando.set(true);
 
-    this.incidenciasService.crear(datos).subscribe({
+    this.incidenciasService.crear(datos)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: () => {
         this.modalCrearAbierto.set(false);
         this.mensaje.set('La incidencia se creó correctamente.');
         this.enviando.set(false);
       },
-      error: () => {
-        this.mensaje.set('No se pudo crear la incidencia.');
+      error: error => {
+        this.mensaje.set(this.mensajeError(error, 'No se pudo crear la incidencia.'));
         this.enviando.set(false);
       },
     });
@@ -105,5 +112,21 @@ export class MisIncidencias implements OnInit {
   cerrarConversacion(): void {
     this.modalConversacionAbierto.set(false);
     this.incidenciaSeleccionada.set(null);
+  }
+
+  private mensajeError(error: unknown, fallback: string): string {
+    if (!(error instanceof HttpErrorResponse)) return fallback;
+    if (error.status === 0) return 'No se pudo conectar con el servidor. Revisá que la API esté disponible.';
+    if (error.status === 401) return 'Tu sesión venció o no es válida. Iniciá sesión nuevamente.';
+    if (error.status === 403) return 'Tu cuenta no tiene permiso para realizar esta operación.';
+
+    const body = error.error as { mensaje?: unknown; message?: unknown; title?: unknown } | null;
+    const serverMessage = [body?.mensaje, body?.message, body?.title]
+      .find((value): value is string => typeof value === 'string' && value.trim().length > 0);
+
+    if (serverMessage) return serverMessage;
+    if (error.status >= 500) return 'El servidor no pudo completar la operación. Intentá nuevamente más tarde.';
+    if (error.status === 400) return 'Los datos enviados no son válidos. Revisá el formulario e intentá nuevamente.';
+    return `${fallback} (HTTP ${error.status}).`;
   }
 }

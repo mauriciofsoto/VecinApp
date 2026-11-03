@@ -34,7 +34,10 @@
   @if (cargando()) {
     <p class="mis-incidencias__mensaje" role="status">Cargando incidencias…</p>
   } @else if (errorCarga()) {
-    <p class="mis-incidencias__mensaje" role="alert">{{ errorCarga() }}</p>
+    <div class="mis-incidencias__mensaje" role="alert">
+      <p>{{ errorCarga() }}</p>
+      <app-button variant="secondary" (buttonClick)="reintentarCarga()">Reintentar</app-button>
+    </div>
   } @else {
     <app-historial-incidencias
       [incidencias]="incidencias()"
