@@ -60,17 +60,15 @@
             }
           </div>
 
-          @if (incidencia.estado === 'en-proceso') {
-            <div class="incidencia-item__acciones">
-              <button
-                type="button"
-                class="incidencia-item__chat"
-                (click)="solicitarConversacion(incidencia)"
-              >
-                Ver conversación
-              </button>
-            </div>
-          }
+          <div class="incidencia-item__acciones">
+            <button
+              type="button"
+              class="incidencia-item__chat"
+              (click)="solicitarConversacion(incidencia)"
+            >
+              Ver conversación
+            </button>
+          </div>
         </div>
       </article>
     } @empty {

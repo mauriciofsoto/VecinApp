@@ -10,10 +10,20 @@
       </p>
     </div>
 
-    <app-button variant="primary" (buttonClick)="abrirFormulario()">
+    <app-button
+      variant="primary"
+      (buttonClick)="abrirFormulario()"
+      [disabled]="cargandoCategorias() || !categorias().length"
+    >
       + Nueva incidencia
     </app-button>
   </header>
+
+  @if (categoriasError()) {
+    <p class="mis-incidencias__mensaje" role="alert">{{ categoriasError() }}</p>
+  } @else if (!cargandoCategorias() && !categorias().length) {
+    <p class="mis-incidencias__mensaje" role="status">No hay categorías disponibles para crear incidencias.</p>
+  }
 
   @if (mensaje()) {
     <p class="mis-incidencias__mensaje" role="status">
@@ -21,10 +31,16 @@
     </p>
   }
 
-  <app-historial-incidencias
-    [incidencias]="incidencias()"
-    (abrirConversacion)="abrirConversacion($event)"
-  />
+  @if (cargando()) {
+    <p class="mis-incidencias__mensaje" role="status">Cargando incidencias…</p>
+  } @else if (errorCarga()) {
+    <p class="mis-incidencias__mensaje" role="alert">{{ errorCarga() }}</p>
+  } @else {
+    <app-historial-incidencias
+      [incidencias]="incidencias()"
+      (abrirConversacion)="abrirConversacion($event)"
+    />
+  }
 
 </section>
 
@@ -35,6 +51,8 @@
   size="lg"
 >
   <app-crear-incidencia
+    [categoriasDisponibles]="categorias()"
+    [enviando]="enviando()"
     (guardar)="guardarIncidencia($event)"
   />
 </app-modal>

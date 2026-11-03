@@ -1,24 +1,19 @@
+export type EstadoIncidencia = string;
 
-export type EstadoIncidencia =
-  | 'pendiente'
-  | 'en-proceso'
-  | 'resuelta'
-  | 'rechazada';
-
-export type PrioridadIncidencia =
-  | 'baja'
-  | 'media'
-  | 'alta';
+export type PrioridadIncidencia = 'baja' | 'media' | 'alta';
 
 export interface Incidencia {
   id: number;
   titulo: string;
   descripcion: string;
   categoria: string;
+  categoriaId: number;
   ubicacion: string;
   estado: EstadoIncidencia;
-  prioridad: PrioridadIncidencia;
+  prioridad: string;
   fechaCreacion: string;
-  usuarioId: number;
+  usuarioId: string;
   usuarioNombre: string;
+  responsableId: string | null;
+  responsableNombre: string | null;
 }

@@ -1,204 +1,191 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { Observable, delay, of, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, map, tap } from 'rxjs';
 
-import { MensajeIncidencia } from '../models/mensaje-incidencia';
-import {
-  Incidencia,
-  EstadoIncidencia,
-  PrioridadIncidencia,
-} from '../models/incidencia';
+import { environment } from '../../../../../environments/environment';
+import { Incidencia } from '../models/incidencia';
+import { MensajeIncidencia, RolEmisorMensaje } from '../models/mensaje-incidencia';
 
-export interface CrearIncidenciaRequest {
-  titulo: string;
-  descripcion: string;
-  categoria: string;
-  ubicacion: string;
-  prioridad: PrioridadIncidencia;
-  adjuntos?: File[];
+export interface CategoriaIncidenciaDto {
+  idCategoriaIncidencia: number;
+  nombre: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+export interface EstadoIncidenciaDto {
+  idEstadoIncidencia: number;
+  nombre: string;
+}
+
+export interface CrearIncidenciaRequest {
+  idCategoriaIncidencia: number;
+  titulo: string;
+  descripcion: string;
+  ubicacion: string;
+  prioridad: 'baja' | 'media' | 'alta';
+}
+
+export interface IncidenciaDashboardDto {
+  idIncidencia: number;
+  titulo: string;
+  descripcion: string;
+  fechaCreacion: string;
+  estado: string;
+}
+
+interface IncidenciaApiDto {
+  idIncidencia: number;
+  idEstadoIncidencia: number;
+  idCategoriaIncidencia: number;
+  idUsuarioReportante: string;
+  idUsuarioResponsable: string | null;
+  titulo: string;
+  descripcion: string;
+  ubicacion: string | null;
+  prioridad: string;
+  fechaCreacion: string;
+  estado: string;
+  categoria: string;
+  reportante: string;
+  responsable: string | null;
+}
+
+interface MensajeIncidenciaApiDto {
+  idMensajeIncidencia: number;
+  idIncidencia: number;
+  idUsuarioEmisor: string;
+  emisorNombre: string;
+  rolEmisor: string;
+  contenido: string;
+  fechaCreacion: string;
+}
+
+interface CambiarEstadoResponse {
+  idIncidencia: number;
+  estado: string;
+  mensaje: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class Incidencias {
-  // Usuario simulado para probar la experiencia de usuario.
-  private readonly usuarioActualId = 1;
-  private readonly usuarioActualNombre = 'Usuario de prueba';
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/api/incidencias`;
 
-  private readonly incidenciasState = signal<Incidencia[]>([
-    {
-      id: 1,
-      titulo: 'Filtración en el techo',
-      descripcion: 'Hay una filtración de agua en el techo del pasillo.',
-      categoria: 'Mantenimiento',
-      ubicacion: 'Unidad 2B',
-      estado: 'pendiente',
-      prioridad: 'alta',
-      fechaCreacion: '2026-10-28T10:30:00',
-      usuarioId: 1,
-      usuarioNombre: 'Usuario de prueba',
-    },
-    {
-      id: 2,
-      titulo: 'Problema con el ascensor',
-      descripcion: 'El ascensor se detiene entre los pisos.',
-      categoria: 'Mantenimiento',
-      ubicacion: 'Torre A',
-      estado: 'en-proceso',
-      prioridad: 'alta',
-      fechaCreacion: '2026-10-27T15:20:00',
-      usuarioId: 1,
-      usuarioNombre: 'Usuario de prueba',
-    },
-    {
-      id: 3,
-      titulo: 'Luces apagadas',
-      descripcion: 'Las luces de la entrada principal no funcionan.',
-      categoria: 'Mantenimiento',
-      ubicacion: 'Entrada principal',
-      estado: 'resuelta',
-      prioridad: 'media',
-      fechaCreacion: '2026-10-25T09:00:00',
-      usuarioId: 2,
-      usuarioNombre: 'Carlos Fernández',
-    },
-    {
-      id: 4,
-      titulo: 'Limpieza de espacios comunes',
-      descripcion: 'Solicito revisar la limpieza del sector de cocheras.',
-      categoria: 'Mantenimiento',
-      ubicacion: 'Cocheras',
-      estado: 'pendiente',
-      prioridad: 'baja',
-      fechaCreacion: '2026-10-24T12:00:00',
-      usuarioId: 2,
-      usuarioNombre: 'Carlos Fernández',
-    },
-  ]);
+  private readonly adminItems = signal<Incidencia[]>([]);
+  private readonly residentItems = signal<Incidencia[]>([]);
+  readonly incidencias = this.adminItems.asReadonly();
+  readonly misIncidencias = this.residentItems.asReadonly();
 
-  private readonly mensajesState = signal<MensajeIncidencia[]>([]);
+  readonly totalIncidencias = computed(() => this.adminItems().length);
+  readonly totalPendientes = computed(() => this.countByState('pendiente'));
+  readonly totalEnProceso = computed(() => this.countByState('en-proceso'));
+  readonly totalResueltas = computed(() => this.countByState('resuelta'));
 
-  readonly incidencias = this.incidenciasState.asReadonly();
-  readonly mensajes = this.mensajesState.asReadonly();
-
-  // Incidencias del usuario simulado.
-  readonly misIncidencias = computed(() =>
-    this.incidenciasState().filter(
-      (incidencia) => incidencia.usuarioId === this.usuarioActualId,
-    ),
-  );
-
-  // Estadísticas generales para administración.
-  readonly totalIncidencias = computed(
-    () => this.incidenciasState().length,
-  );
-
-  readonly totalPendientes = computed(
-    () =>
-      this.incidenciasState().filter(
-        (i) => i.estado === 'pendiente',
-      ).length,
-  );
-
-  readonly totalEnProceso = computed(
-    () =>
-      this.incidenciasState().filter(
-        (i) => i.estado === 'en-proceso',
-      ).length,
-  );
-
-  readonly totalResueltas = computed(
-    () =>
-      this.incidenciasState().filter(
-        (i) => i.estado === 'resuelta',
-      ).length,
-  );
-
-  // Simula la carga de incidencias sin realizar peticiones HTTP.
-  cargar(): Observable<Incidencia[]> {
-    return of(this.incidenciasState()).pipe(delay(200));
+  cargarParaDashboard(): Observable<IncidenciaDashboardDto[]> {
+    return this.http.get<IncidenciaDashboardDto[]>(this.apiUrl);
   }
 
-  // Devuelve los mensajes de una incidencia.
-  cargarMensajes(
-    incidenciaId: number,
-  ): Observable<MensajeIncidencia[]> {
-    const mensajes = this.mensajesState().filter(
-      (mensaje) => mensaje.incidenciaId === incidenciaId,
+  cargarAdmin(): Observable<Incidencia[]> {
+    return this.http.get<IncidenciaApiDto[]>(this.apiUrl).pipe(
+      map(items => items.map(item => this.mapIncidencia(item))),
+      tap(items => this.adminItems.set(items)),
     );
-
-    return of(mensajes).pipe(delay(200));
   }
 
-  // Guarda un mensaje en memoria.
-  enviarMensaje(
-    datos: Omit<MensajeIncidencia, 'id' | 'fechaCreacion'>,
-  ): Observable<MensajeIncidencia> {
-    const nuevoMensaje: MensajeIncidencia = {
-      ...datos,
-      id: this.generarIdMensaje(),
-      fechaCreacion: new Date().toISOString(),
-    };
+  cargarMisIncidencias(): Observable<Incidencia[]> {
+    return this.http.get<IncidenciaApiDto[]>(`${this.apiUrl}/mis-incidencias`).pipe(
+      map(items => items.map(item => this.mapIncidencia(item))),
+      tap(items => this.residentItems.set(items)),
+    );
+  }
 
-    return of(nuevoMensaje).pipe(
-      delay(200),
-      tap((mensaje) => {
-        this.mensajesState.update((lista) => [...lista, mensaje]);
+  cargarCategorias(): Observable<CategoriaIncidenciaDto[]> {
+    return this.http.get<CategoriaIncidenciaDto[]>(`${this.apiUrl}/categorias`);
+  }
+
+  cargarEstados(): Observable<EstadoIncidenciaDto[]> {
+    return this.http.get<EstadoIncidenciaDto[]>(`${this.apiUrl}/estados`);
+  }
+
+  obtenerDetalle(id: number): Observable<Incidencia> {
+    return this.http.get<IncidenciaApiDto>(`${this.apiUrl}/${id}`).pipe(
+      map(item => this.mapIncidencia(item)),
+    );
+  }
+
+  crear(request: CrearIncidenciaRequest): Observable<Incidencia> {
+    return this.http.post<IncidenciaApiDto>(this.apiUrl, request).pipe(
+      map(item => this.mapIncidencia(item)),
+      tap(item => this.residentItems.update(items => [item, ...items])),
+    );
+  }
+
+  cambiarEstado(id: number, idEstadoIncidencia: number): Observable<CambiarEstadoResponse> {
+    return this.http.put<CambiarEstadoResponse>(`${this.apiUrl}/${id}/estado`, {
+      idEstadoIncidencia,
+    }).pipe(
+      tap(response => {
+        const estado = this.normalizeState(response.estado);
+        this.adminItems.update(items => items.map(item =>
+          item.id === id ? { ...item, estado } : item,
+        ));
       }),
     );
   }
 
-  // Crea una incidencia en memoria.
-  crear(datos: CrearIncidenciaRequest): Observable<Incidencia> {
-    const nuevaIncidencia: Incidencia = {
-      id: this.generarId(),
-      titulo: datos.titulo,
-      descripcion: datos.descripcion,
-      categoria: datos.categoria,
-      ubicacion: datos.ubicacion,
-      prioridad: datos.prioridad,
-      estado: 'pendiente',
-      fechaCreacion: new Date().toISOString(),
-      usuarioId: this.usuarioActualId,
-      usuarioNombre: this.usuarioActualNombre,
+  cargarMensajes(incidenciaId: number): Observable<MensajeIncidencia[]> {
+    return this.http.get<MensajeIncidenciaApiDto[]>(`${this.apiUrl}/${incidenciaId}/mensajes`).pipe(
+      map(items => items.map(item => this.mapMensaje(item))),
+    );
+  }
+
+  enviarMensaje(incidenciaId: number, contenido: string): Observable<MensajeIncidencia> {
+    return this.http.post<MensajeIncidenciaApiDto>(
+      `${this.apiUrl}/${incidenciaId}/mensajes`,
+      { contenido },
+    ).pipe(map(item => this.mapMensaje(item)));
+  }
+
+  private mapIncidencia(item: IncidenciaApiDto): Incidencia {
+    return {
+      id: item.idIncidencia,
+      titulo: item.titulo,
+      descripcion: item.descripcion,
+      categoria: item.categoria,
+      categoriaId: item.idCategoriaIncidencia,
+      ubicacion: item.ubicacion ?? '',
+      estado: this.normalizeState(item.estado),
+      prioridad: item.prioridad.toLocaleLowerCase('es-AR'),
+      fechaCreacion: item.fechaCreacion,
+      usuarioId: item.idUsuarioReportante,
+      usuarioNombre: item.reportante,
+      responsableId: item.idUsuarioResponsable,
+      responsableNombre: item.responsable,
     };
-
-    return of(nuevaIncidencia).pipe(
-      delay(200),
-      tap((incidencia) => {
-        this.incidenciasState.update((lista) => [
-          incidencia,
-          ...lista,
-        ]);
-      }),
-    );
   }
 
-  // Actualiza el estado de una incidencia.
-  cambiarEstado(
-    id: number,
-    estado: EstadoIncidencia,
-  ): void {
-    this.incidenciasState.update((lista) =>
-      lista.map((incidencia) =>
-        incidencia.id === id
-          ? { ...incidencia, estado }
-          : incidencia,
-      ),
-    );
+  private mapMensaje(item: MensajeIncidenciaApiDto): MensajeIncidencia {
+    const rolEmisor: RolEmisorMensaje =
+      item.rolEmisor.toLocaleLowerCase('es-AR') === 'administrador'
+        ? 'administrador'
+        : 'usuario';
+
+    return {
+      id: item.idMensajeIncidencia,
+      incidenciaId: item.idIncidencia,
+      emisorId: item.idUsuarioEmisor,
+      emisorNombre: item.emisorNombre,
+      rolEmisor,
+      contenido: item.contenido,
+      fechaCreacion: item.fechaCreacion,
+    };
   }
 
-  private generarId(): number {
-    return Math.max(
-      0,
-      ...this.incidenciasState().map((incidencia) => incidencia.id),
-    ) + 1;
+  private normalizeState(value: string): string {
+    return value.trim().toLocaleLowerCase('es-AR')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
   }
 
-  private generarIdMensaje(): number {
-    return Math.max(
-      0,
-      ...this.mensajesState().map((mensaje) => mensaje.id),
-    ) + 1;
+  private countByState(state: string): number {
+    return this.adminItems().filter(item => item.estado === state).length;
   }
 }

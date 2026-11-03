@@ -13,6 +13,8 @@
   <div class="chat-incidencia__messages" aria-live="polite">
     @if (cargando()) {
       <p class="chat-incidencia__feedback">Cargando mensajes...</p>
+    } @else if (errorCarga()) {
+      <p class="chat-incidencia__error" role="alert">{{ errorCarga() }}</p>
     } @else if (mensajes().length === 0) {
       <div class="chat-incidencia__empty">
         <p>Todavía no hay mensajes.</p>
@@ -35,23 +37,6 @@
             </p>
           }
 
-          @if (mensaje.adjuntos.length > 0) {
-            <div class="chat-message__attachments">
-              @for (archivo of mensaje.adjuntos; track $index) {
-                @if (archivo.type.startsWith('image/')) {
-                  <img
-                    [src]="obtenerUrlAdjunto(archivo)"
-                    [alt]="archivo.name"
-                  />
-                } @else if (archivo.type.startsWith('video/')) {
-                  <video
-                    [src]="obtenerUrlAdjunto(archivo)"
-                    controls
-                  ></video>
-                }
-              }
-            </div>
-          }
         </article>
       }
     }
@@ -64,13 +49,9 @@
   }
 
   <footer class="chat-incidencia__composer">
-    <app-media-attachments
-      (attachmentsChange)="actualizarAdjuntos($event)"
-    />
-
     <app-message-input
       placeholder="Escribí tu mensaje..."
-      [disabled]="cargando()"
+      [disabled]="cargando() || enviando()"
       (send)="enviarMensaje($event)"
     />
   </footer>

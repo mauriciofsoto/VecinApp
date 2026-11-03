@@ -8,5 +8,4 @@ export interface MensajeIncidencia {
   rolEmisor: RolEmisorMensaje;
   contenido: string;
   fechaCreacion: string;
-  adjuntos: File[];
 }

@@ -1,195 +1,119 @@
-<div class="app-dashboard-layout">
+<main class="admin-dashboard" aria-labelledby="dashboard-title">
+  <header class="dashboard-header">
+    <div>
+      <span class="dashboard-eyebrow">CENTRO DE OPERACIONES</span>
+      <h1 id="dashboard-title">Hola, {{ userName() }}</h1>
+      <p>Resumen de la comunidad · {{ today | date:'EEEE d MMMM y':'':'es-AR' }}</p>
+    </div>
+    <div class="dashboard-community" aria-label="Comunidad seleccionada">
+      <span class="community-indicator" aria-hidden="true"></span>
+      <span>Edificio no disponible</span>
+    </div>
+  </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="app-main-content">
+  <app-bento-grid [widgets]="widgets">
+    <ng-template bentoItem="calendar">
+      <section class="dashboard-widget dashboard-widget--calendar" aria-labelledby="calendar-title">
+        <header class="widget-heading">
+          <div><span class="widget-kicker">AGENDA</span><h2 id="calendar-title">Calendario</h2></div>
+          <a class="widget-link" routerLink="/admin/reservas">Ver reservas <span aria-hidden="true">↗</span></a>
+        </header>
+        <app-reserva-calendar-modal
+          [reservas]="calendarReservations"
+          (fechaSeleccionada)="navigateToReservations($event)"
+        />
+        <p class="widget-note">Las reservas aparecerán cuando el backend exponga su consulta.</p>
+      </section>
+    </ng-template>
 
-    <!-- HEADER -->
-    <header class="admin-header">
-      <div class="admin-header__heading">
-        <span class="admin-header__eyebrow">
-          ADMINISTRACIÓN
-        </span>
+    <ng-template bentoItem="users">
+      <section class="dashboard-widget" aria-labelledby="users-title">
+        <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="users-title">Usuarios</h2></div><span class="widget-icon" aria-hidden="true">♙</span></header>
+        <p class="widget-unavailable">Métricas no disponibles</p>
+        <p class="widget-note">El backend no ofrece totales ni solicitudes de asociación.</p>
+        <a class="widget-link" routerLink="/inquilinos">Ir a gestión de usuarios <span aria-hidden="true">↗</span></a>
+      </section>
+    </ng-template>
 
-        <h1>Panel de administración</h1>
+    <ng-template bentoItem="clock">
+      <section class="dashboard-widget dashboard-widget--clock" aria-labelledby="clock-title">
+        <span class="widget-kicker">HORA LOCAL</span>
+        <h2 id="clock-title" class="clock-value">{{ now() | date:'shortTime' }}</h2>
+        <p class="widget-note">Zona horaria del dispositivo</p>
+      </section>
+    </ng-template>
 
-        <p>
-          Gestioná las actividades y los servicios de tu comunidad.
-        </p>
-      </div>
-
-      <app-search-bar
-        placeholder="Buscar..."
-        (search)="onBuscar($event)"
-      ></app-search-bar>
-    </header>
-
-    <!-- RESUMEN GENERAL -->
-    <section class="admin-section" aria-labelledby="overview-title">
-
-      <header class="admin-section__header">
-        <div>
-          <h2 id="overview-title">Resumen general</h2>
-          <p>Un vistazo al estado actual del edificio.</p>
-        </div>
-      </header>
-
-      <div class="admin-overview">
-
-        <app-card variant="glass" size="full">
-          <div class="admin-overview__item">
-            <span class="admin-overview__label">
-              Usuarios
-            </span>
-
-            <strong class="admin-overview__value">--</strong>
-
-            <span class="admin-overview__description">
-              Residentes registrados
-            </span>
+    <ng-template bentoItem="incidents">
+      <section class="dashboard-widget" aria-labelledby="incidents-title">
+        <header class="widget-heading"><div><span class="widget-kicker">OPERACIONES</span><h2 id="incidents-title">Incidencias</h2></div><a class="widget-link" routerLink="/admin/incidencias">Gestionar <span aria-hidden="true">↗</span></a></header>
+        @if (incidentsLoading()) {
+          <p class="widget-state" role="status">Cargando incidencias…</p>
+        } @else if (incidentsError()) {
+          <p class="widget-state widget-state--error" role="status">No se pudieron cargar las incidencias.</p>
+        } @else if (incidents(); as items) {
+          <div class="incident-stats">
+            <div><strong>{{ incidentCounts.total }}</strong><span>Total</span></div>
+            <div><strong>{{ incidentCounts.pending }}</strong><span>Abiertas</span></div>
+            <div><strong>{{ incidentCounts.inProgress }}</strong><span>En proceso</span></div>
+            <div><strong>{{ incidentCounts.resolved }}</strong><span>Resueltas</span></div>
           </div>
-        </app-card>
+          @if (items.length) {
+            <ul class="incident-recent" aria-label="Incidencias recientes">
+              @for (item of recentIncidents; track item.idIncidencia) {
+                <li>
+                  <div class="incident-recent__content">
+                    <strong>{{ item.titulo }}</strong>
+                    <span>{{ item.descripcion }}</span>
+                  </div>
+                  <div class="incident-recent__meta">
+                    <span>{{ item.estado }}</span>
+                    <time [attr.datetime]="item.fechaCreacion">{{ item.fechaCreacion | date:'dd/MM HH:mm' }}</time>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="widget-state">No hay incidencias registradas.</p>
+          }
+        } @else {
+          <p class="widget-state">La consulta está disponible para cuentas Administrador.</p>
+        }
+      </section>
+    </ng-template>
 
-        <app-card variant="glass" size="full">
-          <div class="admin-overview__item">
-            <span class="admin-overview__label">
-              Incidencias
-            </span>
+    <ng-template bentoItem="reservations">
+      <section class="dashboard-widget" aria-labelledby="reservations-title">
+        <header class="widget-heading"><div><span class="widget-kicker">AGENDA</span><h2 id="reservations-title">Reservas</h2></div><span class="widget-icon" aria-hidden="true">▦</span></header>
+        <p class="widget-unavailable">Datos no disponibles</p>
+        <p class="widget-note">El módulo aún no tiene endpoints de reservas.</p>
+        <a class="widget-link" routerLink="/admin/reservas">Abrir gestión <span aria-hidden="true">↗</span></a>
+      </section>
+    </ng-template>
 
-            <strong class="admin-overview__value">--</strong>
+    <ng-template bentoItem="weather">
+      <section class="dashboard-widget dashboard-widget--weather" aria-labelledby="weather-title">
+        <span class="widget-kicker">CLIMA</span>
+        <h2 id="weather-title">Sin datos</h2>
+        <p class="widget-note">No hay ubicación ni proveedor configurados.</p>
+      </section>
+    </ng-template>
 
-            <span class="admin-overview__description">
-              Reportes pendientes
-            </span>
-          </div>
-        </app-card>
+    <ng-template bentoItem="publications">
+      <section class="dashboard-widget" aria-labelledby="publications-title">
+        <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="publications-title">Publicaciones</h2></div><a class="widget-link" routerLink="/admin/publicaciones">Gestionar <span aria-hidden="true">↗</span></a></header>
+        <p class="widget-unavailable">Publicaciones no disponibles</p>
+        <p class="widget-note">La API de publicaciones consumida por Angular no existe en el backend actual.</p>
+      </section>
+    </ng-template>
 
-        <app-card variant="glass" size="full">
-          <div class="admin-overview__item">
-            <span class="admin-overview__label">
-              Encuestas
-            </span>
-
-            <strong class="admin-overview__value">--</strong>
-
-            <span class="admin-overview__description">
-              Votaciones activas
-            </span>
-          </div>
-        </app-card>
-
-        <app-card variant="glass" size="full">
-          <div class="admin-overview__item">
-            <span class="admin-overview__label">
-              mis reservas
-            </span>
-
-            <app-mis-reservas></app-mis-reservas>
-
-            <strong class="admin-overview__value">--</strong>
-
-            <span class="admin-overview__description">
-              Paquetes registrados
-            </span>
-          </div>
-        </app-card>
-
-      </div>
-    </section>
-
-    <!-- COMUNIDAD -->
-    <section class="admin-section" aria-labelledby="community-title">
-
-      <header class="admin-section__header">
-        <div>
-          <h2 id="community-title">Comunidad</h2>
-          <p>Publicaciones y novedades del edificio.</p>
-          <app-gestionar-reservas></app-gestionar-reservas>
+    <ng-template bentoItem="activity">
+      <section class="dashboard-widget" aria-labelledby="activity-title">
+        <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="activity-title">Actividad reciente</h2></div><span class="widget-icon" aria-hidden="true">◷</span></header>
+        <div class="widget-empty">
+          <p>No hay una fuente de actividad consolidada.</p>
+          <span>Hace falta un endpoint que reúna incidencias, reservas, solicitudes y publicaciones.</span>
         </div>
-      </header>
-
-      <app-card variant="glass" size="full">
-        <app-feed-principal></app-feed-principal>
-      </app-card>
-
-    </section>
-
-    <!-- INCIDENCIAS -->
-    <section class="admin-section" aria-labelledby="incidents-title">
-
-      <header class="admin-section__header">
-        <div>
-          <h2 id="incidents-title">Gestión de incidencias</h2>
-          <p>
-            Supervisá los reportes y gestioná las solicitudes de los residentes.
-          </p>
-        </div>
-      </header>
-
-      <app-card variant="glass" size="full">
-        <app-incidencias-admin></app-incidencias-admin>
-      </app-card>
-
-    </section>
-
-    <!-- ENCUESTAS -->
-    <section class="admin-section" aria-labelledby="surveys-title">
-
-      <header class="admin-section__header">
-        <div>
-          <h2 id="surveys-title">Encuestas</h2>
-          <p>Administrá las votaciones y consultá sus resultados.</p>
-        </div>
-      </header>
-
-      <app-card variant="glass" size="full">
-        <app-historial-encuestas></app-historial-encuestas>
-      </app-card>
-
-    </section>
-
-    <!-- PAQUETERÍA -->
-    <section class="admin-section" aria-labelledby="packages-title">
-
-      <header class="admin-section__header">
-        <div>
-          <h2 id="packages-title">Paquetería</h2>
-          <p>Controlá los paquetes recibidos en el edificio.</p>
-        </div>
-      </header>
-
-      <app-card variant="glass" size="full">
-        <app-empty-state
-          title="Gestión de paquetería"
-          description="Desde acá vas a poder registrar paquetes y controlar su entrega a los residentes."
-        ></app-empty-state>
-      </app-card>
-
-    </section>
-
-    <!-- USUARIOS Y UNIDADES -->
-    <section class="admin-section" aria-labelledby="residents-title">
-
-      <header class="admin-section__header">
-        <div>
-          <h2 id="residents-title">Usuarios y unidades</h2>
-          <p>Administrá la información de los residentes del edificio.</p>
-        </div>
-      </header>
-
-      <app-card variant="glass" size="full">
-        <app-empty-state
-          title="Gestión de residentes"
-          description="En este espacio vas a poder consultar usuarios, propietarios, inquilinos y sus unidades."
-        ></app-empty-state>
-      </app-card>
-
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="admin-footer">
-      <span>© {{ currentYear }} VecinApp</span>
-      <span>Panel de administración</span>
-    </footer>
-
-  </main>
-</div>
+      </section>
+    </ng-template>
+  </app-bento-grid>
+</main>

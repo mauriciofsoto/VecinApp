@@ -72,13 +72,11 @@ export class HistorialIncidencias {
       rechazada: 'Rechazada',
     };
 
-    return estados[estado];
+    return estados[estado] ?? estado;
   }
 
   protected solicitarConversacion(incidencia: Incidencia): void {
-    if (incidencia.estado === 'en-proceso') {
-      this.abrirConversacion.emit(incidencia);
-    }
+    this.abrirConversacion.emit(incidencia);
   }
 
   protected actualizarBusqueda(valor: string | number): void {

@@ -48,7 +48,7 @@
           name="categoria"
           [ngModel]="categoria()"
           (ngModelChange)="categoria.set($event)"
-          [options]="categorias"
+          [options]="categorias()"
           placeholder="Seleccioná una categoría"
           [required]="true"
         />
@@ -82,18 +82,7 @@
       />
     </div>
 
-    <section class="incidencia-form__attachments">
-      <div class="form-field">
-        <label>Evidencia adjunta</label>
-        <p class="form-hint">
-          Podés agregar fotografías o videos para explicar mejor el problema.
-        </p>
-      </div>
-
-      <app-media-attachments
-        (attachmentsChange)="actualizarAdjuntos($event)"
-      />
-    </section>
+    <p class="form-hint">Los adjuntos estarán disponibles cuando se integre el almacenamiento de archivos.</p>
 
     @if (error()) {
       <p class="form-feedback form-feedback--error" role="alert">
@@ -106,8 +95,9 @@
         type="submit"
         variant="primary"
         size="lg"
+        [disabled]="enviando()"
       >
-        Enviar reporte
+        {{ enviando() ? 'Enviando…' : 'Enviar reporte' }}
       </app-button>
     </div>
   </form>

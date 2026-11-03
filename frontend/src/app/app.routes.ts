@@ -58,6 +58,69 @@ export const routes: Routes = [
             .then(m => m.UserDashboardComponent),
       },
 
+      // Alias administrativos: conservan el MainLayout y su único router-outlet.
+      {
+        path: 'admin',
+        children: [
+          {
+            path: 'dashboard',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/dashboard/admin-dashboard/admin-dashboard.component')
+                .then(m => m.AdminDashboardComponent),
+          },
+          {
+            path: 'incidencias',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/operations/incidencias/pages/incidencias-admin/incidencias-admin')
+                .then(m => m.IncidenciasAdmin),
+          },
+          {
+            path: 'reservas',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/operations/reservas/pages/gestionar-reservas/gestionar-reservas')
+                .then(m => m.GestionarReservas),
+          },
+          {
+            path: 'encuestas',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/operations/encuestas/pages/historial-encuestas/historial-encuestas')
+                .then(m => m.HistorialEncuestas),
+          },
+          {
+            path: 'paqueteria',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/operations/paqueteria/pages/recepcion-paquetes/recepcion-paquetes')
+                .then(m => m.RecepcionPaquetes),
+          },
+          {
+            path: 'publicaciones',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/community/feed/pages/feed-principal/feed-principal')
+                .then(m => m.FeedPrincipal),
+          },
+          {
+            path: 'usuarios',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/operations/inquilinos/pages/inquilinos-list/inquilinos-list')
+                .then(m => m.InquilinosList),
+          },
+        ],
+      },
+
       // COMUNIDAD
       {
         path: 'comunidad',

@@ -44,7 +44,7 @@
 
   &__filtros {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(160px, 200px)) auto;
+    grid-template-columns: minmax(0, 1fr) repeat(3, minmax(130px, 180px)) auto;
     gap: $space-3;
     align-items: end;
     min-width: 0;
@@ -52,7 +52,8 @@
 
   &__busqueda,
   &__categoria,
-  &__estado {
+  &__estado,
+  &__prioridad {
     min-width: 0;
 
     app-input,

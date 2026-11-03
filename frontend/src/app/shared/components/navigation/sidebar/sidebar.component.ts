@@ -57,7 +57,7 @@ export class SidebarComponent {
     switch (this.role()) {
       case 'Administrador':
       case 'SuperAdministrador':
-        return '/admin-dashboard';
+        return '/admin/dashboard';
 
       case 'Porteria':
         return '/porteria-dashboard';
@@ -78,7 +78,7 @@ export class SidebarComponent {
         {
           label: 'Dashboard',
           icon: '▦',
-          route: '/admin-dashboard',
+          route: '/admin/dashboard',
           exact: true,
           roles: ['Administrador', 'SuperAdministrador'],
         },
@@ -102,7 +102,7 @@ export class SidebarComponent {
       title: 'COMUNIDAD',
       items: [
         {
-          label: 'Publicaciones',
+          label: 'Comunidad',
           icon: '◉',
           route: '/comunidad',
           roles: [
@@ -129,9 +129,15 @@ export class SidebarComponent {
       title: 'OPERACIONES',
       items: [
         {
+          label: 'Publicaciones',
+          icon: '▤',
+          route: '/admin/publicaciones',
+          roles: ['Administrador', 'SuperAdministrador'],
+        },
+        {
           label: 'Incidencias',
           icon: '◈',
-          route: '/incidencias',
+          route: '/admin/incidencias',
           roles: ['Administrador', 'SuperAdministrador'],
         },
         {
@@ -143,7 +149,7 @@ export class SidebarComponent {
         {
           label: 'Recepción de paquetes',
           icon: '▣',
-          route: '/recepcion-paquetes',
+          route: '/admin/paqueteria',
           roles: [
             'Administrador',
             'SuperAdministrador',
@@ -159,7 +165,7 @@ export class SidebarComponent {
         {
           label: 'Gestionar reservas',
           icon: '▦',
-          route: '/reservas',
+          route: '/admin/reservas',
           roles: ['Administrador', 'SuperAdministrador'],
         },
         {
