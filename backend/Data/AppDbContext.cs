@@ -14,6 +14,8 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     {
     }
 
+    
+
     // Tablas de negocio
     public DbSet<Rol> RolesAplicacion { get; set; }
     public DbSet<Edificio> Edificios { get; set; }
@@ -25,6 +27,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     public DbSet<Incidencia> Incidencias { get; set; }
     public DbSet<EstadoIncidencia> EstadosIncidencia { get; set; }
     public DbSet<CategoriaIncidencia> CategoriasIncidencia { get; set; }
+    public DbSet<MensajeIncidencia> MensajesIncidencia { get; set; }
     public DbSet<Publicacion> Publicaciones { get; set; }
     public DbSet<CategoriaPublicacion> CategoriasPublicacion { get; set; }
     public DbSet<Comentario> Comentarios { get; set; }
@@ -32,6 +35,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     public DbSet<Encuesta> Encuestas { get; set; }
     public DbSet<OpcionEncuesta> OpcionesEncuesta { get; set; }
     public DbSet<RespuestaEncuesta> RespuestasEncuesta { get; set; }
+    public DbSet<MensajePaquete> MensajesPaquete { get; set; }
     public DbSet<Paquete> Paquetes { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
 
@@ -291,6 +295,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
                 .HasColumnName("descripcion")
                 .IsRequired();
 
+            entity.Property(e => e.Ubicacion)
+                .HasColumnName("ubicacion")
+                .HasMaxLength(150);
+
             entity.Property(e => e.Prioridad)
                 .HasColumnName("prioridad")
                 .IsRequired();
@@ -322,6 +330,30 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.HasOne(e => e.CategoriaIncidencia)
                 .WithMany(e => e.Incidencias)
                 .HasForeignKey(e => e.IdCategoriaIncidencia)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // =========================
+        // MENSAJE INCIDENCIA
+        // =========================
+        modelBuilder.Entity<MensajeIncidencia>(entity =>
+        {
+            entity.ToTable("mensaje_incidencia");
+            entity.HasKey(e => e.IdMensajeIncidencia);
+            entity.Property(e => e.IdMensajeIncidencia).HasColumnName("id_mensaje_incidencia");
+            entity.Property(e => e.IdIncidencia).HasColumnName("id_incidencia");
+            entity.Property(e => e.IdUsuarioEmisor).HasColumnName("id_usuario_emisor").IsRequired();
+            entity.Property(e => e.Contenido).HasColumnName("contenido").HasMaxLength(2000).IsRequired();
+            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").IsRequired();
+
+            entity.HasOne(e => e.Incidencia)
+                .WithMany(e => e.Mensajes)
+                .HasForeignKey(e => e.IdIncidencia)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.UsuarioEmisor)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioEmisor)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -494,6 +526,11 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.Property(e => e.FechaRecepcion).HasColumnName("fecha_recepcion").IsRequired();
             entity.Property(e => e.Observaciones).HasColumnName("observaciones");
             entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
+            entity.Property(e => e.IdUsuarioRegistro).HasColumnName("id_usuario_registro").IsRequired();
+            
+            entity.Property(e => e.IdUsuarioDestinatario).HasColumnName("id_usuario_destinatario").IsRequired();
+            entity.Property(e => e.FechaConfirmacion).HasColumnName("fecha_confirmacion");
+            entity.Property(e => e.FechaEliminacion).HasColumnName("fecha_eliminacion");
 
             entity.HasOne(e => e.Unidad)
                 .WithMany(e => e.Paquetes)
@@ -502,9 +539,56 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
 
             entity.HasOne(e => e.UsuarioRegistro)
                 .WithMany()
-                 .HasForeignKey(e => e.IdUsuarioRegistro)
+                .HasForeignKey(e => e.IdUsuarioRegistro)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Mensajes)
+                .WithOne(e => e.Paquete)
+                .HasForeignKey(e => e.IdPaquete)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.UsuarioDestinatario)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioDestinatario)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+
+                // =========================
+        // MENSAJE PAQUETE
+        // =========================
+        modelBuilder.Entity<MensajePaquete>(entity =>
+        {
+            entity.ToTable("mensaje_paquete");
+
+            entity.HasKey(e => e.IdMensajePaquete);
+
+            entity.Property(e => e.IdMensajePaquete)
+                .HasColumnName("id_mensaje_paquete");
+
+            entity.Property(e => e.IdPaquete)
+                .HasColumnName("id_paquete");
+
+            entity.Property(e => e.IdUsuarioEmisor)
+                .HasColumnName("id_usuario_emisor")
+                .IsRequired();
+
+            entity.Property(e => e.Contenido)
+                .HasColumnName("contenido")
+                .IsRequired();
+
+            entity.Property(e => e.FechaEnvio)
+                .HasColumnName("fecha_envio")
+                .IsRequired();
+
+            entity.HasOne(e => e.UsuarioEmisor)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioEmisor)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+
+
 
         // =========================
         // NOTIFICACION
@@ -515,9 +599,12 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.HasKey(e => e.IdNotificacion);
             entity.Property(e => e.IdNotificacion).HasColumnName("id_notificacion");
             entity.Property(e => e.Tipo).HasColumnName("tipo").IsRequired();
+            entity.Property(e => e.Titulo).HasColumnName("titulo").HasMaxLength(200).IsRequired();
             entity.Property(e => e.Mensaje).HasColumnName("mensaje").IsRequired();
             entity.Property(e => e.Fecha).HasColumnName("fecha").IsRequired();
             entity.Property(e => e.Leida).HasColumnName("leida").IsRequired();
+            entity.Property(e => e.Ruta).HasColumnName("ruta").HasMaxLength(500);
+            entity.HasIndex(e => new { e.IdUsuario, e.Leida, e.Fecha });
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()

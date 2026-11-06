@@ -1,100 +1,107 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Badge } from '../../../shared/components/ui/badge/badge';
-import { ButtonComponent } from '../../../shared/components/ui/button/button.component';
-import { CommentInput } from '../../../shared/components/ui/comment-input/comment-input';
-import { SearchBar } from '../../../shared/components/ui/search-bar/search-bar';
-import { CardComponent } from '../../../shared/components/ui/card/card.component';
-import { SidebarComponent } from '../../../shared/components/navigation/sidebar/sidebar.component';
-import { Modal } from '../../../shared/components/ui/modal/modal';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeEsAr from '@angular/common/locales/es-AR';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
+import { interval, map, startWith } from 'rxjs';
 
-export interface DashboardWidget {
-  id: string;
-  title: string;
-  variant: 'glass' | 'solid';
-  cols: 1 | 2 | 3;
-}
+import { AuthService } from '../../../core/services/auth';
+import {
+  BentoGridComponent,
+  BentoWidget,
+} from '../../../shared/components/layout/bento-grid/bento-grid';
+import { BentoItemDirective } from '../../../shared/components/layout/bento-grid/bento-item.directive';
+import { ReservaCalendarModal } from '../../operations/reservas/components/reserva-calendar-modal/reserva-calendar-modal';
+import { Incidencias, IncidenciaDashboardDto } from '../../operations/incidencias/services/incidencias';
+
+const DASHBOARD_WIDGETS: BentoWidget[] = [
+  { id: 'calendar', title: 'Calendario', variant: 'glass', cols: 2, rows: 3, visible: true },
+  { id: 'users', title: 'Usuarios', variant: 'glass', cols: 1, rows: 1, visible: true },
+  { id: 'clock', title: 'Hora local', variant: 'solid', cols: 1, rows: 1, visible: true },
+  { id: 'incidents', title: 'Incidencias', variant: 'glass', cols: 2, rows: 2, visible: true },
+  { id: 'reservations', title: 'Reservas', variant: 'glass', cols: 1, rows: 1, visible: true },
+  { id: 'weather', title: 'Clima', variant: 'solid', cols: 1, rows: 1, visible: true },
+  { id: 'publications', title: 'Publicaciones', variant: 'glass', cols: 2, rows: 1, visible: true },
+  { id: 'activity', title: 'Actividad reciente', variant: 'glass', cols: 2, rows: 1, visible: true },
+];
+
+registerLocaleData(localeEsAr);
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    CdkDropList,
-    CdkDrag,
-    CardComponent,
-    Badge,
-    ButtonComponent,
-    CommentInput,
-    SearchBar,
-    SidebarComponent,
-    Modal
-  ],
+  imports: [CommonModule, RouterLink, BentoGridComponent, BentoItemDirective, ReservaCalendarModal],
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.scss'
+  styleUrl: './admin-dashboard.component.scss',
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent {
+  private readonly auth = inject(AuthService);
+  private readonly incidentsService = inject(Incidencias);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  widgets: DashboardWidget[] = [
-    { id: '1', title: 'Contenedor 1', variant: 'glass', cols: 2 },
-    { id: '2', title: 'Contenedor 2', variant: 'solid', cols: 1 },
-    { id: '3', title: 'Contenedor 3', variant: 'glass', cols: 1 },
-    { id: '4', title: 'Contenedor 4', variant: 'glass', cols: 1 },
-    { id: '5', title: 'Contenedor 5', variant: 'glass', cols: 1 }
-  ];
+  readonly widgets = DASHBOARD_WIDGETS;
+  readonly now = signal(new Date());
+  readonly today = new Date();
+  readonly currentUser = this.auth.currentUser;
+  readonly incidents = signal<IncidenciaDashboardDto[] | null>(null);
+  readonly incidentsLoading = signal(false);
+  readonly incidentsError = signal(false);
 
-  // Modal "Asignar QR"
-  protected readonly showQr = signal(false);
+  // El calendario comparte la presentación existente; el backend todavía no expone reservas.
+  readonly calendarReservations = [];
 
-  ngOnInit(): void {
-    const savedLayout = localStorage.getItem('bento_layout_sample');
-    if (savedLayout) {
-      try {
-        this.widgets = JSON.parse(savedLayout);
-      } catch (e) {
-        console.error('Error al recuperar layout', e);
-      }
+  constructor() {
+    interval(30_000)
+      .pipe(startWith(0), map(() => new Date()), takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.now.set(value));
+
+    if (this.currentUser()?.rol === 'Administrador') {
+      this.loadIncidents();
     }
   }
 
-  onDrop(event: CdkDragDrop<DashboardWidget[]>): void {
-    moveItemInArray(this.widgets, event.previousIndex, event.currentIndex);
-    localStorage.setItem('bento_layout_sample', JSON.stringify(this.widgets));
+  get incidentCounts(): { total: number; pending: number; inProgress: number; resolved: number } {
+    const items = this.incidents() ?? [];
+    return {
+      pending: items.filter(item => this.normalizeStatus(item.estado) === 'pendiente').length,
+      inProgress: items.filter(item => this.normalizeStatus(item.estado) === 'en proceso').length,
+      resolved: items.filter(item => this.normalizeStatus(item.estado) === 'resuelta').length,
+      total: items.length,
+    };
   }
 
-  resetLayout(): void {
-    localStorage.removeItem('bento_layout_sample');
-    window.location.reload();
+  get recentIncidents(): IncidenciaDashboardDto[] {
+    return (this.incidents() ?? []).slice(0, 3);
   }
 
-  // Modal QR
-  openQr(): void {
-    this.showQr.set(true);
+  readonly userName = () => {
+    const user = this.currentUser();
+    return user ? `${user.nombre} ${user.apellido}`.trim() : 'Administrador';
+  };
+
+  navigateToReservations(_date: string): void {
+    void this.router.navigate(['/admin/reservas']);
   }
 
-  closeQr(): void {
-    this.showQr.set(false);
+  private loadIncidents(): void {
+    this.incidentsLoading.set(true);
+    this.incidentsService.cargarParaDashboard()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: items => {
+          this.incidents.set(items);
+          this.incidentsLoading.set(false);
+        },
+        error: () => {
+          this.incidentsError.set(true);
+          this.incidentsLoading.set(false);
+        },
+      });
   }
 
-  guardarQr(): void {
-    // Acá va la llamada al servicio cuando esté listo
-    this.closeQr();
-  }
-
-  // Escucha el (submitComment) emitido por el app-comment-input
-  onNuevoComentario(texto: string, widgetId?: string): void {
-    console.log('Nuevo comentario recibido:', texto);
-
-    if (widgetId) {
-      console.log(`Comentario enviado al widget ID: ${widgetId}`);
-    }
-
-    // this.incidenciasService.agregarComentario(widgetId, texto).subscribe();
-  }
-
-  // Escucha el evento (search) emitido por el app-search-bar
-  onBuscar(termino: string): void {
-    console.log('Término de búsqueda:', termino);
+  private normalizeStatus(status: string): string {
+    return status.trim().toLocaleLowerCase('es-AR')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-\s]+/g, ' ');
   }
 }

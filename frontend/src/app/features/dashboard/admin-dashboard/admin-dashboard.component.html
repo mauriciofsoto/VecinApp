@@ -1,131 +1,119 @@
-<div class="app-dashboard-layout">
-
-  <!-- SIDEBAR DE NAVEGACIÓN LATERAL -->
-  <app-sidebar></app-sidebar>
-
-  <!-- ÁREA PRINCIPAL CON SCROLL CONTROLADO -->
-  <main class="app-main-content space-y-6">
-
-    <!-- HEADER DEL DASHBOARD CON BÚSQUEDA -->
-    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
-      <div>
-        <h1 class="text-2xl font-bold text-white">Panel de Administración</h1>
-        <p class="text-sm text-muted">Gestión integral del consorcio VecinApp</p>
-      </div>
-
-      <!-- BUSCADOR PRINCIPAL REUTILIZABLE -->
-      <div class="w-full md:w-80">
-        <app-search-bar
-          placeholder="Buscar reclamo, departamento o vecino..."
-          (search)="onBuscar($event)">
-        </app-search-bar>
-      </div>
-    </header>
-
-    <!-- BARRA DE ACCIONES Y RESUMEN DE ESTADOS -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-md">
-
-      <!-- RESUMEN EN BADGES -->
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs text-muted font-medium mr-1">Estado general:</span>
-        <app-badge variant="danger" size="sm">🚨 2 Urgentes</app-badge>
-        <app-badge variant="warning" size="sm">3 En Proceso</app-badge>
-        <app-badge variant="info" size="sm">📦 4 En Portería</app-badge>
-      </div>
-
-      <!-- BOTONES DE ACCIÓN RÁPIDA -->
-      <div class="flex items-center gap-3">
-        <app-button variant="ghost" size="sm" (buttonClick)="resetLayout()">
-          🔄 Restablecer Orden
-        </app-button>
-        <app-button variant="outline" size="sm" (buttonClick)="openQr()">
-          <span>📲</span> Asignar QR
-        </app-button>
-        <app-button variant="primary" size="sm">
-          <span>➕</span> Nueva Incidencia
-        </app-button>
-      </div>
+<main class="admin-dashboard" aria-labelledby="dashboard-title">
+  <header class="dashboard-header">
+    <div>
+      <span class="dashboard-eyebrow">CENTRO DE OPERACIONES</span>
+      <h1 id="dashboard-title">Hola, {{ userName() }}</h1>
+      <p>Resumen de la comunidad · {{ today | date:'EEEE d MMMM y':'':'es-AR' }}</p>
     </div>
+    <div class="dashboard-community" aria-label="Comunidad seleccionada">
+      <span class="community-indicator" aria-hidden="true"></span>
+      <span>Edificio no disponible</span>
+    </div>
+  </header>
 
-    <!-- BENTO GRID CONTAINER -->
-    <section
-      cdkDropList
-      cdkDropListOrientation="mixed"
-      (cdkDropListDropped)="onDrop($event)"
-      class="bento-grid">
+  <app-bento-grid [widgets]="widgets">
+    <ng-template bentoItem="calendar">
+      <section class="dashboard-widget dashboard-widget--calendar" aria-labelledby="calendar-title">
+        <header class="widget-heading">
+          <div><span class="widget-kicker">AGENDA</span><h2 id="calendar-title">Calendario</h2></div>
+          <a class="widget-link" routerLink="/admin/reservas">Ver reservas <span aria-hidden="true">↗</span></a>
+        </header>
+        <app-reserva-calendar-modal
+          [reservas]="calendarReservations"
+          (fechaSeleccionada)="navigateToReservations($event)"
+        />
+        <p class="widget-note">Las reservas aparecerán cuando el backend exponga su consulta.</p>
+      </section>
+    </ng-template>
 
-      @for (widget of widgets; track widget.id) {
+    <ng-template bentoItem="users">
+      <section class="dashboard-widget" aria-labelledby="users-title">
+        <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="users-title">Usuarios</h2></div><span class="widget-icon" aria-hidden="true">♙</span></header>
+        <p class="widget-unavailable">Métricas no disponibles</p>
+        <p class="widget-note">El backend no ofrece totales ni solicitudes de asociación.</p>
+        <a class="widget-link" routerLink="/inquilinos">Ir a gestión de usuarios <span aria-hidden="true">↗</span></a>
+      </section>
+    </ng-template>
 
-        <div
-          cdkDrag
-          [class]="'bento-item col-span-' + widget.cols">
+    <ng-template bentoItem="clock">
+      <section class="dashboard-widget dashboard-widget--clock" aria-labelledby="clock-title">
+        <span class="widget-kicker">HORA LOCAL</span>
+        <h2 id="clock-title" class="clock-value">{{ now() | date:'shortTime' }}</h2>
+        <p class="widget-note">Zona horaria del dispositivo</p>
+      </section>
+    </ng-template>
 
-          <app-card [variant]="widget.variant" size="full" align="between" [hover]="true">
-
-            <!-- HEADER DE LA CARD CON HANDLE DE DRAG -->
-            <div card-title class="flex justify-between items-center w-full cursor-grab active:cursor-grabbing select-none">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-white">{{ widget.title }}</span>
-                <!-- Badge opcional de la tarjeta -->
-                @if (widget.id === 'incidencias') {
-                  <app-badge variant="danger" size="sm">Activas</app-badge>
-                }
-              </div>
-              <span class="text-xs opacity-60 hover:opacity-100 transition-opacity">⋮⋮</span>
-            </div>
-
-            <!-- CUERPO SEGÚN EL TIPO DE WIDGET -->
-            <div class="py-3 w-full space-y-4">
-
-              <!-- EJEMPLO WIDGET: MURO / INCIDENCIAS CON COMENTARIOS -->
-              @if (widget.id === 'muro' || widget.id === 'incidencias') {
-                <div class="bg-white/5 p-3 rounded-lg border border-white/5 space-y-2">
-                  <div class="flex justify-between items-center">
-                    <span class="text-xs font-semibold text-accent">Dpto 4B - Caño con pérdida</span>
-                    <app-badge variant="warning" size="sm">En Proceso</app-badge>
+    <ng-template bentoItem="incidents">
+      <section class="dashboard-widget" aria-labelledby="incidents-title">
+        <header class="widget-heading"><div><span class="widget-kicker">OPERACIONES</span><h2 id="incidents-title">Incidencias</h2></div>@if (currentUser()?.rol === 'Administrador') { <a class="widget-link" routerLink="/admin/incidencias">Gestionar <span aria-hidden="true">↗</span></a> }</header>
+        @if (incidentsLoading()) {
+          <p class="widget-state" role="status">Cargando incidencias…</p>
+        } @else if (incidentsError()) {
+          <p class="widget-state widget-state--error" role="status">No se pudieron cargar las incidencias.</p>
+        } @else if (incidents(); as items) {
+          <div class="incident-stats">
+            <div><strong>{{ incidentCounts.total }}</strong><span>Total</span></div>
+            <div><strong>{{ incidentCounts.pending }}</strong><span>Abiertas</span></div>
+            <div><strong>{{ incidentCounts.inProgress }}</strong><span>En proceso</span></div>
+            <div><strong>{{ incidentCounts.resolved }}</strong><span>Resueltas</span></div>
+          </div>
+          @if (items.length) {
+            <ul class="incident-recent" aria-label="Incidencias recientes">
+              @for (item of recentIncidents; track item.idIncidencia) {
+                <li>
+                  <div class="incident-recent__content">
+                    <strong>{{ item.titulo }}</strong>
+                    <span>{{ item.descripcion }}</span>
                   </div>
-                  <p class="text-xs text-muted">Se notificó al plomero para la revisión de mañana a las 10:00 hs.</p>
-                </div>
-
-                <!-- CAMPO DE COMENTARIOS INTEGRADO EN EL BENTO -->
-                <app-comment-input
-                  placeholder="Responder o agregar nota interna..."
-                  userInitials="AD"
-                  (submitComment)="onNuevoComentario($event, widget.id)">
-                </app-comment-input>
+                  <div class="incident-recent__meta">
+                    <span>{{ item.estado }}</span>
+                    <time [attr.datetime]="item.fechaCreacion">{{ item.fechaCreacion | date:'dd/MM HH:mm' }}</time>
+                  </div>
+                </li>
               }
+            </ul>
+          } @else {
+            <p class="widget-state">No hay incidencias registradas.</p>
+          }
+        } @else {
+          <p class="widget-state">La consulta está disponible para cuentas Administrador.</p>
+        }
+      </section>
+    </ng-template>
 
-              <!-- WIDGETS GENÉRICOS -->
-              @else {
-                <p class="text-sm text-muted">Contenido e indicadores de {{ widget.title }}</p>
-              }
+    <ng-template bentoItem="reservations">
+      <section class="dashboard-widget" aria-labelledby="reservations-title">
+        <header class="widget-heading"><div><span class="widget-kicker">AGENDA</span><h2 id="reservations-title">Reservas</h2></div><span class="widget-icon" aria-hidden="true">▦</span></header>
+        <p class="widget-unavailable">Datos no disponibles</p>
+        <p class="widget-note">El módulo aún no tiene endpoints de reservas.</p>
+        <a class="widget-link" routerLink="/admin/reservas">Abrir gestión <span aria-hidden="true">↗</span></a>
+      </section>
+    </ng-template>
 
-            </div>
+    <ng-template bentoItem="weather">
+      <section class="dashboard-widget dashboard-widget--weather" aria-labelledby="weather-title">
+        <span class="widget-kicker">CLIMA</span>
+        <h2 id="weather-title">Sin datos</h2>
+        <p class="widget-note">No hay ubicación ni proveedor configurados.</p>
+      </section>
+    </ng-template>
 
-            <!-- FOOTER DE LA CARD -->
-            <div card-actions class="flex justify-end gap-2 w-full pt-2 border-t border-white/5">
-              <app-button variant="ghost" size="sm">Detalles</app-button>
-              <app-button variant="outline" size="sm">Gestionar</app-button>
-            </div>
+    <ng-template bentoItem="publications">
+      <section class="dashboard-widget" aria-labelledby="publications-title">
+        <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="publications-title">Publicaciones</h2></div><a class="widget-link" routerLink="/admin/publicaciones">Gestionar <span aria-hidden="true">↗</span></a></header>
+        <p class="widget-unavailable">Publicaciones no disponibles</p>
+        <p class="widget-note">La API de publicaciones consumida por Angular no existe en el backend actual.</p>
+      </section>
+    </ng-template>
 
-          </app-card>
-
+    <ng-template bentoItem="activity">
+      <section class="dashboard-widget" aria-labelledby="activity-title">
+        <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="activity-title">Actividad reciente</h2></div><span class="widget-icon" aria-hidden="true">◷</span></header>
+        <div class="widget-empty">
+          <p>No hay una fuente de actividad consolidada.</p>
+          <span>Hace falta un endpoint que reúna incidencias, reservas, solicitudes y publicaciones.</span>
         </div>
-
-      }
-
-    </section>
-
-  </main>
-
-</div>
-
-<!-- MODALES (van fuera del layout, al final) -->
-<app-modal heading="Asignar QR" size="sm" [(open)]="showQr">
-  <p class="text-sm text-muted">Contenido…</p>
-
-  <ng-container ngProjectAs="[modal-footer]">
-    <app-button variant="ghost" size="sm" (buttonClick)="closeQr()">Cancelar</app-button>
-    <app-button variant="primary" size="sm" (buttonClick)="guardarQr()">Guardar</app-button>
-  </ng-container>
-</app-modal>
+      </section>
+    </ng-template>
+  </app-bento-grid>
+</main>

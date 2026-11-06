@@ -23,11 +23,11 @@ export class ResetPassword implements OnInit {
 
   isLoading = false;
 
- 
+
   successMessage = signal('');
   errorMessage = signal('');
 
- 
+
   showNewPassword = signal(false);
   showConfirmPassword = signal(false);
 

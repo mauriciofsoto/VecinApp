@@ -3,6 +3,7 @@
 @use './base/reset';
 @use './base/typography';
 @use './base/animations';
+@use './operations/reservas';
 
 @tailwind base;
 @tailwind components;
@@ -53,7 +54,7 @@ app-root {
 
 .building-selector {
   background: $bg-dark-alpha;
-  border: 1px solid $glass-border;
+  @include glass-border;
   color: $text-main;
 }
 

@@ -1,44 +1,85 @@
+
 // ========================================
-// 1. COLORES & GRADIENTES (Tema Glass)
+// 1. COLORES & GRADIENTES — MIDNIGHT LAVENDER
 // ========================================
-$bg-dark: #0f172a;
-$bg-dark-alpha: rgba($bg-dark, 0.6);
-$glass-bg: rgba(30, 41, 59, 0.65);
-$glass-border: rgba(255, 255, 255, 0.12);
-$glass-hover: rgba(51, 65, 85, 0.7);
 
-$primary: #2563eb;
-$primary-light: #818cf8;
-$primary-glow: rgba(37, 99, 235, 0.35);
-$accent: #38bdf8;
+// Fondos
+$bg-dark: #171923;
+$bg-dark-alpha: rgba($bg-dark, 0.72);
 
-$white: #fff;
-$text-main: #f8fafc;
-$text-muted: #94a3b8;
+$glass-bg: rgba(4, 17, 51, 0.341);
+$glass-border: rgba(226, 220, 255, 0.10);
+$glass-hover: rgba(52, 51, 70, 0.82);
 
-// Superficies translúcidas (fondos y bordes sutiles sobre el glass)
-$surface-1: rgba(255, 255, 255, 0.04);
-$surface-2: rgba(255, 255, 255, 0.08);
-$surface-3: rgba(255, 255, 255, 0.15);
-$border-subtle: rgba(255, 255, 255, 0.05);
+// Identidad principal
+$primary: #A78BFA;
+$primary-hover: #9275E8;
+$primary-light: #C4B5FD;
+$primary-glow: rgba(167, 139, 250, 0.24);
+
+// Acento secundario
+$accent: #78B8A5;
+
+// Botones
+$surface-button-secondary: #454457;
+$button-padding-compact: 0.7rem 1rem;
+
+// Textos
+$white: #FFFFFF;
+$text-main: #F4F1FA;
+$text-muted: #AAA8B9;
+$text-form-label: 0.9rem;
+$text-page: #E5E1EE;
+
+// Estados suaves
+$text-success-soft: #91CDB5;
+$text-warning-soft: #E7B878;
+$text-danger-soft: #D98C91;
+$text-info-soft: #A6B9DB;
+
+// Superficies translúcidas
+$surface-1: rgba(255, 255, 255, 0.035);
+$surface-2: rgba(255, 255, 255, 0.065);
+$surface-3: rgba(255, 255, 255, 0.11);
+
+$surface-dashboard-table: rgba(255, 255, 255, 0.025);
+$surface-dashboard-progress: rgba(255, 255, 255, 0.045);
+
+$border-subtle: rgba(226, 220, 255, 0.055);
+$border-control: rgba(226, 220, 255, 0.14);
+
+$surface-control-dark: rgba($bg-dark, 0.8);
+$surface-control-solid: #3a2b3c;
 
 // Gradientes
-$bg-gradient: radial-gradient(circle at 10% 10%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
-$avatar-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6);
+$bg-gradient: radial-gradient(
+  circle at 12% 8%,
+  #302943 0%,
+  #1B1C29 48%,
+  #12131B 100%
+);
+
+$avatar-gradient: linear-gradient(
+  135deg,
+  #A78BFA,
+  #78B8A5
+);
 
 // ========================================
 // 2. ESTADOS DE COLOR
 // ========================================
-$danger: #ef4444;
-$success: #22c55e;
-$warning: #eab308;
-$info: #3b82f6;
+
+$danger: #D98C91;
+$success: #78B8A5;
+$warning: #E7B878;
+$info: #91A9CE;
 
 // ========================================
 // 3. TIPOGRAFIA (Jerarquia Visual)
 // ========================================
 $font-primary: 'Poppins', sans-serif;
 $font-title: 'Playfair Display', serif;
+$font-dashboard: 'Segoe UI', system-ui, -apple-system, sans-serif;
 
 $text-title: clamp(2.25rem, 5vw, 3rem);     // 36px → 48px
 $text-heading: clamp(1.25rem, 2vw, 1.5rem); // 20px → 24px
@@ -46,6 +87,16 @@ $text-body: 1rem;                           // 16px
 $text-small: 0.875rem;                      // 14px
 $text-caption: 0.75rem;                     // 12px
 $text-tiny: 0.7rem;                         // 11px
+$text-dashboard-brand: 1.2rem;
+$text-dashboard-nav: 0.95rem;
+$text-dashboard-building: 0.9rem;
+$text-dashboard-stat-label: 0.85rem;
+$text-dashboard-stat-value: 1.8rem;
+$text-dashboard-small: 0.8rem;
+$text-dashboard-card-title: 1.1rem;
+$sidebar-width: 260px;
+$avatar-dashboard-size: 2.5rem;
+$space-dashboard-badge-x: 0.625rem;
 
 $font-regular: 400;
 $font-medium: 500;
@@ -64,11 +115,18 @@ $space-3: 0.75rem; // 12px
 $space-4: 1rem;    // 16px
 $space-5: 1.25rem; // 20px
 $space-6: 1.5rem;  // 24px
+$space-7: 2rem;
+$space-dashboard-xs: 0.125rem;
+$space-dashboard-action-y: 0.625rem;
+$space-dashboard-action-x: 1.125rem;
 
 // ========================================
 // 5. RADIOS DE BORDE
 // ========================================
 $radius-sm: 0.625rem;  // 10px
+$radius-control: 0.75rem;
+$radius-dashboard-panel: 1rem;
+$radius-dashboard-progress: 0.5rem;
 $radius-md: 1.25rem;   // 20px
 $radius-lg: 1.875rem;  // 30px
 $radius-full: 9999px;  // pills / badges
@@ -111,6 +169,7 @@ $button-sizes: (
   sm: (padding: 0.35rem 0.85rem, font-size: $text-caption),
   md: (padding: 0.5rem 1.25rem, font-size: $text-small),
   lg: (padding: 0.75rem 1.75rem, font-size: $text-body),
+  xl: (padding: 1rem 2.25rem, font-size: $text-heading),
 );
 
 $badge-sizes: (
@@ -128,13 +187,13 @@ $transition-drag: transform 250ms $ease-out;
 
 // Variantes de badge: bg = color base, text = color del texto, border = opacidad del borde (opcional)
 $badge-variants: (
-  success: (bg: $success, text: #4ade80),
-  warning: (bg: $warning, text: #fbbf24),
-  danger:  (bg: $danger,  text: #f87171),
-  info:    (bg: $info,    text: $accent),
-  accent:  (bg: $primary, text: $primary-light, border: 0.4),
-  purple:  (bg: $purple,  text: $purple),
-  neutral: (bg: $white,   text: $text-muted, border: 0.12),
+  'success': (bg: $success, text: #A9DCC6),
+  'warning': (bg: $warning, text: #F2D09B),
+  'danger':  (bg: $danger,  text: #E8A9AD),
+  'info':    (bg: $info,    text: #B8C9E5),
+  'accent':  (bg: $primary, text: $primary-light, border: 0.4),
+  'purple':  (bg: $purple,  text: $purple),
+  'neutral': (bg: $white,   text: $text-muted, border: 0.12),
 );
 
 // Tamaños de card (las keys son propiedades CSS)

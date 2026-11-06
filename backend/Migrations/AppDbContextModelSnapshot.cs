@@ -511,6 +511,11 @@ namespace VecinApp.Migrations
                         .HasColumnType("text")
                         .HasColumnName("titulo");
 
+                    b.Property<string>("Ubicacion")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("ubicacion");
+
                     b.HasKey("IdIncidencia");
 
                     b.HasIndex("IdCategoriaIncidencia");
@@ -524,6 +529,79 @@ namespace VecinApp.Migrations
                     b.HasIndex("IdUsuarioResponsable");
 
                     b.ToTable("incidencia", (string)null);
+                });
+
+            modelBuilder.Entity("VecinApp.Models.MensajeIncidencia", b =>
+                {
+                    b.Property<int>("IdMensajeIncidencia")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_mensaje_incidencia");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdMensajeIncidencia"));
+
+                    b.Property<string>("Contenido")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("contenido");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_creacion");
+
+                    b.Property<int>("IdIncidencia")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_incidencia");
+
+                    b.Property<string>("IdUsuarioEmisor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario_emisor");
+
+                    b.HasKey("IdMensajeIncidencia");
+
+                    b.HasIndex("IdIncidencia");
+
+                    b.HasIndex("IdUsuarioEmisor");
+
+                    b.ToTable("mensaje_incidencia", (string)null);
+                });
+
+            modelBuilder.Entity("VecinApp.Models.MensajePaquete", b =>
+                {
+                    b.Property<int>("IdMensajePaquete")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_mensaje_paquete");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdMensajePaquete"));
+
+                    b.Property<string>("Contenido")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("contenido");
+
+                    b.Property<DateTime>("FechaEnvio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_envio");
+
+                    b.Property<int>("IdPaquete")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_paquete");
+
+                    b.Property<string>("IdUsuarioEmisor")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario_emisor");
+
+                    b.HasKey("IdMensajePaquete");
+
+                    b.HasIndex("IdPaquete");
+
+                    b.HasIndex("IdUsuarioEmisor");
+
+                    b.ToTable("mensaje_paquete", (string)null);
                 });
 
             modelBuilder.Entity("VecinApp.Models.Notificacion", b =>
@@ -552,14 +630,25 @@ namespace VecinApp.Migrations
                         .HasColumnType("text")
                         .HasColumnName("mensaje");
 
+                    b.Property<string>("Ruta")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("ruta");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("tipo");
 
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("titulo");
+
                     b.HasKey("IdNotificacion");
 
-                    b.HasIndex("IdUsuario");
+                    b.HasIndex("IdUsuario", "Leida", "Fecha");
 
                     b.ToTable("notificacion", (string)null);
                 });
@@ -603,6 +692,14 @@ namespace VecinApp.Migrations
                         .HasColumnType("text")
                         .HasColumnName("estado");
 
+                    b.Property<DateTime?>("FechaConfirmacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_confirmacion");
+
+                    b.Property<DateTime?>("FechaEliminacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_eliminacion");
+
                     b.Property<DateTime>("FechaRecepcion")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_recepcion");
@@ -611,9 +708,15 @@ namespace VecinApp.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id_unidad");
 
+                    b.Property<string>("IdUsuarioDestinatario")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario_destinatario");
+
                     b.Property<string>("IdUsuarioRegistro")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario_registro");
 
                     b.Property<string>("Identificacion")
                         .IsRequired()
@@ -627,6 +730,8 @@ namespace VecinApp.Migrations
                     b.HasKey("IdPaquete");
 
                     b.HasIndex("IdUnidad");
+
+                    b.HasIndex("IdUsuarioDestinatario");
 
                     b.HasIndex("IdUsuarioRegistro");
 
@@ -1110,6 +1215,44 @@ namespace VecinApp.Migrations
                     b.Navigation("UsuarioResponsable");
                 });
 
+            modelBuilder.Entity("VecinApp.Models.MensajeIncidencia", b =>
+                {
+                    b.HasOne("VecinApp.Models.Incidencia", "Incidencia")
+                        .WithMany("Mensajes")
+                        .HasForeignKey("IdIncidencia")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VecinApp.Models.Usuario", "UsuarioEmisor")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioEmisor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Incidencia");
+
+                    b.Navigation("UsuarioEmisor");
+                });
+
+            modelBuilder.Entity("VecinApp.Models.MensajePaquete", b =>
+                {
+                    b.HasOne("VecinApp.Models.Paquete", "Paquete")
+                        .WithMany("Mensajes")
+                        .HasForeignKey("IdPaquete")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VecinApp.Models.Usuario", "UsuarioEmisor")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioEmisor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Paquete");
+
+                    b.Navigation("UsuarioEmisor");
+                });
+
             modelBuilder.Entity("VecinApp.Models.Notificacion", b =>
                 {
                     b.HasOne("VecinApp.Models.Usuario", "Usuario")
@@ -1140,6 +1283,12 @@ namespace VecinApp.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("VecinApp.Models.Usuario", "UsuarioDestinatario")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioDestinatario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("VecinApp.Models.Usuario", "UsuarioRegistro")
                         .WithMany()
                         .HasForeignKey("IdUsuarioRegistro")
@@ -1147,6 +1296,8 @@ namespace VecinApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Unidad");
+
+                    b.Navigation("UsuarioDestinatario");
 
                     b.Navigation("UsuarioRegistro");
                 });
@@ -1300,9 +1451,19 @@ namespace VecinApp.Migrations
                     b.Navigation("Incidencias");
                 });
 
+            modelBuilder.Entity("VecinApp.Models.Incidencia", b =>
+                {
+                    b.Navigation("Mensajes");
+                });
+
             modelBuilder.Entity("VecinApp.Models.OpcionEncuesta", b =>
                 {
                     b.Navigation("Respuestas");
+                });
+
+            modelBuilder.Entity("VecinApp.Models.Paquete", b =>
+                {
+                    b.Navigation("Mensajes");
                 });
 
             modelBuilder.Entity("VecinApp.Models.Publicacion", b =>

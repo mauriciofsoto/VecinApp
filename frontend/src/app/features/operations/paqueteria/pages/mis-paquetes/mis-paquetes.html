@@ -1,1 +1,76 @@
-<p>mis-paquetes works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <h1>Mis paquetes</h1>
+    <p>Consultá tus entregas y conversá con Administración o Portería.</p>
+  </header>
+
+  <section class="package-workspace">
+    <div class="package-list">
+      <h2>Mis entregas</h2>
+
+      <div class="item-list">
+        @for (paquete of misPaquetes(); track paquete.id) {
+          <button
+            type="button"
+            class="item-card"
+            [class.item-card--selected]="paqueteSeleccionadoId() === paquete.id"
+            [attr.aria-pressed]="paqueteSeleccionadoId() === paquete.id"
+            (click)="seleccionarPaquete(paquete)"
+          >
+            <div>
+              <h3>{{ paquete.descripcion }}</h3>
+              <p>Remitente: {{ paquete.remitente }}</p>
+              <p>Unidad {{ paquete.unidad }} · {{ paquete.edificioNombre }}</p>
+              <p>Recepción: {{ paquete.fechaRecepcion | date:'short' }}</p>
+
+              @if (paquete.fechaEntrega) {
+                <p>Entrega: {{ paquete.fechaEntrega | date:'short' }}</p>
+              }
+            </div>
+
+            <span
+              class="status"
+              [class.delivered]="paquete.estado === 'entregado'"
+            >
+              {{ paquete.estado === 'pendiente' ? 'Esperando retiro' : 'Entregado' }}
+            </span>
+          </button>
+        } @empty {
+          <article class="item-card">
+            Todavía no tenés paquetes registrados.
+          </article>
+        }
+      </div>
+    </div>
+
+    <section class="package-conversation">
+      @if (paqueteSeleccionado(); as paquete) {
+        <app-chat-paquete
+          [paquete]="paquete"
+          rolVista="residente"
+        />
+      @if (paquete.estado === 'pendiente') {
+        <button
+        type="button"
+        class="confirm-reception-button"
+        (click)="abrirConfirmacion()"
+      >
+        Confirmar recepción
+      </button>}
+      
+       <app-confirmar-recepcion-modal
+      [paquete]="paquete"
+      [(open)]="confirmacionAbierta"
+      (confirmar)="confirmarRecepcion()"
+    />
+      }@else {
+        <div class="conversation-empty">
+          <h2>Mis conversaciones</h2>
+          <p>Seleccioná uno de tus paquetes para consultar los mensajes.</p>
+        </div>
+      }
+    </section>
+    
+    
+  </section>
+</main>

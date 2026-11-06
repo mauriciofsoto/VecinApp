@@ -1,1 +1,116 @@
-<p>inquilinos-list works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <div>
+      <h1>Inquilinos</h1>
+      <p>Administrá los residentes de cada edificio.</p>
+    </div>
+
+    <button type="button" (click)="mostrarFormulario = !mostrarFormulario">
+      {{ mostrarFormulario ? 'Cerrar formulario' : 'Registrar residente' }}
+    </button>
+  </header>
+
+  @if (mostrarFormulario) {
+    <section class="panel">
+      <h2>Nuevo residente</h2>
+
+      <form (ngSubmit)="registrar()" class="form-grid">
+        <label>
+          Nombre
+          <app-input name="nombre" [(ngModel)]="nombre" [required]="true" />
+        </label>
+
+        <label>
+          Apellido
+          <app-input name="apellido" [(ngModel)]="apellido" [required]="true" />
+        </label>
+
+        <label>
+          Email
+          <app-input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            [required]="true"
+          />
+        </label>
+
+        <label>
+          Documento
+          <app-input name="documento" [(ngModel)]="documento" [required]="true" />
+        </label>
+
+        <label>
+          Edificio
+          <app-input
+            name="edificioNombre"
+            [(ngModel)]="edificioNombre"
+            [required]="true"
+          />
+        </label>
+
+        <label>
+          ID del edificio
+          <app-input
+            type="number"
+            name="edificioId"
+            [(ngModel)]="edificioId"
+            min="1"
+            [required]="true"
+          />
+        </label>
+
+        <label>
+          Unidad / departamento
+          <app-input name="unidad" [(ngModel)]="unidad" [required]="true" />
+        </label>
+
+        <button type="submit">Guardar residente</button>
+      </form>
+
+      <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
+    </section>
+  }
+
+  <section class="panel">
+    <div class="toolbar">
+      <app-input
+        name="busqueda"
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por nombre, email, documento o unidad..."
+      />
+
+      <app-select
+        name="edificio"
+        ariaLabel="Filtrar por edificio"
+        [options]="opcionesEdificio"
+        [(ngModel)]="filtroEdificio"
+      />
+    </div>
+
+    <p>Total de residentes: <strong>{{ filtrados.length }}</strong></p>
+
+    <div class="item-list">
+      @for (inquilino of filtrados; track inquilino.id) {
+        <article class="item-card">
+          <div>
+            <h2>{{ inquilino.nombre }} {{ inquilino.apellido }}</h2>
+            <p>{{ inquilino.email }}</p>
+            <p>Documento: {{ inquilino.documento }}</p>
+            <p>{{ inquilino.edificioNombre }} · Unidad {{ inquilino.unidad }}</p>
+            <p>Registrado: {{ inquilino.fechaRegistro | date:'shortDate' }}</p>
+            <span class="status" [class.inactive]="inquilino.estado === 'inactivo'">
+              {{ inquilino.estado }}
+            </span>
+          </div>
+
+          <button type="button" (click)="servicio.cambiarEstado(inquilino.id)">
+            {{ inquilino.estado === 'activo' ? 'Desactivar' : 'Activar' }}
+          </button>
+        </article>
+      } @empty {
+        <p>No hay residentes que coincidan con la búsqueda.</p>
+      }
+    </div>
+  </section>
+</main>

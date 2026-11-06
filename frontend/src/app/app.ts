@@ -1,21 +1,12 @@
-
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
-import { AuthService } from './core/services/auth.service';
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
-  auth = inject(AuthService);
-  private router = inject(Router);
-
-  cerrarSesion(): void {
-    this.auth.logout();
-    this.router.navigate(['/login']);
-  }
+  protected readonly title = signal('vecinapp');
 }

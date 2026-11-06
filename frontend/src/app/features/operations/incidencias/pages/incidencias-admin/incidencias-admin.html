@@ -1,160 +1,322 @@
+<section class="incidencias-admin">
 
-<section class="pagina">
-
-  <header class="encabezado">
+  <!-- ENCABEZADO -->
+  <header class="incidencias-admin__header">
     <div>
-      <h1>Incidencias del edificio</h1>
-      <p>Consultá los reclamos y actualizá su estado.</p>
-    </div>
+      <span class="incidencias-admin__eyebrow">
+        ADMINISTRACIÓN / REPORTES
+      </span>
 
-    <div class="acciones-encabezado">
-      <button type="button"
-              class="boton-invitar"
-              (click)="abrirInvitacion()">
-        <span aria-hidden="true">＋</span> Invitar vecino
-      </button>
+      <h1>Incidencias</h1>
 
-      <button type="button"
-              class="boton-secundario"
-              (click)="cargarIncidencias()">
-        Actualizar
-      </button>
+      <p>
+        Gestioná y hacé seguimiento de los reportes del edificio.
+      </p>
     </div>
   </header>
 
+  @if (mensaje()) {
+    <p role="status">{{ mensaje() }}</p>
+  }
 
+  @if (cargando()) {
+    <p role="status">Cargando incidencias…</p>
+  } @else if (errorCarga()) {
+    <p role="alert">{{ errorCarga() }}</p>
+  } @else {
 
-  <p *ngIf="cargando" class="mensaje">Cargando incidencias...</p>
+  <!-- RESUMEN -->
+  <section class="incidencias-admin__resumen">
 
-  <div *ngIf="error" class="mensaje error">
-    {{ error }}
-  </div>
-
-  <ng-container *ngIf="!cargando && !error">
-    <div class="dashboard">
-      <article class="tarjeta">
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
         <span>Total de incidencias</span>
-        <strong>{{ incidencias.length }}</strong>
-      </article>
+        <strong>{{ totalIncidencias() }}</strong>
+      </div>
+    </app-card>
 
-      <article class="tarjeta pendiente">
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
         <span>Pendientes</span>
-        <strong>{{ contarPorEstado('PENDIENTE') }}</strong>
-      </article>
+        <strong>{{ pendientes() }}</strong>
+      </div>
+    </app-card>
 
-      <article class="tarjeta proceso">
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
         <span>En proceso</span>
-        <strong>{{ contarPorEstado('EN PROCESO') }}</strong>
-      </article>
+        <strong>{{ enProceso() }}</strong>
+      </div>
+    </app-card>
 
-      <article class="tarjeta resuelta">
-        <span>Resueltas / cerradas</span>
-        <strong>{{ contarPorEstado('RESUELTA') + contarPorEstado('CERRADA') }}</strong>
-      </article>
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
+        <span>Resueltas</span>
+        <strong>{{ resueltas() }}</strong>
+      </div>
+    </app-card>
+
+  </section>
+
+  <!-- FILTROS -->
+  <section class="incidencias-admin__filtros">
+
+    <div class="incidencias-admin__busqueda">
+      <app-input
+        type="search"
+        placeholder="Buscar por título, ubicación o usuario..."
+        [ngModel]="busqueda()"
+        (valueChange)="actualizarBusqueda($any($event).toString())"
+        aria-label="Buscar incidencias"
+      />
     </div>
 
-    <div class="tabla-contenedor">
-      <table>
+    <div class="incidencias-admin__categoria">
+      <app-select
+        ariaLabel="Filtrar por categoría"
+        [options]="opcionesCategoria"
+        [value]="categoriaSeleccionada()"
+        (valueChange)="actualizarCategoriaFiltro($any($event).toString())"
+      />
+    </div>
+
+    <div class="incidencias-admin__estado">
+      <app-select
+        ariaLabel="Filtrar por estado"
+        [options]="opcionesEstado"
+        [value]="estadoSeleccionado()"
+        (valueChange)="actualizarEstadoFiltro($any($event).toString())"
+      />
+    </div>
+
+    <div class="incidencias-admin__prioridad">
+      <app-select
+        ariaLabel="Filtrar por prioridad"
+        [options]="opcionesPrioridad"
+        [value]="prioridadSeleccionada()"
+        (valueChange)="actualizarPrioridadFiltro($any($event).toString())"
+      />
+    </div>
+
+    <app-button
+      variant="outline"
+      type="button"
+      (click)="limpiarFiltros()"
+    >
+      Limpiar filtros
+    </app-button>
+
+  </section>
+
+  <!-- TABLA -->
+  <section class="incidencias-admin__contenido">
+
+    <div class="incidencias-admin__tabla-wrapper">
+
+      <table class="incidencias-admin__tabla">
+
         <thead>
           <tr>
+            <th>#</th>
             <th>Incidencia</th>
             <th>Categoría</th>
-            <th>Reportante</th>
-            <th>Prioridad</th>
-            <th>Estado</th>
+            <th>Ubicación</th>
+            <th>Usuario</th>
             <th>Fecha</th>
-            <th>Acción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let incidencia of incidencias">
-            <td>
-              <strong>{{ incidencia.titulo }}</strong>
-              <small>{{ incidencia.descripcion }}</small>
-            </td>
-            <td>{{ incidencia.categoria }}</td>
-            <td>{{ incidencia.reportante }}</td>
-            <td>
-              <span class="prioridad" [ngClass]="incidencia.prioridad.toLowerCase()">
-                {{ incidencia.prioridad }}
-              </span>
-            </td>
-            <td>
-              <span class="estado">{{ incidencia.estado }}</span>
-            </td>
-            <td>{{ incidencia.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>
-              <button class="boton-ver" (click)="verDetalle(incidencia)">
-                Ver detalle
-              </button>
-            </td>
-          </tr>
 
-          <tr *ngIf="incidencias.length === 0">
-            <td colspan="7" class="vacio">
-              Todavía no hay incidencias registradas.
-            </td>
-          </tr>
+          @for (
+            incidencia of incidenciasFiltradas();
+            track incidencia.id
+          ) {
+            <tr>
+              <td>#{{ incidencia.id }}</td>
+
+              <td>
+                <span class="incidencias-admin__titulo">
+                  {{ incidencia.titulo }}
+                </span>
+              </td>
+
+              <td>
+                {{ incidencia.categoria }}
+              </td>
+
+              <td>
+                {{ incidencia.ubicacion }}
+              </td>
+
+              <td>
+                {{ incidencia.usuarioNombre }}
+              </td>
+
+              <td>
+                {{ incidencia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+
+              <td>
+                <span
+                  class="incidencia-item__estado"
+                  [attr.data-estado]="incidencia.estado"
+                >
+                  {{ obtenerEstado(incidencia.estado) }}
+                </span>
+              </td>
+
+              <td>
+                <app-button
+                  variant="outline"
+                  type="button"
+                  (click)="verIncidencia(incidencia)"
+                >
+                  Ver incidencia
+                </app-button>
+                <a [routerLink]="['/administrador/incidencias', incidencia.id]">
+                  Detalle completo
+                </a>
+              </td>
+            </tr>
+          }
+
+          @empty {
+            <tr>
+              <td colspan="8">
+                <div class="incidencias-admin__vacio">
+                  <h3>No hay incidencias</h3>
+                  <p>
+                    No se encontraron reportes con los filtros seleccionados.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
         </tbody>
+
       </table>
+
     </div>
-  </ng-container>
 
-  <div class="modal-fondo" *ngIf="modalInvitacion" (click)="cerrarInvitacion()">
-    <section class="modal-invitacion"
-             role="dialog"
-             aria-modal="true"
-             aria-labelledby="titulo-invitacion"
-             (click)="$event.stopPropagation()">
+  </section>
 
-      <button type="button"
-              class="cerrar-modal"
-              aria-label="Cerrar"
-              (click)="cerrarInvitacion()">
-        ×
-      </button>
+  <!-- DETALLE DE INCIDENCIA -->
+  <app-modal
+    [open]="modalDetalleAbierto()"
+    (openChange)="modalDetalleAbierto.set($event)"
+    heading="Detalle de incidencia"
+    size="lg"
+  >
 
-      <div class="icono-invitacion">＋</div>
-      <h2 id="titulo-invitacion">Invitar a un inquilino</h2>
-      <p class="descripcion-modal">
-        Generá un código para que un vecino pueda registrarse en tu edificio.
-      </p>
+    @if (incidenciaSeleccionada(); as incidencia) {
 
-      <div class="informacion-invitacion">
-        <span>Rol asignado</span>
-        <strong>Inquilino</strong>
-        <span>Validez del código</span>
-        <strong>7 días · Un solo uso</strong>
-      </div>
+      <div class="incidencia-detalle">
 
-      <button type="button"
-              class="boton-generar"
-              (click)="generarInvitacion()"
-              [disabled]="generandoInvitacion">
-        {{ generandoInvitacion ? 'Generando código...' : 'Generar código de invitación' }}
-      </button>
+        <div class="incidencia-detalle__encabezado">
+          <span class="incidencia-detalle__id">
+            Incidencia #{{ incidencia.id }}
+          </span>
 
-      <div *ngIf="codigoInvitacion" class="codigo-generado">
-        <span>Código para compartir</span>
-        <strong>{{ codigoInvitacion }}</strong>
-        <p>
-          Vence el {{ fechaExpiracionInvitacion | date:'dd/MM/yyyy HH:mm' }}
+          <span
+            class="incidencia-item__estado"
+            [attr.data-estado]="incidencia.estado"
+          >
+            {{ obtenerEstado(incidencia.estado) }}
+          </span>
+        </div>
+
+        <h2>{{ incidencia.titulo }}</h2>
+
+        <p class="incidencia-detalle__descripcion">
+          {{ incidencia.descripcion }}
         </p>
-        <button type="button"
-                class="boton-copiar"
-                (click)="copiarCodigoInvitacion()">
-          Copiar código
-        </button>
+
+        <div class="incidencia-detalle__metadatos">
+
+          <div>
+            <span>Categoría</span>
+            <strong>{{ incidencia.categoria }}</strong>
+          </div>
+
+          <div>
+            <span>Ubicación</span>
+            <strong>{{ incidencia.ubicacion }}</strong>
+          </div>
+
+          <div>
+            <span>Usuario</span>
+            <strong>{{ incidencia.usuarioNombre }}</strong>
+          </div>
+
+          <div>
+            <span>Responsable</span>
+            <strong>{{ incidencia.responsableNombre || 'Sin asignar' }}</strong>
+          </div>
+
+          <div>
+            <span>Fecha de creación</span>
+            <strong>
+              {{ incidencia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
+            </strong>
+          </div>
+
+        </div>
+
+        <div class="incidencia-detalle__seguimiento">
+
+          <h3>Actualizar estado</h3>
+
+          <label for="estado-incidencia">
+            Estado de la incidencia
+          </label>
+
+          <app-select
+            id="estado-incidencia"
+            ariaLabel="Estado de la incidencia"
+            [options]="opcionesEstadoEdicion"
+            [value]="estadoNuevo()"
+            (valueChange)="cambiarEstado($any($event))"
+          />
+
+        </div>
+
+        <div class="incidencia-detalle__acciones">
+
+          <app-button
+            variant="outline"
+            type="button"
+            (click)="cerrarDetalle()"
+          >
+            Cerrar
+          </app-button>
+
+          <app-button
+            variant="primary"
+            type="button"
+            (click)="guardarEstado()"
+            [disabled]="guardandoEstado() || estadoNuevo() === null || estadoSinCambios"
+          >
+            {{ guardandoEstado() ? 'Guardando…' : 'Guardar estado' }}
+          </app-button>
+
+        </div>
+        <!-- CONVERSACIÓN -->
+        <div class="incidencia-detalle__conversacion">
+          <app-chat-incidencia
+            [incidencia]="incidencia"
+            rolVista="administrador"
+          />
+        </div>
+
       </div>
 
-      <p *ngIf="mensajeInvitacion" class="mensaje-exito">
-        {{ mensajeInvitacion }}
-      </p>
-      <p *ngIf="errorInvitacion" class="mensaje-error">
-        {{ errorInvitacion }}
-      </p>
-    </section>
-  </div>
+    }
+
+  </app-modal>
+  }
 
 </section>

@@ -19,6 +19,8 @@ public class Incidencia
 
     public string Descripcion { get; set; } = string.Empty;
 
+    public string? Ubicacion { get; set; }
+
     public string Prioridad { get; set; } = string.Empty;
 
     public DateTime FechaCreacion { get; set; }
@@ -33,4 +35,6 @@ public class Incidencia
     public EstadoIncidencia EstadoIncidencia { get; set; } = null!;
 
     public CategoriaIncidencia CategoriaIncidencia { get; set; } = null!;
+
+    public ICollection<MensajeIncidencia> Mensajes { get; set; } = new List<MensajeIncidencia>();
 }

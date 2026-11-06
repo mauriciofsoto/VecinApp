@@ -1,16 +1,28 @@
-// Punto de entrada único: @use 'abstracts' as *;
-@forward 'variables';
-@forward 'breakpoints';
-@forward 'mixins-core';
-@forward 'mixins-effects';
-@forward 'mixins-typography';
-@forward 'mixins-scrollbar';
-@forward 'mixins-buttons';
-@forward 'mixins-avatar';
-@forward 'mixins-forms';
-@forward 'mixins-icon';
-@forward 'mixins-badge';
-@forward 'mixins-layout';
-@forward 'mixins-card';
-@forward 'mixins-sidebar';
-@forward 'mixins-modal';
+// ========================================
+// VARIABLES Y CONFIGURACIÓN
+// ========================================
+@forward './variables';
+@forward './breakpoints';
+
+// ========================================
+// MIXINS GLOBALES
+// ========================================
+@forward './global/mixins-core';
+@forward './global/mixins-effects';
+@forward './global/mixins-layout';
+@forward './global/mixins-scrollbar';
+@forward './global/mixins-typography';
+
+// ========================================
+// MIXINS DE COMPONENTES
+// ========================================
+@forward './components/mixins-avatar';
+@forward './components/mixins-badge';
+@forward './components/mixins-buttons';
+@forward './components/mixins-card';
+@forward './components/mixins-chip';
+@forward './components/mixins-forms';
+@forward './components/mixins-icon';
+@forward './components/mixins-modal';
+@forward './components/mixins-poll';
+@forward './components/mixins-sidebar';

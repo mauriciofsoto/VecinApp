@@ -1,39 +1,23 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { catchError, switchMap, throwError } from 'rxjs';
+
+import { AuthService } from '../services/auth';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const router = inject(Router);
-  const token = authService.getToken();
+  const token = authService.getAccessToken();
 
-  let authReq = req;
-  if (token && !req.url.includes('/auth/refresh') && !req.url.includes('/auth/login')) {
-    authReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
+  // No modifica peticiones si no hay una sesión iniciada.
+  if (!token) {
+    return next(req);
   }
 
-  return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/auth/login') && !req.url.includes('/auth/refresh')) {
-        return authService.refreshToken().pipe(
-          switchMap(res => {
-            const retryReq = req.clone({
-              setHeaders: { Authorization: `Bearer ${res.accessToken}` }
-            });
-            return next(retryReq);
-          }),
-          catchError(refreshErr => {
-            authService.logout();
-            router.navigate(['/login']);
-            return throwError(() => refreshErr);
-          })
-        );
-      }
-      return throwError(() => error);
-    })
-  );
+  // Envía el JWT únicamente a nuestra API.
+  const authenticatedRequest = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return next(authenticatedRequest);
 };

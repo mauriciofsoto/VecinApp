@@ -1,0 +1,25 @@
+<section class="notification-panel" aria-label="Notificaciones">
+  <header class="notification-panel__header">
+    <h2>Notificaciones</h2>
+    <button type="button" [disabled]="!hasUnread" (click)="markAll.emit()">
+      Marcar todas como leídas
+    </button>
+  </header>
+
+  <div class="notification-panel__items">
+    @for (item of items(); track item.idNotificacion) {
+      <button
+        class="notification-item"
+        [class.notification-item--unread]="!item.leida"
+        type="button"
+        (click)="selected.emit(item)"
+      >
+        <span class="notification-item__title">{{ item.titulo }}</span>
+        <span class="notification-item__message">{{ item.mensaje }}</span>
+        <time>{{ item.fecha | date: 'short' }}</time>
+      </button>
+    } @empty {
+      <p class="notification-empty">No tenés notificaciones.</p>
+    }
+  </div>
+</section>

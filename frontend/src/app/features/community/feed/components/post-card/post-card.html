@@ -1,1 +1,137 @@
-<p>post-card works!</p>
+ <article
+  class="post-card"
+  [class.post-card--admin]="post().authorRole === 'admin'"
+>
+  <header class="post-card__header">
+    @if (post().userAvatar) {
+      <img
+        class="post-card__avatar"
+        [src]="post().userAvatar"
+        [alt]="'Avatar de ' + post().userName"
+      />
+    } @else {
+      <div class="post-card__avatar-fallback" aria-hidden="true">
+        {{ post().userName.charAt(0).toUpperCase() }}
+      </div>
+    }
+
+    <div class="post-card__author">
+      <strong>
+        {{ post().userName }}
+
+        @if (post().authorRole === 'admin') {
+          <span class="post-card__admin-icon" aria-label="Administración">
+            ✓
+          </span>
+        }
+      </strong>
+
+      <time [attr.datetime]="post().createdAt">
+        {{ post().createdAt | date:'dd/MM/yyyy · HH:mm' }}
+      </time>
+    </div>
+
+    <span class="post-card__type">
+      @switch (post().type) {
+        @case ('aviso') { Aviso }
+        @case ('encuesta') { Encuesta }
+        @default { Publicación }
+      }
+    </span>
+  </header>
+
+  @if (post().authorRole === 'admin') {
+    <span class="post-card__official-label">
+      <span aria-hidden="true">✦</span>
+      Comunicación oficial
+    </span>
+  }
+
+
+
+
+
+
+
+<div class="post-card__body">
+  @if (post().type === 'encuesta') {
+    @if (encuesta()) {
+      <app-poll-card [encuesta]="encuesta()!" />
+    } @else {
+      <p class="post-card__text">
+        No se encontró la encuesta asociada.
+      </p>
+    }
+  } @else {
+    @if (post().title) {
+      <h3>{{ post().title }}</h3>
+    }
+
+    <p class="post-card__text">{{ post().content }}</p>
+
+    @if (post().imageUrl) {
+      <img
+        class="post-card__image"
+        [src]="post().imageUrl"
+        alt="Imagen de la publicación"
+      />
+    }
+  }
+
+  @if (post().attachments?.length) {
+    <div class="post-card__attachments">
+      @for (attachment of post().attachments; track attachment.id) {
+        <div class="post-card__attachment">
+          @if (attachment.type === 'image') {
+            <img
+              class="post-card__image"
+              [src]="attachment.url"
+              [alt]="attachment.name"
+              loading="lazy"
+            />
+          } @else {
+            <video
+              class="post-card__video"
+              [src]="attachment.url"
+              controls
+              preload="metadata"
+              [attr.aria-label]="'Video adjunto: ' + attachment.name"
+            ></video>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+
+
+
+
+<!-- Reacciones y comentarios -->
+<footer class="post-card__footer">
+  <app-reaction-bar
+    [reactions]="post().reactions"
+    (toggled)="onReactionToggled($event)"
+  />
+
+  @if (puedeComentar()) {
+    <button
+      class="post-card__comments-toggle"
+      type="button"
+      [attr.aria-expanded]="commentsOpen()"
+      (click)="toggleComments()"
+    >
+      {{ commentsOpen() ? 'Ocultar comentarios' : 'Ver comentarios' }}
+      ({{ post().commentsCount }})
+    </button>
+  }
+</footer>
+
+@if (puedeComentar() && commentsOpen()) {
+  <app-post-comments
+    [comments]="post().comments"
+    (commentAdded)="onCommentAdded($event)"
+  />
+}
+</article>

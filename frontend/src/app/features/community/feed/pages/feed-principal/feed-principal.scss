@@ -1,0 +1,209 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.feed {
+  width: 100%;
+  min-width: 0;
+
+  &__header {
+    padding: $space-3;
+    margin-bottom: $space-4;
+
+    h2 {
+      margin: 0;
+    }
+
+    p {
+      margin: $space-1 0 0;
+      color: $text-muted;
+    }
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+    gap: $space-5;
+    min-width: 0;
+  }
+
+  &__main {
+    @include flex-col($space-4);
+    min-width: 0;
+  }
+
+  &__create-trigger {
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    width: 100%;
+    padding: $space-3;
+    border: 1px solid transparent;
+    border-radius: $radius-md;
+    background: transparent;
+    color: $text-main;
+    text-align: left;
+    cursor: pointer;
+    transition: $transition-base;
+
+    &:hover {
+      border-color: rgba($primary, 0.5);
+      background: $surface-2;
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba($primary, 0.7);
+      outline-offset: 2px;
+    }
+  }
+
+  &__create-avatar {
+    display: grid;
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: $radius-circle;
+    background: $avatar-gradient;
+    color: $white;
+    font-weight: $font-semibold;
+  }
+
+  &__create-placeholder {
+    flex: 1;
+    min-width: 0;
+    color: $text-muted;
+    font-size: $text-small;
+  }
+
+  &__scroll-container {
+    max-height: calc(100dvh - 12rem);
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  &__timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+    min-width: 0;
+  }
+
+  &__item {
+    position: relative;
+    min-width: 0;
+  }
+
+  &__sidebar {
+    position: sticky;
+    top: $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    max-height: calc(100dvh - #{$space-7});
+    min-width: 0;
+    overflow-y: auto;
+  }
+}
+
+.feed-widget {
+  @include flex-col($space-3);
+  width: 100%;
+  min-width: 0;
+
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    @include text-heading;
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    color: $text-muted;
+    font-size: $text-small;
+    line-height: 1.5;
+  }
+
+  &__heading {
+    @include flex-row($space-2);
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  &__notice {
+    @include flex-col($space-2);
+    padding-top: $space-3;
+    border-top: 1px solid $glass-border;
+
+    h4 {
+      color: $text-main;
+      font-size: $text-small;
+      font-weight: $font-semibold;
+    }
+
+    time {
+      color: $text-muted;
+      font-size: $text-tiny;
+    }
+  }
+
+  &__empty {
+    padding-top: $space-3;
+    border-top: 1px solid $glass-border;
+  }
+}
+
+.feed__poll-results {
+  @include flex-col($space-4);
+  min-width: 0;
+}
+
+.feed__poll-result {
+  @include flex-col($space-3);
+  width: 100%;
+  min-width: 0;
+
+  p {
+    margin: 0;
+    color: $text-muted;
+  }
+}
+
+.feed__poll-result-header {
+  @include flex-row($space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  h3 {
+    @include text-heading;
+    min-width: 0;
+    margin: 0;
+    color: $text-main;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: $tablet) {
+  .feed__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .feed__sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .feed__scroll-container {
+    max-height: none;
+    overflow: visible;
+  }
+}

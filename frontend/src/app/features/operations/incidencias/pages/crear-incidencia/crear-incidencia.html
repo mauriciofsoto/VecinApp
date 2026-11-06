@@ -1,66 +1,104 @@
 
-<div class="incidencia-container">
-  <button type="button" class="btn-volver" (click)="volver()">
-    ← Volver a mis incidencias
-  </button>
-
-  <h2>Crear incidencia</h2>
-  <p class="descripcion">Reportá un problema en tu edificio.</p>
-
-  <form (ngSubmit)="crear()" #formIncidencia="ngForm">
-    <div class="campo">
+<app-form-layout
+  title="Reportar una incidencia"
+  description="Informá un problema del edificio o de los espacios comunes para que administración pueda darle seguimiento."
+>
+  <form
+    id="crear-incidencia-form"
+    class="incidencia-form"
+    (ngSubmit)="publicarIncidencia()"
+  >
+    <div class="form-field">
       <label for="titulo">Título *</label>
-      <input id="titulo"
-             name="titulo"
-             type="text"
-             [(ngModel)]="incidencia.titulo"
-             placeholder="Ej.: Pérdida de agua"
-             required
-             maxlength="150" />
+
+      <app-input
+        id="titulo"
+        name="titulo"
+        type="text"
+        placeholder="Ej. Pérdida de agua en el pasillo"
+        [ngModel]="titulo()"
+        (ngModelChange)="titulo.set($event)"
+        [maxlength]="100"
+        [required]="true"
+      />
     </div>
 
-    <div class="campo">
+    <div class="form-field">
       <label for="descripcion">Descripción *</label>
-      <textarea id="descripcion"
-                name="descripcion"
-                [(ngModel)]="incidencia.descripcion"
-                placeholder="Describí el problema con el mayor detalle posible"
-                rows="5"
-                required></textarea>
+
+      <app-input
+        id="descripcion"
+        name="descripcion"
+        [multiline]="true"
+        placeholder="Describí el problema y cualquier detalle relevante..."
+        [ngModel]="descripcion()"
+        (ngModelChange)="descripcion.set($event)"
+        [maxlength]="1000"
+        [rows]="5"
+        [required]="true"
+      />
     </div>
 
-    <div class="campo">
-      <label for="categoria">Categoría *</label>
-      <select id="categoria"
-              name="categoria"
-              [(ngModel)]="incidencia.idCategoriaIncidencia"
-              required>
-        <option [ngValue]="0" disabled>Seleccioná una categoría</option>
-        <option *ngFor="let categoria of categorias"
-                [ngValue]="categoria.idCategoriaIncidencia">
-          {{ categoria.nombre }}
-        </option>
-      </select>
+    <div class="incidencia-form__grid">
+      <div class="form-field">
+        <label for="categoria">Categoría *</label>
+
+        <app-select
+          id="categoria"
+          name="categoria"
+          [ngModel]="categoria()"
+          (ngModelChange)="categoria.set($event)"
+          [options]="categorias()"
+          placeholder="Seleccioná una categoría"
+          [required]="true"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="prioridad">Prioridad</label>
+
+        <app-select
+          id="prioridad"
+          name="prioridad"
+          [ngModel]="prioridad()"
+          (ngModelChange)="prioridad.set($event)"
+          [options]="prioridades"
+        />
+      </div>
     </div>
 
-    <div class="campo">
-      <label for="prioridad">Prioridad *</label>
-      <select id="prioridad"
-              name="prioridad"
-              [(ngModel)]="incidencia.prioridad"
-              required>
-        <option value="Baja">Baja</option>
-        <option value="Media">Media</option>
-        <option value="Alta">Alta</option>
-      </select>
+    <div class="form-field">
+      <label for="ubicacion">Ubicación *</label>
+
+      <app-input
+        id="ubicacion"
+        name="ubicacion"
+        type="text"
+        placeholder="Ej. Piso 3, pasillo"
+        [ngModel]="ubicacion()"
+        (ngModelChange)="ubicacion.set($event)"
+        [maxlength]="150"
+        [required]="true"
+      />
     </div>
 
-    <p *ngIf="mensaje" class="mensaje-exito">{{ mensaje }}</p>
-    <p *ngIf="error" class="mensaje-error">{{ error }}</p>
+    <p class="form-hint">Los adjuntos estarán disponibles cuando se integre el almacenamiento de archivos.</p>
 
-    <button type="submit"
-            [disabled]="guardando || formIncidencia.invalid">
-      {{ guardando ? 'Enviando...' : 'Crear incidencia' }}
-    </button>
+    @if (error()) {
+      <p class="form-feedback form-feedback--error" role="alert">
+        {{ error() }}
+      </p>
+    }
+
+    <div class="incidencia-form__actions">
+      <app-button
+        type="submit"
+        variant="primary"
+        size="lg"
+        [disabled]="enviando()"
+      >
+        {{ enviando() ? 'Enviando…' : 'Enviar reporte' }}
+      </app-button>
+    </div>
   </form>
-</div>
+</app-form-layout>

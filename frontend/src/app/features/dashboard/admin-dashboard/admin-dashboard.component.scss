@@ -3,21 +3,104 @@
 :host {
   display: block;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
+  min-width: 0;
 }
 
-.app-dashboard-layout {
-  @include full-screen-layout;
-
-  > main,
-  .app-main-content {
-    @include main-scroll-container;
-  }
+.admin-dashboard {
+  @include flex-col($space-6);
+  min-width: 0;
+  padding-bottom: $space-6;
 }
 
-.bento-grid { @include bento-grid-custom; }
-.bento-item { @include bento-item; }
+.dashboard-header {
+  @include flex-row($space-5);
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
 
-// Feedback visual CDK Drag & Drop (preview + placeholder + transición)
-@include cdk-drag-feedback;
+  h1 { @include text-title; margin: $space-2 0; color: $text-main; }
+  p { @include text-body; margin: 0; color: $text-muted; text-transform: capitalize; }
+}
+
+.dashboard-eyebrow,
+.widget-kicker {
+  color: $accent;
+  font-size: $text-tiny;
+  font-weight: $font-semibold;
+  letter-spacing: 0.1em;
+}
+
+.dashboard-community {
+  @include flex-row($space-2);
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-control;
+  background: $surface-1;
+  color: $text-muted;
+  font-size: $text-small;
+}
+
+.community-indicator { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: $text-muted; }
+
+.dashboard-widget {
+  @include flex-col($space-3);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: $space-5;
+
+  h2 { @include text-heading; margin: 0; color: $text-main; }
+}
+
+.dashboard-widget--calendar { padding: $space-4; }
+.dashboard-widget--calendar app-reserva-calendar-modal { display: block; min-height: 0; flex: 1 1 auto; overflow: auto; }
+.dashboard-widget--clock,
+.dashboard-widget--weather { justify-content: center; }
+.dashboard-widget--clock { background: radial-gradient(circle at top right, rgba($accent, 0.15), transparent 68%); }
+
+.widget-heading {
+  @include flex-row($space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.widget-heading > div { @include flex-col($space-1); min-width: 0; }
+.widget-link { color: $accent; font-size: $text-small; font-weight: $font-semibold; text-decoration: none; white-space: nowrap; }
+.widget-link:hover { color: $text-main; }
+.widget-link:focus-visible { outline: 2px solid $accent; outline-offset: 3px; border-radius: $radius-sm; }
+.widget-icon { color: $accent; font-size: $text-heading; }
+.widget-unavailable { margin: auto 0 0; color: $text-main; font-size: $text-body; font-weight: $font-semibold; }
+.widget-note,
+.widget-state { margin: 0; color: $text-muted; font-size: $text-small; line-height: 1.5; }
+.widget-state--error { color: $text-danger-soft; }
+.widget-empty { @include flex-col($space-2); margin: auto 0; color: $text-muted; font-size: $text-small; line-height: 1.5; }
+.widget-empty p { margin: 0; color: $text-main; font-weight: $font-semibold; }
+.clock-value { font-size: clamp(2rem, 5vw, 3rem) !important; font-variant-numeric: tabular-nums; }
+
+.incident-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: $space-2; }
+.incident-stats > div { @include flex-col($space-1); min-width: 0; padding: $space-2 $space-3; border: 1px solid $glass-border; border-radius: $radius-sm; background: $surface-1; }
+.incident-stats strong { color: $text-main; font-size: $text-heading; }
+.incident-stats span { color: $text-muted; font-size: $text-caption; }
+.incident-recent { @include flex-col(0); min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.incident-recent li { @include flex-row($space-3); align-items: center; justify-content: space-between; min-width: 0; padding: $space-2 0; border-top: 1px solid $glass-border; }
+.incident-recent__content { @include flex-col($space-1); min-width: 0; }
+.incident-recent__content strong { overflow: hidden; color: $text-main; font-size: $text-small; text-overflow: ellipsis; white-space: nowrap; }
+.incident-recent__content > span { overflow: hidden; color: $text-muted; font-size: $text-caption; text-overflow: ellipsis; white-space: nowrap; }
+.incident-recent__meta { @include flex-col($space-1); flex: 0 0 auto; align-items: flex-end; color: $text-muted; font-size: $text-caption; text-align: right; }
+
+.dashboard-widget--calendar .widget-heading { padding: $space-1 $space-1 0; }
+.dashboard-widget--calendar .widget-note { padding: 0 $space-1; }
+
+@include tablet {
+  .dashboard-widget { padding: $space-4; }
+}
+
+@include mobile {
+  .admin-dashboard { gap: $space-4; }
+  .dashboard-header { align-items: flex-start; }
+  .dashboard-header h1 { font-size: $text-title; }
+  .dashboard-community { width: 100%; }
+}

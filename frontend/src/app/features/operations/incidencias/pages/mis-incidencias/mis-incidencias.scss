@@ -1,0 +1,63 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.mis-incidencias {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  width: 100%;
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+
+    h1 {
+      @include text-heading;
+      margin: 0.35rem 0;
+      
+    }
+
+    p {
+      @include text-body;
+     
+      margin: 0;
+    }
+  }
+
+  &__eyebrow {
+  
+    color: $primary-light;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  &__mensaje {
+    padding: 0.85rem 1rem;
+    border-radius: $radius-md;
+    background: rgba($success, 0.12);
+    color: $success;
+  }
+}
+
+.mis-incidencias__mensaje[role='alert'] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  background: rgba($danger, 0.12);
+  color: $danger;
+
+  p { margin: 0; }
+}
+
+@media (max-width: 640px) {
+  .mis-incidencias {
+    &__header {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+<div class="notification-control">
+  <button
+    class="notification-trigger"
+    type="button"
+    aria-label="Notificaciones"
+    aria-haspopup="true"
+    [attr.aria-expanded]="isOpen()"
+    (click)="toggle()"
+  >
+    <span aria-hidden="true">🔔</span>
+    @if (unreadCount() > 0) {
+      <span class="notification-count">{{ unreadCount() > 99 ? '99+' : unreadCount() }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <app-notification-list
+      [items]="items()"
+      (selected)="select($event)"
+      (markAll)="markAllRead()"
+    />
+  }
+</div>

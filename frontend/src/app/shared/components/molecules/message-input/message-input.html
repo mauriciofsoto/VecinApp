@@ -1,0 +1,22 @@
+@if (quickReplies().length) {
+  <div class="quick-replies" role="group" aria-label="Respuestas rápidas">
+    @for (reply of quickReplies(); track reply) {
+      <button type="button" class="chip" [disabled]="disabled()" (click)="sendQuick(reply)">{{ reply }}</button>
+    }
+  </div>
+}
+
+<div class="message-field">
+  <input
+    class="message-input"
+    type="text"
+    [value]="text()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    (input)="onInput($event)"
+    (keydown.enter)="submit()"
+  />
+  <app-button variant="primary" size="sm" [disabled]="disabled() || !text().trim()" (buttonClick)="submit()">
+    Enviar
+  </app-button>
+</div>

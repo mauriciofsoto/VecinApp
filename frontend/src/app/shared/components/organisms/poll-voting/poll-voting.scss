@@ -1,0 +1,53 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.poll-wrapper {
+  @include poll-wrapper;
+}
+
+.poll-question {
+  font-size: $text-small;
+  font-weight: $font-semibold;
+  color: $text-main;
+  margin-bottom: $space-2;
+}
+
+.poll-options-list {
+  @include flex-col($space-2);
+  width: 100%;
+}
+
+.poll-option-item {
+  @include poll-option-item;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border: 0;
+}
+
+.poll-option-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.poll-content {
+  @include poll-content-layout;
+}
+
+.poll-text {
+  font-size: $text-small;
+  color: $text-main;
+}
+
+.poll-radio {
+  flex-shrink: 0;
+}
+
+.poll-actions {
+  @include form-actions;
+  margin-top: $space-2;
+}

@@ -1,5 +1,10 @@
 # .NET
-backend/bin/
-backend/obj/
-backend/**/appsettings.Development.json
-backend/**/*.user
+bin/
+obj/
+*.user
+
+# Node
+node_modules/
+
+# Configuración local
+**/appsettings.Development.json

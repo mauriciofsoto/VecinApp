@@ -1,50 +1,22 @@
 
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services/auth';
 
-export const roleGuard: CanActivateFn = (route) => {
-  const authService = inject(AuthService);
+export const roleGuard: CanActivateFn = (route, state) => {
+  const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isAuthenticated()) {
-    return router.createUrlTree(['/login']);
+  if (!auth.isAuthenticated()) {
+    return router.createUrlTree(['/login'], {
+      queryParams: { returnUrl: state.url },
+    });
   }
 
-  const role = authService.getRole()
-    ?.normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
+  const roles = route.data['roles'] as string[] | undefined;
 
-  const allowedRoles: string[] = route.data['roles'] ?? [];
-
-  const hasPermission = allowedRoles.some((allowedRole) => {
-    const normalizedAllowedRole = allowedRole
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase();
-
-    if (normalizedAllowedRole === 'administrador') {
-      return role === 'administrador' ||
-        role === 'administrador de edificio';
-    }
-
-    return role === normalizedAllowedRole;
-  });
-
-  if (!hasPermission) {
-    if (role === 'inquilino') {
-      return router.createUrlTree(['/inquilino/incidencias']);
-    }
-
-    if (
-      role === 'administrador' ||
-      role === 'administrador de edificio'
-    ) {
-      return router.createUrlTree(['/administrador/incidencias']);
-    }
-
-    return router.createUrlTree(['/login']);
+  if (roles?.length && !auth.hasRole(...roles)) {
+    return router.createUrlTree(['/']);
   }
 
   return true;

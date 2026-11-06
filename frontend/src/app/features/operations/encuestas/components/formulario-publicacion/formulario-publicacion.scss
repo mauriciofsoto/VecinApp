@@ -1,0 +1,208 @@
+
+@use '../../../../../../styles/abstracts' as *;
+
+// ========================================
+// ENCABEZADO DEL FORMULARIO
+// ========================================
+
+.surveys-eyebrow {
+  color: $accent;
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+  letter-spacing: 0.08em;
+}
+
+// ========================================
+// FORMULARIO DE PUBLICACIÓN
+// ========================================
+
+.survey-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-6;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+.survey-main-fields,
+.survey-options,
+.options-list,
+.survey-settings-content {
+  @include flex-col($space-3);
+  min-width: 0;
+}
+
+.form-field {
+  @include flex-col($space-2);
+  min-width: 0;
+
+  label {
+    font-size: $text-small;
+    font-weight: $font-medium;
+  }
+}
+
+// ========================================
+// OPCIONES DE RESPUESTA
+// ========================================
+
+.option-field {
+  @include flex-row($space-2);
+  align-items: center;
+
+  &__number {
+    color: $text-muted;
+    font-size: $text-small;
+    font-weight: $font-medium;
+    min-width: 1.2rem;
+  }
+
+  app-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.option-field__remove-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.options-disabled {
+  color: $text-muted;
+  font-size: $text-small;
+  font-style: italic;
+  margin: 0;
+}
+
+// ========================================
+// CONFIGURACIÓN
+// ========================================
+
+.survey-sidebar {
+  min-width: 0;
+}
+
+.survey-settings-accordion {
+  border: 1px solid $glass-border;
+  border-radius: $radius-md;
+  background: $surface-1;
+  padding: $space-4;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+}
+
+.accordion-icon {
+  color: $text-muted;
+  transition: transform $transition-base;
+}
+
+details[open] .accordion-icon {
+  transform: rotate(180deg);
+}
+
+.setting-option {
+  @include flex-row($space-3);
+  align-items: flex-start;
+  padding: $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  background: $surface-2;
+  cursor: pointer;
+  position: relative;
+  transition: $transition-base;
+
+  &:hover {
+    border-color: rgba($primary, 0.4);
+  }
+
+  input[type='checkbox'] {
+    margin-top: 0.2rem;
+    accent-color: $primary;
+  }
+
+  &__content {
+    @include flex-col($space-1);
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      font-size: $text-small;
+    }
+
+    span {
+      color: $text-muted;
+      font-size: $text-small;
+    }
+  }
+
+  &--priority {
+    background: rgba($warning, 0.05);
+  }
+}
+
+.priority-label {
+  @include status-tint($warning, 0.15, 0.4);
+  padding: 0.15rem 0.5rem;
+  border-radius: $radius-full;
+  font-size: $text-tiny;
+  font-weight: $font-semibold;
+  letter-spacing: 0.05em;
+}
+
+.deadline-field {
+  padding-left: $space-4;
+  border-left: 2px solid rgba($primary, 0.4);
+
+  app-input {
+    display: block;
+    width: 100%;
+  }
+}
+
+.survey-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  grid-column: 1 / -1;
+  padding-top: $space-4;
+  margin-top: $space-2;
+  border-top: 1px solid $glass-border;
+}
+
+// ========================================
+// ERRORES DEL FORMULARIO
+// ========================================
+
+.form-error {
+  color: $danger;
+  font-size: $text-small;
+  font-weight: $font-medium;
+  margin: 0;
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+
+@media (max-width: $mobile) {
+  .survey-form {
+    grid-template-columns: 1fr;
+  }
+}

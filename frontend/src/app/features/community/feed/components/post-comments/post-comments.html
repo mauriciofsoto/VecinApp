@@ -1,1 +1,35 @@
-<p>post-comments works!</p>
+
+<section class="post-comments">
+  @for (comment of comments(); track comment.id) {
+    <article class="post-comment">
+      @if (comment.userAvatar) {
+        <img
+          class="post-comment__avatar"
+          [src]="comment.userAvatar"
+          [alt]="'Avatar de ' + comment.userName"
+        />
+      } @else {
+        <div class="post-comment__avatar-fallback" aria-hidden="true">
+          {{ comment.userName.charAt(0).toUpperCase() }}
+        </div>
+      }
+
+      <div class="post-comment__content">
+        <strong>{{ comment.userName }}</strong>
+        <p>{{ comment.content }}</p>
+        <time [attr.datetime]="comment.createdAt">
+          {{ comment.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </time>
+      </div>
+    </article>
+  } @empty {
+    <p class="post-comments__empty">Todavía no hay comentarios.</p>
+  }
+
+  <app-comment-input
+    [userAvatar]="currentUserAvatar()"
+    [userInitials]="currentUserName().charAt(0).toUpperCase()"
+    placeholder="Escribí un comentario..."
+    (submitComment)="submitComment($event)"
+  />
+</section>

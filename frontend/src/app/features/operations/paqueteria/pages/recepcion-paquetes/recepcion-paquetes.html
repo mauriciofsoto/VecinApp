@@ -1,1 +1,106 @@
-<p>recepcion-paquetes works!</p>
+<main class="operations-page">
+  <header class="page-header">
+    <h1>Recepción de paquetes</h1>
+    <p>Registrá los paquetes recibidos para los residentes.</p>
+  </header>
+
+  <section class="panel">
+    <h2>Registrar paquete</h2>
+
+    @if (inquilinosActivos().length > 0) {
+      <form (ngSubmit)="registrar()" class="form-grid">
+        <label>
+          Destinatario
+          <app-select
+            name="destinatarioId"
+            [(ngModel)]="destinatarioId"
+            [options]="opcionesDestinatario()"
+            placeholder="Seleccioná un residente"
+            [required]="true"
+          />
+        </label>
+
+        <label>
+          Remitente o empresa
+          <app-input
+            name="remitente"
+            [(ngModel)]="remitente"
+            [required]="true"
+            placeholder="Correo, mensajería..."
+          />
+        </label>
+
+        <label>
+          Descripción del paquete
+          <app-input
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            [required]="true"
+            placeholder="Sobre, caja, documentación..."
+          />
+        </label>
+
+        <button type="submit">Registrar paquete</button>
+      </form>
+    } @else {
+      <p>No hay residentes activos registrados para seleccionar.</p>
+    }
+
+    <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
+  </section>
+
+  <section class="package-workspace">
+    <div class="panel package-list">
+      <header class="section-header">
+        <h2>Paquetes recibidos</h2>
+        <span>{{ paqueteria.paquetes().length }} registrados</span>
+      </header>
+
+      <div class="package-list__counters">
+        <span>Pendientes: {{ paqueteria.pendientes().length }}</span>
+        <span>Entregados: {{ paqueteria.entregados().length }}</span>
+      </div>
+
+      <div class="item-list">
+        @for (paquete of paqueteria.paquetes(); track paquete.id) {
+          <button
+            type="button"
+            class="item-card"
+            [class.item-card--selected]="paqueteSeleccionado()?.id === paquete.id"
+            [attr.aria-pressed]="paqueteSeleccionado()?.id === paquete.id"
+            (click)="seleccionarPaquete(paquete)"
+          >
+            <div class="item-card__content">
+              <h3>{{ paquete.descripcion }}</h3>
+              <p>{{ paquete.destinatarioNombre }}</p>
+              <p>Unidad {{ paquete.unidad }} · {{ paquete.edificioNombre }}</p>
+              <p>{{ paquete.remitente }}</p>
+              <span
+                class="status"
+                [class.delivered]="paquete.estado === 'entregado'"
+              >
+                {{ paquete.estado === 'pendiente' ? 'Pendiente de entrega' : 'Entregado' }}
+              </span>
+            </div>
+          </button>
+        } @empty {
+          <p>No hay paquetes registrados.</p>
+        }
+      </div>
+    </div>
+
+    <section class="panel package-conversation">
+      @if (paqueteSeleccionado(); as paquete) {
+        <app-chat-paquete
+          [paquete]="paquete"
+          rolVista="porteria"
+        />
+      } @else {
+        <div class="conversation-empty">
+          <h2>Conversaciones</h2>
+          <p>Seleccioná un paquete para consultar o iniciar su conversación.</p>
+        </div>
+      }
+    </section>
+  </section>
+</main>

@@ -6,7 +6,7 @@ import { finalize, forkJoin } from 'rxjs';
 import {
   Incidencias,
   DetalleIncidencia,
-  EstadoIncidencia
+  EstadoIncidenciaDto
 } from '../../services/incidencias';
 
 @Component({
@@ -21,7 +21,7 @@ export class DetalleIncidenciaComponent implements OnInit {
   private incidenciasService = inject(Incidencias);
   private cdr = inject(ChangeDetectorRef);
   incidencia: DetalleIncidencia | null = null;
-  estados: EstadoIncidencia[] = [];
+  estados: EstadoIncidenciaDto[] = [];
   estadoSeleccionado: number | null = null;
 
   cargando = true;

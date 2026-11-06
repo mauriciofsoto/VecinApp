@@ -1,0 +1,27 @@
+@use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/components/mixins-forms.scss' as forms;
+
+.create-post-form {
+  @include flex-col($space-4);
+
+  width: 100%;
+  min-width: 0;
+  color: $text-main;
+}
+
+.create-post-form textarea {
+  @include forms.form-textarea-base;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 6rem;
+  padding: $space-3 $space-4;
+  border-radius: $radius-sm;
+  background: $surface-1;
+  transition: $transition-base;
+
+  &:focus {
+    border-color: rgba($primary, 0.6);
+    background: $surface-2;
+  }
+}

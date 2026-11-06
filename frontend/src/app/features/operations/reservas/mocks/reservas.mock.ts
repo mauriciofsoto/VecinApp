@@ -1,0 +1,126 @@
+
+import {
+  EspacioComun,
+  Reserva,
+  MensajeReserva,
+  InteraccionReserva,
+} from '../models/reserva';
+
+export const ESPACIOS_MOCK: EspacioComun[] = [
+  {
+    id: 1,
+    edificioId: 1,
+    nombre: 'SUM',
+    descripcion: 'Salón de usos múltiples para reuniones y eventos.',
+    horaApertura: '09:00',
+    horaCierre: '23:00',
+    capacidadMaxima: 50,
+    activo: true,
+  },
+  {
+    id: 2,
+    edificioId: 1,
+    nombre: 'Pileta',
+    descripcion: 'Espacio recreativo del edificio.',
+    horaApertura: '10:00',
+    horaCierre: '20:00',
+    capacidadMaxima: 20,
+    activo: true,
+  },
+  {
+    id: 3,
+    edificioId: 1,
+    nombre: 'Parrilla',
+    descripcion: 'Sector de parrillas y mesas.',
+    horaApertura: '10:00',
+    horaCierre: '22:00',
+    capacidadMaxima: 15,
+    activo: true,
+  },
+  {
+    id: 4,
+    edificioId: 1,
+    nombre: 'Terraza',
+    descripcion: 'Espacio común al aire libre.',
+    horaApertura: '09:00',
+    horaCierre: '22:00',
+    capacidadMaxima: 25,
+    activo: true,
+  },
+];
+
+export const RESERVAS_MOCK: Reserva[] = [
+  {
+    id: 1,
+    usuarioId: 'USR-001',
+    usuarioNombre: 'María González',
+    unidadId: 101,
+    unidadNombre: '2° A',
+    edificioId: 1,
+    espacioId: 1,
+    titulo: 'Cumpleaños familiar',
+    descripcion: 'Reunión familiar.',
+    fecha: '2026-11-15',
+    horaInicio: '13:00',
+    horaFin: '18:00',
+    cantidadParticipantes: 20,
+    estado: 'pendiente',
+    tipoEvento: 'privado',
+    categoriaEvento: null,
+    fechaCreacion: '2026-11-03T10:00:00',
+    creadaPorAdministracion: false,
+  },
+  {
+    id: 2,
+    usuarioId: 'USR-002',
+    usuarioNombre: 'Carlos Pérez',
+    unidadId: 203,
+    unidadNombre: '4° B',
+    edificioId: 1,
+    espacioId: 3,
+    titulo: 'Reunión con amigos',
+    descripcion: 'Encuentro entre amigos.',
+    fecha: '2026-11-18',
+    horaInicio: '12:00',
+    horaFin: '16:00',
+    cantidadParticipantes: 10,
+    estado: 'confirmada',
+    tipoEvento: 'privado',
+    categoriaEvento: null,
+    fechaCreacion: '2026-11-02T14:30:00',
+    creadaPorAdministracion: false,
+  },
+];
+
+export const MENSAJES_RESERVA_MOCK: MensajeReserva[] = [
+  {
+    id: 1,
+    reservaId: 1,
+    emisorId: 'USR-001',
+    emisorNombre: 'María González',
+    rolEmisor: 'residente',
+    contenido: 'Quería consultar si está disponible el SUM para ese horario.',
+    fechaEnvio: '2026-11-03T10:15:00',
+  },
+  {
+    id: 2,
+    reservaId: 1,
+    emisorId: 'ADMIN-001',
+    emisorNombre: 'Administración',
+    rolEmisor: 'administracion',
+    contenido: '¡Hola María! Estamos revisando tu solicitud.',
+    fechaEnvio: '2026-11-03T11:00:00',
+  },
+];
+
+export const INTERACCIONES_RESERVA_MOCK: InteraccionReserva[] = [
+  {
+    id: 1,
+    reservaId: 1,
+    tipo: 'solicitud-creada',
+    usuarioId: 'USR-001',
+    usuarioNombre: 'María González',
+    descripcion: 'Creó una solicitud para reservar el SUM.',
+    fecha: '2026-11-03T10:00:00',
+  },
+];

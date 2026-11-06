@@ -1,0 +1,123 @@
+@use '../components/mixins-forms.scss' as *;
+
+@use '../variables' as *;
+@use '../global/mixins-core' as *;
+
+// Estructura principal de una página.
+@mixin operation-page($gap: $space-6) {
+  @include flex-col($gap);
+  width: 100%;
+  min-width: 0;
+}
+
+// Encabezados adaptables.
+@mixin operation-header($gap: $space-4) {
+  @include flex-row($gap);
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+// Grupo de título y descripción.
+@mixin operation-intro($gap: $space-2) {
+  @include flex-col($gap);
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+// Columnas verticales para secciones y listas.
+@mixin operation-stack($gap: $space-4) {
+  @include flex-col($gap);
+  min-width: 0;
+}
+
+// Fila de filtros.
+@mixin operation-filters($gap: $space-3) {
+  @include flex-row($gap);
+  align-items: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+// Campo individual dentro de los filtros.
+@mixin operation-filter-field {
+  @include flex-col($space-2);
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+// Fila de acciones.
+@mixin operation-actions(
+  $gap: $space-2,
+  $justify: flex-end
+) {
+  @include flex-row($gap);
+  justify-content: $justify;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+// Texto secundario.
+@mixin operation-muted-text($size: $text-small) {
+  color: $text-muted;
+  font-size: $size;
+}
+
+// Separador superior de las acciones.
+@mixin operation-actions-divider {
+  padding-top: $space-3;
+  border-top: 1px solid $glass-border;
+}
+
+// Paneles y tarjetas de las pantallas legacy de operaciones.
+@mixin operation-panel($padding: $space-5) {
+  padding: $padding;
+  @include glass-border;
+  border-radius: $radius-md;
+  background: $glass-bg;
+}
+
+@mixin operation-form-grid($gap: $space-4) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $gap;
+}
+
+@mixin operation-form-label($font-size: null) {
+  @include flex-col($space-2);
+  @if $font-size != null { font-size: $font-size; }
+}
+
+// Mantiene la presentación nativa de los controles de las pantallas legacy,
+// reutilizando la base de formularios para color, outline y estado disabled.
+@mixin operation-form-control($background: $surface-control-dark, $inherit-font: false) {
+  @include form-input-base;
+  flex: initial;
+  width: 100%;
+  box-sizing: border-box;
+  padding: $space-3;
+  color: $text-main;
+  border: 1px solid $border-control;
+  border-radius: $radius-control;
+  background: $background;
+
+  @if $inherit-font {
+    font: inherit;
+  } @else {
+    font: revert;
+  }
+
+  // These controls keep the focus, placeholder and disabled behavior they had
+  // before adopting the shared form foundation.
+  outline: revert;
+  &::placeholder {
+    color: revert;
+    opacity: revert;
+  }
+  &:disabled {
+    opacity: revert;
+    cursor: revert;
+  }
+}

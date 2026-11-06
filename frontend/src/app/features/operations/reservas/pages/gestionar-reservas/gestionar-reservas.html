@@ -1,1 +1,168 @@
-<p>gestionar-reservas works!</p>
+<main class="operations-page reservas-module">
+  <header class="page-header">
+    <h1>Gestión de reservas</h1>
+    <p>Administrá las reservas de espacios comunes.</p>
+  </header>
+
+  <div class="reservations-layout">
+
+    <!-- Calendario -->
+    <section class="calendar-section">
+      <app-reserva-calendar-modal
+        [reservas]="reservas()"
+        (fechaSeleccionada)="seleccionarFecha($event)"
+      />
+    </section>
+
+    <!-- Sidebar de administración -->
+    <aside class="reservations-panel">
+
+      <!-- Nueva reserva -->
+      <section class="reservation-form">
+        <header class="panel-header">
+          <div>
+            <h2>Nueva reserva</h2>
+            <p>Registrá una reserva para un residente.</p>
+          </div>
+        </header>
+
+        <button
+          type="button"
+          class="primary"
+          (click)="reservaForm.abrir()"
+        >
+          Nueva reserva
+        </button>
+
+        <!-- Formulario compartido con modal interno -->
+        <app-reserva-form
+          #reservaForm
+          [espacios]="reservasService.espaciosActivos()"
+          [creadaPorAdministracion]="true"
+          (guardar)="crearReserva($event)"
+        />
+
+        @if (mensajeFormulario()) {
+          <p
+            class="form-feedback form-feedback--error"
+            aria-live="polite"
+          >
+            {{ mensajeFormulario() }}
+          </p>
+        }
+
+        @if (exitoFormulario()) {
+          <p
+            class="form-feedback form-feedback--success"
+            aria-live="polite"
+          >
+            {{ exitoFormulario() }}
+          </p>
+        }
+      </section>
+
+      <!-- Historial del día -->
+      <section class="daily-reservations">
+        <header class="panel-header">
+          <div>
+            <h2>Reservas del día</h2>
+            <p>{{ fechaSeleccionada() | date: 'fullDate' }}</p>
+          </div>
+
+          <span class="reservation-count">
+            {{ reservasDelDia().length }}
+          </span>
+        </header>
+
+        @for (reserva of reservasDelDia(); track reserva.id) {
+          <article
+            class="item-card"
+            [class.item-card--selected]="reservaSeleccionada()?.id === reserva.id"
+          >
+            <div class="reservation-information">
+              <h3>{{ reserva.titulo }}</h3>
+
+              <div class="reservation-information__facts">
+                <p class="reservation-fact">
+                  <span>Espacio común</span>
+                  <strong>{{ nombreEspacio(reserva.espacioId) }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Residente</span>
+                  <strong>{{ reserva.usuarioNombre }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Unidad</span>
+                  <strong>{{ reserva.unidadNombre }}</strong>
+                </p>
+                <p class="reservation-fact">
+                  <span>Horario</span>
+                  <strong>{{ reserva.horaInicio }} – {{ reserva.horaFin }}</strong>
+                </p>
+              </div>
+
+              <span
+                class="status"
+                [attr.data-status]="reserva.estado"
+              >
+                {{ reserva.estado }}
+              </span>
+            </div>
+
+            <div class="reservation-actions">
+              <button
+                type="button"
+                class="secondary"
+                (click)="seleccionarReserva(reserva)"
+              >
+                Ver conversación
+              </button>
+
+              @if (reserva.estado === 'pendiente') {
+                <button
+                  type="button"
+                  class="primary"
+                  (click)="cambiarEstado(reserva.id, 'confirmada')"
+                >
+                  Confirmar
+                </button>
+
+                <button
+                  type="button"
+                  class="danger"
+                  (click)="cambiarEstado(reserva.id, 'rechazada')"
+                >
+                  Rechazar
+                </button>
+              }
+            </div>
+          </article>
+        } @empty {
+          <article class="item-card empty-state">
+            <p>No hay reservas registradas para esta fecha.</p>
+          </article>
+        }
+      </section>
+    </aside>
+
+    <!-- Chat -->
+    <section class="chat-section">
+      @if (reservaSeleccionada(); as reserva) {
+        <app-reserva-chat
+          [reserva]="reserva"
+          [emisorId]="usuario()?.id ?? ''"
+          [emisorNombre]="usuario()?.nombre ?? 'Administración'"
+        />
+      } @else {
+        <article class="item-card chat-placeholder">
+          <h2>Conversaciones</h2>
+          <p>
+            Seleccioná una reserva para consultar o responder los mensajes
+            del residente.
+          </p>
+        </article>
+      }
+    </section>
+
+  </div>
+</main>

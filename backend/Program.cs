@@ -93,6 +93,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddScoped<NotificacionesService>();
+
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -201,6 +203,46 @@ using (var scope = app.Services.CreateScope())
         };
 
         context.RolesAplicacion.Add(rolSuperAdministrador);
+    }
+
+    await context.SaveChangesAsync();
+
+    // Catálogos requeridos por la creación, visualización y transición de incidencias.
+    // Se agregan solo los valores faltantes para no alterar catálogos existentes.
+    var estadosIncidenciaPredeterminados = new[]
+    {
+        "Pendiente",
+        "En proceso",
+        "Resuelta",
+        "Rechazada"
+    };
+    var estadosIncidenciaExistentes = await context.EstadosIncidencia
+        .Select(estado => estado.Nombre)
+        .ToListAsync();
+
+    foreach (var nombre in estadosIncidenciaPredeterminados)
+    {
+        if (!estadosIncidenciaExistentes.Contains(nombre, StringComparer.OrdinalIgnoreCase))
+            context.EstadosIncidencia.Add(new EstadoIncidencia { Nombre = nombre });
+    }
+
+    var categoriasIncidenciaPredeterminadas = new[]
+    {
+        "Plomería",
+        "Electricidad",
+        "Ascensor",
+        "Limpieza",
+        "Seguridad",
+        "Otro"
+    };
+    var categoriasIncidenciaExistentes = await context.CategoriasIncidencia
+        .Select(categoria => categoria.Nombre)
+        .ToListAsync();
+
+    foreach (var nombre in categoriasIncidenciaPredeterminadas)
+    {
+        if (!categoriasIncidenciaExistentes.Contains(nombre, StringComparer.OrdinalIgnoreCase))
+            context.CategoriasIncidencia.Add(new CategoriaIncidencia { Nombre = nombre });
     }
 
     await context.SaveChangesAsync();

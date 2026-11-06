@@ -1,0 +1,147 @@
+@use '../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.resident-dashboard {
+  @include flex-col($space-6);
+  min-width: 0;
+  padding-bottom: $space-6;
+}
+
+.dashboard-header {
+  @include flex-row($space-5);
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  h1 { @include text-title; margin: $space-2 0; color: $text-main; }
+  p { @include text-body; margin: 0; color: $text-muted; }
+}
+
+.dashboard-eyebrow,
+.widget-kicker {
+  color: $accent;
+  font-size: $text-tiny;
+  font-weight: $font-semibold;
+  letter-spacing: 0.1em;
+}
+
+.dashboard-widget {
+  @include flex-col($space-3);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: $space-5;
+
+  h2 { @include text-heading; margin: 0; color: $text-main; }
+}
+
+.dashboard-widget--clock,
+.dashboard-widget--weather { justify-content: center; }
+.dashboard-widget--clock { background: radial-gradient(circle at top right, rgba($accent, 0.15), transparent 68%); }
+.dashboard-widget--weather { background: radial-gradient(circle at bottom left, rgba($primary, 0.14), transparent 72%); }
+
+.widget-heading {
+  @include flex-row($space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.widget-heading > div { @include flex-col($space-1); min-width: 0; }
+.widget-link { color: $accent; font-size: $text-small; font-weight: $font-semibold; text-decoration: none; white-space: nowrap; }
+.widget-link:hover { color: $text-main; }
+.widget-link:focus-visible,
+.quick-action:focus-visible,
+.notification-link:focus-visible { outline: 2px solid $accent; outline-offset: 3px; border-radius: $radius-sm; }
+.widget-note,
+.widget-state { margin: 0; color: $text-muted; font-size: $text-small; line-height: 1.5; }
+.widget-state--error { color: $text-danger-soft; }
+.widget-empty { @include flex-col($space-2); margin: auto 0; color: $text-muted; font-size: $text-small; line-height: 1.5; }
+.widget-empty p { margin: 0; color: $text-main; font-weight: $font-semibold; }
+.clock-value { font-size: clamp(2rem, 5vw, 3rem) !important; font-variant-numeric: tabular-nums; }
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+}
+
+.quick-action { min-height: 2.75rem; }
+.widget-action { align-self: flex-start; margin-top: auto; }
+.btn-action { text-decoration: none; }
+
+.incident-summary {
+  @include flex-row($space-2);
+  align-items: baseline;
+  padding: $space-3 $space-4;
+  border: 1px solid $glass-border;
+  border-radius: $radius-control;
+  background: $surface-1;
+
+  strong { color: $text-main; font-size: $text-title; }
+  span { color: $text-muted; font-size: $text-small; }
+}
+
+.resident-list {
+  @include flex-col(0);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+
+  li { min-width: 0; border-top: 1px solid $glass-border; }
+}
+
+.list-copy { @include flex-col($space-1); min-width: 0; }
+.list-copy strong,
+.list-copy > span { overflow: hidden; text-overflow: ellipsis; }
+.list-copy strong { color: $text-main; font-size: $text-small; }
+.list-copy > span { color: $text-muted; font-size: $text-caption; }
+
+.resident-list > li:not(.notification-list__item--unread) { padding: $space-3 0; }
+.resident-list > li:not(.notification-list__item--unread) .list-copy strong { white-space: nowrap; }
+
+.notification-list__item--unread { padding: 0; background: rgba($accent, 0.05); }
+.notification-link {
+  @include flex-row($space-3);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  padding: $space-3;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  time { flex: 0 0 auto; color: $text-muted; font-size: $text-caption; }
+  &:hover { background: rgba($accent, 0.08); }
+}
+
+.notification-badge {
+  flex: 0 0 auto;
+  padding: $space-1 $space-2;
+  border-radius: $radius-full;
+  color: $text-main;
+  background: rgba($accent, 0.16);
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+}
+
+@include mobile {
+  .resident-dashboard { gap: $space-4; }
+  .dashboard-header { align-items: flex-start; }
+  .dashboard-header h1 { font-size: $text-title; }
+  .quick-actions { display: grid; grid-template-columns: 1fr; }
+  .quick-action { justify-content: flex-start; }
+  .notification-link { align-items: flex-start; }
+  .notification-link time { white-space: nowrap; }
+}

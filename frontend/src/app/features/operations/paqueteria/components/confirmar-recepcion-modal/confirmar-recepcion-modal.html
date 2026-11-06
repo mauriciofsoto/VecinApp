@@ -1,0 +1,47 @@
+
+<app-modal
+  [(open)]="open"
+  heading="Confirmar recepción"
+  size="sm"
+>
+  <div class="confirmation-content">
+    <div class="confirmation-icon">
+      <span aria-hidden="true">📦</span>
+    </div>
+
+    <h3>¿Recibiste tu paquete?</h3>
+
+    <p>
+      Vas a confirmar que recibiste el siguiente paquete:
+    </p>
+
+    <div class="package-summary">
+      <strong>{{ paquete().descripcion }}</strong>
+      <span>Remitente: {{ paquete().remitente }}</span>
+      <span>Unidad: {{ paquete().unidad }}</span>
+      <span>{{ paquete().edificioNombre }}</span>
+    </div>
+
+    <p class="confirmation-note">
+      Una vez confirmada la recepción, el paquete cambiará a estado entregado.
+    </p>
+  </div>
+
+  <div modal-footer class="confirmation-actions">
+    <button
+      type="button"
+      class="button-secondary"
+      (click)="cancelar()"
+    >
+      Volver
+    </button>
+
+    <button
+      type="button"
+      class="button-primary"
+      (click)="confirmarRecepcion()"
+    >
+      Confirmar recepción
+    </button>
+  </div>
+</app-modal>

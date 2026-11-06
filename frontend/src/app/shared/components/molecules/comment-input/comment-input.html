@@ -1,0 +1,33 @@
+<div class="comment-input-container">
+  <div class="avatar-wrapper">
+    @if (userAvatar) {
+      <img [src]="userAvatar" alt="Usuario" class="avatar-img" />
+    } @else {
+      <div class="avatar-fallback">{{ userInitials }}</div>
+    }
+  </div>
+
+  <div class="input-wrapper">
+    <app-input
+      [value]="commentText"
+      [placeholder]="placeholder"
+      [multiline]="true"
+      [rows]="1"
+      [disabled]="disabled || loading"
+      (valueChange)="commentText = $event.toString()"
+      (keydown)="onKeyDown($event)"
+    />
+
+    <div class="actions">
+      <app-button
+        variant="primary"
+        size="sm"
+        [disabled]="!commentText.trim() || disabled || loading"
+        (buttonClick)="onSend()"
+      >
+        <span>{{ loading ? 'Enviando...' : 'Enviar' }}</span>
+        <span aria-hidden="true">➔</span>
+      </app-button>
+    </div>
+  </div>
+</div>

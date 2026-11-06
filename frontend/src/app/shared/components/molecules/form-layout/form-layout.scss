@@ -1,0 +1,43 @@
+
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.form-layout {
+  @include flex-col($space-4);
+  width: 100%;
+  min-width: 0;
+}
+
+.form-layout__header {
+  @include flex-col($space-1);
+}
+
+.form-layout__title {
+  margin: 0;
+  color: $text-main;
+  font-family: $font-title;
+  font-size: $text-heading;
+  line-height: 1.3;
+}
+
+.form-layout__description {
+  margin: 0;
+  color: $text-muted;
+  font-size: $text-small;
+  line-height: 1.5;
+}
+
+.form-layout__content {
+  @include flex-col($space-4);
+  min-width: 0;
+}
+
+.form-layout__actions {
+  @include form-actions;
+  flex-wrap: wrap;
+}

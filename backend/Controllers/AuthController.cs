@@ -186,7 +186,13 @@ public class AuthController : ControllerBase
         });
         await _context.SaveChangesAsync();
 
-        return Ok(new AuthResponse(accessToken, refreshToken, expiresAt));
+        var authUser = new AuthUserDto(user.Id,user.Nombre,user.Apellido,user.Email ?? string.Empty,rolNombre ?? string.Empty);
+         return Ok(new AuthResponse(
+            accessToken,
+            refreshToken,
+            expiresAt,
+            authUser
+        ));
     }
 
     // POST /auth/refresh
@@ -229,7 +235,15 @@ public class AuthController : ControllerBase
         });
         await _context.SaveChangesAsync();
 
-        return Ok(new AuthResponse(newAccessToken, newRefreshToken, expiresAt));
+        var authUser = new AuthUserDto(savedToken.User.Id,savedToken.User.Nombre,savedToken.User.Apellido,savedToken.User.Email ?? string.Empty,rolNombre ?? string.Empty);
+
+        return Ok(new AuthResponse(
+            newAccessToken,
+            newRefreshToken,
+            expiresAt,
+            authUser
+        ));
+
     }
 
     // POST /auth/logout

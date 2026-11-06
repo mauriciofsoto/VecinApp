@@ -1,94 +1,87 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
+import { Component, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { Incidencias } from '../../services/incidencias';
-import { finalize } from 'rxjs';
-import { CategoriaIncidencia, CrearIncidenciaRequest } from '../../models/incidencia';
+
+import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
+import { InputComponent } from '../../../../../shared/components/atoms/input/input';
+import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
+import { FormLayout } from '../../../../../shared/components/molecules/form-layout/form-layout';
+import { PrioridadIncidencia } from '../../models/incidencia';
+import { CategoriaIncidenciaDto } from '../../services/incidencias';
+
+export interface CrearIncidenciaPayload {
+  titulo: string;
+  descripcion: string;
+  idCategoriaIncidencia: number;
+  ubicacion: string;
+  prioridad: PrioridadIncidencia;
+}
 
 @Component({
   selector: 'app-crear-incidencia',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    FormsModule,
+    ButtonComponent,
+    InputComponent,
+    SelectComponent,
+    FormLayout,
+  ],
   templateUrl: './crear-incidencia.html',
   styleUrl: './crear-incidencia.scss',
 })
-export class CrearIncidencia implements OnInit {
-  private incidenciasService = inject(Incidencias);
-  private cdr = inject(ChangeDetectorRef);
-  categorias: CategoriaIncidencia[] = [];
-  private router = inject(Router);
+export class CrearIncidencia {
+  readonly categoriasDisponibles = input<CategoriaIncidenciaDto[]>([]);
+  readonly enviando = input(false);
+  readonly guardar = output<CrearIncidenciaPayload>();
 
-  volver(): void {
-    this.router.navigate(['/inquilino/incidencias']);
-  }
-  incidencia: CrearIncidenciaRequest = {
-    idCategoriaIncidencia: 0,
-    titulo: '',
-    descripcion: '',
-    prioridad: 'Media',
-  };
+  protected readonly titulo = signal('');
+  protected readonly descripcion = signal('');
+  protected readonly categoria = signal('');
+  protected readonly ubicacion = signal('');
+  protected readonly prioridad = signal<PrioridadIncidencia>('media');
+  protected readonly error = signal('');
+  protected readonly categorias = computed<SelectOption[]>(() =>
+    this.categoriasDisponibles().map(categoria => ({
+      label: categoria.nombre,
+      value: String(categoria.idCategoriaIncidencia),
+    })),
+  );
 
-  mensaje = '';
-  error = '';
-  guardando = false;
+  protected readonly prioridades: SelectOption[] = [
+    { label: 'Baja', value: 'baja' },
+    { label: 'Media', value: 'media' },
+    { label: 'Alta', value: 'alta' },
+  ];
 
-  ngOnInit(): void {
-    this.incidenciasService.listarCategorias().subscribe({
-      next: (categorias) => {
-        this.categorias = categorias;
-      },
-      error: (err) => {
-        console.error('Error al cargar categorías:', err);
-        this.error = 'No se pudieron cargar las categorías.';
-      },
-    });
-  }
+  protected publicarIncidencia(): void {
+    this.error.set('');
 
-  crear(): void {
-    this.mensaje = '';
-    this.error = '';
+    const titulo = this.titulo().trim();
+    const descripcion = this.descripcion().trim();
+    const idCategoriaIncidencia = Number(this.categoria());
+    const ubicacion = this.ubicacion().trim();
 
-    if (
-      !this.incidencia.titulo.trim() ||
-      !this.incidencia.descripcion.trim() ||
-      this.incidencia.idCategoriaIncidencia <= 0
-    ) {
-      this.error = 'Completá todos los campos obligatorios.';
+    if (!titulo || !descripcion || !Number.isInteger(idCategoriaIncidencia) || idCategoriaIncidencia <= 0 || !ubicacion) {
+      this.error.set('Completá todos los campos obligatorios.');
       return;
     }
 
-    this.guardando = true;
+    this.guardar.emit({
+      titulo,
+      descripcion,
+      idCategoriaIncidencia,
+      ubicacion,
+      prioridad: this.prioridad(),
+    });
+  }
 
-    this.incidenciasService.crear(this.incidencia)
-      .pipe(
-        finalize(() => {
-          this.guardando = false;
-          this.cdr.detectChanges();
-        })
-      )
-
-      .subscribe({
-        next: (respuesta) => {
-          console.log('1. RESPUESTA RECIBIDA:', respuesta);
-          this.mensaje = 'La incidencia se creó correctamente.';
-          this.incidencia = {
-            idCategoriaIncidencia: 0,
-            titulo: '',
-            descripcion: '',
-            prioridad: 'Media',
-          }; this.cdr.detectChanges();
-          console.log('2. MENSAJE:', this.mensaje);
-        },
-        error: (err) => {
-          console.error('ERROR AL CREAR:', err);
-          this.error = err.error?.mensaje ?? 'No se pudo crear la incidencia.';
-        },
-        complete: () => {
-          console.log('3. PETICIÓN COMPLETADA');
-        }
-
-      });
-
+  protected limpiarFormulario(): void {
+    this.titulo.set('');
+    this.descripcion.set('');
+    this.categoria.set('');
+    this.ubicacion.set('');
+    this.prioridad.set('media');
+    this.error.set('');
   }
 }

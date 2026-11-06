@@ -1,0 +1,75 @@
+<section class="mis-incidencias">
+
+  <header class="mis-incidencias__header">
+    <div>
+      <span class="mis-incidencias__eyebrow">SERVICIOS Y SOPORTE</span>
+      <h1>Mis incidencias</h1>
+      <p>
+        Consultá tus reportes, seguí su evolución y comunicate
+        con administración.
+      </p>
+    </div>
+
+    <app-button
+      variant="primary"
+      (buttonClick)="abrirFormulario()"
+      [disabled]="cargandoCategorias() || !categorias().length"
+    >
+      + Nueva incidencia
+    </app-button>
+  </header>
+
+  @if (categoriasError()) {
+    <p class="mis-incidencias__mensaje" role="alert">{{ categoriasError() }}</p>
+  } @else if (!cargandoCategorias() && !categorias().length) {
+    <p class="mis-incidencias__mensaje" role="status">No hay categorías disponibles para crear incidencias.</p>
+  }
+
+  @if (mensaje()) {
+    <p class="mis-incidencias__mensaje" role="status">
+      {{ mensaje() }}
+    </p>
+  }
+
+  @if (cargando()) {
+    <p class="mis-incidencias__mensaje" role="status">Cargando incidencias…</p>
+  } @else if (errorCarga()) {
+    <div class="mis-incidencias__mensaje" role="alert">
+      <p>{{ errorCarga() }}</p>
+      <app-button variant="secondary" (buttonClick)="reintentarCarga()">Reintentar</app-button>
+    </div>
+  } @else {
+    <app-historial-incidencias
+      [incidencias]="incidencias()"
+      (abrirConversacion)="abrirConversacion($event)"
+    />
+  }
+
+</section>
+
+<!-- Modal de creación -->
+<app-modal
+  [(open)]="modalCrearAbierto"
+  heading="Nueva incidencia"
+  size="lg"
+>
+  <app-crear-incidencia
+    [categoriasDisponibles]="categorias()"
+    [enviando]="enviando()"
+    (guardar)="guardarIncidencia($event)"
+  />
+</app-modal>
+
+<!-- Modal de conversación -->
+@if (incidenciaSeleccionada(); as incidencia) {
+  <app-modal
+    [(open)]="modalConversacionAbierto"
+    heading="Conversación de incidencia"
+    size="lg"
+  >
+    <app-chat-incidencia
+      [incidencia]="incidencia"
+      rolVista="usuario"
+    />
+  </app-modal>
+}

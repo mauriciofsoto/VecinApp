@@ -1,0 +1,64 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.input-field {
+  @include form-input-base;
+  width: 100%;
+  min-width: 0;
+
+  &[type='date'],
+  &[type='datetime-local'] {
+    color-scheme: dark;
+  }
+}
+
+.input-field--textarea {
+  @include form-textarea-base;
+  width: 100%;
+  min-width: 0;
+}
+
+.input-control {
+  @include flex-row($space-2);
+  width: 100%;
+  min-width: 0;
+  padding: $space-2 $space-3;
+  border: 1px solid $glass-border;
+  border-radius: $radius-sm;
+  background: $surface-1;
+  transition: $transition-base;
+
+  &:focus-within {
+    border-color: rgba($primary, 0.6);
+    box-shadow: 0 0 0 2px rgba($primary, 0.15);
+  }
+
+  &--invalid,
+  &--invalid:focus-within {
+    border-color: rgba($danger, 0.75);
+  }
+
+  &--disabled { opacity: 0.6; }
+}
+
+.input-prefix-icon {
+  flex: 0 0 auto;
+  color: $text-muted;
+}
+
+.input-clear-button {
+  @include button-icon-clear(1.5rem);
+  flex: 0 0 auto;
+}
+
+.input-error {
+  display: block;
+  margin-top: $space-1;
+  color: $danger;
+  font-size: $text-caption;
+}

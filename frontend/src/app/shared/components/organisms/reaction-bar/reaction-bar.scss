@@ -1,0 +1,25 @@
+@use '../../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+}
+
+.reactions {
+  @include flex-row($space-2);
+  flex-wrap: wrap;
+}
+
+.chip {
+  @include chip-base;
+
+  &.is-selected { @include chip-selected; }
+}
+
+.chip-add { color: $text-muted; }
+
+// Selector de emojis: ocupa todo el ancho del modal
+emoji-picker {
+  width: 100%;
+  --background: transparent;
+  --border-color: #{$glass-border};
+}

@@ -1,0 +1,210 @@
+@use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/operations/mixins-operations' as ops;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.reservation-calendar {
+  @include ops.operation-panel;
+  @include flex-col($space-4);
+  min-width: 0;
+}
+
+.calendar-header {
+  @include flex-row($space-3);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  p {
+    @include ops.operation-muted-text;
+    margin-top: $space-1;
+  }
+}
+
+.calendar-navigation {
+  @include flex-row($space-2);
+  align-items: center;
+}
+
+.calendar-nav-button,
+.calendar-today {
+  display: grid;
+  place-items: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: $space-2;
+  border: 1px solid $glass-border;
+  border-radius: $radius-control;
+  cursor: pointer;
+  font: inherit;
+  transition: $transition-base;
+
+  &:focus-visible {
+    outline: 2px solid $primary-light;
+    outline-offset: 2px;
+  }
+
+  &:active:not(:disabled) { filter: brightness(0.92); }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+}
+
+.calendar-nav-button {
+  @include button-variant($surface-2, $glass-border, $text-main, $surface-3);
+  font-size: $text-heading;
+}
+
+.calendar-today {
+  @include button-variant(transparent, $glass-border, $text-main, $surface-2);
+}
+
+.calendar-month {
+  color: $text-main;
+  font-size: $text-heading;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: $space-2;
+}
+
+.calendar-weekday {
+  padding: $space-2 0;
+  color: $text-muted;
+  font-size: $text-small;
+  font-weight: 600;
+  text-align: center;
+}
+
+.calendar-day {
+  @include flex-col($space-1);
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 5rem;
+  padding: $space-2;
+  border: 1px solid transparent;
+  border-radius: $radius-control;
+  background: $surface-1;
+  color: $text-main;
+  cursor: pointer;
+  transition:
+    background $transition-fast,
+    border-color $transition-fast;
+
+  &:focus-visible {
+    outline: 2px solid $primary-light;
+    outline-offset: 2px;
+  }
+
+  &:active:not(:disabled) { filter: brightness(0.92); }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+
+  &:hover {
+    background: $surface-2;
+    border-color: $glass-border;
+  }
+}
+
+.calendar-day--outside {
+  opacity: 0.35;
+}
+
+.calendar-day--today {
+  border-color: $primary-light;
+}
+
+.calendar-day--selected {
+  background: rgba($primary, 0.2);
+  border-color: $primary;
+
+  &:hover {
+    background: rgba($primary, 0.28);
+  }
+}
+
+.calendar-day__number {
+  font-size: $text-small;
+  font-weight: 600;
+}
+
+.calendar-day__count {
+  color: $text-muted;
+  font-size: $text-caption;
+}
+
+.calendar-day__indicators {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+}
+
+.calendar-day__dot,
+.legend-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: $radius-full;
+  background: $text-muted;
+}
+
+.calendar-day__dot--pending,
+.legend-dot--pending {
+  background: $warning;
+}
+
+.calendar-day__dot--confirmed,
+.legend-dot--confirmed {
+  background: $success;
+}
+
+.calendar-day__dot--rejected,
+.legend-dot--rejected {
+  background: $danger;
+}
+
+.calendar-legend {
+  @include flex-row($space-4);
+  flex-wrap: wrap;
+  padding-top: $space-3;
+  border-top: 1px solid $glass-border;
+
+  span {
+    @include flex-row($space-2);
+    align-items: center;
+    color: $text-muted;
+    font-size: $text-caption;
+  }
+}
+
+@include mobile {
+  .reservation-calendar {
+    padding: $space-3;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .calendar-day {
+    min-height: 3.75rem;
+    padding: $space-1;
+  }
+
+  .calendar-legend {
+    gap: $space-2;
+  }
+}

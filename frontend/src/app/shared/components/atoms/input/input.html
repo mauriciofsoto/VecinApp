@@ -1,0 +1,65 @@
+<div
+  class="input-control"
+  [class.input-control--invalid]="isInvalid"
+  [class.input-control--disabled]="disabled"
+>
+  @if (prefixIcon) {
+    <span class="input-prefix-icon" aria-hidden="true">{{ prefixIcon }}</span>
+  }
+
+  @if (multiline) {
+    <textarea
+      class="input-field input-field--textarea"
+      [value]="value"
+      [placeholder]="placeholder"
+      [rows]="rows"
+      [disabled]="disabled"
+      [required]="required"
+      [attr.maxlength]="maxlength"
+      [attr.name]="name || null"
+      [attr.id]="id || null"
+      [attr.aria-invalid]="isInvalid ? 'true' : null"
+      [attr.aria-describedby]="errorId"
+      (input)="handleInput($event)"
+      (keydown)="handleKeyDown($event)"
+      (focus)="handleFocus($event)"
+      (blur)="handleBlur($event)"
+    ></textarea>
+  } @else {
+    <input
+      class="input-field"
+      [type]="type"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [required]="required"
+      [attr.min]="min"
+      [attr.max]="max"
+      [attr.maxlength]="maxlength"
+      [attr.autocomplete]="autocomplete"
+      [attr.name]="name || null"
+      [attr.id]="id || null"
+      [attr.aria-invalid]="isInvalid ? 'true' : null"
+      [attr.aria-describedby]="errorId"
+      (input)="handleInput($event)"
+      (keydown)="handleKeyDown($event)"
+      (focus)="handleFocus($event)"
+      (blur)="handleBlur($event)"
+    />
+  }
+
+  @if (canClear) {
+    <button
+      type="button"
+      class="input-clear-button"
+      aria-label="Limpiar campo"
+      (click)="clearValue()"
+    >
+      ×
+    </button>
+  }
+</div>
+
+@if (errorMessage) {
+  <span class="input-error" [id]="errorId" role="alert">{{ errorMessage }}</span>
+}

@@ -1,0 +1,160 @@
+//
+@use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/operations/mixins-operations' as ops;
+
+// ========================================
+// ESTRUCTURA
+// ========================================
+
+.surveys-page {
+  @include ops.operation-page;
+}
+
+.surveys-header {
+  @include ops.operation-header;
+
+  &__intro {
+    @include ops.operation-intro;
+  }
+}
+
+.surveys-eyebrow {
+  color: $accent;
+  font-size: $text-caption;
+  font-weight: $font-semibold;
+  letter-spacing: 0.08em;
+}
+
+// ========================================
+// RESUMEN
+// ========================================
+
+.surveys-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-4;
+}
+
+.summary-card {
+  @include flex-col($space-2);
+  min-width: 0;
+
+  &__label,
+  &__detail {
+    @include ops.operation-muted-text;
+  }
+
+  strong {
+    @include text-title;
+    overflow-wrap: anywhere;
+  }
+}
+
+// ========================================
+// HISTORIAL
+// ========================================
+
+.survey-history-section,
+.survey-list,
+.survey-entry {
+  @include ops.operation-stack;
+}
+
+.section-heading,
+.subsection-heading {
+  @include ops.operation-header($space-3);
+}
+
+.history-count {
+  @include ops.operation-muted-text;
+  flex-shrink: 0;
+}
+
+// ========================================
+// ENCUESTAS
+// ========================================
+
+.survey-entry {
+  &__top {
+    @include ops.operation-header($space-3);
+  }
+
+  &__title-group {
+    @include flex-col($space-2);
+    flex: 1 1 12rem;
+    min-width: 0;
+
+    p {
+      color: $text-muted;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__badges,
+  &__chips {
+    @include flex-row($space-2);
+    flex-wrap: wrap;
+  }
+
+  &__details {
+    @include flex-row($space-3);
+    align-items: center;
+    flex-wrap: wrap;
+    color: $text-muted;
+    font-size: $text-small;
+  }
+
+  &__options {
+    @include flex-col($space-2);
+    min-width: 0;
+
+    &-label {
+      @include ops.operation-muted-text;
+    }
+  }
+
+  &__date {
+    @include ops.operation-muted-text;
+    flex-shrink: 0;
+  }
+
+  &__actions {
+    @include ops.operation-actions-divider;
+    @include ops.operation-actions;
+  }
+}
+
+.option-chip {
+  @include chip-base;
+  cursor: default;
+}
+
+.priority-label {
+  @include status-tint($warning, 0.12, 0.35);
+  padding: $space-1 $space-2;
+  border-radius: $radius-full;
+  font-size: $text-tiny;
+  font-weight: $font-semibold;
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+
+@media (max-width: $mobile) {
+  .surveys-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .surveys-header,
+  .section-heading,
+  .subsection-heading,
+  .survey-entry__top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .survey-entry__actions {
+    justify-content: flex-start;
+  }
+}

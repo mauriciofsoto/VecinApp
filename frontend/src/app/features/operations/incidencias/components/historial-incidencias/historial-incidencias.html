@@ -1,0 +1,85 @@
+
+<section class="historial-incidencias">
+  <header class="historial-incidencias__list-header">
+    <div>
+      <h2>Historial de incidencias</h2>
+      <p>Consultá los reportes y revisá su estado.</p>
+    </div>
+
+    <span class="historial-incidencias__cantidad">
+      {{ incidenciasFiltradas().length }} resultados
+    </span>
+  </header>
+
+  <div class="historial-incidencias__filtros">
+    <div class="historial-incidencias__busqueda">
+      <app-input
+        type="search"
+        placeholder="Buscar incidencias..."
+        [value]="busqueda()"
+        (valueChange)="actualizarBusqueda($event)"
+      />
+    </div>
+
+    <div class="historial-incidencias__estado">
+      <app-select
+        [options]="opcionesEstado"
+        [value]="estadoSeleccionado()"
+        (valueChange)="actualizarEstado($event)"
+      />
+    </div>
+  </div>
+
+  <div class="historial-incidencias__lista">
+    @for (incidencia of incidenciasFiltradas(); track incidencia.id) {
+      <article class="incidencia-item">
+        <div class="incidencia-item__contenido">
+          <div class="incidencia-item__titulo">
+            <h3>{{ incidencia.titulo }}</h3>
+
+            <span
+              class="incidencia-item__estado"
+              [attr.data-estado]="incidencia.estado"
+            >
+              {{ obtenerEstado(incidencia.estado) }}
+            </span>
+          </div>
+
+          <p class="incidencia-item__descripcion">
+            {{ incidencia.descripcion }}
+          </p>
+
+          <div class="incidencia-item__metadatos">
+            <span>📁 {{ incidencia.categoria }}</span>
+            <span>📍 {{ incidencia.ubicacion }}</span>
+            <span>📅 {{ incidencia.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+            <span>Prioridad: {{ incidencia.prioridad }}</span>
+
+            @if (mostrarReportante()) {
+              <span>Reportado por: {{ incidencia.usuarioNombre }}</span>
+            }
+          </div>
+
+          <div class="incidencia-item__acciones">
+            <button
+              type="button"
+              class="incidencia-item__chat"
+              (click)="solicitarConversacion(incidencia)"
+            >
+              Ver conversación
+            </button>
+          </div>
+        </div>
+      </article>
+    } @empty {
+      <div class="historial-incidencias__vacio">
+        <span class="historial-incidencias__vacio-icon">📋</span>
+        <h3>No encontramos incidencias</h3>
+        <p>
+          No hay reportes que coincidan con tu búsqueda o los filtros
+          seleccionados.
+        </p>
+      </div>
+    }
+  </div>
+</section>

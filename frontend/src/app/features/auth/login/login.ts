@@ -1,85 +1,72 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthLayout } from '../auth-layout/auth-layout';
-import { AuthService } from '../../../core/services/auth.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
+
+import { AuthService } from '../../../core/services/auth';
+import { getDashboardUrl } from '../../../core/guards/auth.guard';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, AuthLayout, FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   email = '';
   password = '';
-  isLoading = false;
 
-  errorMessage = signal('');
-  showSuccessToast = signal(false);
-  showErrorToast = signal(false);
-
-  showPassword = signal(false);
-
-  toggleShowPassword(): void {
-    this.showPassword.update((prev) => !prev);
-  }
+  readonly loading = signal(false);
+  readonly errorMessage = signal('');
 
   onSubmit(): void {
-    if (!this.email || !this.password) {
-      this.errorMessage.set('Por favor, completá todos los campos.');
-      this.triggerErrorToast();
+    if (this.loading()) return;
+
+    this.errorMessage.set('');
+
+    if (!this.email.trim() || !this.password) {
+      this.errorMessage.set('Ingresá tu correo y contraseña.');
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage.set('');
+    this.loading.set(true);
 
-    this.authService.login(this.email, this.password).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.showSuccessToast.set(true);
+    this.authService
+      .login({
+        email: this.email.trim(),
+        password: this.password,
+      })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: () => {
+          const requestedUrl =
+            this.route.snapshot.queryParamMap.get('returnUrl');
 
-        setTimeout(() => {
-          this.showSuccessToast.set(false);
+          const dashboard = getDashboardUrl(this.authService);
 
-          const rol = this.authService.getRole()?.toLowerCase();
+          const returnUrl =
+            requestedUrl?.startsWith('/') &&
+            !requestedUrl.startsWith('//')
+              ? requestedUrl
+              : dashboard;
 
-          if (rol?.includes('inquilino')) {
-            this.router.navigate(['/inquilino/incidencias']);
-          } else if (rol?.includes('administrador')) {
-            this.router.navigate(['/administrador/incidencias']);
-          } else {
-            this.authService.logout();
-            this.errorMessage.set('El usuario no tiene un rol válido para ingresar.');
-            this.triggerErrorToast();
-          }
-        }, 1500);
-      },
-      error: (err) => {
-        this.isLoading = false;
+          void this.router.navigateByUrl(returnUrl);
+        },
 
-        if (err.status === 0) {
-          this.errorMessage.set('No se pudo conectar con el servicio. Intentá de nuevo en unos momentos.');
-        } else {
-          this.errorMessage.set(err.error?.message || 'Email o contraseña incorrectos.');
-        }
+        error: (error) => {
+          const message = error?.error?.message;
 
-        this.triggerErrorToast();
-      }
-    });
-  }
-   
- 
-
-  private triggerErrorToast(): void {
-    this.showErrorToast.set(true);
-    setTimeout(() => {
-      this.showErrorToast.set(false);
-    }, 3500);
+          this.errorMessage.set(
+            typeof message === 'string'
+              ? message
+              : 'No se pudo iniciar sesión. Revisá tus credenciales e intentá nuevamente.',
+          );
+        },
+      });
   }
 }

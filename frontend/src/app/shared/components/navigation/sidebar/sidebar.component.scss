@@ -2,55 +2,158 @@
 
 :host {
   display: block;
-}
-
-.mobile-toggle-btn {
-  @include mobile-toggle-button;
-  display: none;
-
-  @include tablet { display: flex; }
-}
-
-.sidebar-backdrop {
-  @include sidebar-backdrop;
+  position: relative;
+  z-index: 50;
+  width: $sidebar-width;
+  min-width: $sidebar-width;
+  flex: 0 0 $sidebar-width;
 }
 
 .app-sidebar {
-  @include sidebar-container(260px);
+  @include sidebar-container($sidebar-width);
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  height: 100vh;
+  height: 100dvh;
+  padding: $space-6 $space-4;
+  color: $text-main;
+  overflow: hidden;
 
-  .sidebar-header {
-    @include flex-row($space-3);
-    padding: $space-2;
-    margin-bottom: $space-6;
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: 0 $space-2;
+    color: inherit;
+    text-decoration: none;
 
-    .brand-logo  { width: 2rem; height: 2rem; }
-    .brand-title {
-      @include text-heading;
-      color: $text-main;
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 2.625rem;
+      height: 2.625rem;
+      flex: 0 0 2.625rem;
+      border-radius: $radius-control;
+      background: $avatar-gradient;
+      color: $bg-dark;
+      font-size: $text-heading;
+      font-weight: $font-bold;
     }
+
+    .brand-name {
+      font-size: $text-dashboard-brand;
+      font-weight: $font-bold;
+    }
+  }
+
+  .sidebar-close { display: none; }
+
+  .sidebar-user {
+    @include sidebar-user-profile;
+    min-width: 0;
+    margin-top: $space-3;
+
+    .user-avatar { display: grid; place-items: center; }
   }
 
   .sidebar-nav {
-    @include flex-col(0.35rem);
-    flex: 1;
+    @include flex-col($space-2);
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     @include custom-scrollbar(4px);
 
-    .nav-item { @include sidebar-nav-item; }
+    .nav-section-title {
+      padding: 0 $space-3;
+      color: $text-muted;
+      font-size: $text-tiny;
+      font-weight: $font-semibold;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-item {
+      @include sidebar-nav-item;
+      min-height: 2.875rem;
+    }
   }
 
   .sidebar-footer {
-    @include flex-col($space-3);
     padding-top: $space-4;
     border-top: 1px solid $glass-border;
 
-    .user-profile { @include sidebar-user-profile; }
-
-    .btn-logout {
+    .logout-button {
       @include button-base;
       @include button-ghost-danger;
-      width: 100%;
       justify-content: flex-start;
+      width: 100%;
+      min-height: 2.75rem;
+      padding: 0 $space-3;
+      font-size: $text-small;
+
+      .logout-icon { font-size: $text-heading; }
     }
   }
+}
+
+.mobile-toggle-btn,
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 500px) {
+  :host {
+    position: static;
+    z-index: auto;
+    width: 0;
+    min-width: 0;
+    flex: 0 0 0;
+  }
+
+  .mobile-toggle-btn {
+    @include mobile-toggle-button;
+    top: calc($space-4 + env(safe-area-inset-top, 0px));
+    left: calc($space-4 + env(safe-area-inset-left, 0px));
+    z-index: 121;
+  }
+
+  .sidebar-backdrop {
+    @include sidebar-backdrop;
+    z-index: 119;
+    display: block;
+    border: 0;
+    padding: 0;
+    cursor: default;
+  }
+
+  .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 120;
+    width: min($sidebar-width, calc(100vw - env(safe-area-inset-left, 0px) - $space-6));
+    height: 100vh;
+    height: 100dvh;
+    padding: calc($space-6 + env(safe-area-inset-top, 0px)) $space-4 calc($space-4 + env(safe-area-inset-bottom, 0px));
+    border-radius: 0 $radius-md $radius-md 0;
+    transform: translateX(-105%);
+    transition: transform $transition-normal $ease-out;
+
+    &.is-open { transform: translateX(env(safe-area-inset-left, 0px)); }
+
+    .sidebar-close {
+      @include button-icon-clear(2rem);
+      display: grid;
+      place-items: center;
+      position: absolute;
+      top: calc($space-6 + env(safe-area-inset-top, 0px));
+      right: $space-4;
+      font-size: $text-heading;
+    }
+
+    .sidebar-brand { padding-right: 2.5rem; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sidebar, .sidebar-backdrop { transition-duration: 0.01ms; animation-duration: 0.01ms; }
 }

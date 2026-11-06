@@ -1,0 +1,51 @@
+<section class="chat-paquete">
+  <header class="chat-paquete__header">
+    <div>
+      <h3>Conversación del paquete</h3>
+      <p>{{ paquete().descripcion }}</p>
+    </div>
+
+    <span
+      class="chat-paquete__status"
+      [class.chat-paquete__status--delivered]="paquete().estado === 'entregado'"
+    >
+      {{ paquete().estado === 'pendiente' ? 'Pendiente de retiro' : 'Entregado' }}
+    </span>
+  </header>
+
+  <div class="chat-paquete__details">
+    <span>{{ paquete().destinatarioNombre }}</span>
+    <span>Unidad {{ paquete().unidad }}</span>
+    <span>{{ paquete().edificioNombre }}</span>
+  </div>
+
+  <div class="chat-paquete__messages" aria-live="polite">
+    @if (mensajes().length === 0) {
+      <div class="chat-paquete__empty">
+        <p>Todavía no hay mensajes.</p>
+        <span>Podés iniciar la conversación desde acá.</span>
+      </div>
+    } @else {
+      @for (mensaje of mensajes(); track mensaje.id) {
+        <article
+          class="chat-paquete__message"
+          [class.chat-paquete__message--own]="esMensajePropio(mensaje)"
+        >
+          <div class="chat-paquete__meta">
+            <strong>{{ mensaje.emisorNombre }}</strong>
+            <time>{{ mensaje.fechaEnvio | date: 'dd/MM/yyyy HH:mm' }}</time>
+          </div>
+
+          <p>{{ mensaje.contenido }}</p>
+        </article>
+      }
+    }
+  </div>
+
+  <footer class="chat-paquete__composer">
+    <app-message-input
+      placeholder="Escribí un mensaje..."
+      (send)="enviarMensaje($event)"
+    />
+  </footer>
+</section>
