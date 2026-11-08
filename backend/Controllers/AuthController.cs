@@ -66,9 +66,16 @@ public class AuthController : ControllerBase
 
         var rolNombre = invitacion.Rol?.Nombre;
 
-        if (rolNombre != "Inquilino" &&
-    rolNombre != "Propietario" &&
-    rolNombre != "Administrador")
+        var rolesPermitidos = new[]
+        {
+            "Administrador",
+            "Encargado",
+            "Propietario",
+            "Inquilino"
+        };
+
+        if (rolNombre == null ||
+            !rolesPermitidos.Contains(rolNombre, StringComparer.OrdinalIgnoreCase))
         {
             return BadRequest(new { message = "El código no permite registrar este tipo de usuario." });
         }

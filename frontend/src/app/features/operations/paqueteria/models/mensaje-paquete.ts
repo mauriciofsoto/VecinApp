@@ -1,6 +1,6 @@
 export type RolEmisorPaquete =
   | 'administracion'
-  | 'porteria'
+  | 'encargado'
   | 'residente';
 
 export interface MensajePaquete {

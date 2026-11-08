@@ -172,6 +172,128 @@ public class CodigosInvitacionController : ControllerBase
         });
     }
 
+    // POST /api/codigos-invitacion
+    // Genera una invitación para el rol indicado. El SuperAdministrador puede
+    // invitar cualquier rol; el Administrador solo roles de su propio edificio.
+    [HttpPost]
+    public async Task<IActionResult> CrearCodigo(
+        [FromBody] CrearCodigoRequest request)
+    {
+        var usuarioId = User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(usuarioId))
+            return Unauthorized(new { message = "No se pudo identificar al usuario." });
+
+        var usuario = await _userManager.FindByIdAsync(usuarioId);
+
+        if (usuario == null || !usuario.IdRol.HasValue)
+            return Unauthorized(new { message = "Usuario o rol inválido." });
+
+        var rolActual = await _context.RolesAplicacion
+            .Where(r => r.IdRol == usuario.IdRol.Value)
+            .Select(r => r.Nombre)
+            .FirstOrDefaultAsync();
+
+        var esSuperAdmin = rolActual == "SuperAdministrador";
+        var esAdministrador = rolActual == "Administrador";
+
+        if (!esSuperAdmin && !esAdministrador)
+            return Forbid();
+
+        var rolSolicitado = request.Rol?.Trim();
+
+        var rolesSuperAdmin = new[]
+        {
+            "Administrador", "Encargado", "Propietario", "Inquilino"
+        };
+        var rolesAdministrador = new[]
+        {
+            "Encargado", "Propietario", "Inquilino"
+        };
+
+        var rolesPermitidos = esSuperAdmin
+            ? rolesSuperAdmin
+            : rolesAdministrador;
+
+        var rolNormalizado = rolesPermitidos
+            .FirstOrDefault(r => string.Equals(
+                r,
+                rolSolicitado,
+                StringComparison.OrdinalIgnoreCase));
+
+        if (rolNormalizado == null)
+            return BadRequest(new { message = "El rol indicado no es válido para tu usuario." });
+
+        if (request.DiasValidez <= 0 || request.DiasValidez > 30)
+            return BadRequest(new { message = "La validez debe ser de 1 a 30 días." });
+
+        int idEdificio;
+
+        if (esSuperAdmin)
+        {
+            if (!request.IdEdificio.HasValue || request.IdEdificio.Value <= 0)
+                return BadRequest(new { message = "El edificio es obligatorio." });
+
+            idEdificio = request.IdEdificio.Value;
+        }
+        else
+        {
+            if (!usuario.IdEdificio.HasValue)
+                return BadRequest(new { message = "El administrador no tiene un edificio asignado." });
+
+            idEdificio = usuario.IdEdificio.Value;
+        }
+
+        var edificioExiste = await _context.Edificios
+            .AnyAsync(e => e.IdEdificio == idEdificio);
+
+        if (!edificioExiste)
+            return BadRequest(new { message = "El edificio indicado no existe." });
+
+        var idRol = await _context.RolesAplicacion
+            .Where(r => r.Nombre == rolNormalizado)
+            .Select(r => (int?)r.IdRol)
+            .FirstOrDefaultAsync();
+
+        if (!idRol.HasValue)
+            return BadRequest(new { message = $"No existe el rol {rolNormalizado} en la base de datos." });
+
+        string codigo;
+
+        do
+        {
+            codigo = Convert.ToHexString(
+                RandomNumberGenerator.GetBytes(8));
+        }
+        while (await _context.CodigosInvitacion
+            .AnyAsync(c => c.Codigo == codigo));
+
+        var invitacion = new CodigoInvitacion
+        {
+            Codigo = codigo,
+            IdEdificio = idEdificio,
+            IdRol = idRol.Value,
+            FechaExpiracion = DateTime.UtcNow.AddDays(request.DiasValidez),
+            UsosMaximos = 1,
+            UsosRealizados = 0,
+            Activo = true
+        };
+
+        _context.CodigosInvitacion.Add(invitacion);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = $"Código de invitación para {rolNormalizado} creado correctamente.",
+            codigo = invitacion.Codigo,
+            rol = rolNormalizado,
+            idEdificio = invitacion.IdEdificio,
+            fechaExpiracion = invitacion.FechaExpiracion,
+            usosMaximos = invitacion.UsosMaximos
+        });
+    }
+
 }
 
 public class CrearCodigoInvitacionRequest
@@ -181,5 +303,12 @@ public class CrearCodigoInvitacionRequest
 }
 public class CrearCodigoInquilinoRequest
 {
+    public int DiasValidez { get; set; } = 7;
+}
+
+public class CrearCodigoRequest
+{
+    public int? IdEdificio { get; set; }
+    public string? Rol { get; set; }
     public int DiasValidez { get; set; } = 7;
 }

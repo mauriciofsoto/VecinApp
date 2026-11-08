@@ -9,7 +9,7 @@ import { MessageInput } from '../../../../../shared/components/molecules/message
 
 export type RolVistaPaquete =
   | 'administracion'
-  | 'porteria'
+  | 'encargado'
   | 'residente';
 
 @Component({
@@ -23,7 +23,7 @@ export class ChatPaquete {
   private readonly paqueteria = inject(Paqueteria);
 
   readonly paquete = input.required<Paquete>();
-  readonly rolVista = input<RolVistaPaquete>('porteria');
+  readonly rolVista = input<RolVistaPaquete>('encargado');
 
   readonly mensajes = computed(() =>
     this.paqueteria.mensajesDe(this.paquete().id),
@@ -35,8 +35,8 @@ export class ChatPaquete {
         return this.paquete().destinatarioNombre;
       case 'administracion':
         return 'Administración';
-      case 'porteria':
-        return 'Portería';
+      case 'encargado':
+        return 'Encargado';
     }
   });
 
