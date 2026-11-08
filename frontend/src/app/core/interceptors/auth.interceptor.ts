@@ -1,23 +1,81 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpInterceptorFn,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  catchError,
+  finalize,
+  Observable,
+  shareReplay,
+  switchMap,
+  throwError,
+} from 'rxjs';
 
+import { AuthResponse } from '../models/auth';
 import { AuthService } from '../services/auth';
+
+// Evita que varias peticiones que reciben 401 disparen refreshes en paralelo.
+let refreshInFlight$: Observable<AuthResponse> | null = null;
+
+function refrescarSesion(authService: AuthService): Observable<AuthResponse> {
+  if (!refreshInFlight$) {
+    refreshInFlight$ = authService.refresh().pipe(
+      finalize(() => {
+        refreshInFlight$ = null;
+      }),
+      shareReplay(1),
+    );
+  }
+
+  return refreshInFlight$;
+}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
   const token = authService.getAccessToken();
 
-  // No modifica peticiones si no hay una sesión iniciada.
-  if (!token) {
-    return next(req);
-  }
+  const authenticatedRequest = token
+    ? req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    : req;
 
-  // Envía el JWT únicamente a nuestra API.
-  const authenticatedRequest = req.clone({
-    setHeaders: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return next(authenticatedRequest).pipe(
+    catchError((error: HttpErrorResponse) => {
+      const esPeticionDeAutenticacion = req.url.includes('/auth/');
 
-  return next(authenticatedRequest);
+      if (
+        error.status !== 401 ||
+        esPeticionDeAutenticacion ||
+        !authService.getAccessToken()
+      ) {
+        return throwError(() => error);
+      }
+
+      return refrescarSesion(authService).pipe(
+        catchError((refreshError) => {
+          authService.clearSession();
+          void router.navigate(['/login'], {
+            queryParams: { returnUrl: router.url },
+          });
+
+          return throwError(() => refreshError);
+        }),
+        switchMap((response) => {
+          const retriedRequest = req.clone({
+            setHeaders: {
+              Authorization: `Bearer ${response.accessToken}`,
+            },
+          });
+
+          return next(retriedRequest);
+        }),
+      );
+    }),
+  );
 };
