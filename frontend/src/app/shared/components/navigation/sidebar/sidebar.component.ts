@@ -6,7 +6,7 @@ import { AuthService } from '../../../../core/services/auth';
 type UserRole =
   | 'Administrador'
   | 'SuperAdministrador'
-  | 'Porteria'
+  | 'Encargado'
   | 'Inquilino'
   | 'Propietario';
 
@@ -59,8 +59,8 @@ export class SidebarComponent {
       case 'SuperAdministrador':
         return '/admin/dashboard';
 
-      case 'Porteria':
-        return '/porteria-dashboard';
+      case 'Encargado':
+        return '/encargado-dashboard';
 
       case 'Inquilino':
       case 'Propietario':
@@ -85,9 +85,9 @@ export class SidebarComponent {
         {
           label: 'Dashboard',
           icon: '▦',
-          route: '/porteria-dashboard',
+          route: '/encargado-dashboard',
           exact: true,
-          roles: ['Porteria'],
+          roles: ['Encargado'],
         },
         {
           label: 'Mi inicio',
@@ -153,7 +153,7 @@ export class SidebarComponent {
           roles: [
             'Administrador',
             'SuperAdministrador',
-            'Porteria',
+            'Encargado',
           ],
         },
         {
