@@ -17,17 +17,23 @@ public class AuthController : ControllerBase
     private readonly SignInManager<Usuario> _signInManager;
     private readonly AppDbContext _context;
     private readonly TokenService _tokenService;
+    private readonly EmailService _emailService;
+    private readonly IWebHostEnvironment _environment;
 
     public AuthController(
         UserManager<Usuario> userManager,
         SignInManager<Usuario> signInManager,
         AppDbContext context,
-        TokenService tokenService)
+        TokenService tokenService,
+        EmailService emailService,
+        IWebHostEnvironment environment)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
         _tokenService = tokenService;
+        _emailService = emailService;
+        _environment = environment;
     }
 
     // POST /auth/registro
@@ -293,20 +299,33 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "El email es requerido." });
         }
 
+        const string mensajeGenerico =
+            "Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.";
+
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            
-            return Ok(new { message = "Si el correo está registrado, recibirás las instrucciones para reestablecer tu contraseña." });
+            return Ok(new { message = mensajeGenerico });
         }
 
         // Genera el código numérico de 6 dígitos asociado al email
         var codigoEmail = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
 
+        var cuerpo = $@"
+            <p>Hola {user.Nombre},</p>
+            <p>Tu código de verificación para restablecer la contraseña es:</p>
+            <p style='font-size:24px;font-weight:bold;letter-spacing:4px'>{codigoEmail}</p>
+            <p>Si no solicitaste este cambio, podés ignorar este mensaje.</p>";
+
+        await _emailService.EnviarAsync(
+            user.Email!,
+            "Recuperación de contraseña - VecinApp",
+            cuerpo);
+
         return Ok(new
         {
-            message = "Si el correo está registrado, recibirás las instrucciones para reestablecer tu contraseña.",
-            devToken = codigoEmail
+            message = mensajeGenerico,
+            devToken = _environment.IsDevelopment() ? codigoEmail : null
         });
     }
     // POST /auth/reset-password

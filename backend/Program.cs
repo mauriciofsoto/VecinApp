@@ -93,7 +93,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<NotificacionesService>();
+builder.Services.AddScoped<UsuarioActualService>();
+builder.Services.AddScoped<EmailService>();
 
 
 builder.Services.AddSwaggerGen(options =>
