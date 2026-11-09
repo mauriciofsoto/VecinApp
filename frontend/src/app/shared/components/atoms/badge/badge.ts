@@ -7,7 +7,7 @@ export type BadgeVariant =
   | 'success'  // Al día, Resuelto, Entregado
   | 'warning'  // En proceso, Por vencer, Pendiente
   | 'danger'   // Impaga, Urgente, Reclamo
-  | 'info'     // En portería, Comunicados, Novedades
+  | 'info'     // En encargaduría, Comunicados, Novedades
   | 'accent'   // Roles de usuario, Destacados (Cyan/Primary)
   | 'purple'   // Mantenimiento, Espacios Comunes, Reservas
   | 'neutral'; // Archivado, Leído, Secundario

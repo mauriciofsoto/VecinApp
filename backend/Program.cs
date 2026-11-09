@@ -93,7 +93,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<NotificacionesService>();
+builder.Services.AddScoped<UsuarioActualService>();
+builder.Services.AddScoped<EmailService>();
 
 
 builder.Services.AddSwaggerGen(options =>
@@ -175,6 +178,12 @@ using (var scope = app.Services.CreateScope())
     var rolSuperAdministrador = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "SuperAdministrador");
 
+    var rolPropietario = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "Propietario");
+
+    var rolEncargado = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "Encargado");
+
     if (rolAdministrador == null)
     {
         rolAdministrador = new Rol
@@ -203,6 +212,26 @@ using (var scope = app.Services.CreateScope())
         };
 
         context.RolesAplicacion.Add(rolSuperAdministrador);
+    }
+
+    if (rolPropietario == null)
+    {
+        rolPropietario = new Rol
+        {
+            Nombre = "Propietario"
+        };
+
+        context.RolesAplicacion.Add(rolPropietario);
+    }
+
+    if (rolEncargado == null)
+    {
+        rolEncargado = new Rol
+        {
+            Nombre = "Encargado"
+        };
+
+        context.RolesAplicacion.Add(rolEncargado);
     }
 
     await context.SaveChangesAsync();

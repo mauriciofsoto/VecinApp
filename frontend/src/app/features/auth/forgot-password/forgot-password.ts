@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthLayout } from '../auth-layout/auth-layout';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-forgot-password',

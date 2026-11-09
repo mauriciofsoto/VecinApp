@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthLayout } from '../auth-layout/auth-layout';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-reset-password',

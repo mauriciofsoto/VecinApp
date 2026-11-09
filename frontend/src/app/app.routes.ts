@@ -54,12 +54,12 @@ export const routes: Routes = [
             .then(m => m.AdminDashboardComponent),
       },
       {
-        path: 'porteria-dashboard',
+        path: 'encargado-dashboard',
         canActivate: [roleGuard],
-        data: { roles: ['Porteria'] },
+        data: { roles: ['Encargado'] },
         loadComponent: () =>
-          import('./features/dashboard/porteria-dashboard/porteria-dashboard.component')
-            .then(m => m.PorteriaDashboardComponent),
+          import('./features/dashboard/encargado-dashboard/encargado-dashboard.component')
+            .then(m => m.EncargadoDashboardComponent),
       },
       {
         path: 'user-dashboard',
@@ -204,7 +204,7 @@ export const routes: Routes = [
       {
         path: 'recepcion-paquetes',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, 'Porteria'] },
+        data: { roles: [...ADMIN_ROLES, 'Encargado'] },
         loadComponent: () =>
           import('./features/operations/paqueteria/pages/recepcion-paquetes/recepcion-paquetes')
             .then(m => m.RecepcionPaquetes),
