@@ -1,0 +1,61 @@
+:host { display: block; min-height: 100vh; color: var(--color-text-primary); }
+.questionnaire-page { min-height: 100vh; padding: clamp(1.25rem, 4vw, 3.5rem) 1rem; background: var(--color-background-gradient); }
+.questionnaire-shell { width: min(100%, 780px); margin: 0 auto; }
+.brand-row { display: flex; align-items: center; gap: .65rem; font-size: 1.15rem; font-weight: 700; }
+.brand-mark, .info-mark { display: grid; place-items: center; border-radius: .8rem; color: var(--color-text-inverse); background: var(--color-primary); }
+.brand-mark { width: 2.2rem; height: 2.2rem; }
+.preview-tag { margin-left: auto; padding: .35rem .65rem; border: 1px solid var(--color-primary-subtle-border); border-radius: 99px; color: var(--color-primary-text); background: var(--color-primary-subtle); font-size: .75rem; font-weight: 600; }
+.progress-area { margin: 2rem 0 1rem; }
+.progress-copy { display: flex; justify-content: space-between; margin-bottom: .55rem; color: var(--color-text-muted); font-size: .82rem; }
+.progress-track { overflow: hidden; height: .4rem; border-radius: 99px; background: var(--color-surface-muted); }
+.progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--color-primary); transition: width .25s ease; }
+.form-panel { min-height: 450px; padding: clamp(1.25rem, 4vw, 2.5rem); border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface-elevated); box-shadow: var(--shadow-lg); }
+.step-heading { max-width: 620px; margin-bottom: 1.8rem; }
+.eyebrow { display: block; margin-bottom: .55rem; color: var(--color-primary-text); font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.2rem); line-height: 1.15; }
+.step-heading p { margin: .7rem 0 0; color: var(--color-text-muted); line-height: 1.6; }
+.field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+label { display: grid; align-content: start; gap: .45rem; color: var(--color-text-secondary); font-size: .88rem; font-weight: 600; }
+.span-two { grid-column: 1 / -1; }
+.field-hint, .optional { color: var(--color-text-muted); font-size: .78rem; font-weight: 400; }
+.field-error { display: block; margin: .2rem 0 0; color: var(--color-danger); font-size: .82rem; }
+.actions { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 2rem; }
+.actions-end { justify-content: flex-end; }
+.choice-grid { display: grid; gap: .85rem; }
+.role-grid, .function-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.binary-grid, .unit-choice-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.choice-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; min-height: 150px; padding: 1.1rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); color: var(--color-text-primary); background: var(--color-surface); text-align: left; cursor: pointer; transition: var(--effect-transition); }
+.choice-card:hover { border-color: var(--color-border-hover); background: var(--color-surface-hover); transform: translateY(-2px); }
+.choice-card:focus-visible, .remove-button:focus-visible, .text-action:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.choice-card.selected { border-color: var(--color-primary); background: var(--color-primary-soft); box-shadow: 0 0 0 2px var(--color-primary-ring); }
+.choice-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; margin-bottom: .9rem; border-radius: .8rem; color: var(--color-primary-text); background: var(--color-primary-subtle); font-size: 1.25rem; }
+.choice-title { font-weight: 700; }
+.choice-description { margin-top: .35rem; color: var(--color-text-muted); font-size: .8rem; line-height: 1.4; }
+.choice-check { position: absolute; top: .75rem; right: .8rem; display: grid; place-items: center; width: 1.25rem; height: 1.25rem; border: 1px solid var(--color-border-strong); border-radius: 50%; color: var(--color-text-inverse); font-size: .75rem; }
+.choice-card.selected .choice-check { border-color: var(--color-primary); background: var(--color-primary); }
+.choice-card.compact { min-height: 3.4rem; align-items: center; justify-content: center; padding: .85rem 1rem; text-align: center; font-weight: 600; }
+.question-label { margin: 1.4rem 0 .7rem; font-size: 1rem; }
+.info-mark { width: 3.3rem; height: 3.3rem; margin-bottom: 1rem; color: var(--color-primary-text); background: var(--color-primary-subtle); font-size: 1.6rem; }
+.unit-list { margin-top: 1rem; padding: 1rem; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-card); background: var(--color-surface-muted); }
+.unit-list .question-label { margin-top: 0; }
+.unit-row { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: .75rem; margin-top: .75rem; }
+.remove-button { width: 2.5rem; height: 2.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); color: var(--color-danger); background: var(--color-surface); font-size: 1.3rem; cursor: pointer; }
+.text-action { margin-top: .85rem; padding: .2rem 0; border: 0; color: var(--color-primary-text); background: none; font: inherit; font-weight: 700; cursor: pointer; }
+.single-field { margin-top: 1.25rem; }
+.summary-card { display: block; }
+.summary-card h2 { margin: 1.1rem 0 .35rem; font-size: .9rem; }
+.summary-card h2:first-child { margin-top: 0; }
+.summary-card p { margin: .25rem 0; color: var(--color-text-secondary); font-size: .9rem; }
+.preview-note { display: flex; gap: .55rem; margin-top: 1rem; color: var(--color-text-muted); font-size: .82rem; }
+footer { margin-top: 1rem; color: var(--color-text-muted); font-size: .78rem; text-align: center; }
+@media (max-width: 640px) {
+  .questionnaire-page { padding: 1rem .75rem; }
+  .progress-area { margin-top: 1.4rem; }
+  .form-panel { min-height: 0; padding: 1.25rem; }
+  .role-grid, .function-grid, .field-grid { grid-template-columns: 1fr; }
+  .role-grid .choice-card { min-height: 112px; padding-left: 4.2rem; }
+  .role-grid .choice-icon { position: absolute; top: 1rem; left: 1rem; }
+  .span-two { grid-column: auto; }
+  .actions { margin-top: 1.5rem; }
+  .unit-row { gap: .5rem; }
+}

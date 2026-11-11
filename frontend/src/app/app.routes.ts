@@ -22,6 +22,10 @@ export const routes: Routes = [
     loadComponent: () => import('../app/features/auth/registro/registro').then(m => m.Registro),
   },
   {
+    path: 'cuestionario-cuenta',
+    loadComponent: () => import('./features/account-questionnaire/account-questionnaire').then(m => m.AccountQuestionnaire),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login')

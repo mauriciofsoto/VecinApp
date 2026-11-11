@@ -1,0 +1,101 @@
+<main class="questionnaire-page">
+  <section class="questionnaire-shell" aria-labelledby="questionnaire-title">
+    <header class="brand-row"><span class="brand-mark">V</span><span>VecinApp</span><span class="preview-tag">Vista previa</span></header>
+    <div class="progress-area" aria-label="Progreso del cuestionario">
+      <div class="progress-copy"><span>Paso {{ stepNumber }} de {{ currentSteps.length }}</span><span>{{ progress | number:'1.0-0' }}%</span></div>
+      <div class="progress-track"><span [style.width.%]="progress"></span></div>
+    </div>
+
+    <div class="form-panel">
+      @switch (current) {
+        @case ('account') {
+          <div class="step-heading"><span class="eyebrow">Empecemos</span><h1 id="questionnaire-title">Creá tu cuenta</h1><p>Completá tus datos para continuar con el registro del edificio.</p></div>
+          <div class="field-grid">
+            <label>Nombre <app-input id="first-name" name="name" autocomplete="given-name" placeholder="Tu nombre" [required]="true" [(ngModel)]="name" /></label>
+            <label>Apellido <app-input id="last-name" name="surname" autocomplete="family-name" placeholder="Tu apellido" [required]="true" [(ngModel)]="surname" /></label>
+            <label class="span-two">Correo electrónico <app-input id="email" name="email" type="email" autocomplete="email" placeholder="nombre@correo.com" [required]="true" [(ngModel)]="email" /></label>
+            @if (submitted && email && !emailValid) { <small class="field-error span-two">Ingresá un correo electrónico válido.</small> }
+            <label>Contraseña <app-input id="password" name="password" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres" [required]="true" [(ngModel)]="password" /></label>
+            <label>Confirmar contraseña <app-input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Repetí tu contraseña" [required]="true" [(ngModel)]="confirmPassword" /></label>
+            <small class="field-hint span-two">Usá al menos 8 caracteres, con una letra y un número.</small>
+            @if (submitted && password && !passwordPattern.test(password)) { <small class="field-error span-two">La contraseña debe tener al menos 8 caracteres, una letra y un número.</small> }
+            @if (submitted && confirmPassword && confirmPassword !== password) { <small class="field-error span-two">Las contraseñas no coinciden.</small> }
+            @if (submitted && (!name.trim() || !surname.trim() || !email || !password || !confirmPassword)) { <small class="field-error span-two">Completá todos los campos obligatorios.</small> }
+          </div>
+          <div class="actions actions-end"><app-button (buttonClick)="next()">Siguiente <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('role') {
+          <div class="step-heading"><span class="eyebrow">Tu vínculo con el edificio</span><h1 id="questionnaire-title">¿Cómo participás?</h1><p>Elegí una opción para mostrarte las preguntas correspondientes.</p></div>
+          <div class="choice-grid role-grid">
+            @for (option of roleOptions; track option.id) {
+              <button class="choice-card" type="button" [class.selected]="role === option.id" [attr.aria-pressed]="role === option.id" (click)="chooseRole(option.id)">
+                <span class="choice-icon" aria-hidden="true">{{ option.icon }}</span><span class="choice-title">{{ option.title }}</span><span class="choice-description">{{ option.description }}</span><span class="choice-check" aria-hidden="true">{{ role === option.id ? '✓' : '' }}</span>
+              </button>
+            }
+          </div>
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Siguiente <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('owner-info') {
+          <div class="info-mark" aria-hidden="true">⌂</div><div class="step-heading"><span class="eyebrow">Información para propietarios</span><h1 id="questionnaire-title">Una mejor comunicación para tus unidades</h1><p>Queremos permitir vincular al propietario con sus inquilinos para que pueda recibir información sobre incidencias relacionadas con esas propiedades y mantenerse al tanto de lo que sucede en sus unidades.</p></div>
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Continuar <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('owner-home') {
+          <div class="step-heading"><span class="eyebrow">Tu unidad principal</span><h1 id="questionnaire-title">¿Cuál es tu unidad?</h1><p>Indicá dónde está ubicada y si vivís actualmente en el edificio.</p></div>
+          <div class="field-grid"><label>Piso <app-input id="owner-floor" name="floor" placeholder="Ej. 4" [required]="true" [(ngModel)]="floor" /></label><label>Unidad <app-input id="owner-unit" name="unit" placeholder="Ej. B" [required]="true" [(ngModel)]="unitNumber" /></label></div>
+          <h2 class="question-label">¿Vivís actualmente en el edificio?</h2><div class="choice-grid binary-grid"><button class="choice-card compact" [class.selected]="livesHere === true" [attr.aria-pressed]="livesHere === true" (click)="livesHere = true">Sí, vivo aquí</button><button class="choice-card compact" [class.selected]="livesHere === false" [attr.aria-pressed]="livesHere === false" (click)="livesHere = false">No, no vivo aquí</button></div>
+          @if (submitted && !unitValid) { <p class="field-error">Completá el piso, la unidad y si vivís en el edificio.</p> }
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Siguiente <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('owner-units') {
+          <div class="step-heading"><span class="eyebrow">Otras propiedades</span><h1 id="questionnaire-title">¿Tenés otras unidades?</h1><p>Podés agregar todas las unidades que tengas en este edificio.</p></div>
+          <div class="choice-grid binary-grid"><button class="choice-card compact" [class.selected]="hasOtherUnits === true" [attr.aria-pressed]="hasOtherUnits === true" (click)="chooseHasOtherUnits(true)">Sí, tengo otras</button><button class="choice-card compact" [class.selected]="hasOtherUnits === false" [attr.aria-pressed]="hasOtherUnits === false" (click)="chooseHasOtherUnits(false)">No, ninguna más</button></div>
+          @if (hasOtherUnits) {
+            <div class="unit-list"><h2 class="question-label">Otras unidades</h2>@for (unit of otherUnits; track $index; let i = $index) {<div class="unit-row"><label>Piso <app-input [id]="'other-floor-' + i" [name]="'other-floor-' + i" placeholder="Ej. 2" [required]="true" [(ngModel)]="unit.floor" /></label><label>Unidad <app-input [id]="'other-unit-' + i" [name]="'other-unit-' + i" placeholder="Ej. A" [required]="true" [(ngModel)]="unit.number" /></label>@if (otherUnits.length > 1) {<button type="button" class="remove-button" aria-label="Quitar unidad" (click)="removeUnit(otherUnits, i)">×</button>}</div>}<button class="text-action" type="button" (click)="addUnit(otherUnits)">＋ Agregar otra unidad</button></div>
+            <h2 class="question-label">¿Alguna de esas unidades está alquilada?</h2><div class="choice-grid binary-grid"><button class="choice-card compact" [class.selected]="hasRentedUnits === true" [attr.aria-pressed]="hasRentedUnits === true" (click)="chooseRented(true)">Sí</button><button class="choice-card compact" [class.selected]="hasRentedUnits === false" [attr.aria-pressed]="hasRentedUnits === false" (click)="chooseRented(false)">No</button></div>
+            @if (hasRentedUnits) { <div class="unit-list"><h2 class="question-label">¿Cuáles están alquiladas?</h2><div class="choice-grid unit-choice-grid">@for (unit of otherUnits; track unit.id) {<button class="choice-card compact" type="button" [class.selected]="isRented(unit)" [attr.aria-pressed]="isRented(unit)" (click)="toggleRentedUnit(unit)">Piso {{ unit.floor || '—' }}, unidad {{ unit.number || '—' }}</button>}</div></div> }
+          }
+          @if (submitted && duplicateUnits) { <p class="field-error">Cada piso y unidad debe ser único, incluida tu unidad principal.</p> }
+          @else if (submitted && !ownerUnitsValid) { <p class="field-error">Completá las unidades y respondé si alguna está alquilada.</p> }
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Ver resumen <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('tenant-info') {
+          <div class="info-mark" aria-hidden="true">▣</div><div class="step-heading"><span class="eyebrow">Información para inquilinos</span><h1 id="questionnaire-title">Mejor comunicación entre vecinos</h1><p>Queremos conocer esta información para facilitar la comunicación entre propietarios e inquilinos y permitir que el propietario esté al tanto de las incidencias relacionadas con su unidad.</p></div>
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Continuar <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('tenant-home') {
+          <div class="step-heading"><span class="eyebrow">Tu alquiler</span><h1 id="questionnaire-title">¿En qué unidad vivís?</h1><p>Contanos la ubicación y cómo alquilás.</p></div>
+          <div class="field-grid"><label>Piso <app-input id="tenant-floor" name="floor" placeholder="Ej. 4" [required]="true" [(ngModel)]="floor" /></label><label>Unidad <app-input id="tenant-unit" name="unit" placeholder="Ej. B" [required]="true" [(ngModel)]="unitNumber" /></label></div>
+          <h2 class="question-label">¿Alquilás directamente al propietario o mediante una inmobiliaria/empresa?</h2><div class="choice-grid binary-grid"><button class="choice-card compact" [class.selected]="rentalMethod === 'direct'" [attr.aria-pressed]="rentalMethod === 'direct'" (click)="changeRentalMethod('direct')">Dueño directo</button><button class="choice-card compact" [class.selected]="rentalMethod === 'agency'" [attr.aria-pressed]="rentalMethod === 'agency'" (click)="changeRentalMethod('agency')">Inmobiliaria/empresa</button></div>
+          @if (submitted && (!floor.trim() || !unitNumber.trim() || !rentalMethod)) { <p class="field-error">Completá los datos de tu unidad y elegí cómo alquilás.</p> }
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Siguiente <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('tenant-owner') {
+          <div class="step-heading"><span class="eyebrow">Contacto del propietario</span><h1 id="questionnaire-title">Un último dato</h1><p>Esta información ayuda a mantener una comunicación clara sobre tu unidad.</p></div>
+          <h2 class="question-label">¿El propietario vive en este edificio?</h2><div class="choice-grid binary-grid"><button class="choice-card compact" [class.selected]="ownerLivesHere === true" [attr.aria-pressed]="ownerLivesHere === true" (click)="ownerLivesHere = true">Sí</button><button class="choice-card compact" [class.selected]="ownerLivesHere === false" [attr.aria-pressed]="ownerLivesHere === false" (click)="ownerLivesHere = false">No</button></div>
+          <label class="single-field">Nombre y apellido del propietario <app-input id="owner-name" name="ownerName" autocomplete="name" placeholder="Nombre completo" [required]="true" [(ngModel)]="ownerName" /></label>
+          @if (submitted && (ownerLivesHere === null || !ownerName.trim())) { <p class="field-error">Respondé si vive en el edificio e indicá su nombre.</p> }
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Ver resumen <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('staff-details') {
+          <div class="step-heading"><span class="eyebrow">Tu trabajo en el edificio</span><h1 id="questionnaire-title">¿Qué función cumplís?</h1><p>Estos datos ayudan a los vecinos a saber con quién comunicarse.</p></div>
+          <div class="choice-grid function-grid">@for (item of staffFunctions; track item) {<button class="choice-card compact" [class.selected]="staffFunction === item" [attr.aria-pressed]="staffFunction === item" (click)="chooseStaffFunction(item)">{{ item }}</button>}</div>
+          @if (staffFunction === 'Otro') { <label class="single-field">¿Cuál es tu función? <app-input id="staff-other" name="staffOther" placeholder="Tu función" [required]="true" [(ngModel)]="staffFunctionOther" /></label> }
+          <label class="single-field">Horario habitual <span class="optional">Opcional</span><app-input id="staff-schedule" name="staffSchedule" placeholder="Ej. Lunes a viernes, de 9 a 17 h" [(ngModel)]="staffSchedule" /></label>
+          @if (submitted && (!staffFunction || (staffFunction === 'Otro' && !staffFunctionOther.trim()))) { <p class="field-error">Elegí una función para continuar.</p> }
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Ver resumen <span aria-hidden="true">→</span></app-button></div>
+        }
+        @case ('summary') {
+          <div class="step-heading"><span class="eyebrow">Todo listo</span><h1 id="questionnaire-title">Revisá tus respuestas</h1><p>Este resumen es una vista previa. Tus datos no se enviaron ni se guardaron.</p></div>
+          <app-card variant="glass" size="full" customClass="summary-card"><h2 card-title>Cuenta</h2><p>{{ name }} {{ surname }}</p><p>{{ email }}</p><h2>Perfil</h2><p>{{ role === 'owner' ? 'Propietario/a' : role === 'tenant' ? 'Inquilino/a' : 'Personal del edificio' }}</p>
+            @if (role === 'owner') {<h2>Unidades</h2><p>Unidad principal: piso {{ floor }}, unidad {{ unitNumber }} · {{ livesHere ? 'Vive en el edificio' : 'No vive en el edificio' }}</p><p>Otras unidades: {{ hasOtherUnits ? otherUnits.length : 'Ninguna' }}</p>@if (otherUnits.length) {<p>{{ otherUnitsText() }}</p>}<p>Unidades alquiladas: {{ hasRentedUnits ? rentedUnits.length : 'Ninguna' }}</p>@if (rentedUnits.length) {<p>{{ rentedUnitsText() }}</p>}
+            } @else if (role === 'tenant') {<h2>Alquiler</h2><p>Unidad: piso {{ floor }}, unidad {{ unitNumber }}</p><p>{{ rentalMethod === 'direct' ? 'Alquiler directo al propietario' : 'Inmobiliaria/empresa' }}</p>@if (rentalMethod === 'direct') {<p>Propietario/a: {{ ownerName }} · {{ ownerLivesHere ? 'Vive en el edificio' : 'No vive en el edificio' }}</p>}
+            } @else {<h2>Función</h2><p>{{ staffFunction === 'Otro' ? staffFunctionOther : staffFunction }}</p>@if (staffSchedule.trim()) {<p>Horario: {{ staffSchedule }}</p>}}
+          </app-card>
+          <div class="preview-note"><span aria-hidden="true">ⓘ</span> El cuestionario todavía no envía información a VecinApp.</div>
+          <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver a editar</app-button><app-button variant="secondary" (buttonClick)="restart()">Empezar de nuevo</app-button></div>
+        }
+      }
+    </div>
+    <footer>Un espacio más conectado para quienes viven y trabajan en el edificio.</footer>
+  </section>
+</main>
