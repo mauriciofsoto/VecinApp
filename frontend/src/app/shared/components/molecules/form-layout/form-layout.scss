@@ -19,16 +19,16 @@
 
 .form-layout__title {
   margin: 0;
-  color: $text-main;
-  font-family: $font-title;
-  font-size: $text-heading;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-title);
+  font-size: var(--font-size-heading);
   line-height: 1.3;
 }
 
 .form-layout__description {
   margin: 0;
-  color: $text-muted;
-  font-size: $text-small;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
   line-height: 1.5;
 }
 

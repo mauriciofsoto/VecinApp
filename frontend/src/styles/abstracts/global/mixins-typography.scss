@@ -2,19 +2,20 @@
 @use '../variables' as *;
 
 @mixin text-title {
-  font-family: $font-title;
-  font-size: $text-title;
-  line-height: $line-tight;
+  font-family: var(--font-family-title);
+  font-size: var(--font-size-title);
+  line-height: var(--line-height-tight);
 }
 
 @mixin text-heading {
-  font-family: $font-primary;
-  font-size: $text-heading;
-  font-weight: $font-semibold;
-  line-height: $line-tight;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
 }
 
 @mixin text-body {
-  font-size: $text-body;
-  line-height: $line-normal;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
 }

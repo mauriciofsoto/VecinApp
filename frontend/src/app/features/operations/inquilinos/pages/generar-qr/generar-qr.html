@@ -1,1 +1,46 @@
-<p>generar-qr works!</p>
+<main class="invite-page">
+  <header class="invite-page__header">
+    <p class="invite-page__eyebrow">COMUNIDAD VECINAPP</p>
+    <h1>Invitá a tu edificio</h1>
+    <p>Generá un código QR para que una persona pueda iniciar su incorporación.</p>
+  </header>
+
+  @if (!invitacion()) {
+    <section class="invite-panel">
+      <div class="invite-panel__icon" aria-hidden="true">⌁</div>
+      <h2>Una invitación simple</h2>
+      <p>El código se puede usar una vez y vence a los 7 días. Generá uno nuevo para cada persona.</p>
+      <button type="button" class="invite-button" (click)="generarInvitacion()" [disabled]="loading()">
+        {{ loading() ? 'Generando…' : 'Generar invitación' }}
+      </button>
+      @if (error()) { <p class="feedback feedback--error" role="alert">{{ error() }}</p> }
+    </section>
+  } @else {
+    <section class="invitation-card">
+      <div class="invitation-card__content">
+        <div class="invitation-card__print-heading">
+          <span class="brand-mark" aria-hidden="true">V</span><span>VecinApp</span>
+        </div>
+        <p class="invite-page__eyebrow screen-only">INVITACIÓN DE UN SOLO USO</p>
+        <h2 class="screen-only">Compartí este QR con un residente</h2>
+        <app-qr-code [value]="enlace()" />
+        <p class="print-message">Escaneá el código para unirte a tu comunidad</p>
+        <div class="invitation-meta screen-only">
+          <span class="status-pill">Generada · {{ invitacion()?.usosMaximos }} uso total</span>
+          @if (vencimiento) { <span>Vence el {{ vencimiento }}</span> }
+        </div>
+        @if (error()) { <p class="feedback feedback--error" role="alert">{{ error() }}</p> }
+        @if (mensaje()) { <p class="feedback" role="status">{{ mensaje() }}</p> }
+      </div>
+      <div class="invitation-actions screen-only">
+        <button type="button" class="invite-button" (click)="descargarQr()">Descargar PNG</button>
+        <button type="button" class="invite-button invite-button--secondary" (click)="copiarEnlace()">Copiar enlace</button>
+        <button type="button" class="invite-button invite-button--secondary" (click)="compartirEnlace()">Compartir</button>
+        <button type="button" class="invite-button invite-button--secondary" (click)="imprimir()">Imprimir sticker</button>
+        <button type="button" class="invite-link" (click)="generarInvitacion()" [disabled]="loading()">Generar otra invitación</button>
+        <label class="invite-url-label" for="invite-url">Enlace de invitación</label>
+        <input id="invite-url" class="invite-url" [value]="enlace()" readonly />
+      </div>
+    </section>
+  }
+</main>

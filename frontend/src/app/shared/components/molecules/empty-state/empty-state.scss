@@ -15,13 +15,13 @@
   padding: $space-6;
   box-sizing: border-box;
   text-align: center;
-  color: $text-muted;
+  color: var(--color-text-muted);
 
   h3 {
     @include text-heading;
 
     margin: 0;
-    color: $text-main;
+    color: var(--color-text-primary);
   }
 
   p {

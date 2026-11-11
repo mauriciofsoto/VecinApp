@@ -14,12 +14,12 @@
   width: 100%;
   padding: $padding;
   border-radius: $radius;
-  transition: $transition-base;
+  transition: var(--effect-transition);
 
   &:focus-within {
-    border-color: rgba($primary, 0.5);
-    box-shadow: 0 0 12px rgba($primary, 0.2);
-    background: $surface-2;
+    border-color: var(--color-primary-focus-border);
+    box-shadow: var(--shadow-focus);
+    background: var(--color-surface-muted);
   }
 }
 
@@ -36,12 +36,33 @@
   background: transparent;
   border: none;
   outline: none;
-  color: $text-main;
-  font-family: $font-primary;
-  font-size: $text-small;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
 
-  &::placeholder { color: $text-muted; opacity: 0.7; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &::placeholder { color: var(--color-text-muted); opacity: 0.7; }
+  &:disabled { opacity: var(--state-disabled-opacity); cursor: not-allowed; }
+}
+
+// Carcasa visual común para app-input y app-select. El padding queda a cargo
+// de cada control para preservar sus dimensiones actuales.
+@mixin semantic-form-control {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: var(--effect-transition);
+
+  &:focus-within,
+  &:focus-visible {
+    border-color: var(--color-primary-focus-border);
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:disabled {
+    opacity: var(--state-disabled-control-opacity);
+    cursor: not-allowed;
+  }
 }
 
 // 4. Textarea

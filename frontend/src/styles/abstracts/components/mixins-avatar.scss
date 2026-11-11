@@ -21,10 +21,10 @@
 // Fallback de iniciales (sin foto)
 @mixin avatar-fallback($size: 2.25rem) {
   @include avatar-base($size);
-  background: rgba($primary, 0.2);
-  color: $primary-light;
-  border: 1px solid rgba($primary, 0.35);
-  font-size: $text-caption;
-  font-weight: $font-semibold;
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--color-primary-emphasis);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
   user-select: none;
 }

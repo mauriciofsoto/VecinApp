@@ -10,20 +10,20 @@
   place-items: center;
   padding: 1.5rem;
   background:
-    radial-gradient(circle at 15% 15%, rgb(56 189 248 / 16%), transparent 35%),
-    radial-gradient(circle at 85% 85%, rgb(37 99 235 / 18%), transparent 35%),
-    #0f172a;
+    radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 35%),
+    radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 35%),
+    var(--color-background-gradient);
 }
 
 .login-card {
   width: min(100%, 420px);
   padding: 2.5rem;
-  color: #f8fafc;
-  background: rgb(30 41 59 / 85%);
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 1.25rem;
-  box-shadow: 0 24px 60px rgb(0 0 0 / 25%);
-  backdrop-filter: blur(16px);
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(var(--effect-glass-blur));
 }
 
 .login-header {
@@ -33,20 +33,20 @@
   h1 {
     margin: 1rem 0 0.5rem;
     font-size: clamp(1.6rem, 5vw, 2rem);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
   }
 
   p {
     margin: 0;
-    color: #cbd5e1;
+    color: var(--color-text-secondary);
     line-height: 1.5;
   }
 }
 
 .login-brand {
-  color: #38bdf8;
+  color: var(--color-primary-emphasis);
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
 }
 
@@ -57,22 +57,22 @@
   button {
     width: 100%;
     padding: 0.9rem 1rem;
-    color: #fff;
+    color: var(--color-text-inverse);
     font: inherit;
-    font-weight: 600;
-    background: #2563eb;
+    font-weight: var(--font-weight-semibold);
+    background: var(--color-primary);
     border: 0;
     border-radius: 0.75rem;
     cursor: pointer;
     transition: background-color 250ms ease, opacity 250ms ease;
 
     &:hover:not(:disabled) {
-      background: #1d4ed8;
+      background: var(--color-primary-hover);
     }
 
     &:disabled {
       cursor: wait;
-      opacity: 0.65;
+      opacity: var(--state-disabled-opacity);
     }
   }
 }
@@ -83,33 +83,33 @@
 
   label {
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
 
   input {
     width: 100%;
     min-width: 0;
     padding: 0.85rem 1rem;
-    color: #f8fafc;
+    color: var(--color-text-primary);
     font: inherit;
-    background: rgb(15 23 42 / 70%);
-    border: 1px solid rgb(148 163 184 / 30%);
+    background: var(--color-control-surface);
+    border: 1px solid var(--color-border-strong);
     border-radius: 0.75rem;
     outline: none;
     box-sizing: border-box;
     transition: border-color 200ms ease, box-shadow 200ms ease;
 
     &::placeholder {
-      color: #94a3b8;
+      color: var(--color-text-muted);
     }
 
     &:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgb(56 189 248 / 15%);
+      border-color: var(--color-primary-focus-border);
+      box-shadow: var(--shadow-focus);
     }
 
     &:disabled {
-      opacity: 0.65;
+      opacity: var(--state-disabled-opacity);
     }
   }
 }
@@ -117,11 +117,11 @@
 .login-error {
   margin: 0;
   padding: 0.75rem;
-  color: #fecaca;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  background: rgb(220 38 38 / 12%);
-  border: 1px solid rgb(248 113 113 / 30%);
+  color: var(--color-danger-text);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+  background: var(--color-danger-subtle);
+  border: 1px solid var(--color-danger-border);
   border-radius: 0.5rem;
 }
 

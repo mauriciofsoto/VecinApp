@@ -42,14 +42,14 @@
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: $space-2;
-  border: 1px solid $glass-border;
+  border: 1px solid var(--color-border);
   border-radius: $radius-control;
   cursor: pointer;
   font: inherit;
-  transition: $transition-base;
+  transition: var(--effect-transition);
 
   &:focus-visible {
-    outline: 2px solid $primary-light;
+    outline: 2px solid var(--color-primary-emphasis);
     outline-offset: 2px;
   }
 
@@ -58,18 +58,18 @@
 }
 
 .calendar-nav-button {
-  @include button-variant($surface-2, $glass-border, $text-main, $surface-3);
-  font-size: $text-heading;
+  @include button-variant(var(--color-surface-muted), var(--color-border), var(--color-text-primary), var(--color-surface-highlight));
+  font-size: var(--font-size-heading);
 }
 
 .calendar-today {
-  @include button-variant(transparent, $glass-border, $text-main, $surface-2);
+  @include button-variant(transparent, var(--color-border), var(--color-text-primary), var(--color-surface-muted));
 }
 
 .calendar-month {
-  color: $text-main;
-  font-size: $text-heading;
-  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
   text-transform: capitalize;
 }
 
@@ -81,9 +81,9 @@
 
 .calendar-weekday {
   padding: $space-2 0;
-  color: $text-muted;
-  font-size: $text-small;
-  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
   text-align: center;
 }
 
@@ -96,15 +96,15 @@
   padding: $space-2;
   border: 1px solid transparent;
   border-radius: $radius-control;
-  background: $surface-1;
-  color: $text-main;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition:
-    background $transition-fast,
-    border-color $transition-fast;
+    background var(--duration-fast),
+    border-color var(--duration-fast);
 
   &:focus-visible {
-    outline: 2px solid $primary-light;
+    outline: 2px solid var(--color-primary-emphasis);
     outline-offset: 2px;
   }
 
@@ -112,8 +112,8 @@
   &:disabled { cursor: not-allowed; opacity: 0.5; }
 
   &:hover {
-    background: $surface-2;
-    border-color: $glass-border;
+    background: var(--color-surface-muted);
+    border-color: var(--color-border);
   }
 }
 
@@ -122,26 +122,26 @@
 }
 
 .calendar-day--today {
-  border-color: $primary-light;
+  border-color: var(--color-primary-emphasis);
 }
 
 .calendar-day--selected {
-  background: rgba($primary, 0.2);
-  border-color: $primary;
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-color: var(--color-primary);
 
   &:hover {
-    background: rgba($primary, 0.28);
+    background: color-mix(in srgb, var(--color-primary) 28%, transparent);
   }
 }
 
 .calendar-day__number {
-  font-size: $text-small;
-  font-weight: 600;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
 }
 
 .calendar-day__count {
-  color: $text-muted;
-  font-size: $text-caption;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
 }
 
 .calendar-day__indicators {
@@ -158,35 +158,35 @@
   height: 7px;
   flex: 0 0 auto;
   border-radius: $radius-full;
-  background: $text-muted;
+  background: var(--color-text-muted);
 }
 
 .calendar-day__dot--pending,
 .legend-dot--pending {
-  background: $warning;
+  background: var(--color-warning);
 }
 
 .calendar-day__dot--confirmed,
 .legend-dot--confirmed {
-  background: $success;
+  background: var(--color-success);
 }
 
 .calendar-day__dot--rejected,
 .legend-dot--rejected {
-  background: $danger;
+  background: var(--color-danger);
 }
 
 .calendar-legend {
   @include flex-row($space-4);
   flex-wrap: wrap;
   padding-top: $space-3;
-  border-top: 1px solid $glass-border;
+  border-top: 1px solid var(--color-border);
 
   span {
     @include flex-row($space-2);
     align-items: center;
-    color: $text-muted;
-    font-size: $text-caption;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
   }
 }
 

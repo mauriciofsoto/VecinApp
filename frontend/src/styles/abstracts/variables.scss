@@ -21,7 +21,6 @@ $primary-glow: rgba(167, 139, 250, 0.24);
 $accent: #78B8A5;
 
 // Botones
-$surface-button-secondary: #454457;
 $button-padding-compact: 0.7rem 1rem;
 
 // Textos
@@ -79,21 +78,16 @@ $info: #91A9CE;
 // ========================================
 $font-primary: 'Poppins', sans-serif;
 $font-title: 'Playfair Display', serif;
-$font-dashboard: 'Segoe UI', system-ui, -apple-system, sans-serif;
 
 $text-title: clamp(2.25rem, 5vw, 3rem);     // 36px → 48px
 $text-heading: clamp(1.25rem, 2vw, 1.5rem); // 20px → 24px
+$text-title-small: 1.75rem;
+$text-subtitle: 1.125rem;
 $text-body: 1rem;                           // 16px
 $text-small: 0.875rem;                      // 14px
 $text-caption: 0.75rem;                     // 12px
 $text-tiny: 0.7rem;                         // 11px
 $text-dashboard-brand: 1.2rem;
-$text-dashboard-nav: 0.95rem;
-$text-dashboard-building: 0.9rem;
-$text-dashboard-stat-label: 0.85rem;
-$text-dashboard-stat-value: 1.8rem;
-$text-dashboard-small: 0.8rem;
-$text-dashboard-card-title: 1.1rem;
 $sidebar-width: 260px;
 $avatar-dashboard-size: 2.5rem;
 $space-dashboard-badge-x: 0.625rem;
@@ -166,10 +160,10 @@ $status-colors: (
 );
 
 $button-sizes: (
-  sm: (padding: 0.35rem 0.85rem, font-size: $text-caption),
-  md: (padding: 0.5rem 1.25rem, font-size: $text-small),
-  lg: (padding: 0.75rem 1.75rem, font-size: $text-body),
-  xl: (padding: 1rem 2.25rem, font-size: $text-heading),
+  sm: (padding: 0.375rem 0.75rem, font-size: 0.75rem, font-weight: $font-medium),
+  md: (padding: 0.625rem 1rem, font-size: $text-small, font-weight: $font-medium),
+  lg: (padding: 0.75rem 1.5rem, font-size: $text-body, font-weight: $font-semibold),
+  xl: (padding: 1rem 2rem, font-size: 1.125rem, font-weight: $font-semibold),
 );
 
 $badge-sizes: (

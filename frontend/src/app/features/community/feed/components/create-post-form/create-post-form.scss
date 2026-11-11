@@ -6,7 +6,7 @@
 
   width: 100%;
   min-width: 0;
-  color: $text-main;
+  color: var(--color-text-primary);
 }
 
 .create-post-form textarea {
@@ -17,11 +17,11 @@
   min-height: 6rem;
   padding: $space-3 $space-4;
   border-radius: $radius-sm;
-  background: $surface-1;
-  transition: $transition-base;
+  background: var(--color-surface);
+  transition: var(--effect-transition);
 
   &:focus {
-    border-color: rgba($primary, 0.6);
-    background: $surface-2;
+    border-color: color-mix(in srgb, var(--color-primary) 60%, transparent);
+    background: var(--color-surface-muted);
   }
 }

@@ -19,9 +19,9 @@
 }
 
 .surveys-eyebrow {
-  color: $accent;
-  font-size: $text-caption;
-  font-weight: $font-semibold;
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.08em;
 }
 
@@ -85,7 +85,7 @@
     min-width: 0;
 
     p {
-      color: $text-muted;
+      color: var(--color-text-muted);
       overflow-wrap: anywhere;
     }
   }
@@ -100,8 +100,8 @@
     @include flex-row($space-3);
     align-items: center;
     flex-wrap: wrap;
-    color: $text-muted;
-    font-size: $text-small;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
   }
 
   &__options {
@@ -130,11 +130,11 @@
 }
 
 .priority-label {
-  @include status-tint($warning, 0.12, 0.35);
+  @include status-tint(var(--color-warning), 0.12, 0.35);
   padding: $space-1 $space-2;
   border-radius: $radius-full;
-  font-size: $text-tiny;
-  font-weight: $font-semibold;
+  font-size: var(--font-size-tiny);
+  font-weight: var(--font-weight-semibold);
 }
 
 // ========================================

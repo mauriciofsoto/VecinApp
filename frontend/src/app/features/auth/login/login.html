@@ -1,55 +1,58 @@
 
 <main class="login-page">
-  <section class="login-card" aria-labelledby="login-title">
-    <header class="login-header">
-      <span class="login-brand">VecinApp</span>
-      <h1 id="login-title">¡Hola de nuevo!</h1>
-      <p>Ingresá a tu cuenta para continuar.</p>
-    </header>
+  <section class="" aria-labelledby="page-login">
+   <span class="login-brand">VecinApp</span>
 
-    <form class="login-form" (ngSubmit)="onSubmit()">
-      <div class="form-field">
-        <label for="email">Correo electrónico</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          [(ngModel)]="email"
-          placeholder="nombre@correo.com"
-          autocomplete="username"
-          required
-          [disabled]="loading()"
-        />
-      </div>
+    <section class="login-card" aria-labelledby="login-title">
+      <header class="login-header">
+        <h1 id="login-title">¡Hola de nuevo!</h1>
+        <p>Ingresá a tu cuenta para continuar.</p>
+      </header>
 
-      <div class="form-field">
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          [(ngModel)]="password"
-          placeholder="Ingresá tu contraseña"
-          autocomplete="current-password"
-          required
-          [disabled]="loading()"
-        />
-      </div>
+      <form class="login-form" (ngSubmit)="onSubmit()">
+        <div class="form-field">
+          <label for="email">Correo electrónico</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            [(ngModel)]="email"
+            placeholder="nombre@correo.com"
+            autocomplete="username"
+            required
+            [disabled]="loading()"
+          />
+        </div>
 
-      <div class="login-links">
-        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
-        <a routerLink="/registro">Crear cuenta con código de invitación</a>
-      </div>
+        <div class="form-field">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            [(ngModel)]="password"
+            placeholder="********"
+            autocomplete="current-password"
+            required
+            [disabled]="loading()"
+          />
+        </div>
 
-      @if (errorMessage()) {
-        <p class="login-error" role="alert">
-          {{ errorMessage() }}
-        </p>
-      }
+        <div class="login-links">
+          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+          <app-button routerLink="/registro">Crear mi cuenta</app-button>
+        </div>
 
-      <button type="submit" [disabled]="loading()">
-        {{ loading() ? 'Ingresando...' : 'Iniciar sesión' }}
-      </button>
-    </form>
+        @if (errorMessage()) {
+          <p class="login-error" role="alert">
+            {{ errorMessage() }}
+          </p>
+        }
+
+        <button type="submit" [disabled]="loading()">
+          {{ loading() ? 'Ingresando...' : 'Iniciar sesión' }}
+        </button>
+      </form>
+    </section>
   </section>
 </main>

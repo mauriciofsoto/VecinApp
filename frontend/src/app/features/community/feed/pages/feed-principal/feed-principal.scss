@@ -14,7 +14,7 @@
 
     p {
       margin: $space-1 0 0;
-      color: $text-muted;
+      color: var(--color-text-muted);
     }
   }
 
@@ -40,18 +40,18 @@
     border: 1px solid transparent;
     border-radius: $radius-md;
     background: transparent;
-    color: $text-main;
+    color: var(--color-text-primary);
     text-align: left;
     cursor: pointer;
-    transition: $transition-base;
+    transition: var(--effect-transition);
 
     &:hover {
-      border-color: rgba($primary, 0.5);
-      background: $surface-2;
+      border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+      background: var(--color-surface-muted);
     }
 
     &:focus-visible {
-      outline: 2px solid rgba($primary, 0.7);
+      outline: 2px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
       outline-offset: 2px;
     }
   }
@@ -63,16 +63,16 @@
     height: 2.5rem;
     place-items: center;
     border-radius: $radius-circle;
-    background: $avatar-gradient;
-    color: $white;
-    font-weight: $font-semibold;
+    background: var(--effect-avatar-gradient);
+    color: var(--color-text-inverse);
+    font-weight: var(--font-weight-semibold);
   }
 
   &__create-placeholder {
     flex: 1;
     min-width: 0;
-    color: $text-muted;
-    font-size: $text-small;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
   }
 
   &__scroll-container {
@@ -125,8 +125,8 @@
   }
 
   p {
-    color: $text-muted;
-    font-size: $text-small;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
     line-height: 1.5;
   }
 
@@ -140,23 +140,23 @@
   &__notice {
     @include flex-col($space-2);
     padding-top: $space-3;
-    border-top: 1px solid $glass-border;
+    border-top: 1px solid var(--color-border);
 
     h4 {
-      color: $text-main;
-      font-size: $text-small;
-      font-weight: $font-semibold;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-semibold);
     }
 
     time {
-      color: $text-muted;
-      font-size: $text-tiny;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-tiny);
     }
   }
 
   &__empty {
     padding-top: $space-3;
-    border-top: 1px solid $glass-border;
+    border-top: 1px solid var(--color-border);
   }
 }
 
@@ -172,7 +172,7 @@
 
   p {
     margin: 0;
-    color: $text-muted;
+    color: var(--color-text-muted);
   }
 }
 
@@ -186,7 +186,7 @@
     @include text-heading;
     min-width: 0;
     margin: 0;
-    color: $text-main;
+    color: var(--color-text-primary);
     overflow-wrap: anywhere;
   }
 }

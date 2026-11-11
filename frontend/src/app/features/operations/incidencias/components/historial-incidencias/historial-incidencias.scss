@@ -17,21 +17,21 @@
     h2 {
       @include text-heading;
 
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: 0 0 $space-1;
     }
 
     p {
       @include text-body;
 
-      color: $text-muted;
+      color: var(--color-text-muted);
       margin: 0;
     }
   }
 
   &__cantidad {
-    color: $text-muted;
-    font-size: $text-caption;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
     white-space: nowrap;
   }
 
@@ -69,14 +69,14 @@
     h3 {
       @include text-heading;
 
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: 0;
     }
 
     p {
       @include text-body;
 
-      color: $text-muted;
+      color: var(--color-text-muted);
       margin: 0;
     }
   }
@@ -90,7 +90,7 @@
   box-sizing: border-box;
   min-width: 0;
   padding: $space-4;
-  border: 1px solid $glass-border;
+  border: 1px solid var(--color-border);
   border-radius: $radius-md;
 
   &__contenido {
@@ -107,7 +107,7 @@
     h3 {
       @include text-heading;
 
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: 0;
     }
   }
@@ -115,7 +115,7 @@
   &__descripcion {
     @include text-body;
 
-    color: $text-muted;
+    color: var(--color-text-muted);
     margin: 0;
     overflow-wrap: anywhere;
   }
@@ -124,8 +124,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: $space-2 $space-4;
-    color: $text-muted;
-    font-size: $text-caption;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
   }
 
   &__estado {
@@ -133,25 +133,25 @@
     align-items: center;
     padding: $space-1 $space-3;
     border-radius: $radius-full;
-    font-size: $text-caption;
-    font-weight: $font-medium;
-    background: $surface-2;
-    color: $text-main;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    background: var(--color-surface-muted);
+    color: var(--color-text-primary);
 
     &[data-estado='pendiente'] {
-      @include status-tint($warning, 0.12, 0.4);
+      @include status-tint(var(--color-warning), 0.12, 0.4);
     }
 
     &[data-estado='en-proceso'] {
-      @include status-tint($accent, 0.12, 0.4);
+      @include status-tint(var(--color-accent), 0.12, 0.4);
     }
 
     &[data-estado='resuelta'] {
-      @include status-tint($success, 0.12, 0.4);
+      @include status-tint(var(--color-success), 0.12, 0.4);
     }
 
     &[data-estado='rechazada'] {
-      @include status-tint($danger, 0.12, 0.4);
+      @include status-tint(var(--color-danger), 0.12, 0.4);
     }
   }
 
@@ -164,7 +164,7 @@
     @include button-base;
     @include button-ghost;
 
-    color: $accent;
+    color: var(--color-accent);
   }
 }
 

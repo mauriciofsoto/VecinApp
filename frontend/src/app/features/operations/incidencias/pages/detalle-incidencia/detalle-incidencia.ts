@@ -14,7 +14,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './detalle-incidencia.html',
-  styleUrl: './detalle-incidencia.css'
+  styleUrl: './detalle-incidencia.scss'
 })
 export class DetalleIncidenciaComponent implements OnInit {
   private route = inject(ActivatedRoute);

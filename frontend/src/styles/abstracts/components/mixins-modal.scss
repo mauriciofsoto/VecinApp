@@ -16,7 +16,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: $text-main;
+  color: var(--color-text-primary);
   overflow: visible;
   max-width: calc(100vw - #{$space-6});
   max-height: calc(100dvh - #{$space-6});
@@ -25,20 +25,25 @@
     &[data-size="#{$name}"] { width: $width; }
   }
 
-  &[open] { animation: modalIn $transition-normal $ease-out; }
+  &[open] { animation: modalIn var(--duration-normal) $ease-out; }
 
   &::backdrop {
-    @include backdrop-blur(4px);
-    background: rgba(0, 0, 0, 0.6);
-    animation: fadeIn $transition-fast ease-out;
+    backdrop-filter: blur(var(--effect-backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--effect-backdrop-blur));
+    background: var(--color-backdrop);
+    animation: fadeIn var(--duration-fast) ease-out;
   }
 }
 
 // 2. Panel de vidrio
 @mixin modal-panel {
   @include flex-col;
-  @include glass-panel-effect;
-  border-radius: $radius-md;
+  backdrop-filter: blur(var(--effect-glass-blur));
+  -webkit-backdrop-filter: blur(var(--effect-glass-blur));
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-card);
   overflow: hidden;
   max-height: calc(100dvh - #{$space-6});
 }
@@ -48,7 +53,7 @@
   @include flex-row($space-3);
   justify-content: space-between;
   padding: $space-4 $space-5;
-  border-bottom: 1px solid $glass-border;
+  border-bottom: 1px solid var(--color-border);
 
   .modal-title {
     @include text-heading;
@@ -74,7 +79,7 @@
  @include flex-row;
   justify-content: flex-end;
   padding: $space-4 $space-5;
-  border-top: 1px solid $glass-border;
+  border-top: 1px solid var(--color-border);
 
 
   &:empty { display: none; }

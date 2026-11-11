@@ -12,41 +12,28 @@
 }
 
 .select-field {
+  @include semantic-form-control;
   width: 100%;
   min-width: 0;
   padding: $space-3 $space-4;
-  border: 1px solid $glass-border;
-  border-radius: $radius-sm;
   outline: none;
-  color: $text-main;
-  background: $surface-1;
-  font: inherit;
-  color-scheme: dark;
-  transition: $transition-base;
-
-  &:focus-visible {
-    border-color: rgba($primary, 0.6);
-    box-shadow: 0 0 0 2px rgba($primary, 0.15);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  color-scheme: inherit;
 
   option {
-    color: $text-main;
-    background: $bg-dark;
+    color: var(--color-text-primary);
+    background: var(--color-background);
   }
 
-  &--success { border-color: rgba($success, 0.55); }
-  &--warning { border-color: rgba($warning, 0.55); }
-  &--danger { border-color: rgba($danger, 0.55); }
+  &--success { border-color: var(--color-success-border); }
+  &--warning { border-color: var(--color-warning-border); }
+  &--danger { border-color: var(--color-danger-border); }
 }
 
 .select-control--invalid .select-field,
 .select-control--invalid .select-field:focus-visible {
-  border-color: rgba($danger, 0.75);
+  border-color: var(--color-danger-border);
 }
 
 .select-control--disabled { opacity: 0.8; }
@@ -54,6 +41,6 @@
 .select-error {
   display: block;
   margin-top: $space-1;
-  color: $danger;
-  font-size: $text-caption;
+  color: var(--color-danger);
+  font-size: var(--font-size-caption);
 }

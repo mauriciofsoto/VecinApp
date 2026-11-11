@@ -29,16 +29,16 @@
 
   &__eyebrow {
   
-    color: $primary-light;
-    font-weight: 700;
+    color: var(--color-primary-emphasis);
+    font-weight: var(--font-weight-bold);
     letter-spacing: 0.08em;
   }
 
   &__mensaje {
     padding: 0.85rem 1rem;
     border-radius: $radius-md;
-    background: rgba($success, 0.12);
-    color: $success;
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
   }
 }
 
@@ -47,8 +47,8 @@
   align-items: center;
   justify-content: space-between;
   gap: $space-3;
-  background: rgba($danger, 0.12);
-  color: $danger;
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
 
   p { margin: 0; }
 }

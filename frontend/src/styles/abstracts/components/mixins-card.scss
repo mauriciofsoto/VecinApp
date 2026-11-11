@@ -15,8 +15,8 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  border-radius: $radius-md;
-  transition: $transition-base;
+  border-radius: var(--radius-card);
+  transition: var(--effect-transition);
   overflow: hidden;
   box-sizing: border-box;
   background-repeat: no-repeat;
@@ -36,8 +36,8 @@
 @mixin card-hover-effect {
   &:hover {
     transform: translateY(-4px);
-    box-shadow: $shadow-lg;
-    border-color: rgba($white, 0.25);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-border-hover);
   }
 }
 
@@ -59,24 +59,25 @@
 }
 
 @mixin card-skin-solid {
-  background-color: rgba($bg-dark, 0.85);
-  @include glass-border;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  background-color: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card-solid);
 }
 
 @mixin card-skin-image {
-  @include glass-border;
+  border: 1px solid var(--color-border);
 
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba($bg-dark, 0.3) 0%, rgba($bg-dark, 0.85) 100%);
+    background: var(--effect-image-overlay);
     z-index: 1;
   }
 
   > * {
     position: relative;
     z-index: 2;
+    color: var(--color-text-on-image);
   }
 }

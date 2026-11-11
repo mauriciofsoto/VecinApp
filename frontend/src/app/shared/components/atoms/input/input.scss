@@ -13,7 +13,7 @@
 
   &[type='date'],
   &[type='datetime-local'] {
-    color-scheme: dark;
+    color-scheme: inherit;
   }
 }
 
@@ -25,30 +25,22 @@
 
 .input-control {
   @include flex-row($space-2);
+  @include semantic-form-control;
   width: 100%;
   min-width: 0;
   padding: $space-2 $space-3;
-  border: 1px solid $glass-border;
-  border-radius: $radius-sm;
-  background: $surface-1;
-  transition: $transition-base;
-
-  &:focus-within {
-    border-color: rgba($primary, 0.6);
-    box-shadow: 0 0 0 2px rgba($primary, 0.15);
-  }
 
   &--invalid,
   &--invalid:focus-within {
-    border-color: rgba($danger, 0.75);
+    border-color: var(--color-danger-border);
   }
 
-  &--disabled { opacity: 0.6; }
+  &--disabled { opacity: var(--state-disabled-control-opacity); }
 }
 
 .input-prefix-icon {
   flex: 0 0 auto;
-  color: $text-muted;
+  color: var(--color-text-muted);
 }
 
 .input-clear-button {
@@ -59,6 +51,6 @@
 .input-error {
   display: block;
   margin-top: $space-1;
-  color: $danger;
-  font-size: $text-caption;
+  color: var(--color-danger);
+  font-size: var(--font-size-caption);
 }

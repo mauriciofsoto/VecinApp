@@ -14,25 +14,25 @@
   width: 100%;
   padding: $space-3 $space-4;
   border-radius: $radius-sm;
-  background: $surface-1;
+  background: var(--color-surface);
   @include glass-border;
   overflow: hidden;
-  transition: $transition-base;
+  transition: var(--effect-transition);
   cursor: pointer;
   user-select: none;
 
   &:hover:not(:disabled) {
-    background: $surface-2;
-    border-color: rgba($accent, 0.4);
+    background: var(--color-surface-muted);
+    border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
     @include hover-lift(-1px);
   }
 
   &.selected {
-    @include active-state($accent);
+    @include active-state(var(--color-accent));
 
     .poll-text {
-      color: $accent;
-      font-weight: $font-semibold;
+      color: var(--color-accent);
+      font-weight: var(--font-weight-semibold);
     }
   }
 
@@ -47,8 +47,8 @@
   top: 0;
   left: 0;
   bottom: 0;
-  background: rgba($primary, 0.25);
-  border-right: 2px solid $primary-light;
+  background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  border-right: 2px solid var(--color-primary-emphasis);
   transition: width 0.4s $ease-out;
   z-index: 1;
 }

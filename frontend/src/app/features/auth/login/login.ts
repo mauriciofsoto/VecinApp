@@ -5,11 +5,12 @@ import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth';
 import { getDashboardUrl } from '../../../core/guards/auth.guard';
+import { ButtonComponent } from '../../../shared/components/atoms';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, ButtonComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

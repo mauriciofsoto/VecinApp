@@ -60,15 +60,15 @@
 }
 
 // Texto secundario.
-@mixin operation-muted-text($size: $text-small) {
-  color: $text-muted;
+@mixin operation-muted-text($size: var(--font-size-small)) {
+  color: var(--color-text-muted);
   font-size: $size;
 }
 
 // Separador superior de las acciones.
 @mixin operation-actions-divider {
   padding-top: $space-3;
-  border-top: 1px solid $glass-border;
+  border-top: 1px solid var(--color-border);
 }
 
 // Paneles y tarjetas de las pantallas legacy de operaciones.
@@ -76,7 +76,7 @@
   padding: $padding;
   @include glass-border;
   border-radius: $radius-md;
-  background: $glass-bg;
+  background: var(--color-surface-elevated);
 }
 
 @mixin operation-form-grid($gap: $space-4) {
@@ -92,14 +92,14 @@
 
 // Mantiene la presentación nativa de los controles de las pantallas legacy,
 // reutilizando la base de formularios para color, outline y estado disabled.
-@mixin operation-form-control($background: $surface-control-dark, $inherit-font: false) {
+@mixin operation-form-control($background: var(--color-control-surface), $inherit-font: false) {
   @include form-input-base;
   flex: initial;
   width: 100%;
   box-sizing: border-box;
   padding: $space-3;
-  color: $text-main;
-  border: 1px solid $border-control;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
   border-radius: $radius-control;
   background: $background;
 

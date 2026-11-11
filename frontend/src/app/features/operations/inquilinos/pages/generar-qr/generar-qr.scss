@@ -1,0 +1,43 @@
+@use '../../../../../../styles/abstracts/variables' as *;
+
+.invite-page { max-width:70rem; margin:0 auto; padding:clamp($space-4, 4vw, $space-7); color:$text-main; }
+.invite-page__header { margin-bottom:$space-6; }
+.invite-page__eyebrow { color:$primary-light; font-size:$text-caption; letter-spacing:.13em; font-weight:$font-semibold; }
+.invite-page h1 { margin:$space-2 0; font: $font-bold $text-title $font-title; }
+.invite-page__header > p:last-child, .invite-panel > p { color:$text-muted; line-height:$line-normal; }
+.invite-panel, .invitation-card { border:1px solid $border-control; border-radius:$radius-md; background:$surface-1; box-shadow:$shadow-md; }
+.invite-panel { max-width:34rem; padding:clamp($space-5, 5vw, $space-7); text-align:center; }
+.invite-panel__icon { display:grid; place-items:center; width:3rem; height:3rem; margin:0 auto $space-4; border-radius:$radius-full; background:$primary-glow; color:$primary-light; font-size:2rem; }
+.invite-panel h2, .invitation-card h2 { margin:0 0 $space-2; font-size:$text-heading; }
+.invite-button { min-height:2.8rem; padding:$space-3 $space-5; border:0; border-radius:$radius-control; background:$primary; color:#201a2b; font:$font-semibold $text-small $font-primary; cursor:pointer; }
+.invite-button:hover { background:$primary-light; }
+.invite-button:disabled { opacity:.6; cursor:wait; }
+.invite-button--secondary { border:1px solid $border-control; background:$surface-2; color:$text-main; }
+.invite-button--secondary:hover { background:$surface-3; }
+.invitation-card { display:grid; grid-template-columns:minmax(0, 1fr) minmax(15rem, 19rem); gap:$space-7; align-items:center; padding:clamp($space-4, 4vw, $space-7); }
+.invitation-card__content { display:flex; flex-direction:column; align-items:center; text-align:center; }
+.invitation-card__content .qr-code { width:min(100%, 25rem); }
+.invitation-card__print-heading { display:none; align-items:center; gap:.55rem; color:#171923; font-weight:700; font-size:1.25rem; }
+.brand-mark { display:grid; place-items:center; width:2rem; height:2rem; border-radius:.6rem; background:#a78bfa; color:#171923; }
+.print-message { max-width:19rem; margin:$space-4 0 0; color:$text-main; font-size:$text-heading; font-weight:$font-semibold; line-height:$line-tight; }
+.invitation-meta { display:flex; flex-wrap:wrap; justify-content:center; gap:$space-3; margin-top:$space-4; color:$text-muted; font-size:$text-small; }
+.status-pill { padding:.3rem .7rem; border:1px solid rgba($success,.45); border-radius:$radius-full; color:$text-success-soft; }
+.invitation-actions { display:flex; flex-direction:column; gap:$space-3; }
+.feedback { margin:0; color:$text-success-soft; font-size:$text-small; }
+.feedback--error { margin-top:$space-3; color:$text-danger-soft; }
+.invite-link { align-self:flex-start; padding:$space-2 0; border:0; background:none; color:$primary-light; text-decoration:underline; cursor:pointer; }
+.invite-link:disabled { opacity:.5; }
+.invite-url-label { color:$text-muted; font-size:$text-caption; }
+.invite-url { width:100%; padding:$space-3; border:1px solid $border-control; border-radius:$radius-control; background:$surface-control-dark; color:$text-main; }
+@media (max-width:760px) { .invitation-card { grid-template-columns:1fr; gap:$space-5; } .invitation-actions { width:100%; } }
+@media print {
+  :host { display:block; }
+  .invite-page { max-width:none; padding:0; color:#171923; }
+  .invite-page__header, .screen-only { display:none !important; }
+  .invitation-card { display:block; padding:0; border:0; border-radius:0; background:#fff; box-shadow:none; }
+  .invitation-card__content { min-height:100vh; justify-content:center; gap:1rem; }
+  .invitation-card__print-heading { display:flex; }
+  .invitation-card app-qr-code { width:min(78vw, 15cm); }
+  .print-message { max-width:13cm; margin:1rem 0 0; color:#171923; font-size:24pt; }
+  @page { size:A5 portrait; margin:12mm; }
+}

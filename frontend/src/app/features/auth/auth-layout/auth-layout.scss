@@ -1,0 +1,13 @@
+.auth-layout__page {
+  background: var(--color-background-gradient);
+}
+
+.auth-layout__header {
+  color: var(--color-text-inverse);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-layout__header a {
+  color: var(--color-text-inverse);
+}

@@ -34,7 +34,7 @@
   padding: $space-2;
   border-radius: $radius-sm;
   @include glass-border;
-  background: $surface-1;
+  background: var(--color-surface);
 }
 
 .media-attachments__preview {
@@ -43,7 +43,7 @@
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: $radius-sm;
-  background: $bg-dark;
+  background: var(--color-background);
 }
 
 .media-attachments__remove {
@@ -54,35 +54,35 @@
   place-items: center;
   width: 2rem;
   height: 2rem;
-  border: 1px solid $glass-border;
+  border: 1px solid var(--color-border);
   border-radius: 50%;
-  background: rgba($bg-dark, 0.85);
-  color: $text-main;
+  background: color-mix(in srgb, var(--color-background) 85%, transparent);
+  color: var(--color-text-primary);
   cursor: pointer;
 
   &:hover {
-    @include glow($danger, 8px, 0.25);
+    @include glow(var(--color-danger), 8px, 0.25);
   }
 }
 
 .media-attachments__filename {
   overflow: hidden;
-  color: $text-muted;
-  font-size: $text-caption;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .media-attachments__error {
   margin: 0;
-  color: $danger;
-  font-size: $text-small;
+  color: var(--color-danger);
+  font-size: var(--font-size-small);
 }
 
 .media-attachments__hint {
   margin: 0;
-  color: $text-muted;
-  font-size: $text-caption;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
 }
 
 @media (max-width: 480px) {

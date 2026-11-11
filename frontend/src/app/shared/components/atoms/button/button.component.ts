@@ -26,14 +26,6 @@ export class ButtonComponent {
 
   @Output() buttonClick = new EventEmitter<void>();
 
-  // Mapa de utilidades Tailwind para estructura y padding
-  private readonly sizeClasses = {
-    sm: 'px-3 py-1.5 text-xs font-medium',
-    md: 'px-4 py-2.5 text-sm font-medium',
-    lg: 'px-6 py-3 text-base font-semibold',
-    xl: 'px-8 py-4 text-lg font-semibold',
-  };
-
   handleClick(): void {
     if (!this.disabled) {
       this.buttonClick.emit();
@@ -44,8 +36,8 @@ export class ButtonComponent {
     const classes = [
       'btn', // Clase base SCSS
       `btn-${this.variant}`, // Variante de color SCSS
+      `btn-${this.size}`, // Tamaños desde el mapa Sass compartido
       'inline-flex items-center justify-center gap-2', // Layout de Tailwind
-      this.sizeClasses[this.size] || this.sizeClasses.md, // Estructura/Tamaño Tailwind
       this.customClass // Clases extras opcionales de Tailwind
     ];
 

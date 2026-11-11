@@ -10,9 +10,9 @@
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  color: $text-main;
-  background: $surface-2;
-  border: 1px solid $border-control;
+  color: var(--color-text-primary);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-strong);
   border-radius: $radius-full;
   cursor: pointer;
 }
@@ -23,9 +23,9 @@
   right: -0.35rem;
   min-width: 1.2rem;
   padding: 0.1rem 0.25rem;
-  color: $bg-dark;
-  background: $primary-light;
+  color: var(--color-background);
+  background: var(--color-primary-emphasis);
   border-radius: $radius-full;
-  font-size: $text-tiny;
-  font-weight: $font-bold;
+  font-size: var(--font-size-tiny);
+  font-weight: var(--font-weight-bold);
 }

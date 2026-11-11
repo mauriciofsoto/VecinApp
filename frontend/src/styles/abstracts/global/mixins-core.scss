@@ -1,5 +1,6 @@
 //core
 @use 'sass:map';
+@use 'sass:math';
 @use '../variables' as *;
 @use './mixins-scrollbar' as *; 
 
@@ -43,7 +44,7 @@
 
 // resplandor
 @mixin glow($color, $size: 15px, $alpha: 0.25) {
-  box-shadow: 0 0 $size rgba($color, $alpha);
+  box-shadow: 0 0 $size color-mix(in srgb, #{$color} #{math.percentage($alpha)}, transparent);
 }
 
 @mixin touch-target($size: 2.75rem) {
@@ -56,7 +57,7 @@
 
 // Mixin unificado para bordes de vidrio
 @mixin glass-border {
-  border: 1px solid $glass-border;
+  border: 1px solid var(--color-border);
 }
 
 
@@ -74,16 +75,16 @@
 
 // Fondo tintado + borde + texto del mismo color (badges, botones de estado)
 @mixin status-tint($color, $bg-alpha: 0.2, $border-alpha: 1) {
-  background: rgba($color, $bg-alpha);
+  background: color-mix(in srgb, #{$color} #{math.percentage($bg-alpha)}, transparent);
   color: $color;
-  border: 1px solid rgba($color, $border-alpha);
+  border: 1px solid color-mix(in srgb, #{$color} #{math.percentage($border-alpha)}, transparent);
 }
 
 // Estado activo / seleccionado
-@mixin active-state($color: $primary) {
-  background: rgba($color, 0.2);
-  border-color: rgba($color, 0.5);
-  box-shadow: 0 0 15px rgba($color, 0.25);
+@mixin active-state($color: var(--color-primary)) {
+  background: color-mix(in srgb, #{$color} 20%, transparent);
+  border-color: color-mix(in srgb, #{$color} 50%, transparent);
+  box-shadow: 0 0 15px color-mix(in srgb, #{$color} 25%, transparent);
 }
 
 // Elevación al hover

@@ -9,27 +9,29 @@
   @include flex-center($inline: true);
   gap: $space-1;
   padding: $space-1 $space-3;
-  border: 1px solid $glass-border;
-  border-radius: $radius-full;
-  background: $surface-1;
-  color: $text-main;
-  font-family: $font-primary;
-  font-size: $text-small;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
   cursor: pointer;
   user-select: none;
-  transition: $transition-base;
+  transition: var(--effect-transition);
 
   @include touch-target;
 
   @media (hover: hover) {
-    &:hover:not(:disabled) { background: $surface-2; }
+    &:hover:not(:disabled) { background: var(--color-surface-muted); }
   }
 
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:disabled { opacity: var(--state-disabled-opacity); cursor: not-allowed; }
 }
 
 // Chip activo (por ejemplo, una reacción que ya hice)
 @mixin chip-selected {
-  @include active-state($accent);
-  color: $accent;
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-accent);
+  color: var(--color-accent);
 }

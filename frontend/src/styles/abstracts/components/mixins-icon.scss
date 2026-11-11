@@ -2,7 +2,7 @@
 @use '../variables' as *;
 @use '../global/mixins-core' as *;
 
-@mixin icon-base($size: 0.875rem, $color: $text-muted) {
+@mixin icon-base($size: 0.875rem, $color: var(--color-text-muted)) {
   @include flex-center;
   font-size: $size;
   color: $color;

@@ -7,8 +7,8 @@
 @mixin custom-scrollbar(
   
   $width: 3px,
-  $thumb-color: rgba(206, 206, 206, 0.2),
-  $hover-color: rgba($primary, 0.6)
+  $thumb-color: color-mix(in srgb, var(--color-text-inverse) 20%, transparent),
+  $hover-color: color-mix(in srgb, var(--color-primary) 60%, transparent)
 ) {
 
   padding: 15px;
@@ -29,7 +29,7 @@
   &::-webkit-scrollbar-thumb {
     background: $thumb-color;
     border-radius: $radius-full;
-    transition: background $transition-fast ease;
+    transition: background var(--duration-fast) ease;
 
     &:hover { background: $hover-color; }
   }

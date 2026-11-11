@@ -36,7 +36,7 @@
   box-sizing: border-box;
   flex-shrink: 0;
   z-index: $z-index;
-  transition: width $transition-fast ease, transform $transition-fast ease;
+  transition: width var(--duration-fast) ease, transform var(--duration-fast) ease;
 }
 
 // 3. Bento Grid Dinámico (4 columnas por defecto, flujo denso y filas automáticas)
@@ -97,14 +97,14 @@
 
   @if $variant == 'glass' {
     @include backdrop-blur;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba($primary, 0.5);
-    box-shadow: $shadow-xl, 0 0 20px rgba($primary, 0.3);
+    background: color-mix(in srgb, var(--color-text-inverse) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
+    box-shadow: var(--shadow-xl), 0 0 20px color-mix(in srgb, var(--color-primary) 30%, transparent);
     opacity: 0.95;
   } @else if $variant == 'solid' {
-    background: #1e1e2f;
+    background: var(--color-surface-solid);
     @include glass-border;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 15px 30px color-mix(in srgb, var(--color-shadow-base) 80%, transparent);
     opacity: 0.98;
   }
 }
@@ -114,11 +114,11 @@
 
   @if $variant == 'dashed' {
     opacity: 0.2;
-    border: 2px dashed rgba($accent, 0.6);
-    background: rgba($accent, 0.05);
+    border: 2px dashed color-mix(in srgb, var(--color-accent) 60%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
   } @else if $variant == 'solid' {
     opacity: 0.1;
-    background: rgba(255, 255, 255, 0.2);
+    background: color-mix(in srgb, var(--color-text-inverse) 20%, transparent);
   }
 }
 

@@ -17,8 +17,8 @@
   @include card.card-size($space-5);
 
   
-  background: #222222;
-  color: #ffffff;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   height: auto;
   gap: $space-6;
   min-width: 0;
@@ -47,22 +47,22 @@
     min-width: 0;
 
     strong {
-      color: $text-main;
-      font-size: $text-small;
-      font-weight: $font-semibold;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-semibold);
       overflow-wrap: anywhere;
     }
 
     time {
-      color: $text-muted;
-      font-size: $text-caption;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-caption);
     }
   }
 
   &__type {
     @include badge.badge-base;
     @include badge.badge-size(sm);
-    @include badge.badge-variant($primary, $primary-light);
+    @include badge.badge-variant(var(--color-primary), var(--color-primary-emphasis));
 
     flex-shrink: 0;
     margin-left: auto;
@@ -78,7 +78,7 @@
     h3 {
       @include typography.text-heading;
       margin: 0 0 $space-2;
-      color: $text-main;
+      color: var(--color-text-primary);
       overflow-wrap: anywhere;
     }
   }
@@ -86,7 +86,7 @@
   &__text {
     @include typography.text-body;
     margin: 0;
-    color: $text-main;
+    color: var(--color-text-primary);
     overflow-wrap: anywhere;
     white-space: pre-wrap;
   }
@@ -126,7 +126,7 @@
     width: 100%;
     max-height: 24rem;
     border-radius: $radius-sm;
-    background: #000;
+    background: var(--color-shadow-base);
     @include core.glass-border;
   }
 
@@ -140,7 +140,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     padding-top: $space-6;
-    border-top: 1px solid $glass-border;
+    border-top: 1px solid var(--color-border);
   }
 
   &__comments-toggle {
@@ -148,26 +148,26 @@
 
     border-color: transparent;
     background: transparent;
-    color: $accent;
-    font-family: $font-primary;
-    font-size: $text-small;
+    color: var(--color-accent);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-small);
 
     &:hover:not(:disabled) {
-      background: $surface-2;
-      color: $text-main;
+      background: var(--color-surface-muted);
+      color: var(--color-text-primary);
     }
 
     &:focus-visible {
-      outline: 2px solid $accent;
+      outline: 2px solid var(--color-accent);
       outline-offset: 3px;
     }
   }
 
  &--admin {
-    border-color: rgba($primary-light, 0.75);
+    border-color: color-mix(in srgb, var(--color-primary-emphasis) 75%, transparent);
     box-shadow:
-      0 0 0 1px rgba($primary-light, 0.18),
-      0 0 18px rgba($primary, 0.12);
+      0 0 0 1px color-mix(in srgb, var(--color-primary-emphasis) 18%, transparent),
+      0 0 18px color-mix(in srgb, var(--color-primary) 12%, transparent);
   }
 
   &__admin-icon {
@@ -178,8 +178,8 @@
     height: 1rem;
     margin-left: 0.25rem;
     border-radius: 50%;
-    background: $primary;
-    color: $white;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
     font-size: 0.65rem;
     vertical-align: middle;
   }
@@ -190,12 +190,12 @@
     align-self: flex-start;
     gap: $space-1;
     padding: $space-1 $space-2;
-    border: 1px solid rgba($primary-light, 0.35);
+    border: 1px solid color-mix(in srgb, var(--color-primary-emphasis) 35%, transparent);
     border-radius: $radius-full;
-    background: rgba($primary, 0.10);
-    color: $primary-light;
-    font-size: $text-caption;
-    font-weight: $font-semibold;
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-primary-emphasis);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
   }
 
 }

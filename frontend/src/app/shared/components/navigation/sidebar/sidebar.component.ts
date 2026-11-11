@@ -2,6 +2,7 @@
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 type UserRole =
   | 'Administrador'
@@ -33,6 +34,7 @@ interface SidebarSection {
 export class SidebarComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  readonly themeService = inject(ThemeService);
 
   readonly isOpen = signal(false);
   readonly loggingOut = signal(false);
@@ -179,6 +181,12 @@ export class SidebarComponent {
     {
       title: 'ADMINISTRACIÓN',
       items: [
+        {
+          label: 'Invitaciones QR',
+          icon: '▦',
+          route: '/admin/invitaciones',
+          roles: ['Administrador'],
+        },
         {
           label: 'Inquilinos',
           icon: '♙',

@@ -11,11 +11,11 @@
   display: grid;
   gap: $space-5;
   padding: $space-6;
-  color: $text-page;
+  color: var(--color-text-secondary);
 }
 
 .page-header p {
-  @include ops.operation-muted-text($text-body);
+  @include ops.operation-muted-text(var(--font-size-body));
 }
 
 .package-workspace {
@@ -50,7 +50,7 @@
     transform 250ms ease;
 
   &:hover {
-    border-color: rgba($primary, 0.45);
+    border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
     transform: translateY(-2px);
   }
 
@@ -59,21 +59,21 @@
   }
 
   p {
-    @include ops.operation-muted-text($text-body);
+    @include ops.operation-muted-text(var(--font-size-body));
   }
 }
 
 .item-card--selected {
-  border-color: $primary;
-  background: rgba($primary, 0.1);
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 .status {
-  color: $text-warning-soft;
+  color: var(--color-warning-text);
 }
 
 .status.delivered {
-  color: $text-success-soft;
+  color: var(--color-success-text);
 }
 
 .conversation-empty {
@@ -89,7 +89,7 @@
   }
 
   p {
-    color: $text-muted;
+    color: var(--color-text-muted);
   }
 }
 

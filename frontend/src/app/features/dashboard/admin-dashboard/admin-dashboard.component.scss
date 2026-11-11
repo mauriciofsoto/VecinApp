@@ -18,15 +18,15 @@
   justify-content: space-between;
   flex-wrap: wrap;
 
-  h1 { @include text-title; margin: $space-2 0; color: $text-main; }
-  p { @include text-body; margin: 0; color: $text-muted; text-transform: capitalize; }
+  h1 { @include text-title; margin: $space-2 0; color: var(--color-text-primary); }
+  p { @include text-body; margin: 0; color: var(--color-text-muted); text-transform: capitalize; }
 }
 
 .dashboard-eyebrow,
 .widget-kicker {
-  color: $accent;
-  font-size: $text-tiny;
-  font-weight: $font-semibold;
+  color: var(--color-accent);
+  font-size: var(--font-size-tiny);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.1em;
 }
 
@@ -35,14 +35,14 @@
   align-items: center;
   min-height: 2.75rem;
   padding: 0 $space-3;
-  border: 1px solid $glass-border;
+  border: 1px solid var(--color-border);
   border-radius: $radius-control;
-  background: $surface-1;
-  color: $text-muted;
-  font-size: $text-small;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
 }
 
-.community-indicator { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: $text-muted; }
+.community-indicator { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-text-muted); }
 
 .dashboard-widget {
   @include flex-col($space-3);
@@ -51,14 +51,14 @@
   min-width: 0;
   padding: $space-5;
 
-  h2 { @include text-heading; margin: 0; color: $text-main; }
+  h2 { @include text-heading; margin: 0; color: var(--color-text-primary); }
 }
 
 .dashboard-widget--calendar { padding: $space-4; }
 .dashboard-widget--calendar app-reserva-calendar-modal { display: block; min-height: 0; flex: 1 1 auto; overflow: auto; }
 .dashboard-widget--clock,
 .dashboard-widget--weather { justify-content: center; }
-.dashboard-widget--clock { background: radial-gradient(circle at top right, rgba($accent, 0.15), transparent 68%); }
+.dashboard-widget--clock { background: radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 15%, transparent), transparent 68%); }
 
 .widget-heading {
   @include flex-row($space-3);
@@ -68,28 +68,28 @@
 }
 
 .widget-heading > div { @include flex-col($space-1); min-width: 0; }
-.widget-link { color: $accent; font-size: $text-small; font-weight: $font-semibold; text-decoration: none; white-space: nowrap; }
-.widget-link:hover { color: $text-main; }
-.widget-link:focus-visible { outline: 2px solid $accent; outline-offset: 3px; border-radius: $radius-sm; }
-.widget-icon { color: $accent; font-size: $text-heading; }
-.widget-unavailable { margin: auto 0 0; color: $text-main; font-size: $text-body; font-weight: $font-semibold; }
+.widget-link { color: var(--color-accent); font-size: var(--font-size-small); font-weight: var(--font-weight-semibold); text-decoration: none; white-space: nowrap; }
+.widget-link:hover { color: var(--color-text-primary); }
+.widget-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: $radius-sm; }
+.widget-icon { color: var(--color-accent); font-size: var(--font-size-heading); }
+.widget-unavailable { margin: auto 0 0; color: var(--color-text-primary); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); }
 .widget-note,
-.widget-state { margin: 0; color: $text-muted; font-size: $text-small; line-height: 1.5; }
-.widget-state--error { color: $text-danger-soft; }
-.widget-empty { @include flex-col($space-2); margin: auto 0; color: $text-muted; font-size: $text-small; line-height: 1.5; }
-.widget-empty p { margin: 0; color: $text-main; font-weight: $font-semibold; }
+.widget-state { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); line-height: 1.5; }
+.widget-state--error { color: var(--color-danger-text); }
+.widget-empty { @include flex-col($space-2); margin: auto 0; color: var(--color-text-muted); font-size: var(--font-size-small); line-height: 1.5; }
+.widget-empty p { margin: 0; color: var(--color-text-primary); font-weight: var(--font-weight-semibold); }
 .clock-value { font-size: clamp(2rem, 5vw, 3rem) !important; font-variant-numeric: tabular-nums; }
 
 .incident-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: $space-2; }
-.incident-stats > div { @include flex-col($space-1); min-width: 0; padding: $space-2 $space-3; border: 1px solid $glass-border; border-radius: $radius-sm; background: $surface-1; }
-.incident-stats strong { color: $text-main; font-size: $text-heading; }
-.incident-stats span { color: $text-muted; font-size: $text-caption; }
+.incident-stats > div { @include flex-col($space-1); min-width: 0; padding: $space-2 $space-3; border: 1px solid var(--color-border); border-radius: $radius-sm; background: var(--color-surface); }
+.incident-stats strong { color: var(--color-text-primary); font-size: var(--font-size-heading); }
+.incident-stats span { color: var(--color-text-muted); font-size: var(--font-size-caption); }
 .incident-recent { @include flex-col(0); min-height: 0; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
-.incident-recent li { @include flex-row($space-3); align-items: center; justify-content: space-between; min-width: 0; padding: $space-2 0; border-top: 1px solid $glass-border; }
+.incident-recent li { @include flex-row($space-3); align-items: center; justify-content: space-between; min-width: 0; padding: $space-2 0; border-top: 1px solid var(--color-border); }
 .incident-recent__content { @include flex-col($space-1); min-width: 0; }
-.incident-recent__content strong { overflow: hidden; color: $text-main; font-size: $text-small; text-overflow: ellipsis; white-space: nowrap; }
-.incident-recent__content > span { overflow: hidden; color: $text-muted; font-size: $text-caption; text-overflow: ellipsis; white-space: nowrap; }
-.incident-recent__meta { @include flex-col($space-1); flex: 0 0 auto; align-items: flex-end; color: $text-muted; font-size: $text-caption; text-align: right; }
+.incident-recent__content strong { overflow: hidden; color: var(--color-text-primary); font-size: var(--font-size-small); text-overflow: ellipsis; white-space: nowrap; }
+.incident-recent__content > span { overflow: hidden; color: var(--color-text-muted); font-size: var(--font-size-caption); text-overflow: ellipsis; white-space: nowrap; }
+.incident-recent__meta { @include flex-col($space-1); flex: 0 0 auto; align-items: flex-end; color: var(--color-text-muted); font-size: var(--font-size-caption); text-align: right; }
 
 .dashboard-widget--calendar .widget-heading { padding: $space-1 $space-1 0; }
 .dashboard-widget--calendar .widget-note { padding: 0 $space-1; }
@@ -101,6 +101,6 @@
 @include mobile {
   .admin-dashboard { gap: $space-4; }
   .dashboard-header { align-items: flex-start; }
-  .dashboard-header h1 { font-size: $text-title; }
+  .dashboard-header h1 { font-size: var(--font-size-title); }
   .dashboard-community { width: 100%; }
 }

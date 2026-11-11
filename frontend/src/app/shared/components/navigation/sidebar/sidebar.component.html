@@ -86,6 +86,16 @@
   <!-- FOOTER -->
   <div class="sidebar-footer">
     <button
+      class="theme-toggle-button"
+      type="button"
+      (click)="themeService.toggle()"
+      [attr.aria-label]="themeService.toggleLabel()"
+      [attr.aria-pressed]="themeService.isLight()"
+    >
+      <span aria-hidden="true">{{ themeService.isLight() ? '☀' : '☾' }}</span>
+      <span>{{ themeService.isLight() ? 'Tema claro' : 'Tema oscuro' }}</span>
+    </button>
+    <button
       class="logout-button"
       type="button"
       (click)="logout()"

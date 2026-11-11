@@ -1,5 +1,7 @@
 
 @use './abstracts' as *;
+@use './base/theme-tokens';
+@use '../app/features/marketing/landing/landing-theme';
 @use './base/reset';
 @use './base/typography';
 @use './base/animations';
@@ -18,8 +20,9 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: sans-serif;
-  background-color: #f8fafc;
+  font-family: var(--font-family-primary);
+  color: var(--color-text-primary);
+  background: var(--color-background-gradient);
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -41,28 +44,38 @@ app-root {
 }
 
 .nav-link {
-  color: $text-muted;
-  transition: $transition-base;
+  color: var(--color-nav-text);
+  transition: var(--effect-transition);
 
   &:hover,
   &.active {
-    background: $primary;
-    color: $white;
-    box-shadow: 0 0 15px $primary-glow;
+    background: var(--color-nav-active);
+    color: var(--color-nav-active-text);
+    box-shadow: var(--shadow-accent);
   }
 }
 
 .building-selector {
-  background: $bg-dark-alpha;
+  background: var(--color-background-overlay);
   @include glass-border;
-  color: $text-main;
+  color: var(--color-text-primary);
 }
 
 .avatar {
-  background: $avatar-gradient;
+  background: var(--effect-avatar-gradient);
+}
+
+@media print {
+  .printing-invitation {
+    background: #fff !important;
+    app-sidebar,
+    .app-layout-notifications { display: none !important; }
+    .app-background { display: block !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+    .app-layout-content { display: block !important; min-height: 0 !important; padding: 0 !important; }
+  }
 }
 
 .table-item {
-  background: $surface-1;
-  border: 1px solid $border-subtle;
+  background: var(--color-surface-table);
+  border: 1px solid var(--color-border-subtle);
 }

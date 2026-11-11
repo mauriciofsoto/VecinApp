@@ -10,9 +10,9 @@
 }
 
 .poll-question {
-  font-size: $text-small;
-  font-weight: $font-semibold;
-  color: $text-main;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   margin-bottom: $space-2;
 }
 
@@ -38,19 +38,19 @@
 }
 
 .poll-text {
-  font-size: $text-small;
-  color: $text-main;
+  font-size: var(--font-size-small);
+  color: var(--color-text-primary);
 }
 
 .poll-percentage {
-  font-size: $text-small;
-  font-weight: $font-semibold;
-  color: $primary-light;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-emphasis);
   flex-shrink: 0;
 }
 
 .poll-total {
-  font-size: $text-small;
-  color: $text-muted;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
   margin: $space-2 0 0;
 }

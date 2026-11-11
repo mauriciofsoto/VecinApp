@@ -5,14 +5,14 @@ h1, .text-title { @include text-title; }
 h2, h3, .text-heading { @include text-heading; }
 body, p, .text-body { @include text-body; }
 
-.text-small { font-size: $text-small; }
-.text-caption { font-size: $text-caption; }
+.text-small { font-size: var(--font-size-small); }
+.text-caption { font-size: var(--font-size-caption); }
 
 // Colores de texto
-.brand-text, .text-accent { color: $accent; }
-.text-muted { color: $text-muted; }
+.brand-text, .text-accent { color: var(--color-accent); }
+.text-muted { color: var(--color-text-muted); }
 
 // .text-danger, .text-success, .text-warning, .text-info
 @each $name, $color in $status-colors {
-  .text-#{$name} { color: $color; }
+  .text-#{$name} { color: var(--color-#{$name}); }
 }

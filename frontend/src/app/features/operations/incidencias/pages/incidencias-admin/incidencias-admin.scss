@@ -13,21 +13,21 @@
 
     h1 {
       @include text-title;
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: $space-2 0;
     }
 
     p {
       @include text-body;
-      color: $text-muted;
+      color: var(--color-text-muted);
       margin: 0;
     }
   }
 
   &__eyebrow {
-    color: $accent;
-    font-size: $text-caption;
-    font-weight: $font-semibold;
+    color: var(--color-accent);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.1em;
   }
 
@@ -62,14 +62,14 @@
       box-sizing: border-box;
       width: 100%;
       min-height: 44px;
-      color: $text-main;
+      color: var(--color-text-primary);
     }
   }
 
   &__tabla-wrapper {
     min-width: 0;
     overflow-x: auto;
-    border: 1px solid $glass-border;
+    border: 1px solid var(--color-border);
     border-radius: $radius-lg;
   }
 
@@ -83,16 +83,16 @@
       padding: $space-3 $space-4;
       text-align: left;
       vertical-align: middle;
-      border-bottom: 1px solid $glass-border;
-      color: $text-main;
-      font-size: $text-small;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
     }
 
     th {
-      color: $text-muted;
-      font-weight: $font-semibold;
+      color: var(--color-text-muted);
+      font-weight: var(--font-weight-semibold);
       white-space: nowrap;
-      background: $surface-2;
+      background: var(--color-surface-muted);
     }
 
     tbody tr:last-child td {
@@ -100,7 +100,7 @@
     }
 
     tbody tr:hover {
-      background: rgba(255, 255, 255, 0.025);
+      background: color-mix(in srgb, var(--color-text-inverse) 2.5%, transparent);
     }
   }
 
@@ -118,13 +118,13 @@
 
     h3 {
       @include text-heading;
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: 0;
     }
 
     p {
       @include text-body;
-      color: $text-muted;
+      color: var(--color-text-muted);
       margin: 0;
     }
   }
@@ -135,16 +135,16 @@
   min-width: 0;
 
   span {
-    color: $text-muted;
-    font-size: $text-small;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
     line-height: 1.4;
     overflow-wrap: break-word;
   }
 
   strong {
-    color: $text-main;
+    color: var(--color-text-primary);
     font-size: clamp(1.5rem, 3vw, 1.75rem);
-    font-weight: $font-semibold;
+    font-weight: var(--font-weight-semibold);
     line-height: 1.2;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -156,25 +156,25 @@
   align-items: center;
   padding: $space-1 $space-3;
   border-radius: $radius-full;
-  font-size: $text-caption;
-  font-weight: $font-medium;
-  background: $surface-2;
-  color: $text-main;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-surface-muted);
+  color: var(--color-text-primary);
 
   &[data-estado='pendiente'] {
-    @include status-tint($warning, 0.12, 0.4);
+    @include status-tint(var(--color-warning), 0.12, 0.4);
   }
 
   &[data-estado='en-proceso'] {
-    @include status-tint($accent, 0.12, 0.4);
+    @include status-tint(var(--color-accent), 0.12, 0.4);
   }
 
   &[data-estado='resuelta'] {
-    @include status-tint($success, 0.12, 0.4);
+    @include status-tint(var(--color-success), 0.12, 0.4);
   }
 
   &[data-estado='rechazada'] {
-    @include status-tint($danger, 0.12, 0.4);
+    @include status-tint(var(--color-danger), 0.12, 0.4);
   }
 }
 
@@ -184,7 +184,7 @@
 
   h2 {
     @include text-heading;
-    color: $text-main;
+    color: var(--color-text-primary);
     margin: 0;
     overflow-wrap: anywhere;
   }
@@ -197,13 +197,13 @@
   }
 
   &__id {
-    color: $text-muted;
-    font-size: $text-caption;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
   }
 
   &__descripcion {
     @include text-body;
-    color: $text-muted;
+    color: var(--color-text-muted);
     margin: 0;
     overflow-wrap: anywhere;
   }
@@ -219,14 +219,14 @@
     }
 
     span {
-      color: $text-muted;
-      font-size: $text-caption;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-caption);
     }
 
     strong {
-      color: $text-main;
-      font-size: $text-small;
-      font-weight: $font-medium;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-medium);
       overflow-wrap: anywhere;
     }
   }
@@ -236,13 +236,13 @@
 
     h3 {
       @include text-heading;
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: 0;
     }
 
     label {
-      color: $text-muted;
-      font-size: $text-small;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-small);
     }
 
     app-select {
@@ -251,7 +251,7 @@
       width: 100%;
       min-width: 0;
       min-height: 44px;
-      color: $text-main;
+      color: var(--color-text-primary);
     }
   }
 
@@ -267,7 +267,7 @@
   &__conversacion {
     min-width: 0;
     padding-top: $space-4;
-    border-top: 1px solid $glass-border;
+    border-top: 1px solid var(--color-border);
   }
 }
 

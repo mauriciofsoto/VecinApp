@@ -1,5 +1,6 @@
 //badge
 @use 'sass:map';
+@use 'sass:math';
 @use '../variables' as *;
 @use '../global/mixins-core' as *;
 
@@ -7,11 +8,12 @@
 @mixin badge-base {
   @include flex-center($inline: true);
   gap: 0.35rem;
-  font-weight: $font-semibold;
-  border-radius: $radius-full;
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-pill);
   white-space: nowrap;
   letter-spacing: 0.02em;
-  transition: $transition-base;
+  transition: var(--effect-transition);
   user-select: none;
 }
 
@@ -22,9 +24,9 @@
 
 // 3. Color: fondo translúcido + texto + borde
 @mixin badge-variant($bg-color, $text-color: $bg-color, $border-opacity: 0.35) {
-  background: rgba($bg-color, 0.15);
+  background: color-mix(in srgb, #{$bg-color} 15%, transparent);
   color: $text-color;
-  border: 1px solid rgba($bg-color, $border-opacity);
+  border: 1px solid color-mix(in srgb, #{$bg-color} #{math.percentage($border-opacity)}, transparent);
 }
 
 // 4. Genera .badge-sm / -md / -lg
@@ -43,12 +45,36 @@
       $border: map.get($cfg, border);
     }
 
+    $token-name: $name;
+    @if $name == 'accent' { $token-name: 'primary'; }
+
     &-#{$name} {
-      @include badge-variant(
-        map.get($cfg, bg),
-        map.get($cfg, text),
-        $border
-      );
+      @if $name == 'neutral' {
+        background: var(--color-neutral-soft);
+        color: var(--color-neutral-text, #{map.get($cfg, text)});
+        border: 1px solid var(--color-neutral-border);
+      } @else {
+        $bg-color: map.get($cfg, bg);
+        $text-color: map.get($cfg, text);
+        background: var(
+          --color-#{$token-name}-subtle,
+          #{rgba($bg-color, 0.15)}
+        );
+        color: var(--color-#{$token-name}-text, #{$text-color});
+        @if $name == 'accent' {
+          border: 1px solid var(--color-primary-subtle-border);
+        } @else if $name == 'info' {
+          border: 1px solid var(--color-info-border);
+        } @else if $name == 'purple' {
+          border: 1px solid var(--color-purple-border);
+        } @else {
+          border: 1px solid color-mix(
+            in srgb,
+            var(--color-#{$token-name}, #{$bg-color}) #{math.percentage($border)},
+            transparent
+          );
+        }
+      }
     }
   }
 }

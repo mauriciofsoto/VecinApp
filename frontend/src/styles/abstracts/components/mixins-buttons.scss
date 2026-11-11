@@ -1,5 +1,4 @@
 //buttons
-@use 'sass:color';
 @use 'sass:map';
 @use '../variables' as *;
 @use '../global/mixins-core' as *;
@@ -14,21 +13,26 @@
   @include flex-center($inline: true);
   @include hover-lift;
   gap: $space-2;
-  font-family: $font-primary;
-  font-weight: $font-medium;
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: $transition-base;
+  transition: var(--effect-transition);
   user-select: none;
   white-space: nowrap;
-  border-radius: $radius-sm;
+  border-radius: var(--radius-control);
   outline: none;
   border: 1px solid transparent;
 
   &:disabled {
-    opacity: 0.5;
+    opacity: var(--state-disabled-opacity);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
   }
 }
 
@@ -54,51 +58,98 @@
   &:hover:not(:disabled) {
     background: $hover-bg;
     color: $hover-color;
-    @if $glow { box-shadow: 0 0 20px rgba($glow, 0.6); }
+    @if $glow { box-shadow: 0 0 20px color-mix(in srgb, #{$glow} 60%, transparent); }
   }
 }
 
 // 4. Variante de estado (danger, success, warning...) en un solo mixin
 @mixin button-status($color) {
   @include button-variant(
-    rgba($color, 0.2), $color, $color, $color, $white, rgba($color, 0.4)
+    color-mix(in srgb, #{$color} 20%, transparent), $color, $color, $color, var(--color-text-inverse), color-mix(in srgb, #{$color} 40%, transparent)
   );
 }
 
 // 5. Variantes concretas
 @mixin button-primary {
-  @include button-variant(
-    $primary, $primary, $white,
-    color.adjust($primary, $lightness: 5%), $white, $primary-glow
-  );
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-primary);
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-primary-hover);
+  }
 }
 
 @mixin button-secondary {
-  @include button-variant($surface-2, $glass-border, $text-main, $surface-3, $text-main);
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+
+  &:hover:not(:disabled) { background: var(--color-surface-highlight); }
 }
 
-@mixin button-danger  { @include button-status($danger); }
-@mixin button-success { @include button-status($success); }
-@mixin button-warning { @include button-status($warning); }
+@mixin button-danger {
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  box-shadow: var(--shadow-danger);
+  &:hover:not(:disabled) {
+    background: var(--color-danger);
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-danger-hover);
+  }
+}
+
+@mixin button-success {
+  background: var(--color-success-soft);
+  border-color: var(--color-success);
+  color: var(--color-success);
+  box-shadow: var(--shadow-success);
+  &:hover:not(:disabled) {
+    background: var(--color-success);
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-success-hover);
+  }
+}
+
+@mixin button-warning {
+  background: var(--color-warning-soft);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  box-shadow: var(--shadow-warning);
+  &:hover:not(:disabled) {
+    background: var(--color-warning);
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-warning-hover);
+  }
+}
 
 @mixin button-outline {
-  @include button-variant(transparent, $glass-border, $text-main, transparent, $accent);
-  &:hover:not(:disabled) { border-color: $accent; }
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  &:hover:not(:disabled) { border-color: var(--color-accent); color: var(--color-accent); }
 }
 
-@mixin button-ghost($color: $text-muted, $hover-bg: $surface-2, $hover-color: $text-main) {
+@mixin button-ghost($color: var(--color-text-muted), $hover-bg: var(--color-surface-muted), $hover-color: var(--color-text-primary)) {
   @include button-variant(transparent, transparent, $color, $hover-bg, $hover-color);
 }
 
 // Ghost en rojo (logout, eliminar)
 @mixin button-ghost-danger {
-  @include button-ghost($danger, rgba($danger, 0.15), $danger);
+  @include button-ghost(var(--color-danger), var(--color-danger-subtle), var(--color-danger));
 }
 
 // 6. Estado seleccionado (sin !important: aplicalo DESPUÉS de la variante)
 @mixin button-selected {
-  @include active-state($accent);
-  color: $accent;
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+  box-shadow: var(--shadow-accent);
+  color: var(--color-accent);
 }
 
 // 7. Botón circular chico (limpiar inputs / cerrar modales)
@@ -110,12 +161,12 @@
   border: none;
   border-radius: $radius-circle;
   background: transparent;
-  color: $text-muted;
-  font-size: $text-caption;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
 
   &:hover:not(:disabled) {
-    color: $white;
-    background: $surface-3;
+    color: var(--color-text-inverse);
+    background: var(--color-surface-highlight);
     transform: none;
   }
 }

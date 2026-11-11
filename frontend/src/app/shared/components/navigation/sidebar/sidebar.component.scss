@@ -13,13 +13,10 @@
   @include sidebar-container($sidebar-width);
   position: sticky;
   top: 0;
-  display: flex;
-  flex-direction: column;
   gap: $space-4;
-  height: 100vh;
   height: 100dvh;
-  padding: $space-6 $space-4;
-  color: $text-main;
+  transition: width var(--duration-fast) ease, transform var(--duration-fast) ease;
+  color: var(--color-text-primary);
   overflow: hidden;
 
   .sidebar-brand {
@@ -37,15 +34,15 @@
       height: 2.625rem;
       flex: 0 0 2.625rem;
       border-radius: $radius-control;
-      background: $avatar-gradient;
-      color: $bg-dark;
-      font-size: $text-heading;
-      font-weight: $font-bold;
+      background: var(--effect-avatar-gradient);
+      color: var(--color-background);
+      font-size: var(--font-size-heading);
+      font-weight: var(--font-weight-bold);
     }
 
     .brand-name {
-      font-size: $text-dashboard-brand;
-      font-weight: $font-bold;
+      font-size: var(--font-size-dashboard-brand);
+      font-weight: var(--font-weight-bold);
     }
   }
 
@@ -68,9 +65,9 @@
 
     .nav-section-title {
       padding: 0 $space-3;
-      color: $text-muted;
-      font-size: $text-tiny;
-      font-weight: $font-semibold;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-tiny);
+      font-weight: var(--font-weight-semibold);
       letter-spacing: 0.08em;
     }
 
@@ -82,18 +79,44 @@
 
   .sidebar-footer {
     padding-top: $space-4;
-    border-top: 1px solid $glass-border;
+    border-top: 1px solid var(--color-border);
 
+    .theme-toggle-button,
     .logout-button {
-      @include button-base;
-      @include button-ghost-danger;
+      display: flex;
+      align-items: center;
       justify-content: flex-start;
+      gap: $space-2;
       width: 100%;
       min-height: 2.75rem;
       padding: 0 $space-3;
-      font-size: $text-small;
+      border: 1px solid transparent;
+      border-radius: var(--radius-control);
+      background: transparent;
+      font-family: var(--font-family-primary);
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-medium);
+      text-align: left;
+      cursor: pointer;
+      transition: var(--effect-transition);
 
-      .logout-icon { font-size: $text-heading; }
+      &:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+      &:disabled { opacity: var(--state-disabled-opacity); cursor: not-allowed; }
+    }
+
+    .theme-toggle-button {
+      margin-bottom: $space-2;
+      color: var(--color-nav-text);
+
+      &:hover:not(:disabled) { background: var(--color-surface-muted); color: var(--color-text-primary); }
+    }
+
+    .logout-button {
+      color: var(--color-danger);
+
+      &:hover:not(:disabled) { background: var(--color-danger-subtle); }
+
+      .logout-icon { font-size: var(--font-size-heading); }
     }
   }
 }
@@ -136,18 +159,28 @@
     padding: calc($space-6 + env(safe-area-inset-top, 0px)) $space-4 calc($space-4 + env(safe-area-inset-bottom, 0px));
     border-radius: 0 $radius-md $radius-md 0;
     transform: translateX(-105%);
-    transition: transform $transition-normal $ease-out;
+    transition: transform var(--duration-normal) $ease-out;
 
     &.is-open { transform: translateX(env(safe-area-inset-left, 0px)); }
 
     .sidebar-close {
-      @include button-icon-clear(2rem);
       display: grid;
       place-items: center;
       position: absolute;
       top: calc($space-6 + env(safe-area-inset-top, 0px));
       right: $space-4;
-      font-size: $text-heading;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-heading);
+      cursor: pointer;
+
+      &:hover { background: var(--color-surface-highlight); color: var(--color-text-primary); }
+      &:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
     }
 
     .sidebar-brand { padding-right: 2.5rem; }

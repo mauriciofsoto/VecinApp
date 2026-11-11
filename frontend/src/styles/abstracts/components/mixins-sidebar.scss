@@ -12,7 +12,15 @@
 // ========================================
 @mixin sidebar-container($width: 260px) {
   @include glass-panel-effect;
-  @include vertical-panel($width, $radius-md);
+  background: var(--color-nav-background);
+  display: flex;
+  flex-direction: column;
+  width: $width;
+  height: 100vh;
+  padding: $space-6 $space-4;
+  border-radius: $radius-md;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 @mixin sidebar-nav-item {
@@ -20,52 +28,54 @@
   padding: $space-3 $space-4;
   border: 1px solid transparent;
   border-radius: $radius-sm;
-  color: $text-muted;
-  font-family: $font-primary;
-  font-size: $text-small;
-  font-weight: $font-medium;
+  color: var(--color-nav-text);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
   text-decoration: none;
   cursor: pointer;
-  transition: $transition-base;
+  transition: var(--effect-transition);
   user-select: none;
 
   .nav-icon {
     display: flex;
     font-size: 1.25rem;
-    transition: color $transition-fast ease;
+    transition: color var(--duration-fast) ease;
   }
 
   &:hover {
-    color: $text-main;
-    background: $surface-2;
+    color: var(--color-text-primary);
+    background: var(--color-nav-hover);
   }
 
   &:focus-visible {
-    outline: 2px solid $primary-light;
+    outline: 2px solid var(--color-primary-emphasis);
     outline-offset: 2px;
   }
 
   &.active {
-    @include active-state;
-    color: $white;
-    .nav-icon { color: $accent; }
+    background: var(--color-nav-active);
+    border-color: var(--color-nav-active-border);
+    color: var(--color-nav-active-text);
+    box-shadow: var(--shadow-focus);
+    .nav-icon { color: var(--color-nav-icon-active); }
   }
 }
 
 @mixin sidebar-user-profile {
-  @include card-base;
-  @include card-hover-effect;
-  flex-direction: row;
+  position: relative;
+  display: flex;
   align-items: center;
-  height: auto;
   gap: $space-3;
   padding: $space-3;
-  background: $surface-1;
+  border-radius: var(--radius-card);
+  transition: var(--effect-transition);
+  background: var(--color-surface);
   @include glass-border;
 
   .avatar {
     @include avatar-image(2.5rem);
-    border-color: rgba($primary, 0.5);
+    border-color: var(--color-primary-focus-border);
   }
 
   .user-info {
@@ -74,14 +84,14 @@
 
     .user-name {
       @include truncate;
-      color: $text-main;
-      font-size: $text-small;
-      font-weight: $font-medium;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
+      font-weight: var(--font-weight-medium);
     }
 
     .user-role {
-      color: $text-muted;
-      font-size: $text-caption;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-caption);
     }
   }
 }
@@ -96,22 +106,22 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: $radius-sm;
-  background: rgba($bg-dark, 0.85);
+  background: var(--color-background-overlay);
   @include glass-border;
-  color: $text-main;
+  color: var(--color-text-primary);
   font-size: 1.25rem;
   cursor: pointer;
-  box-shadow: $shadow-sm;
-  transition: background $transition-fast ease;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--duration-fast) ease;
 
-  &:hover { background: rgba(255, 255, 255, 0.1); }
+  &:hover { background: var(--color-surface-highlight); }
 }
 
 @mixin sidebar-backdrop {
   @include backdrop-blur(4px);
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--color-backdrop);
   z-index: 45;
   animation: fadeIn 200ms ease-out;
 }

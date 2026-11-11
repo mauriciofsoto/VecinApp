@@ -8,7 +8,7 @@
 
 .publication-list__item {
   overflow: hidden;
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  border: 1px solid var(--glass-border, color-mix(in srgb, var(--color-text-inverse) 12%, transparent));
   border-radius: 1rem;
 }
 
@@ -61,8 +61,8 @@
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--glass-bg, rgba(255, 255, 255, 0.08));
+  font-weight: var(--font-weight-semibold);
+  background: var(--glass-bg, color-mix(in srgb, var(--color-text-inverse) 8%, transparent));
 }
 
 .publication-list__chevron {

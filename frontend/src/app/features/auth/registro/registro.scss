@@ -1,0 +1,103 @@
+
+.registro-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-background-gradient);
+}
+
+.registro-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(var(--effect-glass-blur));
+}
+
+h1 {
+  margin: 0 0 8px;
+  color: var(--color-text-primary);
+}
+
+.registro-card > p {
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+label {
+  font-weight: var(--font-weight-semibold);
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-control-surface-solid);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+  input:focus {
+    outline: none;
+    border-color: var(--color-primary-focus-border);
+    box-shadow: var(--shadow-focus);
+  }
+
+button {
+  padding: 12px;
+  margin-top: 8px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+  button:disabled {
+    opacity: var(--state-disabled-opacity);
+    cursor: not-allowed;
+  }
+
+.mensaje {
+  padding: 10px;
+  border-radius: var(--radius-control);
+  font-size: var(--font-size-small);
+}
+
+.error {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger-text);
+}
+
+.exito {
+  background: var(--color-success-subtle);
+  color: var(--color-success-text);
+}
+
+.login-link {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+  .login-link a {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+  }

@@ -32,27 +32,27 @@
 
   transition:
     transform 250ms $ease-out,
-    border-color $transition-normal $ease-out,
-    box-shadow $transition-normal $ease-out;
+    border-color var(--duration-normal) $ease-out,
+    box-shadow var(--duration-normal) $ease-out;
 
   &--glass {
     @include backdrop-blur;
 
-    background: $glass-bg;
-    box-shadow: $shadow-md;
+    background: var(--color-surface-elevated);
+    box-shadow: var(--shadow-md);
   }
 
   &--solid {
-    background: $bg-dark;
+    background: var(--color-background);
   }
 
   &:hover {
-    border-color: rgba($accent, 0.65);
-    @include glow($accent, 18px, 0.18);
+    border-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+    @include glow(var(--color-accent), 18px, 0.18);
   }
 
   &:focus-within {
-    border-color: rgba($accent, 0.8);
+    border-color: color-mix(in srgb, var(--color-accent) 80%, transparent);
   }
 }
 
@@ -87,24 +87,24 @@
   touch-action: none;
 
   transition:
-    opacity $transition-normal $ease-out,
-    background-color $transition-normal $ease-out,
-    box-shadow $transition-normal $ease-out;
+    opacity var(--duration-normal) $ease-out,
+    background-color var(--duration-normal) $ease-out,
+    box-shadow var(--duration-normal) $ease-out;
 
   &:hover,
   &:focus-visible {
     opacity: 1;
-    background-color: rgba($accent, 0.16);
-    @include glow($accent, 12px, 0.25);
+    background-color: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    @include glow(var(--color-accent), 12px, 0.25);
   }
 
   &:focus-visible {
-    outline: 2px solid $accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
   &:active {
-    background-color: rgba($accent, 0.28);
+    background-color: color-mix(in srgb, var(--color-accent) 28%, transparent);
   }
 }
 
@@ -197,7 +197,7 @@
 @media (hover: none) {
   .resize-handle {
     opacity: 0.65;
-    background-color: $surface-2;
+    background-color: var(--color-surface-muted);
   }
 }
 

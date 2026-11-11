@@ -14,8 +14,12 @@ const RESIDENT_ROLES = ['Inquilino', 'Propietario'];
 
 export const routes: Routes = [
   {
+    path: 'landing',
+    loadComponent: () => import('./features/marketing/landing/landing').then(m => m.Landing),
+  },
+  {
     path: 'registro',
-    loadComponent: () => import('./pages/registro/registro').then(m => m.Registro),
+    loadComponent: () => import('../app/features/auth/registro/registro').then(m => m.Registro),
   },
   {
     path: 'login',
@@ -129,6 +133,14 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/operations/inquilinos/pages/inquilinos-list/inquilinos-list')
                 .then(m => m.InquilinosList),
+          },
+          {
+            path: 'invitaciones',
+            canActivate: [roleGuard],
+            data: { roles: ['Administrador'] },
+            loadComponent: () =>
+              import('./features/operations/inquilinos/pages/generar-qr/generar-qr')
+                .then(m => m.GenerarQr),
           },
         ],
       },

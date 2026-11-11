@@ -8,10 +8,10 @@
 }
 
 body {
-  background: $bg-gradient;
+  background: var(--color-background-gradient);
   background-attachment: fixed;
-  color: $text-main;
-  font-family: $font-primary;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
   min-height: 100vh;
   overflow: hidden;
 }

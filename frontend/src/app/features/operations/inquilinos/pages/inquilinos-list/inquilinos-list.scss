@@ -7,7 +7,7 @@
   @include ops.operation-page;
   display: grid;
   padding: $space-6;
-  color: $text-page;
+  color: var(--color-text-secondary);
 }
 
 .page-header {
@@ -19,7 +19,7 @@
 
 .page-header p,
 .item-card p {
-  @include ops.operation-muted-text($text-body);
+  @include ops.operation-muted-text(var(--font-size-body));
 }
 
 .panel,
@@ -35,10 +35,10 @@ label { @include ops.operation-form-label; }
 
 button {
   padding: $space-3 $space-4;
-  color: $white;
+  color: var(--color-text-inverse);
   border: 0;
   border-radius: $radius-control;
-  background: $primary;
+  background: var(--color-primary);
   cursor: pointer;
 }
 
@@ -63,9 +63,9 @@ button {
 
 .item-card h2 { margin-top: 0; }
 
-.status { color: $text-success-soft; }
-.status.inactive { color: $text-danger-soft; }
-.feedback { color: $text-info-soft; }
+.status { color: var(--color-success-text); }
+.status.inactive { color: var(--color-danger-text); }
+.feedback { color: var(--color-info-text); }
 
 @include mobile {
   .operations-page { padding: $space-4; }

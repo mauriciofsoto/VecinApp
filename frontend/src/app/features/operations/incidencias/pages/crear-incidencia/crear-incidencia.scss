@@ -19,21 +19,21 @@
   @include flex-col($space-2);
 
   .incidencia-eyebrow {
-    color: $accent;
-    font-size: $text-caption;
-    font-weight: $font-semibold;
+    color: var(--color-accent);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.1em;
   }
 
   h1 {
     @include text-title;
-    color: $text-main;
+    color: var(--color-text-primary);
     margin: 0;
   }
 
   p {
     @include text-body;
-    color: $text-muted;
+    color: var(--color-text-muted);
     max-width: 650px;
     margin: 0;
   }
@@ -53,11 +53,11 @@
     @include flex-col($space-1);
 
     padding-bottom: $space-3;
-    border-bottom: 1px solid $glass-border;
+    border-bottom: 1px solid var(--color-border);
 
     h2 {
       @include text-heading;
-      color: $text-main;
+      color: var(--color-text-primary);
       margin: 0;
     }
   }
@@ -72,7 +72,7 @@
     @include form-actions;
 
     padding-top: $space-3;
-    border-top: 1px solid $glass-border;
+    border-top: 1px solid var(--color-border);
   }
 }
 
@@ -87,9 +87,9 @@
   min-width: 0;
 
   label {
-    color: $text-main;
-    font-size: $text-small;
-    font-weight: $font-medium;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
   }
 
   app-input,
@@ -107,16 +107,16 @@
 .form-feedback {
   padding: $space-3 $space-4;
   border-radius: $radius-sm;
-  font-size: $text-small;
-  line-height: $line-normal;
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
   margin: 0;
 
   &--error {
-    @include status-tint($danger, 0.12, 0.4);
+    @include status-tint(var(--color-danger), 0.12, 0.4);
   }
 
   &--success {
-    @include status-tint($success, 0.12, 0.4);
+    @include status-tint(var(--color-success), 0.12, 0.4);
   }
 }
 

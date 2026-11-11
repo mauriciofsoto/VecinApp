@@ -12,9 +12,9 @@
   min-width: 0;
   height: 100%;
   padding: $space-4;
-  border: 1px solid rgba($accent, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
   border-radius: $radius-control;
-  background: rgba($bg-dark, 0.22);
+  background: color-mix(in srgb, var(--color-background) 22%, transparent);
   box-sizing: border-box;
 }
 
@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: $space-3;
-  border-bottom: 1px solid $glass-border;
+  border-bottom: 1px solid var(--color-border);
 
   h3,
   p {
@@ -32,8 +32,8 @@
 
   p {
     margin-top: $space-1;
-    color: $text-muted;
-    font-size: $text-small;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
   }
 }
 
@@ -45,36 +45,36 @@
 }
 
 .reserva-chat__status[data-status='pendiente'] {
-  @include status-tint($warning, 0.12, 0.4);
+  @include status-tint(var(--color-warning), 0.12, 0.4);
 }
 
 .reserva-chat__status[data-status='confirmada'] {
-  @include status-tint($success, 0.12, 0.4);
+  @include status-tint(var(--color-success), 0.12, 0.4);
 }
 
 .reserva-chat__status[data-status='rechazada'] {
-  @include status-tint($danger, 0.12, 0.4);
+  @include status-tint(var(--color-danger), 0.12, 0.4);
 }
 
 .reserva-chat__details {
   display: flex;
   flex-wrap: wrap;
   gap: $space-3;
-  color: $text-page;
-  font-size: $text-small;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
 
   span {
     @include flex-col($space-1);
     min-width: 7rem;
     padding: $space-2 $space-3;
-    border: 1px solid $border-subtle;
+    border: 1px solid var(--color-border-subtle);
     border-radius: $radius-sm;
-    background: $surface-1;
+    background: var(--color-surface);
   }
 
   small {
-    color: $text-muted;
-    font-size: $text-caption;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
   }
 }
 
@@ -82,25 +82,25 @@
   display: grid;
   gap: $space-2;
   padding: $space-3 $space-4;
-  border-left: 3px solid $accent;
+  border-left: 3px solid var(--color-accent);
   border-radius: 0 $radius-control $radius-control 0;
-  background: rgba($accent, 0.075);
+  background: color-mix(in srgb, var(--color-accent) 7.5%, transparent);
 
   h4,
   p { margin: 0; }
 
   h4 {
-    color: $text-muted;
-    font-size: $text-caption;
-    font-weight: $font-semibold;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
 
   p {
-    color: $text-page;
-    font-size: $text-small;
-    line-height: $line-normal;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-normal);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
@@ -112,24 +112,24 @@
   min-height: 220px;
   overflow-y: auto;
   padding: $space-4;
-  border: 1px solid $border-subtle;
+  border: 1px solid var(--color-border-subtle);
   border-radius: $radius-control;
-  background: rgba($bg-dark, 0.48);
+  background: color-mix(in srgb, var(--color-background) 48%, transparent);
 }
 
 .reserva-chat__empty {
   @include flex-col($space-1);
   margin: auto;
-  color: $text-muted;
+  color: var(--color-text-muted);
   text-align: center;
 
   p {
     margin: 0;
-    color: $text-main;
+    color: var(--color-text-primary);
   }
 
   span {
-    font-size: $text-small;
+    font-size: var(--font-size-small);
   }
 }
 
@@ -138,23 +138,23 @@
   width: fit-content;
   max-width: 85%;
   padding: $space-3;
-  border: 1px solid $glass-border;
+  border: 1px solid var(--color-border);
   border-radius: $radius-md $radius-md $radius-md 4px;
-  background: rgba(255, 255, 255, 0.055);
+  background: color-mix(in srgb, var(--color-text-inverse) 5.5%, transparent);
   overflow-wrap: anywhere;
 
   p {
     margin: 0;
-    color: $text-main;
+    color: var(--color-text-primary);
     white-space: pre-wrap;
   }
 }
 
 .reserva-chat__message--own {
   align-self: flex-end;
-  border-color: rgba($primary, 0.35);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
   border-radius: $radius-md $radius-md 4px $radius-md;
-  background: rgba($primary, 0.16);
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
 .reserva-chat__meta {
@@ -165,27 +165,27 @@
   margin-bottom: $space-2;
 
   strong {
-    color: $text-main;
-    font-size: $text-small;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-small);
   }
 
   time {
-    color: $text-muted;
-    font-size: $text-caption;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
   }
 }
 
 .reserva-chat__composer {
   padding-top: $space-3;
-  border-top: 1px solid $glass-border;
+  border-top: 1px solid var(--color-border);
 }
 
 .reserva-chat__composer app-message-input {
   display: block;
   padding: $space-2;
-  border: 1px solid $border-subtle;
+  border: 1px solid var(--color-border-subtle);
   border-radius: $radius-control;
-  background: rgba($bg-dark, 0.32);
+  background: color-mix(in srgb, var(--color-background) 32%, transparent);
 }
 
 @include mobile {

@@ -1,1 +1,9 @@
-<p>qr-code works!</p>
+<div class="qr-code" aria-live="polite">
+  @if (dataUrl()) {
+    <img [src]="dataUrl()" alt="Código QR para unirse a VecinApp" />
+  } @else if (error()) {
+    <p role="alert">{{ error() }}</p>
+  } @else {
+    <span class="qr-code__loading" role="status">Preparando código QR…</span>
+  }
+</div>

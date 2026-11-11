@@ -1,0 +1,194 @@
+<div class="landing-shell">
+  <header class="site-header">
+    <a class="brand" href="#inicio" (click)="closeMenu()" aria-label="VecinApp, inicio">
+      <span class="brand__symbol" aria-hidden="true">V</span>
+      <span>VecinApp</span>
+    </a>
+
+    <button class="menu-toggle" type="button" (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()" aria-controls="site-navigation"
+      [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'">
+      <span></span><span></span>
+    </button>
+
+    <nav id="site-navigation" class="site-nav" [class.site-nav--open]="menuOpen()" aria-label="Navegación principal">
+      <a href="#producto" (click)="closeMenu()">El producto</a>
+      <a href="#beneficios" (click)="closeMenu()">Beneficios</a>
+      <a href="#funcionalidades" (click)="closeMenu()">Funcionalidades</a>
+      <a href="#planes" (click)="closeMenu()">Planes</a>
+      <a class="nav-cta" href="#contacto" (click)="closeMenu()">Consultar planes <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section-wrap" id="inicio" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Una nueva forma de vivir en comunidad</p>
+        <h1 id="hero-title">Tu edificio,<br /><em>más conectado</em><br />y organizado.</h1>
+        <p class="hero__lead">VecinApp reúne en un solo lugar la comunicación, las novedades y la gestión cotidiana de tu comunidad.</p>
+        <div class="hero__actions">
+          <a class="button button--primary" href="#planes">Conocé nuestros planes <span aria-hidden="true">↗</span></a>
+          <a class="button button--quiet" href="#contacto">Contactanos</a>
+        </div>
+        <div class="hero__note"><span class="hero__note-icon" aria-hidden="true">✳</span><span>Un espacio común para quienes hacen comunidad todos los días.</span></div>
+      </div>
+
+      <div class="hero-art" role="img" aria-label="Ilustración de edificios conectados con una comunidad digital">
+        <div class="hero-art__orbit hero-art__orbit--one"></div>
+        <div class="hero-art__orbit hero-art__orbit--two"></div>
+        <div class="city-scene">
+          <div class="tower tower--left"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="tower tower--middle"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="tower tower--right"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="city-scene__ground"></div>
+        </div>
+        <div class="community-card community-card--notice">
+          <span class="mini-icon mini-icon--notice" aria-hidden="true">✳</span>
+          <div><strong>Comunidad</strong><small>Todo en un mismo lugar</small></div>
+          <span class="live-dot" aria-label="Actualizado"></span>
+        </div>
+        <div class="community-card community-card--people">
+          <div class="people-dots" aria-hidden="true"><span>●</span><span>●</span><span>●</span></div>
+          <div><strong>Una comunidad</strong><small>Más cerca, cada día</small></div>
+        </div>
+        <div class="hero-art__caption"><span>VECINOS</span><span>·</span><span>ESPACIOS</span><span>·</span><span>COMUNIDAD</span></div>
+      </div>
+      <a class="scroll-cue" href="#producto"><span aria-hidden="true">↓</span> Descubrí VecinApp</a>
+    </section>
+
+    <section class="intro section-wrap" id="producto" aria-labelledby="intro-title">
+      <div class="intro__label"><span>01</span><span class="label-line"></span><span>EL ESPACIO COMÚN</span></div>
+      <div class="intro__main">
+        <p class="eyebrow eyebrow--dark">¿Qué es VecinApp?</p>
+        <h2 id="intro-title">La vida del edificio,<br /><em>mejor organizada.</em></h2>
+        <p class="intro__text">VecinApp es un espacio digital para ordenar la información y las interacciones de cada edificio. Ayuda a que las novedades importantes estén a mano y que la comunidad no dependa exclusivamente de grupos de mensajería.</p>
+        <div class="role-list" aria-label="Personas a quienes está dirigida VecinApp">
+          <span>Administradores</span><span>Propietarios</span><span>Inquilinos</span><span>Personal del edificio</span>
+        </div>
+      </div>
+      <div class="intro__aside">
+        <div class="intro-mark" aria-hidden="true"><span>V</span><i></i><i></i><i></i></div>
+        <p>La comunidad sigue siendo la protagonista.<br /><strong>La información encuentra su lugar.</strong></p>
+      </div>
+    </section>
+
+    <section class="benefits section-wrap" id="beneficios" aria-labelledby="benefits-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">02 · MENOS RUIDO, MÁS COMUNIDAD</p><h2 id="benefits-title">Lo cotidiano,<br /><em>en orden.</em></h2></div>
+        <p>Una mejor experiencia empieza cuando cada persona sabe dónde encontrar lo que necesita.</p>
+      </div>
+      <div class="benefit-grid">
+        <article class="benefit-card benefit-card--featured">
+          <span class="card-index">01 / COMUNICACIÓN</span>
+          <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 12.5A4.5 4.5 0 0 1 12.5 8h23a4.5 4.5 0 0 1 4.5 4.5v15a4.5 4.5 0 0 1-4.5 4.5H21l-9 7v-7h-.5A4.5 4.5 0 0 1 7 27.5v-15Z"/><path d="M15 18h18M15 24h12"/></svg></span>
+          <h3>Comunicación organizada</h3><p>Las novedades importantes tienen un espacio propio y fácil de consultar.</p>
+          <span class="card-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="benefit-card benefit-card--lavender">
+          <span class="card-index">02 / INFORMACIÓN</span>
+          <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M13 8h16l7 7v25H13z"/><path d="M29 8v8h7M18 23h13M18 29h13M18 35h8"/></svg></span>
+          <h3>Todo más accesible</h3><p>Información centralizada para encontrarla cuando hace falta.</p>
+          <span class="card-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="benefit-card">
+          <span class="card-index">03 / SEGUIMIENTO</span>
+          <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 7 40 36H8L24 7Z"/><path d="M24 18v8M24 31h.01"/></svg></span>
+          <h3>Incidencias con seguimiento</h3><p>Reportes e intercambios reunidos para acompañar cada tema.</p>
+          <span class="card-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="benefit-card benefit-card--dark">
+          <span class="card-index">04 / ESPACIOS</span>
+          <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="8" y="11" width="32" height="29" rx="3"/><path d="M16 7v8M32 7v8M8 20h32M16 27h5M27 27h5M16 33h5"/></svg></span>
+          <h3>Espacios mejor coordinados</h3><p>Una forma más clara de organizar reservas y actividades comunes.</p>
+          <span class="card-arrow" aria-hidden="true">↗</span>
+        </article>
+        <article class="benefit-card benefit-card--wide">
+          <span class="card-index">05 / PARTICIPACIÓN</span>
+          <span class="line-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="18" cy="17" r="7"/><path d="M5 39c.7-7 5.3-11 13-11s12.3 4 13 11M31 12a6 6 0 0 1 0 12M35 29c4 1.4 6.5 4.7 7 10"/></svg></span>
+          <h3>Más voces en la conversación</h3><p>Encuestas y publicaciones ayudan a abrir espacios de participación para quienes forman parte del edificio.</p>
+          <span class="card-arrow" aria-hidden="true">↗</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="features section-wrap" id="funcionalidades" aria-labelledby="features-title">
+      <div class="section-heading section-heading--light">
+        <div><p class="eyebrow">03 · HERRAMIENTAS PARA EL DÍA A DÍA</p><h2 id="features-title">Un lugar para<br /><em>cada cosa.</em></h2></div>
+        <p>Áreas que componen la propuesta VecinApp. El alcance del servicio se conversa según las necesidades de cada edificio.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-tile feature-tile--large"><span class="feature-number">01</span><span class="feature-icon" aria-hidden="true">⌁</span><h3>Incidencias</h3><p>Reportes y seguimiento de temas del edificio.</p><div class="feature-line"></div></article>
+        <article class="feature-tile feature-tile--rose"><span class="feature-number">02</span><span class="feature-icon" aria-hidden="true">▦</span><h3>Reservas</h3><p>Organización de espacios compartidos.</p><div class="feature-line"></div></article>
+        <article class="feature-tile"><span class="feature-number">03</span><span class="feature-icon" aria-hidden="true">◉</span><h3>Encuestas</h3><p>Participación y opinión de la comunidad.</p><div class="feature-line"></div></article>
+        <article class="feature-tile"><span class="feature-number">04</span><span class="feature-icon" aria-hidden="true">▤</span><h3>Publicaciones y novedades</h3><p>Información compartida en un espacio común.</p><div class="feature-line"></div></article>
+        <article class="feature-tile feature-tile--sage"><span class="feature-number">05</span><span class="feature-icon" aria-hidden="true">▣</span><h3>Paquetería</h3><p>Registro y comunicación de paquetes recibidos.</p><div class="feature-line"></div></article>
+        <article class="feature-tile feature-tile--wide"><span class="feature-number">06</span><span class="feature-icon" aria-hidden="true">♙</span><h3>Gestión de residentes</h3><p>Herramientas para administrar información de residentes del edificio.</p><div class="feature-line"></div></article>
+      </div>
+    </section>
+
+    <section class="how section-wrap" id="como-funciona" aria-labelledby="how-title">
+      <div class="how__intro"><p class="eyebrow eyebrow--dark">04 · EMPEZAR ES SENCILLO</p><h2 id="how-title">De un edificio<br />a una <em>comunidad.</em></h2><p>Un recorrido acompañado para que cada comunidad empiece a usar VecinApp a su ritmo.</p></div>
+      <div class="steps">
+        <article class="step"><span class="step__number">01</span><div class="step__icon" aria-hidden="true">⌂</div><h3>Conversamos sobre tu edificio</h3><p>El administrador consulta una propuesta y comparte las necesidades de su comunidad.</p></article>
+        <div class="step-connector" aria-hidden="true"></div>
+        <article class="step"><span class="step__number">02</span><div class="step__icon" aria-hidden="true">◫</div><h3>Se configura el espacio común</h3><p>Se organiza el entorno digital de acuerdo con el servicio definido.</p></article>
+        <div class="step-connector" aria-hidden="true"></div>
+        <article class="step"><span class="step__number">03</span><div class="step__icon" aria-hidden="true">⌗</div><h3>La comunidad se incorpora</h3><p>El administrador comparte invitaciones QR para facilitar el acceso de residentes y personal.</p></article>
+      </div>
+    </section>
+
+    <section class="plans section-wrap" id="planes" aria-labelledby="plans-title">
+      <div class="plans__top"><div><p class="eyebrow">05 · UNA PROPUESTA PARA CADA EDIFICIO</p><h2 id="plans-title">Elegí cómo<br /><em>empezar.</em></h2></div><p>Los nombres y descripciones son una primera propuesta. Conversamos el alcance y las condiciones según las necesidades del edificio.</p></div>
+      <div class="plan-grid">
+        <article class="plan-card"><span class="plan-card__tag">01 · PARA EMPEZAR</span><h3>Esencial</h3><p>Para edificios que buscan organizar su comunicación y gestión cotidiana.</p><a href="#contacto" class="plan-link">Consultar este plan <span aria-hidden="true">↗</span></a><div class="plan-card__ornament" aria-hidden="true">01</div></article>
+        <article class="plan-card plan-card--featured"><span class="plan-card__tag">02 · PARA CONECTAR</span><h3>Comunidad</h3><p>Para edificios que quieren sumar herramientas de organización y participación.</p><a href="#contacto" class="plan-link">Consultar este plan <span aria-hidden="true">↗</span></a><div class="plan-card__ornament" aria-hidden="true">02</div></article>
+        <article class="plan-card"><span class="plan-card__tag">03 · A MEDIDA</span><h3>Personalizado</h3><p>Para edificios grandes o administraciones con necesidades particulares.</p><a href="#contacto" class="plan-link">Solicitar una propuesta <span aria-hidden="true">↗</span></a><div class="plan-card__ornament" aria-hidden="true">03</div></article>
+      </div>
+      <p class="plans-note"><span aria-hidden="true">✳</span> Las condiciones y el precio se definen en una conversación sobre el edificio y el servicio requerido.</p>
+    </section>
+
+    <section class="faq section-wrap" id="preguntas" aria-labelledby="faq-title">
+      <div class="faq__heading"><p class="eyebrow eyebrow--dark">06 · PARA SABER MÁS</p><h2 id="faq-title">Preguntas<br /><em>frecuentes.</em></h2><p>Si necesitás conversar un caso particular, dejanos tu consulta.</p><a href="#contacto" class="text-link">Ir a contacto <span aria-hidden="true">↗</span></a></div>
+      <div class="faq-list">
+        <details><summary>¿Qué es VecinApp?<span aria-hidden="true"></span></summary><p>Una plataforma digital que reúne información e interacciones de la vida cotidiana de un edificio en un espacio común.</p></details>
+        <details><summary>¿Quién puede contratar el servicio?<span aria-hidden="true"></span></summary><p>La propuesta está pensada para administradores y comunidades de edificios. Escribinos para conversar sobre tu caso.</p></details>
+        <details><summary>¿Cómo se incorporan los vecinos?<span aria-hidden="true"></span></summary><p>El administrador puede compartir invitaciones para iniciar el registro en VecinApp. Cada invitación actual admite un único registro.</p></details>
+        <details><summary>¿Necesitan descargar una aplicación?<span aria-hidden="true"></span></summary><p>VecinApp se utiliza desde el navegador y adapta su presentación a celulares y computadoras.</p></details>
+        <details><summary>¿Puedo consultar un plan para mi edificio?<span aria-hidden="true"></span></summary><p>Sí. Los planes de esta página son alternativas conceptuales. El alcance y las condiciones se conversan para cada edificio.</p></details>
+        <details><summary>¿Cómo solicito información?<span aria-hidden="true"></span></summary><p>Podés completar el formulario de contacto. El canal de envío todavía no está habilitado, así que por ahora no recibimos esos datos desde la página.</p></details>
+      </div>
+    </section>
+
+    <section class="contact section-wrap" id="contacto" aria-labelledby="contact-title">
+      <div class="contact__intro"><p class="eyebrow">07 · HABLEMOS</p><h2 id="contact-title">Tu comunidad<br /><em>merece un espacio.</em></h2><p>Contanos un poco sobre tu edificio y qué te gustaría organizar mejor.</p><div class="contact-note"><span aria-hidden="true">✳</span><span>Las consultas comerciales todavía no tienen un canal de recepción conectado.</span></div></div>
+      <form class="contact-form" #contactForm="ngForm" (ngSubmit)="submitContact(contactForm)" novalidate>
+        <div class="form-row">
+          <label>Nombre y apellido<input name="nombre" ngModel required autocomplete="name" placeholder="Tu nombre" /></label>
+          <label>Correo electrónico<input name="email" ngModel required email type="email" autocomplete="email" placeholder="nombre@correo.com" /></label>
+        </div>
+        @if (submitted() && (contactForm.controls['nombre']?.invalid || contactForm.controls['email']?.invalid)) { <p class="field-error" role="alert">Completá tu nombre y un correo electrónico válido.</p> }
+        <div class="form-row">
+          <label>Edificio o administración <span>(opcional)</span><input name="edificio" ngModel placeholder="Nombre del edificio o administración" /></label>
+          <label>Unidades aproximadas <span>(opcional)</span><input name="unidades" ngModel inputmode="numeric" placeholder="Por ejemplo, 40" /></label>
+        </div>
+        <label>Motivo de consulta<select name="motivo" ngModel required><option value="" disabled selected>Elegí una opción</option><option>Consultar planes</option><option>Contratar</option><option>Solicitar una demostración</option><option>Otra consulta</option></select></label>
+        @if (submitted() && contactForm.controls['motivo']?.invalid) { <p class="field-error" role="alert">Elegí el motivo de tu consulta.</p> }
+        <label>Mensaje<textarea name="mensaje" ngModel required rows="4" placeholder="¿Qué te gustaría resolver en tu edificio?"></textarea></label>
+        @if (submitted() && contactForm.controls['mensaje']?.invalid) { <p class="field-error" role="alert">Escribí un mensaje para continuar.</p> }
+        @if (formNotice()) { <p class="form-notice" role="status">{{ formNotice() }}</p> }
+        <button class="button button--primary form-submit" type="submit">Enviar consulta <span aria-hidden="true">↗</span></button>
+        <p class="form-privacy">El formulario es solo visual por ahora. No se envían ni almacenan los datos ingresados.</p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div class="footer-brand"><a class="brand" href="#inicio"><span class="brand__symbol" aria-hidden="true">V</span><span>VecinApp</span></a><p>Un espacio común para vivir el edificio de otra manera.</p></div>
+      <div class="footer-links"><span>EXPLORAR</span><a href="#producto">El producto</a><a href="#beneficios">Beneficios</a><a href="#funcionalidades">Funcionalidades</a></div>
+      <div class="footer-links"><span>EMPEZAR</span><a href="#como-funciona">Cómo funciona</a><a href="#planes">Planes</a><a href="#preguntas">Preguntas frecuentes</a></div>
+      <div class="footer-contact"><span>¿CONVERSAMOS?</span><a href="#contacto">Contactanos <span aria-hidden="true">↗</span></a><small>El canal comercial se habilitará próximamente.</small></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 VecinApp · Boceto comercial</span><a href="#inicio">Volver arriba ↑</a></div>
+  </footer>
+</div>

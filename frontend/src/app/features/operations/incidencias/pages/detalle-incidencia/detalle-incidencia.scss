@@ -6,13 +6,13 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 32px;
-  color: #1e293b;
+  color: var(--color-text-primary);
 }
 
 .volver {
   display: inline-block;
   margin-bottom: 24px;
-  color: #2563eb;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
 }
@@ -27,27 +27,27 @@
 
 .subtitulo,
 .fecha {
-  color: #64748b;
-  font-size: 14px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
 }
 
 h1 {
   margin: 8px 0;
-  font-size: 28px;
+  font-size: var(--font-size-title-small);
 }
 
 h2 {
   margin-top: 0;
   margin-bottom: 20px;
-  font-size: 19px;
+  font-size: var(--font-size-subtitle);
 }
 
 .estado {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
   padding: 8px 14px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -60,11 +60,11 @@ h2 {
 }
 
 .tarjeta {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
   padding: 24px;
-  box-shadow: 0 2px 8px #0f172a08;
+  box-shadow: var(--shadow-sm);
 }
 
 .descripcion {
@@ -88,30 +88,32 @@ h2 {
   }
 
 .etiqueta {
-  color: #64748b;
-  font-size: 13px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
 }
 
 .gestion p {
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.5;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
 }
 
 .gestion label {
   display: block;
   margin: 20px 0 8px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
 }
 
 .gestion select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  font-size: 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-control-surface-solid);
+  color: var(--color-text-primary);
+  color-scheme: inherit;
+  font-size: var(--font-size-small);
 }
 
 .gestion button {
@@ -119,32 +121,32 @@ h2 {
   margin-top: 16px;
   padding: 12px;
   border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 
   .gestion button:disabled {
-    opacity: 0.55;
+    opacity: var(--state-disabled-opacity);
     cursor: not-allowed;
   }
 
 .alerta {
   padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-control);
+  font-size: var(--font-size-small);
 }
 
 .exito {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--color-success-subtle);
+  color: var(--color-success-text);
 }
 
 .error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger-subtle);
+  color: var(--color-danger-text);
 }
 
 @media (max-width: 760px) {
