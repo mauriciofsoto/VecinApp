@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MisPaquetes } from './mis-paquetes';
@@ -8,7 +9,8 @@ describe('MisPaquetes', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MisPaquetes]
+      imports: [MisPaquetes],
+      providers: [provideHttpClient()],
     })
     .compileComponents();
 

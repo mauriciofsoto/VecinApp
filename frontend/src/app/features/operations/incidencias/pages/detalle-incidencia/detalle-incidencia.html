@@ -91,6 +91,11 @@
           {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
         </button>
 
+        <div class="gestion__derivar">
+          <p>¿Necesitás solicitar que un propietario gestione esta incidencia?</p>
+          <button type="button" class="boton-derivar">Derivar</button>
+        </div>
+
         <p *ngIf="mensaje" class="alerta exito">
           {{ mensaje }}
         </p>
@@ -101,6 +106,77 @@
       </section>
 
     </div>
+
+    <section class="tarjeta conversacion" aria-label="Conversación de la incidencia">
+      <app-chat-incidencia
+        [incidencia]="incidencia"
+        rolVista="administrador"
+      />
+    </section>
+
+    <dialog
+      class="modal-derivacion"
+      data-size="lg"
+      aria-labelledby="titulo-derivacion"
+    >
+      <div class="modal-panel">
+        <header class="modal-header">
+          <h2 class="modal-title" id="titulo-derivacion">Derivar incidencia</h2>
+        </header>
+
+        <div class="modal-body">
+          <p>
+            Seleccioná el propietario que recibirá esta incidencia para aceptar o rechazar su gestión
+          </p>
+
+          <section class="destinatarios__grupo" aria-labelledby="propietarios-unidad-titulo">
+            <div class="destinatarios__encabezado">
+              <div>
+                <h3 id="propietarios-unidad-titulo">Propietarios vinculados a la unidad</h3>
+                <p>Propietarios asociados a la unidad de esta incidencia</p>
+              </div>
+            </div>
+
+            <div class="destinatarios__lista">
+              <p class="destinatarios__pendiente">
+                Los propietarios disponibles aparecerán aquí.
+              </p>
+            </div>
+
+          </section>
+
+          <ng-template #propietariosSinUnidad>
+            <section class="destinatarios__grupo" aria-labelledby="otros-propietarios-titulo">
+              <div class="destinatarios__encabezado">
+                <div>
+                  <h3 id="otros-propietarios-titulo">Otros propietarios registrados</h3>
+                  <p>Propietarios que todavía no tienen una unidad vinculada</p>
+                </div>
+              </div>
+
+              <div class="destinatarios__lista">
+                <p class="destinatarios__pendiente">
+                  Esta lista se mostrará cuando la unidad no tenga propietarios vinculados.
+                </p>
+              </div>
+
+            </section>
+          </ng-template>
+
+          <div class="destinatarios__seleccion" aria-live="polite">
+            <span class="destinatarios__seleccion-etiqueta">Destinatario seleccionado</span>
+            <strong>Ningún propietario seleccionado</strong>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="boton-secundario">Cancelar</button>
+          <button type="button" class="boton-principal">
+            Enviar solicitud de aceptación
+          </button>
+        </footer>
+      </div>
+    </dialog>
   </ng-container>
 
 </div>

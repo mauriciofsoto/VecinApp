@@ -3,6 +3,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia';
 import {
   Incidencias,
   DetalleIncidencia,
@@ -12,7 +13,7 @@ import {
 @Component({
   selector: 'app-detalle-incidencia',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ChatIncidencia],
   templateUrl: './detalle-incidencia.html',
   styleUrl: './detalle-incidencia.scss'
 })

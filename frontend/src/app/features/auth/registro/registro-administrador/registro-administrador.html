@@ -1,0 +1,47 @@
+<main class="registro-container">
+  <section class="registro-card contratacion-card" aria-labelledby="registro-title">
+    <a class="salir" routerLink="/landing#planes">← Volver a los planes</a>
+    <p class="etapa">Etapa {{ etapa }} de 2</p>
+    <div class="progreso" role="progressbar" [attr.aria-valuenow]="etapa" aria-valuemin="1" aria-valuemax="2" [attr.aria-label]="'Etapa ' + etapa + ' de 2'"><span [style.width.%]="etapa * 50"></span></div>
+
+    @if (success()) {
+      <h1 id="registro-title">Cuenta creada</h1>
+      <p class="mensaje exito" role="status">{{ success() }}</p>
+      <p>Ya podés iniciar sesión con el correo y la contraseña que registraste.</p>
+      <a class="continuar-login" routerLink="/login">Ir a iniciar sesión</a>
+    } @else if (etapa === 1) {
+      <h1 id="registro-title">Datos de la cuenta</h1>
+      <p>Creá la cuenta que administrará tu edificio.</p>
+      <form (ngSubmit)="continuar()" novalidate>
+        <label for="nombre">Nombre</label><input id="nombre" name="nombre" [(ngModel)]="nombre" required autocomplete="given-name" />
+        <label for="apellido">Apellido</label><input id="apellido" name="apellido" [(ngModel)]="apellido" required autocomplete="family-name" />
+        <label for="email">Correo electrónico</label><input id="email" name="email" type="email" [(ngModel)]="email" required autocomplete="email" />
+        @if (email && !emailValido) { <small class="mensaje error">Ingresá un correo electrónico válido.</small> }
+        <label for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel" [(ngModel)]="telefono" required autocomplete="tel" />
+        <label for="password">Contraseña</label><input id="password" name="password" type="password" [(ngModel)]="password" required autocomplete="new-password" />
+        <small>Al menos 8 caracteres, una mayúscula, una minúscula y un número.</small>
+        <label for="confirmPassword">Confirmar contraseña</label><input id="confirmPassword" name="confirmPassword" type="password" [(ngModel)]="confirmPassword" required autocomplete="new-password" />
+        @if (confirmPassword && !contrasenasCoinciden) { <small class="mensaje error">Las contraseñas no coinciden.</small> }
+        @if (error()) { <p class="mensaje error" role="alert">{{ error() }}</p> }
+        <button type="submit" [disabled]="!administradorValido">Continuar</button>
+      </form>
+    } @else {
+      <h1 id="registro-title">Datos del edificio</h1>
+      <p>Completá los datos básicos para crear tu espacio en VecinApp.</p>
+      <form (ngSubmit)="registrar()" novalidate>
+        <label for="nombreEdificio">Nombre del edificio</label><input id="nombreEdificio" name="nombreEdificio" [(ngModel)]="nombreEdificio" required autocomplete="organization" />
+        <label for="direccion">Dirección</label><input id="direccion" name="direccion" [(ngModel)]="direccion" required autocomplete="street-address" />
+        <label for="localidad">Localidad</label><input id="localidad" name="localidad" [(ngModel)]="localidad" required />
+        <label for="provincia">Provincia</label><input id="provincia" name="provincia" [(ngModel)]="provincia" required />
+        @if (error()) { <p class="mensaje error" role="alert">{{ error() }}</p> }
+        <div class="acciones">
+          <button type="button" class="secundario" (click)="volver()" [disabled]="loading()">Volver</button>
+          <button type="submit" [disabled]="loading() || !edificioValido">
+            {{ loading() ? 'Creando cuenta y edificio…' : 'Crear cuenta y edificio' }}
+          </button>
+        </div>
+      </form>
+    }
+    @if (!success()) { <p class="login-link">¿Ya tenés cuenta? <a routerLink="/login">Iniciá sesión</a></p> }
+  </section>
+</main>

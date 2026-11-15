@@ -57,3 +57,9 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Recorridos comerciales
+
+La contratación de administrador (`/registro-administrador?plan=...`) y la solicitud de información (`/solicitar-informacion`) son recorridos demostrativos. Los planes publicados son propuestas conceptuales sin precios definidos. El registro de administrador no llama a `POST /auth/registro-administrador`, porque ese endpoint crea un usuario y un edificio activos sin comprobar un pago.
+
+El formulario comercial valida los datos en el navegador, pero no los transmite ni los almacena. Para habilitarlo hace falta definir un contrato y endpoint de recepción, persistencia o entrega al equipo comercial, además de acordar la política de privacidad y el mensaje de confirmación. No hay pasarela de pago ni activación comercial integrada.

@@ -1,64 +1,30 @@
 <main class="operations-page">
   <header class="page-header">
-    <h1>Recepción de paquetes</h1>
-    <p>Registrá los paquetes recibidos para los residentes.</p>
+    <div>
+      <h1>Recepción de paquetes</h1>
+      <p>Registrá los paquetes recibidos para los residentes del edificio.</p>
+    </div>
+    <app-button type="button" customClass="register-button" (buttonClick)="abrirFormulario()">
+      Registrar paquete
+    </app-button>
   </header>
 
-  <section class="panel">
-    <h2>Registrar paquete</h2>
+  <p class="local-data-notice" role="status">
+    La lista y el chat de esta pantalla son datos locales de demostración; todavía no se guardan en el servidor.
+  </p>
 
-    @if (inquilinosActivos().length > 0) {
-      <form (ngSubmit)="registrar()" class="form-grid">
-        <label>
-          Destinatario
-          <app-select
-            name="destinatarioId"
-            [(ngModel)]="destinatarioId"
-            [options]="opcionesDestinatario()"
-            placeholder="Seleccioná un residente"
-            [required]="true"
-          />
-        </label>
-
-        <label>
-          Remitente o empresa
-          <app-input
-            name="remitente"
-            [(ngModel)]="remitente"
-            [required]="true"
-            placeholder="Correo, mensajería..."
-          />
-        </label>
-
-        <label>
-          Descripción del paquete
-          <app-input
-            name="descripcion"
-            [(ngModel)]="descripcion"
-            [required]="true"
-            placeholder="Sobre, caja, documentación..."
-          />
-        </label>
-
-        <button type="submit">Registrar paquete</button>
-      </form>
-    } @else {
-      <p>No hay residentes activos registrados para seleccionar.</p>
-    }
-
-    <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
-  </section>
-
-  <section class="package-workspace">
+  <section class="package-workspace" aria-label="Paquetes y conversación">
     <div class="panel package-list">
       <header class="section-header">
-        <h2>Paquetes recibidos</h2>
-        <span>{{ paqueteria.paquetes().length }} registrados</span>
+        <div>
+          <h2>Paquetes recibidos</h2>
+          <p>{{ paqueteria.paquetes().length }} en esta sesión</p>
+        </div>
       </header>
 
-      <div class="package-list__counters">
-        <span>Pendientes: {{ paqueteria.pendientes().length }}</span>
-        <span>Entregados: {{ paqueteria.entregados().length }}</span>
+      <div class="package-list__counters" aria-label="Contadores locales">
+        <app-badge variant="warning">Estado pendiente (local): {{ paqueteria.pendientes().length }}</app-badge>
+        <app-badge variant="success">Estado entregado (local): {{ paqueteria.entregados().length }}</app-badge>
       </div>
 
       <div class="item-list">
@@ -74,33 +40,114 @@
               <h3>{{ paquete.descripcion }}</h3>
               <p>{{ paquete.destinatarioNombre }}</p>
               <p>Unidad {{ paquete.unidad }} · {{ paquete.edificioNombre }}</p>
-              <p>{{ paquete.remitente }}</p>
-              <span
-                class="status"
-                [class.delivered]="paquete.estado === 'entregado'"
-              >
-                {{ paquete.estado === 'pendiente' ? 'Pendiente de entrega' : 'Entregado' }}
-              </span>
+              <p>Remitente: {{ paquete.remitente }}</p>
+              <app-badge [variant]="paquete.estado === 'pendiente' ? 'warning' : 'success'">
+                Estado local: {{ paquete.estado }}
+              </app-badge>
             </div>
           </button>
         } @empty {
-          <p>No hay paquetes registrados.</p>
+          <p class="empty-state">No hay paquetes para mostrar.</p>
         }
       </div>
     </div>
 
-    <section class="panel package-conversation">
+    <section class="panel package-conversation" aria-label="Chat del paquete">
       @if (paqueteSeleccionado(); as paquete) {
-        <app-chat-paquete
-          [paquete]="paquete"
-          rolVista="porteria"
-        />
+        <app-chat-paquete [paquete]="paquete" rolVista="porteria" />
       } @else {
         <div class="conversation-empty">
           <h2>Conversaciones</h2>
           <p>Seleccioná un paquete para consultar o iniciar su conversación.</p>
+          <p class="local-note">Los mensajes se conservan solo en memoria durante esta sesión.</p>
         </div>
       }
     </section>
   </section>
 </main>
+
+<app-modal [(open)]="formularioAbierto" heading="Registrar paquete" size="lg">
+  <form class="registration-form" (ngSubmit)="intentarRegistrar()">
+    <p class="form-intro">
+      Seleccioná al destinatario y completá los datos. La operación no se enviará hasta que exista un endpoint de alta compatible.
+    </p>
+
+    <label class="search-field">
+      <span>Buscar por nombre o apellido</span>
+      <app-input
+        name="busquedaDestinatario"
+        type="search"
+        autocomplete="off"
+        placeholder="Nombre o apellido"
+        [value]="busqueda()"
+        (valueChange)="busqueda.set($event.toString())"
+      />
+    </label>
+
+    @if (cargando()) {
+      <p class="state-message" role="status">Cargando destinatarios…</p>
+    } @else if (errorCarga()) {
+      <div class="state-message state-message--error" role="alert">
+        <p>{{ errorCarga() }}</p>
+        <app-button type="button" customClass="retry-button" variant="outline" (buttonClick)="cargarDestinatarios()">Reintentar</app-button>
+      </div>
+    } @else if (destinatarios().length === 0) {
+      <p class="state-message">No hay residentes activos disponibles en este edificio.</p>
+    } @else {
+      <div class="recipient-list" aria-label="Destinatarios disponibles">
+        @for (persona of destinatariosFiltrados(); track persona.id) {
+          <button
+            type="button"
+            class="recipient-card"
+            [class.recipient-card--selected]="destinatarioSeleccionadoId() === persona.id"
+            [attr.aria-pressed]="destinatarioSeleccionadoId() === persona.id"
+            (click)="seleccionarDestinatario(persona)"
+          >
+            <strong>{{ persona.nombre }} {{ persona.apellido }}</strong>
+            @if (persona.unidadesDeclaradas.length) {
+              <span class="recipient-references">
+                @for (referencia of referenciasUnidad(persona); track $index) {
+                  <span>{{ referencia }}</span>
+                }
+              </span>
+            } @else {
+              <span class="recipient-no-unit">Sin unidad declarada</span>
+            }
+          </button>
+        } @empty {
+          <p class="state-message">No hay residentes que coincidan con la búsqueda.</p>
+        }
+      </div>
+    }
+
+    @if (destinatarioSeleccionado(); as seleccionado) {
+      <p class="selection-feedback" aria-live="polite">
+        Destinatario: <strong>{{ seleccionado.nombre }} {{ seleccionado.apellido }}</strong>
+      </p>
+    }
+
+    <div class="form-grid">
+      <label>
+        Remitente o empresa
+        <app-input name="remitente" [(ngModel)]="remitente" [required]="true" placeholder="Correo, mensajería…" />
+      </label>
+      <label>
+        Descripción o identificación del paquete
+        <app-input name="descripcion" [(ngModel)]="descripcion" [required]="true" placeholder="Sobre, caja, documentación…" />
+      </label>
+      <label class="form-grid__wide">
+        Observaciones (opcional)
+        <app-input name="observaciones" [(ngModel)]="observaciones" [multiline]="true" placeholder="Indicaciones adicionales" />
+      </label>
+    </div>
+
+    @if (mensajeRegistro()) {
+      <p class="form-feedback" role="status">{{ mensajeRegistro() }}</p>
+    }
+
+    <div modal-footer class="form-actions">
+      <app-button type="button" variant="outline" (buttonClick)="cerrarFormulario()">Cancelar</app-button>
+      <app-button type="submit" [disabled]="!puedeIntentarRegistro()">Registrar paquete</app-button>
+    </div>
+  </form>
+</app-modal>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VecinApp.Data;
 using VecinApp.Models;
+using VecinApp.Services;
 
 namespace VecinApp.Controllers;
 
@@ -16,13 +17,69 @@ public class CodigosInvitacionController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly UserManager<Usuario> _userManager;
+    private readonly AccesoEdificioService _accesoEdificioService;
 
     public CodigosInvitacionController(
         AppDbContext context,
-        UserManager<Usuario> userManager)
+        UserManager<Usuario> userManager,
+        AccesoEdificioService accesoEdificioService)
     {
         _context = context;
         _userManager = userManager;
+        _accesoEdificioService = accesoEdificioService;
+    }
+
+    // GET /api/codigos-invitacion/mi-qr-comunidad
+    [HttpGet("mi-qr-comunidad")]
+    public async Task<IActionResult> ObtenerQrComunidad()
+    {
+        var usuarioId = User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(usuarioId))
+            return Unauthorized(new { message = "No se pudo identificar al usuario." });
+
+        var usuario = await _userManager.FindByIdAsync(usuarioId);
+        if (usuario == null || usuario.Estado != EstadoUsuario.Activo || !usuario.IdRol.HasValue)
+            return Forbid();
+
+        var rolActual = await _context.RolesAplicacion
+            .Where(rol => rol.IdRol == usuario.IdRol.Value)
+            .Select(rol => rol.Nombre)
+            .FirstOrDefaultAsync();
+
+        if (rolActual != "Administrador")
+            return Forbid();
+
+        if (!usuario.IdEdificio.HasValue)
+            return BadRequest(new { message = "El administrador no tiene un edificio asignado." });
+
+        var accesoPublicoId = await _context.Edificios
+            .AsNoTracking()
+            .Where(edificio => edificio.IdEdificio == usuario.IdEdificio.Value)
+            .Select(edificio => (Guid?)edificio.AccesoPublicoId)
+            .SingleOrDefaultAsync();
+
+        if (!accesoPublicoId.HasValue)
+            return NotFound(new { message = "No se encontró el edificio del administrador." });
+
+        return Ok(new { identificadorPublico = accesoPublicoId.Value });
+    }
+
+    // POST /api/codigos-invitacion/comunidad/{accesoPublicoId}/token
+    [AllowAnonymous]
+    [HttpPost("comunidad/{accesoPublicoId:guid}/token")]
+    public async Task<IActionResult> EmitirTokenAccesoComunidad(Guid accesoPublicoId)
+    {
+        var emitido = await _accesoEdificioService.EmitirAsync(accesoPublicoId, HttpContext.RequestAborted);
+        if (emitido == null)
+            return NotFound(new { message = "El acceso del edificio no existe o no está disponible." });
+
+        return Ok(new
+        {
+            token = emitido.Token,
+            fechaExpiracion = emitido.FechaExpiracion
+        });
     }
 
     // POST /api/codigos-invitacion/administrador

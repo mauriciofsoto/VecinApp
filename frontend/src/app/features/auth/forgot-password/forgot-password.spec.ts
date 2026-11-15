@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { ForgotPassword } from './forgot-password';
 
 describe('ForgotPassword', () => {
@@ -8,7 +10,11 @@ describe('ForgotPassword', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ForgotPassword]
+      imports: [ForgotPassword],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: { forgotPassword: () => { throw new Error('No debe solicitar recuperación durante la prueba.'); } } },
+      ],
     })
     .compileComponents();
 

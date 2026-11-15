@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EstadoIncidencia {
   idEstadoIncidencia: number;
@@ -31,7 +32,7 @@ export interface CambiarEstadoRequest {
 export class Incidencias {
   private http = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:5062/api/incidencias';
+  private apiUrl = `${environment.apiUrl}/api/incidencias`;
 
   obtenerDetalle(id: number): Observable<DetalleIncidencia> {
     return this.http.get<DetalleIncidencia>(

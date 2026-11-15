@@ -7,7 +7,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
 type UserRole =
   | 'Administrador'
   | 'SuperAdministrador'
-  | 'Porteria'
+  | 'Portero'
   | 'Inquilino'
   | 'Propietario';
 
@@ -53,7 +53,7 @@ export class SidebarComponent {
       : 'Usuario';
   });
 
-  readonly userRoleLabel = computed(() => this.role());
+  readonly userRoleLabel = computed(() => this.role() === 'Portero' ? 'Personal' : this.role());
 
   readonly dashboardRoute = computed(() => {
     switch (this.role()) {
@@ -61,7 +61,7 @@ export class SidebarComponent {
       case 'SuperAdministrador':
         return '/admin/dashboard';
 
-      case 'Porteria':
+      case 'Portero':
         return '/porteria-dashboard';
 
       case 'Inquilino':
@@ -89,7 +89,7 @@ export class SidebarComponent {
           icon: '▦',
           route: '/porteria-dashboard',
           exact: true,
-          roles: ['Porteria'],
+          roles: ['Portero'],
         },
         {
           label: 'Mi inicio',
@@ -151,11 +151,10 @@ export class SidebarComponent {
         {
           label: 'Recepción de paquetes',
           icon: '▣',
-          route: '/admin/paqueteria',
+          route: '/recepcion-paquetes',
           roles: [
             'Administrador',
-            'SuperAdministrador',
-            'Porteria',
+            'Portero',
           ],
         },
         {

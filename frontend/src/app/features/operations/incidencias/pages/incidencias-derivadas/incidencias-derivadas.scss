@@ -1,0 +1,207 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.incidencias-derivadas {
+  @include flex-col($space-5);
+  min-width: 0;
+
+  &__header {
+    @include flex-row($space-4);
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    h1 {
+      @include text-title;
+      margin: $space-2 0;
+      color: var(--color-text-primary);
+    }
+
+    p {
+      @include text-body;
+      margin: 0;
+      color: var(--color-text-muted);
+    }
+  }
+
+  &__eyebrow {
+    color: var(--color-accent);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.1em;
+  }
+
+  &__resumen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $space-3;
+
+    app-card {
+      display: block;
+      min-width: 0;
+    }
+  }
+
+  &__stat {
+    @include flex-col($space-2);
+    min-width: 0;
+
+    span {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-small);
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    strong {
+      color: var(--color-text-primary);
+      font-size: clamp(1.5rem, 3vw, 1.75rem);
+      font-weight: var(--font-weight-semibold);
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__filtros {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(170px, 220px)) auto;
+    gap: $space-3;
+    align-items: end;
+    min-width: 0;
+
+    app-button {
+      white-space: nowrap;
+    }
+  }
+
+  &__busqueda,
+  &__filtro {
+    display: block;
+    min-width: 0;
+
+    app-input,
+    app-select {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 44px;
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__contenido {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-lg;
+    background: var(--color-surface);
+
+    app-empty-state {
+      display: block;
+      padding: $space-6;
+    }
+  }
+
+  &__tabla-wrapper {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  &__tabla {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: $space-3 $space-4;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--color-surface-muted);
+      color: var(--color-text-muted);
+      font-weight: var(--font-weight-semibold);
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background: color-mix(in srgb, var(--color-text-inverse) 2.5%, transparent);
+    }
+  }
+
+  &__estado {
+    display: inline-flex;
+    align-items: center;
+    padding: $space-1 $space-3;
+    border-radius: $radius-full;
+    background: var(--color-surface-muted);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+
+    &--derivacion[data-estado='pendiente'] {
+      @include status-tint(var(--color-warning), 0.12, 0.4);
+    }
+
+    &--derivacion[data-estado='aceptada'] {
+      @include status-tint(var(--color-accent), 0.12, 0.4);
+    }
+
+    &--derivacion[data-estado='rechazada'] {
+      @include status-tint(var(--color-danger), 0.12, 0.4);
+    }
+
+    &--gestion[data-estado='pendiente'] {
+      @include status-tint(var(--color-warning), 0.12, 0.4);
+    }
+
+    &--gestion[data-estado='en-proceso'] {
+      @include status-tint(var(--color-accent), 0.12, 0.4);
+    }
+
+    &--gestion[data-estado='resuelta'] {
+      @include status-tint(var(--color-success), 0.12, 0.4);
+    }
+  }
+
+  &__feedback {
+    margin: 0;
+    padding: $space-4;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+
+    &--error {
+      @include status-tint(var(--color-danger), 0.12, 0.4);
+    }
+  }
+}
+
+@include mobile {
+  .incidencias-derivadas {
+    gap: $space-4;
+
+    &__resumen {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__filtros {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    &__contenido app-empty-state {
+      padding: $space-4;
+    }
+  }
+}

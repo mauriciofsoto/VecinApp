@@ -18,12 +18,20 @@ export const routes: Routes = [
     loadComponent: () => import('./features/marketing/landing/landing').then(m => m.Landing),
   },
   {
-    path: 'registro',
-    loadComponent: () => import('../app/features/auth/registro/registro').then(m => m.Registro),
+    path: 'acceso/:identificadorPublico',
+    loadComponent: () => import('./features/auth/registro/registro-users/registro-users').then(m => m.RegistroUsers),
+  },
+  {
+    path: 'registro-administrador',
+    loadComponent: () => import('./features/auth/registro/registro-administrador/registro-administrador').then(m => m.RegistroAdministrador),
+  },
+  {
+    path: 'solicitar-informacion',
+    loadComponent: () => import('./features/marketing/solicitar-informacion/solicitar-informacion').then(m => m.SolicitarInformacion),
   },
   {
     path: 'cuestionario-cuenta',
-    loadComponent: () => import('./features/account-questionnaire/account-questionnaire').then(m => m.AccountQuestionnaire),
+    loadComponent: () => import('./features/auth/registro/registro-users/registro-users').then(m => m.RegistroUsers),
   },
   {
     path: 'login',
@@ -64,7 +72,7 @@ export const routes: Routes = [
       {
         path: 'porteria-dashboard',
         canActivate: [roleGuard],
-        data: { roles: ['Porteria'] },
+        data: { roles: ['Portero'] },
         loadComponent: () =>
           import('./features/dashboard/porteria-dashboard/porteria-dashboard.component')
             .then(m => m.PorteriaDashboardComponent),
@@ -117,7 +125,7 @@ export const routes: Routes = [
           {
             path: 'paqueteria',
             canActivate: [roleGuard],
-            data: { roles: ADMIN_ROLES },
+            data: { roles: ['Administrador'] },
             loadComponent: () =>
               import('./features/operations/paqueteria/pages/recepcion-paquetes/recepcion-paquetes')
                 .then(m => m.RecepcionPaquetes),
@@ -220,7 +228,7 @@ export const routes: Routes = [
       {
         path: 'recepcion-paquetes',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, 'Porteria'] },
+        data: { roles: ['Administrador', 'Portero'] },
         loadComponent: () =>
           import('./features/operations/paqueteria/pages/recepcion-paquetes/recepcion-paquetes')
             .then(m => m.RecepcionPaquetes),

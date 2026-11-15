@@ -75,17 +75,34 @@ builder.Services.AddAuthentication(options =>
 
 // Servicios y CORS 
 builder.Services.AddScoped<TokenService>();
-
-var frontendUrl = builder.Configuration["FrontendUrl"]
-    ?? "http://localhost:4200";
+builder.Services.AddScoped<AccesoEdificioService>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins(frontendUrl)
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.SetIsOriginAllowed(origin =>
+                    Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                    && uri.Scheme == Uri.UriSchemeHttp
+                    && uri.Port == 4200
+                    && (uri.Host == "localhost"
+                        || Uri.CheckHostName(uri.Host) is UriHostNameType.IPv4 or UriHostNameType.IPv6))
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else
+        {
+            var frontendUrl = builder.Configuration["FrontendUrl"];
+
+            if (string.IsNullOrWhiteSpace(frontendUrl))
+                throw new InvalidOperationException("Falta configurar FrontendUrl en el entorno.");
+
+            policy.WithOrigins(frontendUrl)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 
@@ -128,7 +145,10 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowAngular");
 
@@ -141,7 +161,7 @@ app.MapControllers();
 
 
 
-using (var scope = app.Services.CreateScope())
+if (!builder.Configuration.GetValue<bool>("VecinApp:SkipDevelopmentSeed")) using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var userManager = services.GetRequiredService<UserManager<Usuario>>();
@@ -172,6 +192,12 @@ using (var scope = app.Services.CreateScope())
     var rolInquilino = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "Inquilino");
 
+    var rolPropietario = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "Propietario");
+
+    var rolPortero = await context.RolesAplicacion
+        .FirstOrDefaultAsync(r => r.Nombre == "Portero");
+
     var rolSuperAdministrador = await context.RolesAplicacion
         .FirstOrDefaultAsync(r => r.Nombre == "SuperAdministrador");
 
@@ -193,6 +219,18 @@ using (var scope = app.Services.CreateScope())
         };
 
         context.RolesAplicacion.Add(rolInquilino);
+    }
+
+    if (rolPropietario == null)
+    {
+        rolPropietario = new Rol { Nombre = "Propietario" };
+        context.RolesAplicacion.Add(rolPropietario);
+    }
+
+    if (rolPortero == null)
+    {
+        rolPortero = new Rol { Nombre = "Portero" };
+        context.RolesAplicacion.Add(rolPortero);
     }
 
     if (rolSuperAdministrador == null)

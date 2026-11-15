@@ -1,17 +1,17 @@
-import { Component, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [FormsModule],
+  imports: [RouterLink],
   templateUrl: './landing.html',
   styleUrl: './landing.scss',
 })
 export class Landing {
+  private readonly host = inject(ElementRef<HTMLElement>);
   readonly menuOpen = signal(false);
-  readonly submitted = signal(false);
-  readonly formNotice = signal('');
+  readonly formSent = signal(false);
 
   toggleMenu(): void {
     this.menuOpen.update(open => !open);
@@ -21,11 +21,44 @@ export class Landing {
     this.menuOpen.set(false);
   }
 
-  submitContact(form: NgForm): void {
-    this.submitted.set(true);
-    this.formNotice.set('');
-    if (form.invalid) return;
+  scrollToSection(event: Event, sectionId: string): void {
+    event.preventDefault();
+    this.closeMenu();
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
-    this.formNotice.set('Este formulario todavía no está conectado. Podés volver a esta página cuando habilitemos el canal de consultas.');
+  playFeatureVideo(video: HTMLVideoElement): void {
+    video.muted = true;
+    video.play().catch(() => {
+      // Evita errores en consola si el navegador bloquea la reproducción antes de interactuar
+    });
+  }
+
+  pauseFeatureVideo(video: HTMLVideoElement): void {
+    video.pause();
+    video.currentTime = 0;
+  }
+
+  submitContact(event: Event): void {
+    event.preventDefault();
+    this.formSent.set(true);
+  }
+
+  @HostListener('document:keydown.escape')
+  closeMenuWithEscape(): void {
+    this.closeMenu();
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeMenuOutside(event: MouseEvent): void {
+    const target = event.target as Node;
+    const menu = this.host.nativeElement.querySelector('.site-nav');
+    const toggle = this.host.nativeElement.querySelector('.menu-toggle');
+    if (!menu?.contains(target) && !toggle?.contains(target)) {
+      this.closeMenu();
+    }
   }
 }

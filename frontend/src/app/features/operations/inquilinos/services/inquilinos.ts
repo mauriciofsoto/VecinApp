@@ -1,5 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 import { Inquilino } from '../models/inquilino';
+import { UsuarioComunidad } from '../models/usuario-comunidad';
 
 export type CrearInquilino = Omit<
   Inquilino,
@@ -8,11 +12,18 @@ export type CrearInquilino = Omit<
 
 @Injectable({ providedIn: 'root' })
 export class Inquilinos {
+  private readonly apiUrl = `${environment.apiUrl}/api/usuarios/comunidad`;
   private readonly estado = signal<Inquilino[]>([]);
+
+  constructor(private readonly http: HttpClient) {}
 
   readonly inquilinos = this.estado.asReadonly();
 
   readonly totalInquilinos = computed(() => this.estado().length);
+
+  obtenerComunidad(): Observable<UsuarioComunidad[]> {
+    return this.http.get<UsuarioComunidad[]>(this.apiUrl);
+  }
 
   registrar(datos: CrearInquilino): boolean {
     const email = datos.email.trim().toLowerCase();

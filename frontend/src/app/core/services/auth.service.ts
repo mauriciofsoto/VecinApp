@@ -44,19 +44,6 @@ export class AuthService {
     );
   }
 
-  registrar(payload: {
-    nombre: string;
-    apellido: string;
-    email: string;
-    password: string;
-    codigoInvitacion: string;
-  }): Observable<MessageResponse> {
-    return this.http.post<MessageResponse>(
-      `${this.API_URL}/registro`,
-      payload
-    );
-  }
-
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem('refresh_token');
     return this.http.post<AuthResponse>(`${this.API_URL}/refresh`, { refreshToken }).pipe(

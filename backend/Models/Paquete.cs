@@ -5,11 +5,15 @@ public class Paquete
 {
     public int IdPaquete { get; set; }
 
-    public int IdUnidad { get; set; }
+    public int IdEdificio { get; set; }
+
+    public int? IdUnidad { get; set; }
 
     public string IdUsuarioRegistro { get; set; } = string.Empty;
 
     public string IdUsuarioDestinatario { get; set; } = string.Empty;
+
+    public string Remitente { get; set; } = string.Empty;
 
     public string Identificacion { get; set; } = string.Empty;
 
@@ -21,14 +25,22 @@ public class Paquete
 
     public DateTime? FechaConfirmacion { get; set; }
 
+    public DateTime? FechaEntrega { get; set; }
+
+    public string? IdUsuarioEntrega { get; set; }
+
     public DateTime? FechaEliminacion { get; set; }
 
     // Relaciones
-    public Unidad Unidad { get; set; } = null!;
+    public Edificio Edificio { get; set; } = null!;
+
+    public Unidad? Unidad { get; set; }
 
     public Usuario UsuarioRegistro { get; set; } = null!;
 
     public Usuario UsuarioDestinatario { get; set; } = null!;
+
+    public Usuario? UsuarioEntrega { get; set; }
 
     public ICollection<MensajePaquete> Mensajes { get; set; }
         = new List<MensajePaquete>();

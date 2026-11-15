@@ -3,19 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia';
 
-import {
-  Incidencia,
-  EstadoIncidencia,
-} from '../../models/incidencia';
+import { EstadoIncidencia } from '../../models/incidencia';
 
 import { EstadoIncidenciaDto, Incidencias } from '../../services/incidencias';
 import { AuthService } from '../../../../../core/services/auth';
 
 import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
 import { CardComponent } from '../../../../../shared/components/atoms/card/card.component';
-import { Modal } from '../../../../../shared/components/organisms/modal/modal';
 import { InputComponent } from '../../../../../shared/components/atoms/input/input';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
 
@@ -28,10 +23,8 @@ import { SelectComponent, SelectOption } from '../../../../../shared/components/
     RouterLink,
     ButtonComponent,
     CardComponent,
-    Modal,
     InputComponent,
     SelectComponent,
-    ChatIncidencia,
   ],
   templateUrl: './incidencias-admin.html',
   styleUrl: './incidencias-admin.scss',
@@ -53,13 +46,10 @@ export class IncidenciasAdmin implements OnInit {
   readonly categoriaSeleccionada = signal('todas');
   readonly prioridadSeleccionada = signal('todas');
 
-  readonly incidenciaSeleccionada = signal<Incidencia | null>(null);
-  readonly estadoNuevo = signal<number | null>(null);
   readonly estadosCatalogo = signal<EstadoIncidenciaDto[]>([]);
   readonly cargando = signal(false);
   readonly errorCarga = signal('');
   readonly mensaje = signal('');
-  readonly guardandoEstado = signal(false);
   readonly opcionesPrioridad: SelectOption[] = [
     { label: 'Todas las prioridades', value: 'todas' },
     { label: 'Alta', value: 'alta' },
@@ -76,26 +66,6 @@ export class IncidenciasAdmin implements OnInit {
       })),
     ];
   }
-
-  get opcionesEstadoEdicion(): SelectOption<number>[] {
-    return this.estadosCatalogo().map(estado => ({
-      label: estado.nombre,
-      value: estado.idEstadoIncidencia,
-      disabled: !this.transicionPermitida(estado.nombre),
-    }));
-  }
-
-  get estadoSinCambios(): boolean {
-    const incidencia = this.incidenciaSeleccionada();
-    const seleccionado = this.estadoNuevo();
-    if (!incidencia || seleccionado === null) return true;
-    return this.estadosCatalogo().some(estado =>
-      estado.idEstadoIncidencia === seleccionado &&
-      this.normalizarEstado(estado.nombre) === incidencia.estado,
-    );
-  }
-
-  readonly modalDetalleAbierto = signal(false);
 
   ngOnInit(): void {
     if (this.auth.currentUser()?.rol !== 'Administrador') {
@@ -183,48 +153,6 @@ export class IncidenciasAdmin implements OnInit {
     ];
   }
 
-  verIncidencia(incidencia: Incidencia): void {
-    this.incidenciaSeleccionada.set(incidencia);
-    const estadoActual = this.estadosCatalogo().find(
-      estado => this.normalizarEstado(estado.nombre) === incidencia.estado,
-    );
-    this.estadoNuevo.set(estadoActual?.idEstadoIncidencia ?? null);
-    this.modalDetalleAbierto.set(true);
-  }
-
-  cerrarDetalle(): void {
-    this.modalDetalleAbierto.set(false);
-    this.incidenciaSeleccionada.set(null);
-  }
-
-  cambiarEstado(estado: unknown): void {
-    const idEstado = Number(estado);
-    this.estadoNuevo.set(Number.isInteger(idEstado) && idEstado > 0 ? idEstado : null);
-  }
-
-  guardarEstado(): void {
-    const incidencia = this.incidenciaSeleccionada();
-
-    const idEstado = this.estadoNuevo();
-    if (!incidencia || idEstado === null || this.guardandoEstado()) return;
-
-    this.guardandoEstado.set(true);
-    this.mensaje.set('');
-    this.incidenciasService.cambiarEstado(incidencia.id, idEstado)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.mensaje.set('El estado se actualizó correctamente.');
-          this.guardandoEstado.set(false);
-          this.cerrarDetalle();
-        },
-        error: () => {
-          this.mensaje.set('No se pudo actualizar el estado. Verificá que la transición sea válida.');
-          this.guardandoEstado.set(false);
-        },
-      });
-  }
-
   actualizarBusqueda(valor: string): void {
     this.busqueda.set(valor);
   }
@@ -259,16 +187,4 @@ export class IncidenciasAdmin implements OnInit {
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
   }
 
-  private transicionPermitida(destino: string): boolean {
-    const actual = this.incidenciaSeleccionada()?.estado;
-    const next = this.normalizarEstado(destino);
-    if (!actual) return true;
-    if (actual === next) return false;
-
-    const permitidas: Record<string, string[]> = {
-      pendiente: ['en-proceso', 'rechazada'],
-      'en-proceso': ['resuelta', 'rechazada'],
-    };
-    return permitidas[actual]?.includes(next) ?? false;
-  }
 }

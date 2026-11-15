@@ -1,5 +1,8 @@
+@use '../../../../../../styles/abstracts' as *;
+
 :host {
   display: block;
+  min-height: 100%;
 }
 
 .pagina-incidencia {
@@ -65,6 +68,10 @@ h2 {
   border-radius: var(--radius-card);
   padding: 24px;
   box-shadow: var(--shadow-sm);
+}
+
+.conversacion {
+  margin-top: 24px;
 }
 
 .descripcion {
@@ -139,6 +146,121 @@ h2 {
   font-size: var(--font-size-small);
 }
 
+.gestion__derivar {
+  @include flex-col($space-2);
+  align-items: flex-start;
+  margin-top: $space-5;
+  padding-top: $space-4;
+  border-top: 1px solid var(--color-border);
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-normal);
+  }
+}
+
+.boton-derivar,
+.boton-secundario,
+.boton-principal {
+  @include button-base;
+  @include button-size(md);
+}
+
+.boton-derivar,
+.boton-secundario {
+  @include button-secondary;
+}
+
+.gestion .boton-derivar {
+  @include button-secondary;
+  width: auto;
+  margin-top: 0;
+  border: 1px solid var(--color-border);
+}
+
+.boton-principal {
+  @include button-primary;
+}
+
+.modal-derivacion {
+  @include modal-dialog;
+
+  .modal-panel {
+    @include modal-panel;
+  }
+
+  .modal-header {
+    @include flex-row($space-3);
+    justify-content: space-between;
+    padding: $space-4 $space-5;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .modal-title {
+    margin: 0;
+  }
+
+  .modal-body {
+    @include modal-body;
+  }
+
+  .modal-footer {
+    @include modal-footer;
+  }
+
+}
+
+.destinatarios {
+  &__grupo {
+    @include flex-col($space-3);
+    min-width: 0;
+  }
+
+  &__encabezado {
+    h3 {
+      @include text-heading;
+      margin: 0;
+      color: var(--color-text-primary);
+    }
+
+    p {
+      margin: $space-1 0 0;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-small);
+    }
+  }
+
+  &__pendiente {
+    margin: 0;
+    padding: $space-3;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: $radius-md;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-align: center;
+  }
+
+  &__seleccion {
+    @include flex-col($space-1);
+    padding: $space-3;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background: var(--color-surface-muted);
+
+    strong {
+      color: var(--color-text-primary);
+      font-size: var(--font-size-small);
+    }
+  }
+
+  &__seleccion-etiqueta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+  }
+}
+
 .exito {
   background: var(--color-success-subtle);
   color: var(--color-success-text);
@@ -165,24 +287,4 @@ h2 {
   .datos {
     grid-template-columns: 1fr;
   }
-}
-
-:host {
-  display: block;
-  min-height: 100%;
-}
-
-.pagina {
-  min-height: 100vh;
-  height: auto;
-  overflow: visible;
-  padding-bottom: 40px;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: auto;
-  min-height: 100%;
-  overflow-y: auto;
 }

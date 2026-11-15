@@ -1,116 +1,86 @@
 <main class="operations-page">
   <header class="page-header">
     <div>
-      <h1>Inquilinos</h1>
-      <p>Administrá los residentes de cada edificio.</p>
+      <h1>Personas de la comunidad</h1>
+      <p>Inquilinos, propietarios y personal registrados en tu edificio.</p>
     </div>
-
     <button type="button" (click)="mostrarFormulario = !mostrarFormulario">
-      {{ mostrarFormulario ? 'Cerrar formulario' : 'Registrar residente' }}
+      {{ mostrarFormulario ? 'Cerrar formulario local' : 'Alta local' }}
     </button>
   </header>
 
   @if (mostrarFormulario) {
     <section class="panel">
-      <h2>Nuevo residente</h2>
-
+      <h2>Alta local de residente</h2>
+      <p class="notice">Este formulario guarda datos solo en memoria. No crea una cuenta en el backend ni modifica el listado comunitario.</p>
       <form (ngSubmit)="registrar()" class="form-grid">
-        <label>
-          Nombre
-          <app-input name="nombre" [(ngModel)]="nombre" [required]="true" />
-        </label>
-
-        <label>
-          Apellido
-          <app-input name="apellido" [(ngModel)]="apellido" [required]="true" />
-        </label>
-
-        <label>
-          Email
-          <app-input
-            type="email"
-            name="email"
-            [(ngModel)]="email"
-            [required]="true"
-          />
-        </label>
-
-        <label>
-          Documento
-          <app-input name="documento" [(ngModel)]="documento" [required]="true" />
-        </label>
-
-        <label>
-          Edificio
-          <app-input
-            name="edificioNombre"
-            [(ngModel)]="edificioNombre"
-            [required]="true"
-          />
-        </label>
-
-        <label>
-          ID del edificio
-          <app-input
-            type="number"
-            name="edificioId"
-            [(ngModel)]="edificioId"
-            min="1"
-            [required]="true"
-          />
-        </label>
-
-        <label>
-          Unidad / departamento
-          <app-input name="unidad" [(ngModel)]="unidad" [required]="true" />
-        </label>
-
-        <button type="submit">Guardar residente</button>
+        <label>Nombre <app-input name="nombre" [(ngModel)]="nombre" [required]="true" /></label>
+        <label>Apellido <app-input name="apellido" [(ngModel)]="apellido" [required]="true" /></label>
+        <label>Email <app-input type="email" name="email" [(ngModel)]="email" [required]="true" /></label>
+        <label>Documento local <app-input name="documento" [(ngModel)]="documento" [required]="true" /></label>
+        <label>Edificio local <app-input name="edificioNombre" [(ngModel)]="edificioNombre" [required]="true" /></label>
+        <label>ID del edificio local <app-input type="number" name="edificioId" [(ngModel)]="edificioId" min="1" [required]="true" /></label>
+        <label>Unidad local <app-input name="unidad" [(ngModel)]="unidad" [required]="true" /></label>
+        <button type="submit">Guardar en memoria</button>
       </form>
-
       <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
     </section>
   }
 
   <section class="panel">
     <div class="toolbar">
-      <app-input
-        name="busqueda"
-        [(ngModel)]="busqueda"
-        placeholder="Buscar por nombre, email, documento o unidad..."
-      />
-
+      <app-input name="busqueda" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" placeholder="Buscar por nombre, apellido o email..." />
       <app-select
-        name="edificio"
-        ariaLabel="Filtrar por edificio"
-        [options]="opcionesEdificio"
-        [(ngModel)]="filtroEdificio"
+        name="perfil"
+        ariaLabel="Filtrar por perfil"
+        [options]="opcionesPerfil"
+        [ngModel]="filtroPerfil()"
+        (ngModelChange)="filtroPerfil.set($event)"
       />
+      <button type="button" (click)="cargar()" [disabled]="cargando()">Actualizar lista</button>
     </div>
 
-    <p>Total de residentes: <strong>{{ filtrados.length }}</strong></p>
+    @if (cargando()) {
+      <p role="status">Cargando personas de la comunidad...</p>
+    } @else if (errorCarga()) {
+      <p class="error" role="alert">{{ errorCarga() }}</p>
+      <button type="button" (click)="cargar()">Reintentar consulta</button>
+    } @else {
+      <p>Total de personas: <strong>{{ filtrados().length }}</strong></p>
+      <div class="item-list">
+        @for (persona of filtrados(); track persona.id) {
+          <article class="item-card">
+            <div class="person-info">
+              <h2>{{ persona.nombre }} {{ persona.apellido }}</h2>
+              <p>{{ persona.email }}</p>
+              <p>Perfil: <strong>{{ etiquetaRol(persona.rol) }}</strong>@if (persona.perfilComunitario) { · {{ persona.perfilComunitario }} }</p>
+              <p>Estado de cuenta: <span class="status" [class.inactive]="persona.estado !== 'Activo'">{{ persona.estado }}</span></p>
+              <p>Fecha de registro: {{ persona.fechaRegistro | date:'shortDate' }}</p>
 
-    <div class="item-list">
-      @for (inquilino of filtrados; track inquilino.id) {
-        <article class="item-card">
-          <div>
-            <h2>{{ inquilino.nombre }} {{ inquilino.apellido }}</h2>
-            <p>{{ inquilino.email }}</p>
-            <p>Documento: {{ inquilino.documento }}</p>
-            <p>{{ inquilino.edificioNombre }} · Unidad {{ inquilino.unidad }}</p>
-            <p>Registrado: {{ inquilino.fechaRegistro | date:'shortDate' }}</p>
-            <span class="status" [class.inactive]="inquilino.estado === 'inactivo'">
-              {{ inquilino.estado }}
-            </span>
-          </div>
-
-          <button type="button" (click)="servicio.cambiarEstado(inquilino.id)">
-            {{ inquilino.estado === 'activo' ? 'Desactivar' : 'Activar' }}
-          </button>
-        </article>
-      } @empty {
-        <p>No hay residentes que coincidan con la búsqueda.</p>
-      }
-    </div>
+              @if (persona.unidadesDeclaradas.length) {
+                <div class="declarations">
+                  <h3>Unidades declaradas (sin verificación)</h3>
+                  @for (unidad of persona.unidadesDeclaradas; track $index) {
+                    <div class="declaration">
+                      <p>Tipo declarado: {{ unidad.tipo }}</p>
+                      @if (unidad.pisoDeclarado) { <p>Piso declarado: {{ unidad.pisoDeclarado }}</p> }
+                      @if (unidad.identificacionDeclarada) { <p>Identificación declarada: {{ unidad.identificacionDeclarada }}</p> }
+                      <p>Unidad principal declarada: {{ unidad.esPrincipalDeclarada ? 'Sí' : 'No' }}</p>
+                      @if (unidad.estaAlquiladaDeclarada !== null) { <p>Alquiler declarado: {{ unidad.estaAlquiladaDeclarada ? 'Sí' : 'No' }}</p> }
+                      <p>Confirmación: {{ unidad.estadoConfirmacion }}</p>
+                      <p>Fecha de declaración: {{ unidad.fechaDeclaracion | date:'shortDate' }}</p>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p>Sin declaraciones de unidades.</p>
+              }
+            </div>
+          </article>
+        } @empty {
+          <p>No hay personas que coincidan con los filtros.</p>
+        }
+      </div>
+    }
   </section>
 </main>

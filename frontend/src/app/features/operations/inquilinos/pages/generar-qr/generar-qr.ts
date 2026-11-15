@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { finalize } from 'rxjs';
-import { CodigosInvitacionService, CodigoInvitacionResponse } from '../../../../../core/services/codigos-invitacion.service';
+import { CodigosInvitacionService } from '../../../../../core/services/codigos-invitacion.service';
 import { QrCode } from '../../../../../shared/components/molecules/qr-code/qr-code';
 
 @Component({
@@ -9,29 +9,30 @@ import { QrCode } from '../../../../../shared/components/molecules/qr-code/qr-co
   templateUrl: './generar-qr.html',
   styleUrl: './generar-qr.scss',
 })
-export class GenerarQr {
+export class GenerarQr implements OnInit {
   private readonly invitaciones = inject(CodigosInvitacionService);
-  readonly invitacion = signal<CodigoInvitacionResponse | null>(null);
+  readonly identificadorPublico = signal<string | null>(null);
   readonly loading = signal(false);
   readonly mensaje = signal('');
   readonly error = signal('');
   readonly enlace = computed(() => {
-    const codigo = this.invitacion()?.codigo;
-    if (!codigo || typeof window === 'undefined') return '';
-    const url = new URL('/registro', window.location.origin);
-    url.searchParams.set('codigo', codigo);
-    return url.toString();
+    const identificador = this.identificadorPublico();
+    if (!identificador || typeof window === 'undefined') return '';
+    return new URL(`/acceso/${identificador}`, window.location.origin).toString();
   });
 
-  generarInvitacion(): void {
-    if (this.loading()) return;
+  ngOnInit(): void {
+    this.cargarQrComunitario();
+  }
+
+  cargarQrComunitario(): void {
     this.loading.set(true);
     this.error.set('');
-    this.mensaje.set('');
-    this.invitacion.set(null);
-    this.invitaciones.crearInvitacionInquilino().pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: invitacion => this.invitacion.set(invitacion),
-      error: err => this.error.set(err?.error?.message ?? 'No se pudo generar la invitación. Intentá nuevamente.'),
+    this.invitaciones.obtenerQrComunidad().pipe(finalize(() => this.loading.set(false))).subscribe({
+      next: acceso => {
+        this.identificadorPublico.set(acceso.identificadorPublico);
+      },
+      error: err => this.error.set(err?.error?.message ?? 'No se pudo cargar el QR del edificio.'),
     });
   }
 
@@ -71,8 +72,4 @@ export class GenerarQr {
     window.print();
   }
 
-  get vencimiento(): string {
-    const value = this.invitacion()?.fechaExpiracion;
-    return value ? new Intl.DateTimeFormat('es-AR', { dateStyle: 'long' }).format(new Date(value)) : '';
-  }
 }

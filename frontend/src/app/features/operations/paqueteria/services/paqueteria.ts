@@ -1,5 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 import { Paquete, CrearPaquete } from '../models/paquete';
+import { DestinatarioPaquete } from '../models/destinatario-paquete';
 import {
   MensajePaquete,
   CrearMensajePaquete,
@@ -9,6 +13,10 @@ import {
   providedIn: 'root',
 })
 export class Paqueteria {
+  private readonly apiUrl = `${environment.apiUrl}/api/paqueteria`;
+
+  constructor(private readonly http: HttpClient) {}
+
   private readonly estadoPaquetes = signal<Paquete[]>([
     {
       id: 1,
@@ -50,6 +58,10 @@ export class Paqueteria {
       paquete => paquete.estado === 'entregado',
     ),
   );
+
+  obtenerDestinatarios(): Observable<DestinatarioPaquete[]> {
+    return this.http.get<DestinatarioPaquete[]>(`${this.apiUrl}/destinatarios`);
+  }
 
   registrar(datos: CrearPaquete): Paquete {
     const paquete: Paquete = {

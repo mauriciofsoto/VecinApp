@@ -1,0 +1,22 @@
+<main class="info-page">
+  <header class="info-header"><a class="brand" routerLink="/landing" aria-label="VecinApp, inicio"><span class="brand__symbol">V</span><span>VecinApp</span></a><a routerLink="/landing#contacto">Volver a la landing</a></header>
+  <section class="info-layout" aria-labelledby="info-title">
+    <div class="info-intro"><p class="eyebrow">CONSULTA COMERCIAL</p><h1 id="info-title">Hablemos de<br /><em>tu edificio.</em></h1><p>Dejanos tus datos y contanos qué necesitás conocer sobre VecinApp.</p><div class="info-note">Este formulario es independiente del registro de cuentas. Las consultas todavía no se envían ni se almacenan.</div></div>
+    <form class="info-form" #consulta="ngForm" (ngSubmit)="revisar(consulta)" novalidate>
+      <div class="form-row"><label for="nombre">Nombre y apellido</label><input id="nombre" name="nombre" ngModel required autocomplete="name" placeholder="Tu nombre" /></div>
+      @if (revisado() && consulta.controls['nombre']?.invalid) { <small class="field-error">Ingresá tu nombre y apellido.</small> }
+      <div class="form-row"><label for="email">Correo electrónico</label><input id="email" name="email" ngModel required email type="email" autocomplete="email" placeholder="nombre@correo.com" /></div>
+      @if (revisado() && consulta.controls['email']?.invalid) { <small class="field-error">Ingresá un correo electrónico válido.</small> }
+      <div class="form-row"><label for="telefono">Teléfono de contacto</label><input id="telefono" name="telefono" ngModel required type="tel" autocomplete="tel" placeholder="Tu teléfono" /></div>
+      @if (revisado() && consulta.controls['telefono']?.invalid) { <small class="field-error">Ingresá un teléfono de contacto.</small> }
+      <div class="form-row"><label for="edificio">Nombre del edificio o consorcio <span>(opcional)</span></label><input id="edificio" name="edificio" ngModel autocomplete="organization" placeholder="Nombre del edificio" /></div>
+      <div class="form-row"><label for="unidades">Cantidad aproximada de unidades <span>(opcional)</span></label><input id="unidades" name="unidades" ngModel type="number" min="1" inputmode="numeric" placeholder="Por ejemplo, 40" /></div>
+      <div class="form-row"><label for="motivo">Motivo de consulta</label><select id="motivo" name="motivo" [(ngModel)]="motivo" required><option value="" disabled>Elegí una opción</option><option>Conocer los planes</option><option>Solicitar una propuesta comercial</option><option>Consultar por contratación</option><option>Solicitar una demostración</option><option>Otra consulta</option></select></div>
+      @if (revisado() && consulta.controls['motivo']?.invalid) { <small class="field-error">Elegí el motivo de tu consulta.</small> }
+      <div class="form-row"><label for="mensaje">Mensaje adicional</label><textarea id="mensaje" name="mensaje" ngModel rows="4" placeholder="¿Qué te gustaría consultar?"></textarea></div>
+      @if (notice()) { <p class="form-notice" role="status">{{ notice() }}</p> }
+      <button class="button" type="submit">Revisar solicitud <span aria-hidden="true">↗</span></button>
+      <p class="form-privacy">No se crea una cuenta ni un edificio al completar esta consulta.</p>
+    </form>
+  </section>
+</main>

@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './auth-layout.scss',
 })
 export class AuthLayout {
-  @Input() showTopLink = true;
-  @Input() topLinkText = 'Crear cuenta';
-  @Input() topLinkRoute = '/registro';
+  @Input() showTopLink = false;
+  @Input() topLinkText = 'Volver al login';
+  @Input() topLinkRoute = '/login';
 }

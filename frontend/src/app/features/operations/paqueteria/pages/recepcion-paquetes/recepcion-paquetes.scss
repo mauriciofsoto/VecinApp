@@ -8,10 +8,15 @@
 
 .operations-page {
   @include ops.operation-page;
-  display: grid;
-  gap: $space-5;
+  gap: $space-4;
   padding: $space-6;
   color: var(--color-text-secondary);
+}
+
+.page-header,
+.section-header {
+  @include ops.operation-header($space-3);
+  align-items: center;
 }
 
 .page-header h1,
@@ -21,8 +26,10 @@
 }
 
 .page-header p,
-.item-card p {
+.item-card p,
+.section-header p {
   @include ops.operation-muted-text(var(--font-size-body));
+  margin: 0 0 $space-2;
 }
 
 .panel,
@@ -30,33 +37,22 @@
   @include ops.operation-panel;
 }
 
-.panel {
+.panel,
+.package-conversation {
   min-width: 0;
 }
 
-.form-grid {
-  @include ops.operation-form-grid;
+.local-data-notice,
+.local-note {
+  @include ops.operation-muted-text(var(--font-size-small));
+  margin: 0;
 }
 
-label {
-  @include ops.operation-form-label($text-form-label);
-}
-
-button[type='submit'] {
+.local-data-notice {
   padding: $space-3 $space-4;
-  color: var(--color-text-inverse);
-  border: 0;
+  border-left: 3px solid var(--color-warning-text);
   border-radius: $radius-control;
-  background: var(--color-primary);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--color-primary-hover);
-  }
-}
-
-.feedback {
-  color: var(--color-info-text);
+  background: var(--color-surface-elevated);
 }
 
 .package-workspace {
@@ -66,71 +62,41 @@ button[type='submit'] {
   align-items: start;
 }
 
-.package-list,
-.package-conversation {
-  min-width: 0;
+.package-list__counters,
+.form-actions {
+  @include ops.operation-actions($space-2, flex-start);
+  margin-top: $space-3;
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $space-3;
-
-  span {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
-  }
-}
-
-.package-list__counters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $space-3;
-  margin: $space-3 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-small);
-}
-
-.item-list {
-  display: grid;
-  gap: $space-3;
+.item-list,
+.recipient-list {
+  @include ops.operation-stack($space-3);
   margin-top: $space-4;
 }
 
 .item-card {
   display: block;
   width: 100%;
-  padding: $space-4;
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition:
-    border-color 250ms ease,
-    background 250ms ease,
-    transform 250ms ease;
+  transition: border-color 250ms ease, background 250ms ease, transform 250ms ease;
 
   &:hover {
     border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
     transform: translateY(-2px);
   }
+
+  app-badge {
+    display: inline-flex;
+    margin-top: $space-2;
+  }
 }
 
-.item-card--selected {
+.item-card--selected,
+.recipient-card--selected {
   border-color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-}
-
-.item-card__content {
-  min-width: 0;
-}
-
-.status {
-  color: var(--color-warning-text);
-}
-
-.status.delivered {
-  color: var(--color-success-text);
 }
 
 .conversation-empty {
@@ -145,9 +111,77 @@ button[type='submit'] {
     margin: 0;
   }
 
-  p {
+  > p:not(.local-note) {
     color: var(--color-text-muted);
   }
+}
+
+.registration-form {
+  display: grid;
+  gap: $space-4;
+}
+
+.form-intro,
+.state-message {
+  @include ops.operation-muted-text(var(--font-size-small));
+  margin: 0;
+}
+
+.search-field,
+.registration-form label {
+  @include ops.operation-form-label($text-form-label);
+}
+
+.recipient-card {
+  @include ops.operation-panel($space-3);
+  display: grid;
+  width: 100%;
+  gap: $space-2;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  }
+}
+
+.recipient-references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+  @include ops.operation-muted-text(var(--font-size-small));
+}
+
+.recipient-no-unit {
+  @include ops.operation-muted-text(var(--font-size-small));
+}
+
+.state-message--error,
+.form-feedback {
+  color: var(--color-danger-text);
+}
+
+.selection-feedback {
+  margin: 0;
+  color: var(--color-success-text);
+}
+
+.form-grid {
+  @include ops.operation-form-grid;
+}
+
+.form-grid__wide {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+.empty-state {
+  @include ops.operation-muted-text;
 }
 
 @include mobile {
@@ -155,11 +189,12 @@ button[type='submit'] {
     padding: $space-4;
   }
 
+  .package-workspace,
   .form-grid {
     grid-template-columns: 1fr;
   }
 
-  .package-workspace {
-    grid-template-columns: 1fr;
+  .form-grid__wide {
+    grid-column: auto;
   }
 }

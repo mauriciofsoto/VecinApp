@@ -171,14 +171,10 @@
               <td>
                 <app-button
                   variant="outline"
-                  type="button"
-                  (click)="verIncidencia(incidencia)"
+                  [routerLink]="['/administrador/incidencias', incidencia.id]"
                 >
-                  Ver incidencia
-                </app-button>
-                <a [routerLink]="['/administrador/incidencias', incidencia.id]">
                   Detalle completo
-                </a>
+                </app-button>
               </td>
             </tr>
           }
@@ -204,119 +200,6 @@
 
   </section>
 
-  <!-- DETALLE DE INCIDENCIA -->
-  <app-modal
-    [open]="modalDetalleAbierto()"
-    (openChange)="modalDetalleAbierto.set($event)"
-    heading="Detalle de incidencia"
-    size="lg"
-  >
-
-    @if (incidenciaSeleccionada(); as incidencia) {
-
-      <div class="incidencia-detalle">
-
-        <div class="incidencia-detalle__encabezado">
-          <span class="incidencia-detalle__id">
-            Incidencia #{{ incidencia.id }}
-          </span>
-
-          <span
-            class="incidencia-item__estado"
-            [attr.data-estado]="incidencia.estado"
-          >
-            {{ obtenerEstado(incidencia.estado) }}
-          </span>
-        </div>
-
-        <h2>{{ incidencia.titulo }}</h2>
-
-        <p class="incidencia-detalle__descripcion">
-          {{ incidencia.descripcion }}
-        </p>
-
-        <div class="incidencia-detalle__metadatos">
-
-          <div>
-            <span>Categoría</span>
-            <strong>{{ incidencia.categoria }}</strong>
-          </div>
-
-          <div>
-            <span>Ubicación</span>
-            <strong>{{ incidencia.ubicacion }}</strong>
-          </div>
-
-          <div>
-            <span>Usuario</span>
-            <strong>{{ incidencia.usuarioNombre }}</strong>
-          </div>
-
-          <div>
-            <span>Responsable</span>
-            <strong>{{ incidencia.responsableNombre || 'Sin asignar' }}</strong>
-          </div>
-
-          <div>
-            <span>Fecha de creación</span>
-            <strong>
-              {{ incidencia.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
-            </strong>
-          </div>
-
-        </div>
-
-        <div class="incidencia-detalle__seguimiento">
-
-          <h3>Actualizar estado</h3>
-
-          <label for="estado-incidencia">
-            Estado de la incidencia
-          </label>
-
-          <app-select
-            id="estado-incidencia"
-            ariaLabel="Estado de la incidencia"
-            [options]="opcionesEstadoEdicion"
-            [value]="estadoNuevo()"
-            (valueChange)="cambiarEstado($any($event))"
-          />
-
-        </div>
-
-        <div class="incidencia-detalle__acciones">
-
-          <app-button
-            variant="outline"
-            type="button"
-            (click)="cerrarDetalle()"
-          >
-            Cerrar
-          </app-button>
-
-          <app-button
-            variant="primary"
-            type="button"
-            (click)="guardarEstado()"
-            [disabled]="guardandoEstado() || estadoNuevo() === null || estadoSinCambios"
-          >
-            {{ guardandoEstado() ? 'Guardando…' : 'Guardar estado' }}
-          </app-button>
-
-        </div>
-        <!-- CONVERSACIÓN -->
-        <div class="incidencia-detalle__conversacion">
-          <app-chat-incidencia
-            [incidencia]="incidencia"
-            rolVista="administrador"
-          />
-        </div>
-
-      </div>
-
-    }
-
-  </app-modal>
   }
 
 </section>

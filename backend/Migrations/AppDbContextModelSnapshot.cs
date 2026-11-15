@@ -327,6 +327,73 @@ namespace VecinApp.Migrations
                     b.ToTable("comentario", (string)null);
                 });
 
+            modelBuilder.Entity("VecinApp.Models.DeclaracionUnidadComunitaria", b =>
+                {
+                    b.Property<int>("IdDeclaracionUnidad")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_declaracion_unidad");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdDeclaracionUnidad"));
+
+                    b.Property<bool>("EsPrincipal")
+                        .HasColumnType("boolean")
+                        .HasColumnName("es_principal");
+
+                    b.Property<bool?>("EstaAlquilada")
+                        .HasColumnType("boolean")
+                        .HasColumnName("esta_alquilada");
+
+                    b.Property<string>("EstadoConfirmacion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("estado_confirmacion");
+
+                    b.Property<DateTime>("FechaDeclaracion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_declaracion");
+
+                    b.Property<int>("IdEdificio")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_edificio");
+
+                    b.Property<int?>("IdUnidad")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_unidad");
+
+                    b.Property<string>("IdUsuario")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<string>("IdentificacionDeclarada")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("identificacion_declarada");
+
+                    b.Property<string>("PisoDeclarado")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("piso_declarado");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("tipo");
+
+                    b.HasKey("IdDeclaracionUnidad");
+
+                    b.HasIndex("IdEdificio");
+
+                    b.HasIndex("IdUnidad");
+
+                    b.HasIndex("IdUsuario", "IdEdificio");
+
+                    b.ToTable("declaracion_unidad_comunitaria", (string)null);
+                });
+
             modelBuilder.Entity("VecinApp.Models.Edificio", b =>
                 {
                     b.Property<int>("IdEdificio")
@@ -335,6 +402,12 @@ namespace VecinApp.Migrations
                         .HasColumnName("id_edificio");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdEdificio"));
+
+                    b.Property<Guid>("AccesoPublicoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("acceso_publico_id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("Direccion")
                         .IsRequired()
@@ -346,12 +419,27 @@ namespace VecinApp.Migrations
                         .HasColumnType("text")
                         .HasColumnName("estado");
 
+                    b.Property<string>("Localidad")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("localidad");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("nombre");
 
+                    b.Property<string>("Provincia")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("provincia");
+
                     b.HasKey("IdEdificio");
+
+                    b.HasIndex("AccesoPublicoId")
+                        .IsUnique();
 
                     b.ToTable("edificio", (string)null);
                 });
@@ -700,11 +788,19 @@ namespace VecinApp.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_eliminacion");
 
+                    b.Property<DateTime?>("FechaEntrega")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_entrega");
+
                     b.Property<DateTime>("FechaRecepcion")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("fecha_recepcion");
 
-                    b.Property<int>("IdUnidad")
+                    b.Property<int>("IdEdificio")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_edificio");
+
+                    b.Property<int?>("IdUnidad")
                         .HasColumnType("integer")
                         .HasColumnName("id_unidad");
 
@@ -712,6 +808,10 @@ namespace VecinApp.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("id_usuario_destinatario");
+
+                    b.Property<string>("IdUsuarioEntrega")
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario_entrega");
 
                     b.Property<string>("IdUsuarioRegistro")
                         .IsRequired()
@@ -727,11 +827,20 @@ namespace VecinApp.Migrations
                         .HasColumnType("text")
                         .HasColumnName("observaciones");
 
+                    b.Property<string>("Remitente")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("remitente");
+
                     b.HasKey("IdPaquete");
+
+                    b.HasIndex("IdEdificio");
 
                     b.HasIndex("IdUnidad");
 
                     b.HasIndex("IdUsuarioDestinatario");
+
+                    b.HasIndex("IdUsuarioEntrega");
 
                     b.HasIndex("IdUsuarioRegistro");
 
@@ -821,6 +930,89 @@ namespace VecinApp.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("VecinApp.Models.RegistroComunitario", b =>
+                {
+                    b.Property<string>("IdUsuario")
+                        .HasColumnType("text")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<bool?>("DeclaraUnidadesAlquiladas")
+                        .HasColumnType("boolean")
+                        .HasColumnName("declara_unidades_alquiladas");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_registro");
+
+                    b.Property<string>("FuncionPersonal")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("funcion_personal");
+
+                    b.Property<string>("FuncionPersonalOtra")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("funcion_personal_otra");
+
+                    b.Property<string>("HorarioPersonal")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("horario_personal");
+
+                    b.Property<string>("ModalidadAlquiler")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("modalidad_alquiler");
+
+                    b.Property<string>("OrigenDeclaracion")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("origen_declaracion");
+
+                    b.Property<string>("Perfil")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("perfil");
+
+                    b.Property<string>("PropietarioDeclaradoApellido")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("propietario_declarado_apellido");
+
+                    b.Property<string>("PropietarioDeclaradoNombre")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("propietario_declarado_nombre");
+
+                    b.Property<string>("PropietarioDeclaradoPiso")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("propietario_declarado_piso");
+
+                    b.Property<string>("PropietarioDeclaradoUnidad")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("propietario_declarado_unidad");
+
+                    b.Property<bool?>("PropietarioDeclaradoViveEnEdificio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("propietario_declarado_vive_en_edificio");
+
+                    b.Property<bool?>("TieneOtrasUnidades")
+                        .HasColumnType("boolean")
+                        .HasColumnName("tiene_otras_unidades");
+
+                    b.Property<bool?>("ViveEnEdificio")
+                        .HasColumnType("boolean")
+                        .HasColumnName("vive_en_edificio");
+
+                    b.HasKey("IdUsuario");
+
+                    b.ToTable("registro_comunitario", (string)null);
+                });
+
             modelBuilder.Entity("VecinApp.Models.RespuestaEncuesta", b =>
                 {
                     b.Property<int>("IdRespuesta")
@@ -876,6 +1068,43 @@ namespace VecinApp.Migrations
                     b.ToTable("rol", (string)null);
                 });
 
+            modelBuilder.Entity("VecinApp.Models.TokenAccesoEdificio", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_creacion");
+
+                    b.Property<DateTime>("FechaExpiracion")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_expiracion");
+
+                    b.Property<string>("HashToken")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("hash_token");
+
+                    b.Property<int>("IdEdificio")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_edificio");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HashToken")
+                        .IsUnique();
+
+                    b.HasIndex("IdEdificio", "FechaExpiracion");
+
+                    b.ToTable("token_acceso_edificio", (string)null);
+                });
+
             modelBuilder.Entity("VecinApp.Models.Unidad", b =>
                 {
                     b.Property<int>("IdUnidad")
@@ -901,7 +1130,8 @@ namespace VecinApp.Migrations
 
                     b.HasKey("IdUnidad");
 
-                    b.HasIndex("IdEdificio");
+                    b.HasIndex("IdEdificio", "Piso", "Identificacion")
+                        .IsUnique();
 
                     b.ToTable("unidad", (string)null);
                 });
@@ -1143,6 +1373,32 @@ namespace VecinApp.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("VecinApp.Models.DeclaracionUnidadComunitaria", b =>
+                {
+                    b.HasOne("VecinApp.Models.Edificio", "Edificio")
+                        .WithMany()
+                        .HasForeignKey("IdEdificio")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VecinApp.Models.Unidad", "Unidad")
+                        .WithMany()
+                        .HasForeignKey("IdUnidad")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VecinApp.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Edificio");
+
+                    b.Navigation("Unidad");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("VecinApp.Models.Encuesta", b =>
                 {
                     b.HasOne("VecinApp.Models.Publicacion", "Publicacion")
@@ -1277,11 +1533,16 @@ namespace VecinApp.Migrations
 
             modelBuilder.Entity("VecinApp.Models.Paquete", b =>
                 {
+                    b.HasOne("VecinApp.Models.Edificio", "Edificio")
+                        .WithMany()
+                        .HasForeignKey("IdEdificio")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("VecinApp.Models.Unidad", "Unidad")
                         .WithMany("Paquetes")
                         .HasForeignKey("IdUnidad")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VecinApp.Models.Usuario", "UsuarioDestinatario")
                         .WithMany()
@@ -1289,15 +1550,24 @@ namespace VecinApp.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("VecinApp.Models.Usuario", "UsuarioEntrega")
+                        .WithMany()
+                        .HasForeignKey("IdUsuarioEntrega")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("VecinApp.Models.Usuario", "UsuarioRegistro")
                         .WithMany()
                         .HasForeignKey("IdUsuarioRegistro")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Edificio");
+
                     b.Navigation("Unidad");
 
                     b.Navigation("UsuarioDestinatario");
+
+                    b.Navigation("UsuarioEntrega");
 
                     b.Navigation("UsuarioRegistro");
                 });
@@ -1340,6 +1610,17 @@ namespace VecinApp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("VecinApp.Models.RegistroComunitario", b =>
+                {
+                    b.HasOne("VecinApp.Models.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("VecinApp.Models.RegistroComunitario", "IdUsuario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("VecinApp.Models.RespuestaEncuesta", b =>
                 {
                     b.HasOne("VecinApp.Models.Encuesta", "Encuesta")
@@ -1365,6 +1646,17 @@ namespace VecinApp.Migrations
                     b.Navigation("Opcion");
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("VecinApp.Models.TokenAccesoEdificio", b =>
+                {
+                    b.HasOne("VecinApp.Models.Edificio", "Edificio")
+                        .WithMany()
+                        .HasForeignKey("IdEdificio")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Edificio");
                 });
 
             modelBuilder.Entity("VecinApp.Models.Unidad", b =>

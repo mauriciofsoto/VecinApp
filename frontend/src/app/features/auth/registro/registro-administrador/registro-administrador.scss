@@ -1,0 +1,9 @@
+@use '../_registro-shared.scss';
+
+.contratacion-card { max-width:620px; }
+.contratacion-card .salir { display:inline-block; margin-bottom:1.2rem; color:var(--color-primary-text); font-size:.8rem; text-decoration:none; }
+.progreso { height:.35rem; overflow:hidden; margin:0 0 1.5rem; border-radius:var(--radius-pill); background:var(--color-border-subtle); }
+.progreso span { display:block; height:100%; border-radius:inherit; background:var(--color-primary); transition:width var(--duration-normal) ease; }
+.contratacion-card form { display:flex; flex-direction:column; gap:10px; }
+.continuar-login { display:inline-flex; min-height:2.8rem; align-items:center; justify-content:center; margin-top:.5rem; padding:.7rem 1rem; border-radius:var(--radius-control); background:var(--color-primary); color:var(--color-text-inverse); font-weight:var(--font-weight-semibold); text-decoration:none; }
+@media(max-width:520px) { .registro-container { padding:14px; }.registro-card { padding:22px; }.acciones { flex-direction:column-reverse; }.acciones button { width:100%; min-height:2.8rem; } }

@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { ResetPassword } from './reset-password';
 
 describe('ResetPassword', () => {
@@ -8,7 +10,11 @@ describe('ResetPassword', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ResetPassword]
+      imports: [ResetPassword],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: { resetPassword: () => { throw new Error('No debe restablecer contraseña durante la prueba.'); } } },
+      ],
     })
     .compileComponents();
 

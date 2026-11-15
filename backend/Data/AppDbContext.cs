@@ -19,10 +19,13 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     // Tablas de negocio
     public DbSet<Rol> RolesAplicacion { get; set; }
     public DbSet<Edificio> Edificios { get; set; }
+    public DbSet<TokenAccesoEdificio> TokensAccesoEdificio { get; set; }
     public DbSet<CodigoInvitacion> CodigosInvitacion { get; set; }
     //public DbSet<Usuario> Usuarios { get; set; } -- lo maneja Identity
     public DbSet<Unidad> Unidades { get; set; }
     public DbSet<UsuarioUnidad> UsuariosUnidades { get; set; }
+    public DbSet<RegistroComunitario> RegistrosComunitarios { get; set; }
+    public DbSet<DeclaracionUnidadComunitaria> DeclaracionesUnidadesComunitarias { get; set; }
     public DbSet<Aviso> Avisos { get; set; }
     public DbSet<Incidencia> Incidencias { get; set; }
     public DbSet<EstadoIncidencia> EstadosIncidencia { get; set; }
@@ -109,8 +112,15 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.ToTable("edificio");
             entity.HasKey(e => e.IdEdificio);
             entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
+            entity.Property(e => e.AccesoPublicoId)
+                .HasColumnName("acceso_publico_id")
+                .HasDefaultValueSql("gen_random_uuid()")
+                .ValueGeneratedOnAdd();
+            entity.HasIndex(e => e.AccesoPublicoId).IsUnique();
             entity.Property(e => e.Nombre).HasColumnName("nombre").IsRequired();
             entity.Property(e => e.Direccion).HasColumnName("direccion").IsRequired();
+            entity.Property(e => e.Localidad).HasColumnName("localidad").HasMaxLength(120).IsRequired();
+            entity.Property(e => e.Provincia).HasColumnName("provincia").HasMaxLength(120).IsRequired();
             entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
         });
         // =========================
@@ -167,6 +177,23 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<TokenAccesoEdificio>(entity =>
+        {
+            entity.ToTable("token_acceso_edificio");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio").IsRequired();
+            entity.Property(e => e.HashToken).HasColumnName("hash_token").HasMaxLength(64).IsRequired();
+            entity.Property(e => e.FechaCreacion).HasColumnName("fecha_creacion").IsRequired();
+            entity.Property(e => e.FechaExpiracion).HasColumnName("fecha_expiracion").IsRequired();
+            entity.HasIndex(e => e.HashToken).IsUnique();
+            entity.HasIndex(e => new { e.IdEdificio, e.FechaExpiracion });
+            entity.HasOne(e => e.Edificio)
+                .WithMany()
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         // =========================
         // USUARIO (Identity + Relaciones)
         // =========================
@@ -182,6 +209,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
             entity.Property(e => e.Piso).HasColumnName("piso").IsRequired();
             entity.Property(e => e.Identificacion).HasColumnName("identificacion").IsRequired();
+            entity.HasIndex(e => new { e.IdEdificio, e.Piso, e.Identificacion }).IsUnique();
 
             entity.HasOne(e => e.Edificio)
                 .WithMany(e => e.Unidades)
@@ -209,6 +237,51 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
                 .WithMany(e => e.UsuariosUnidades)
                 .HasForeignKey(e => e.IdUnidad)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RegistroComunitario>(entity =>
+        {
+            entity.ToTable("registro_comunitario");
+            entity.HasKey(e => e.IdUsuario);
+            entity.Property(e => e.IdUsuario).HasColumnName("id_usuario");
+            entity.Property(e => e.Perfil).HasColumnName("perfil").HasMaxLength(20).IsRequired();
+            entity.Property(e => e.OrigenDeclaracion).HasColumnName("origen_declaracion").HasMaxLength(30).IsRequired();
+            entity.Property(e => e.ViveEnEdificio).HasColumnName("vive_en_edificio");
+            entity.Property(e => e.TieneOtrasUnidades).HasColumnName("tiene_otras_unidades");
+            entity.Property(e => e.DeclaraUnidadesAlquiladas).HasColumnName("declara_unidades_alquiladas");
+            entity.Property(e => e.ModalidadAlquiler).HasColumnName("modalidad_alquiler").HasMaxLength(40);
+            entity.Property(e => e.PropietarioDeclaradoViveEnEdificio).HasColumnName("propietario_declarado_vive_en_edificio");
+            entity.Property(e => e.PropietarioDeclaradoNombre).HasColumnName("propietario_declarado_nombre").HasMaxLength(100);
+            entity.Property(e => e.PropietarioDeclaradoApellido).HasColumnName("propietario_declarado_apellido").HasMaxLength(100);
+            entity.Property(e => e.PropietarioDeclaradoPiso).HasColumnName("propietario_declarado_piso").HasMaxLength(100);
+            entity.Property(e => e.PropietarioDeclaradoUnidad).HasColumnName("propietario_declarado_unidad").HasMaxLength(100);
+            entity.Property(e => e.FuncionPersonal).HasColumnName("funcion_personal").HasMaxLength(80);
+            entity.Property(e => e.FuncionPersonalOtra).HasColumnName("funcion_personal_otra").HasMaxLength(120);
+            entity.Property(e => e.HorarioPersonal).HasColumnName("horario_personal").HasMaxLength(200);
+            entity.Property(e => e.FechaRegistro).HasColumnName("fecha_registro").IsRequired();
+            entity.HasOne(e => e.Usuario).WithOne().HasForeignKey<RegistroComunitario>(e => e.IdUsuario).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DeclaracionUnidadComunitaria>(entity =>
+        {
+            entity.ToTable("declaracion_unidad_comunitaria");
+            entity.HasKey(e => e.IdDeclaracionUnidad);
+            entity.Property(e => e.IdDeclaracionUnidad).HasColumnName("id_declaracion_unidad");
+            entity.Property(e => e.IdUsuario).HasColumnName("id_usuario").IsRequired();
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio").IsRequired();
+            entity.Property(e => e.IdUnidad).HasColumnName("id_unidad");
+            entity.Property(e => e.Tipo).HasColumnName("tipo").HasMaxLength(20).IsRequired();
+            entity.Property(e => e.PisoDeclarado).HasColumnName("piso_declarado").HasMaxLength(100);
+            entity.Property(e => e.IdentificacionDeclarada).HasColumnName("identificacion_declarada").HasMaxLength(100);
+            entity.Property(e => e.EsPrincipal).HasColumnName("es_principal").IsRequired();
+            entity.Property(e => e.EstaAlquilada).HasColumnName("esta_alquilada");
+            entity.Property(e => e.EstadoConfirmacion).HasColumnName("estado_confirmacion").HasMaxLength(20).IsRequired();
+            entity.Property(e => e.FechaDeclaracion).HasColumnName("fecha_declaracion").IsRequired();
+            entity.HasIndex(e => new { e.IdUsuario, e.IdEdificio });
+            entity.HasIndex(e => e.IdUnidad);
+            entity.HasOne(e => e.Usuario).WithMany().HasForeignKey(e => e.IdUsuario).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Edificio).WithMany().HasForeignKey(e => e.IdEdificio).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Unidad).WithMany().HasForeignKey(e => e.IdUnidad).OnDelete(DeleteBehavior.Restrict);
         });
 
         // =========================
@@ -521,7 +594,9 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.ToTable("paquete");
             entity.HasKey(e => e.IdPaquete);
             entity.Property(e => e.IdPaquete).HasColumnName("id_paquete");
+            entity.Property(e => e.IdEdificio).HasColumnName("id_edificio").IsRequired();
             entity.Property(e => e.IdUnidad).HasColumnName("id_unidad");
+            entity.Property(e => e.Remitente).HasColumnName("remitente").IsRequired();
             entity.Property(e => e.Identificacion).HasColumnName("identificacion").IsRequired();
             entity.Property(e => e.FechaRecepcion).HasColumnName("fecha_recepcion").IsRequired();
             entity.Property(e => e.Observaciones).HasColumnName("observaciones");
@@ -530,12 +605,20 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             
             entity.Property(e => e.IdUsuarioDestinatario).HasColumnName("id_usuario_destinatario").IsRequired();
             entity.Property(e => e.FechaConfirmacion).HasColumnName("fecha_confirmacion");
+            entity.Property(e => e.FechaEntrega).HasColumnName("fecha_entrega");
+            entity.Property(e => e.IdUsuarioEntrega).HasColumnName("id_usuario_entrega");
             entity.Property(e => e.FechaEliminacion).HasColumnName("fecha_eliminacion");
+
+            entity.HasOne(e => e.Edificio)
+                .WithMany()
+                .HasForeignKey(e => e.IdEdificio)
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(e => e.Unidad)
                 .WithMany(e => e.Paquetes)
                 .HasForeignKey(e => e.IdUnidad)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
 
             entity.HasOne(e => e.UsuarioRegistro)
                 .WithMany()
@@ -550,6 +633,11 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.HasOne(e => e.UsuarioDestinatario)
                 .WithMany()
                 .HasForeignKey(e => e.IdUsuarioDestinatario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.UsuarioEntrega)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuarioEntrega)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

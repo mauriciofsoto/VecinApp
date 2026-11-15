@@ -7,7 +7,7 @@ export function getDashboardUrl(authService: AuthService): string {
     return '/admin-dashboard';
   }
 
-  if (authService.hasRole('Porteria')) {
+  if (authService.hasRole('Portero')) {
     return '/porteria-dashboard';
   }
 
