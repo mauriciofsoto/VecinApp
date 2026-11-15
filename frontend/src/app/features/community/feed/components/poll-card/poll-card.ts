@@ -23,28 +23,23 @@ import { EncuestasService } from '../../../../operations/encuestas/services/encu
 export class PollCard {
   readonly encuesta = input.required<EncuestaAdmin>();
 
-  // Temporal hasta integrar la sesión real del usuario.
-  readonly userId = input(1);
-
   private readonly encuestasService = inject(EncuestasService);
 
   readonly miVoto = computed(() =>
-    this.encuestasService.obtenerVotoUsuario(
-      this.encuesta().id,
-      this.userId(),
-    )?.opcionId ?? null,
+    this.encuesta().miVoto ??
+    this.encuestasService.obtenerVotoUsuario(this.encuesta().id)
   );
 
-  readonly yaVoto = computed(() => this.miVoto() !== null);
+  readonly yaVoto = computed(() => !!this.miVoto());
 
   readonly opciones = computed<PollOption[]>(() => {
     const encuesta = this.encuesta();
 
     const votosPorOpcion =
       encuesta.votosPorOpcion ??
-      encuesta.opciones.map((text, index) => ({
+      encuesta.opciones.map((texto, index) => ({
         id: String(index),
-        texto: text,
+        texto,
         votos: 0,
       }));
 
@@ -55,8 +50,8 @@ export class PollCard {
       percentage:
         encuesta.totalVotos > 0
           ? Math.round(
-              (opcion.votos / encuesta.totalVotos) * 100,
-            )
+            (opcion.votos / encuesta.totalVotos) * 100,
+          )
           : 0,
     }));
   });
@@ -66,8 +61,11 @@ export class PollCard {
 
     this.encuestasService.registrarVoto(
       this.encuesta().id,
-      this.userId(),
       opcionId,
-    );
+    ).subscribe({
+      error: error => {
+        console.error('Error al registrar el voto:', error);
+      },
+    });
   }
 }

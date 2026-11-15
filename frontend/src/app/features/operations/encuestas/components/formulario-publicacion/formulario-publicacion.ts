@@ -132,75 +132,79 @@ export class FormularioPublicacion {
       name: archivo.name,
     }));
   }
-
   private publicarAviso(titulo: string, descripcion: string): void {
-    this.feedService.addPost({
-      id: Date.now(),
-      authorRole: 'admin' as AuthorRole,
+    this.feedService.createPost({
       type: 'aviso',
-      userId: 1,
-      userName: 'Administración',
-      title: titulo,
-      content: descripcion,
-      createdAt: new Date().toISOString(),
-      reactions: [],
-      comments: [],
-      commentsCount: 0,
-      comentariosActivos: this.comentariosActivos,
-      prioritaria: this.prioritaria,
-      fechaLimite: this.establecerVencimiento
-        ? this.fechaLimite
-        : '',
-      attachments: this.obtenerAdjuntos(),
-    });
+      content: `${titulo}\n\n${descripcion}`,
+    }).subscribe({
+      next: post => {
+        this.feedService.addPost({
+          ...post,
+          reactions: post.reactions ?? [],
+          comments: post.comments ?? [],
+          commentsCount: post.commentsCount ?? 0,
+          prioritaria: this.prioritaria,
+          comentariosActivos: this.comentariosActivos,
+          fechaLimite: this.establecerVencimiento
+            ? this.fechaLimite
+            : '',
+        });
 
-    this.finalizarPublicacion();
+        this.finalizarPublicacion();
+      },
+      error: error => {
+        console.error('Error al guardar el aviso:', error);
+        this.errorFormulario =
+          'No se pudo guardar el aviso. Intentá nuevamente.';
+      },
+    });
   }
+
 
   private publicarEncuesta(
     titulo: string,
     descripcion: string,
     opciones: string[],
   ): void {
-    const nuevaEncuesta: EncuestaAdmin = {
-      id: Date.now(),
+    this.encuestasService.publicar({
       titulo,
       descripcion,
       opciones,
-      votacionActiva: true,
-      comentariosActivos: this.comentariosActivos,
-      prioritaria: this.prioritaria,
-      fechaLimite: this.establecerVencimiento
+      fechaFin: this.establecerVencimiento
         ? this.fechaLimite
-        : '',
-      fechaPublicacion: this.fechaActual,
-      estado: 'en-proceso',
-      totalVotos: 0,
-    };
+        : null,
+    }).subscribe({
+      next: nuevaEncuesta => {
+        this.feedService.addPost({
+          id: Date.now(),
+          authorRole: 'admin',
+          type: 'encuesta',
+          encuestaId: nuevaEncuesta.id,
+          userId: 1,
+          userName: 'Administración',
+          title: nuevaEncuesta.titulo,
+          content: nuevaEncuesta.descripcion,
+          createdAt: nuevaEncuesta.fechaPublicacion,
+          reactions: [],
+          comments: [],
+          commentsCount: 0,
+          comentariosActivos: nuevaEncuesta.comentariosActivos,
+          prioritaria: nuevaEncuesta.prioritaria,
+          fechaLimite: nuevaEncuesta.fechaLimite,
+          attachments: this.obtenerAdjuntos(),
+        });
 
-    this.encuestasService.publicar(nuevaEncuesta);
-
-    this.feedService.addPost({
-      id: Date.now(),
-      authorRole: 'admin',
-      type: 'encuesta',
-      encuestaId: nuevaEncuesta.id,
-      userId: 1,
-      userName: 'Administración',
-      title: nuevaEncuesta.titulo,
-      content: nuevaEncuesta.descripcion,
-      createdAt: new Date().toISOString(),
-      reactions: [],
-      comments: [],
-      commentsCount: 0,
-      comentariosActivos: nuevaEncuesta.comentariosActivos,
-      prioritaria: nuevaEncuesta.prioritaria,
-      fechaLimite: nuevaEncuesta.fechaLimite,
-      attachments: this.obtenerAdjuntos(),
+        this.finalizarPublicacion();
+      },
+      error: error => {
+        console.error('Error al guardar la encuesta:', error);
+        this.errorFormulario =
+          error.error?.message ??
+          'No se pudo guardar la encuesta. Intentá nuevamente.';
+      },
     });
-
-    this.finalizarPublicacion();
   }
+
 
   private finalizarPublicacion(): void {
     this.limpiarFormulario();

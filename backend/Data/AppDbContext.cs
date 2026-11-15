@@ -376,6 +376,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.ToTable("publicacion");
             entity.HasKey(e => e.IdPublicacion);
             entity.Property(e => e.IdPublicacion).HasColumnName("id_publicacion");
+            entity.Property(e => e.IdUsuario).HasColumnName("IdUsuario").IsRequired();
             entity.Property(e => e.IdEdificio).HasColumnName("id_edificio");
             entity.Property(e => e.IdCategoriaPublicacion).HasColumnName("id_categoria_publicacion");
             entity.Property(e => e.Titulo).HasColumnName("titulo").IsRequired();
@@ -408,6 +409,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.HasKey(e => e.IdComentario);
             entity.Property(e => e.IdComentario).HasColumnName("id_comentario");
             entity.Property(e => e.IdPublicacion).HasColumnName("id_publicacion");
+            entity.Property(e => e.IdUsuario).HasColumnName("IdUsuario").IsRequired();
             entity.Property(e => e.Contenido).HasColumnName("contenido").IsRequired();
             entity.Property(e => e.Fecha).HasColumnName("fecha").IsRequired();
 
@@ -493,6 +495,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.ToTable("respuesta_encuesta");
             entity.HasKey(e => e.IdRespuesta);
             entity.Property(e => e.IdRespuesta).HasColumnName("id_respuesta");
+            entity.Property(e => e.IdUsuario).HasColumnName("IdUsuario").IsRequired();
             entity.Property(e => e.IdEncuesta).HasColumnName("id_encuesta");
             entity.Property(e => e.IdOpcion).HasColumnName("id_opcion");
             entity.Property(e => e.FechaRespuesta).HasColumnName("fecha_respuesta").IsRequired();

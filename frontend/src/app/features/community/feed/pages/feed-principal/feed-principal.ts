@@ -51,6 +51,7 @@ export class FeedPrincipal {
 
   constructor() {
     this.feedService.loadPosts();
+    this.encuestasService.cargar();
   }
 
   readonly posts = this.feedService.posts;

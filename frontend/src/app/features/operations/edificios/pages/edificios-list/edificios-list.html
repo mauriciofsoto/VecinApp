@@ -1,0 +1,113 @@
+
+<main class="operations-page">
+  <header class="page-header">
+    <div>
+      <h1>Edificios</h1>
+      <p>Administrá los edificios registrados en VecinApp.</p>
+    </div>
+
+    <button type="button" (click)="abrirFormulario()">
+      Nuevo edificio
+    </button>
+  </header>
+
+  @if (mostrarFormulario) {
+  <section class="panel">
+    <h2>{{ esEdicion ? 'Editar edificio' : 'Nuevo edificio' }}</h2>
+
+    <form (ngSubmit)="guardarEdificio()" class="form-grid">
+      <label>
+        Nombre del edificio
+        <input type="text"
+               name="nombre"
+               [(ngModel)]="nombre"
+               placeholder="Ej. Edificio San Martín"
+               maxlength="150"
+               required />
+      </label>
+
+      <label>
+        Dirección
+        <input type="text"
+               name="direccion"
+               [(ngModel)]="direccion"
+               placeholder="Ej. Av. San Martín 1234"
+               maxlength="250"
+               required />
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Crear edificio') }}
+        </button>
+
+        <button type="button"
+                class="button-secondary"
+                (click)="cancelarFormulario()"
+                [disabled]="guardando()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </section>
+  }
+
+  <section class="panel">
+    <div class="toolbar">
+      <label>
+        Buscar edificio
+        <input type="search"
+               name="busqueda"
+               [(ngModel)]="busqueda"
+               placeholder="Buscar por nombre, dirección o estado..." />
+      </label>
+    </div>
+
+    <p class="total">Total de edificios: <strong>{{ filtrados.length }}</strong></p>
+
+    <p class="feedback" aria-live="polite">{{ mensaje() }}</p>
+
+    @if (cargando()) {
+    <p role="status">Cargando edificios...</p>
+    } @else {
+    <div class="item-list">
+      @for (edificio of filtrados; track edificio.idEdificio) {
+      <article class="item-card">
+        <div class="item-info">
+          <h2>{{ edificio.nombre }}</h2>
+          <p>{{ edificio.direccion }}</p>
+
+          <span class="status"
+                [class.inactive]="edificio.estado === 'Inactivo'">
+            {{ edificio.estado }}
+          </span>
+        </div>
+
+        <div class="item-actions">
+          <button type="button"
+                  class="button-secondary"
+                  (click)="editarEdificio(edificio)">
+            Editar
+          </button>
+
+          <button type="button"
+                  [class.button-danger]="edificio.estado === 'Activo'"
+                  [disabled]="cambiandoEstadoId() === edificio.idEdificio"
+                  (click)="cambiarEstado(edificio)">
+            {{
+                  cambiandoEstadoId() === edificio.idEdificio
+                    ? 'Actualizando...'
+                    : edificio.estado === 'Activo'
+                      ? 'Inactivar'
+                      : 'Activar'
+            }}
+          </button>
+        </div>
+      </article>
+      } @empty {
+      <p>No hay edificios que coincidan con la búsqueda.</p>
+      }
+    </div>
+    }
+  </section>
+</main>

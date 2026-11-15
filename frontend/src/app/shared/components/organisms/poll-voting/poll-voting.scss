@@ -1,53 +1,135 @@
 @use '../../../../../styles/abstracts' as *;
 
-:host {
-  display: block;
-  width: 100%;
-}
+// ========================================
+// ESTRUCTURA
+// ========================================
 
 .poll-wrapper {
-  @include poll-wrapper;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  width: 100%;
 }
 
 .poll-question {
   font-size: $text-small;
   font-weight: $font-semibold;
   color: $text-main;
-  margin-bottom: $space-2;
+  margin: 0;
 }
 
+// ========================================
+// OPCIONES
+// ========================================
+
 .poll-options-list {
-  @include flex-col($space-2);
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.poll-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
   width: 100%;
+  min-width: 0;
 }
 
 .poll-option-item {
-  @include poll-option-item;
+  width: 100%;
+  padding: 0.6rem $space-3;
+  border: 1px solid $border-control;
+  border-radius: $radius-sm;
+  background: $surface-1;
+  cursor: pointer;
   text-align: left;
-  font: inherit;
-  color: inherit;
-  border: 0;
-}
+  transition: $transition-base;
 
-.poll-option-item:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  &:hover:not(:disabled) {
+    background: $surface-2;
+    border-color: rgba($primary, 0.45);
+  }
+
+  &.selected {
+    background: rgba($primary, 0.10);
+    border-color: rgba($primary, 0.55);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 1;
+  }
 }
 
 .poll-content {
-  @include poll-content-layout;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-2;
 }
 
 .poll-text {
-  font-size: $text-small;
-  color: $text-main;
+  font-size: $text-caption;
+  font-weight: $font-medium;
+  color: $text-page;
+
+  strong {
+    color: $accent;
+    font-size: $text-tiny;
+    font-weight: $font-semibold;
+  }
 }
 
 .poll-radio {
+  color: $primary-light;
+  font-size: 0.9rem;
   flex-shrink: 0;
 }
 
+// ========================================
+// RESULTADOS
+// ========================================
+
+.poll-results {
+  padding: 0 2px;
+}
+
+.poll-results__bar {
+  width: 100%;
+  height: 6px;
+  background: $surface-3;
+  border-radius: $radius-full;
+  overflow: hidden;
+}
+
+.poll-results__fill {
+  height: 100%;
+  background: linear-gradient(90deg, $primary, $accent);
+  border-radius: $radius-full;
+  transition: width $transition-normal ease;
+}
+
+.poll-results__info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $space-1;
+  font-size: $text-tiny;
+  color: $text-muted;
+
+  strong {
+    color: $text-main;
+    font-weight: $font-semibold;
+  }
+}
+
+// ========================================
+// ACCIONES
+// ========================================
+
 .poll-actions {
-  @include form-actions;
-  margin-top: $space-2;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0;
 }

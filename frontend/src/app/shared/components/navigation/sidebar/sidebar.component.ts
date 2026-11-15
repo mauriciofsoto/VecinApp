@@ -180,10 +180,16 @@ export class SidebarComponent {
       title: 'ADMINISTRACIÓN',
       items: [
         {
-          label: 'Inquilinos',
+          label: 'Residentes',
           icon: '♙',
           route: '/inquilinos',
           roles: ['Administrador', 'SuperAdministrador'],
+        },
+        {
+          label: 'Edificios',
+          icon: '⌂',
+          route: '/admin/edificios',
+          roles: ['SuperAdministrador'],
         },
       ],
     },

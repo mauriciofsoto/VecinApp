@@ -1,3 +1,4 @@
+
 export type EstadoInquilino = 'activo' | 'inactivo';
 
 export interface Inquilino {

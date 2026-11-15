@@ -1,37 +1,69 @@
+
 <div class="poll-wrapper">
   @if (question()) {
-    <p class="poll-question">{{ question() }}</p>
+  <p class="poll-question">{{ question() }}</p>
   }
 
-  <div class="poll-options-list" role="radiogroup" [attr.aria-label]="question() || 'Opciones de votación'">
+  <div class="poll-options-list"
+       role="radiogroup"
+       [attr.aria-label]="question() || 'Opciones de votación'">
     @for (option of options(); track option.id) {
-      <button
-        type="button"
-        class="poll-option-item"
-        [class.selected]="selectedOptionId() === option.id"
-        [disabled]="disabled()"
-        role="radio"
-        [attr.aria-checked]="selectedOptionId() === option.id"
-        (click)="selectOption(option.id)"
-      >
+    <div class="poll-result-item">
+
+      <button type="button"
+              class="poll-option-item"
+              [class.selected]="
+            selectedOptionId() === option.id ||
+            votedOptionId() === option.id
+          "
+              [disabled]="disabled()"
+              role="radio"
+              [attr.aria-checked]="
+            selectedOptionId() === option.id ||
+            votedOptionId() === option.id
+          "
+              (click)="selectOption(option.id)">
         <span class="poll-content">
-          <span class="poll-text">{{ option.text }}</span>
+          <span class="poll-text">
+            {{ option.text }}
+            @if (votedOptionId() === option.id) {
+            <strong> (Tu voto)</strong>
+            }
+          </span>
+
           <span class="poll-radio" aria-hidden="true">
-            {{ selectedOptionId() === option.id ? '●' : '○' }}
+            {{
+                selectedOptionId() === option.id ||
+                votedOptionId() === option.id ? '●' : '○'
+            }}
           </span>
         </span>
       </button>
+
+      <div class="poll-results">
+        <div class="poll-results__bar">
+          <div class="poll-results__fill"
+               [style.width.%]="option.percentage"></div>
+        </div>
+
+        <div class="poll-results__info">
+          <span>{{ option.votes }} votos</span>
+          <strong>{{ option.percentage }}%</strong>
+        </div>
+      </div>
+
+    </div>
     }
   </div>
 
+  @if (!disabled()) {
   <div class="poll-actions">
-    <app-button
-      variant="primary"
-      size="sm"
-      [disabled]="!selectedOptionId() || disabled()"
-      (buttonClick)="confirmVote()"
-    >
+    <app-button variant="primary"
+                size="sm"
+                [disabled]="!selectedOptionId()"
+                (buttonClick)="confirmVote()">
       Votar
     </app-button>
   </div>
+  }
 </div>

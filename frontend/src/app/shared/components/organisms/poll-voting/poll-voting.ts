@@ -1,3 +1,4 @@
+
 import { Component, input, output, signal } from '@angular/core';
 import { ButtonComponent } from '../../atoms/button/button.component';
 import { PollOption } from '../../../models/poll-option.model';
@@ -13,6 +14,7 @@ export class PollVoting {
   readonly question = input('');
   readonly options = input<PollOption[]>([]);
   readonly disabled = input(false);
+  readonly votedOptionId = input<string | null>(null);
 
   readonly selectedOptionId = signal<string | null>(null);
   readonly vote = output<string>();

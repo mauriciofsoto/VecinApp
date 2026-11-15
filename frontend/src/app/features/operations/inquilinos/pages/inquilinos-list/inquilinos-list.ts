@@ -1,9 +1,21 @@
+
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Inquilinos } from '../../services/inquilinos';
+
+import { AuthService } from '../../../../../core/services/auth';
+import { EdificiosService } from '../../../../../core/services/edificios.service';
+import { UsuariosEdificioService } from '../../../../../core/services/usuarios-edificio.service';
+import { CodigosInvitacionService } from '../../../../../core/services/codigos-invitacion.service';
+
+import { Edificio } from '../../../../../core/models/edificio';
+import { UsuarioEdificio } from '../../../../../core/models/usuario-edificio';
+
 import { InputComponent } from '../../../../../shared/components/atoms/input/input';
-import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
+import {
+  SelectComponent,
+  SelectOption,
+} from '../../../../../shared/components/atoms/select/select';
 
 @Component({
   selector: 'app-inquilinos-list',
@@ -12,96 +24,206 @@ import { SelectComponent, SelectOption } from '../../../../../shared/components/
   templateUrl: './inquilinos-list.html',
   styleUrl: './inquilinos-list.scss',
 })
-export class InquilinosList {
-  readonly servicio = inject(Inquilinos);
+export class InquilinosList implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly edificiosService = inject(EdificiosService);
+  private readonly usuariosService = inject(UsuariosEdificioService);
+  private readonly invitacionesService = inject(CodigosInvitacionService);
+
+  readonly esSuperAdmin = this.auth.hasRole('SuperAdministrador');
 
   busqueda = '';
-  filtroEdificio = 'todos';
+  edificioId: number | null = null;
+
   mostrarFormulario = false;
+  rolInvitacion = 'Inquilino';
+  diasValidez = 7;
 
-  nombre = '';
-  apellido = '';
-  email = '';
-  documento = '';
-  edificioId = 1;
-  edificioNombre = 'Edificio A';
-  unidad = '';
-
+  readonly usuarios = signal<UsuarioEdificio[]>([]);
+  readonly edificios = signal<Edificio[]>([]);
   readonly mensaje = signal('');
+  readonly codigoGenerado = signal('');
+  readonly cargando = signal(false);
+  readonly generando = signal(false);
 
-  get edificios() {
-    const unicos = new Map<number, string>();
-
-    for (const inquilino of this.servicio.inquilinos()) {
-      unicos.set(inquilino.edificioId, inquilino.edificioNombre);
-    }
-
-    return Array.from(unicos, ([id, nombre]) => ({ id, nombre }));
-  }
-
-  get opcionesEdificio(): SelectOption<string>[] {
-    return [
-      { label: 'Todos los edificios', value: 'todos' },
-      ...this.edificios.map(edificio => ({ label: edificio.nombre, value: String(edificio.id) })),
+  readonly rolesInvitacion: SelectOption<string>[] = this.esSuperAdmin
+    ? [
+      { label: 'Administrador', value: 'Administrador' },
+      { label: 'Inquilino', value: 'Inquilino' },
+      { label: 'Propietario', value: 'Propietario' },
+      { label: 'Encargado', value: 'Encargado' },
+    ]
+    : [
+      { label: 'Inquilino', value: 'Inquilino' },
+      { label: 'Propietario', value: 'Propietario' },
+      { label: 'Encargado', value: 'Encargado' },
     ];
+
+  get opcionesEdificio(): SelectOption<number>[] {
+    return this.edificios().map(edificio => ({
+      label: edificio.nombre,
+      value: edificio.idEdificio,
+    }));
   }
 
-  get filtrados() {
-    const busqueda = this.busqueda.trim().toLowerCase();
+  get filtrados(): UsuarioEdificio[] {
+    const texto = this.busqueda.trim().toLowerCase();
 
-    return this.servicio.inquilinos().filter(inquilino => {
+    return this.usuarios().filter(usuario => {
+      const coincideRol = [
+        'Inquilino',
+        'Propietario',
+        'Encargado',
+      ].includes(usuario.rol);
+
+      const unidad = this.unidadTexto(usuario).toLowerCase();
+
       const coincideTexto = [
-        inquilino.nombre,
-        inquilino.apellido,
-        inquilino.email,
-        inquilino.documento,
-        inquilino.unidad,
-      ].some(valor => valor.toLowerCase().includes(busqueda));
+        usuario.nombre,
+        usuario.apellido,
+        usuario.email,
+        usuario.rol,
+        unidad,
+      ].some(valor => valor.toLowerCase().includes(texto));
 
-      const coincideEdificio =
-        this.filtroEdificio === 'todos' ||
-        inquilino.edificioId === Number(this.filtroEdificio);
-
-      return coincideTexto && coincideEdificio;
+      return coincideRol && coincideTexto;
     });
   }
 
-  registrar(): void {
+  ngOnInit(): void {
+    if (this.esSuperAdmin) {
+      this.cargarEdificios();
+    } else {
+      this.cargarUsuarios();
+    }
+  }
+
+  cargarEdificios(): void {
+    this.edificiosService.obtenerEdificios().subscribe({
+      next: edificios => {
+        this.edificios.set(edificios);
+
+        if (edificios.length > 0) {
+          this.edificioId = edificios[0].idEdificio;
+          this.cargarUsuarios();
+        }
+      },
+      error: error => {
+        this.mensaje.set(
+          error.error?.message ?? 'No se pudieron cargar los edificios.',
+        );
+      },
+    });
+  }
+
+  cambiarEdificio(idEdificio: number): void {
+    this.edificioId = Number(idEdificio);
+    this.usuarios.set([]);
+    this.cargarUsuarios();
+  }
+
+  cargarUsuarios(): void {
+    if (this.esSuperAdmin && !this.edificioId) {
+      return;
+    }
+
+    this.cargando.set(true);
+    this.mensaje.set('');
+
+    const request = this.esSuperAdmin
+      ? this.usuariosService.obtenerPorEdificio(this.edificioId!)
+      : this.usuariosService.obtenerPorEdificio();
+
+    request.subscribe({
+      next: usuarios => {
+        this.usuarios.set(usuarios);
+        this.cargando.set(false);
+      },
+      error: error => {
+        this.cargando.set(false);
+        this.mensaje.set(
+          error.error?.message ?? 'No se pudieron cargar los residentes.',
+        );
+      },
+    });
+  }
+
+  unidadTexto(usuario: UsuarioEdificio): string {
+    if (!usuario.unidades?.length) {
+      return 'Sin unidad asignada';
+    }
+
+    return usuario.unidades
+      .map(unidad => `${unidad.piso} ${unidad.identificacion}`.trim())
+      .join(', ');
+  }
+
+  cambiarEstado(usuario: UsuarioEdificio): void {
+    const nuevoEstado =
+      usuario.estado === 'Activo' ? 'Desactivado' : 'Activo';
+
+    this.usuariosService
+      .cambiarEstado(usuario.id, nuevoEstado)
+      .subscribe({
+        next: respuesta => {
+          this.usuarios.update(lista =>
+            lista.map(item =>
+              item.id === usuario.id
+                ? { ...item, estado: respuesta.estado }
+                : item,
+            ),
+          );
+
+          this.mensaje.set(respuesta.message);
+        },
+        error: error => {
+          this.mensaje.set(
+            error.error?.message ?? 'No se pudo modificar el estado.',
+          );
+        },
+      });
+  }
+
+
+  generarInvitacion(): void {
+    this.mensaje.set('');
+    this.codigoGenerado.set('');
+
     if (
-      !this.nombre.trim() ||
-      !this.apellido.trim() ||
-      !this.email.trim() ||
-      !this.documento.trim() ||
-      !this.edificioNombre.trim() ||
-      !this.unidad.trim() ||
-      this.edificioId <= 0
+      !Number.isInteger(this.diasValidez) ||
+      this.diasValidez < 1 ||
+      this.diasValidez > 30
     ) {
-      this.mensaje.set('Completá todos los campos.');
+      this.mensaje.set('La validez debe ser de entre 1 y 30 días.');
       return;
     }
 
-    const creado = this.servicio.registrar({
-      nombre: this.nombre.trim(),
-      apellido: this.apellido.trim(),
-      email: this.email.trim(),
-      documento: this.documento.trim(),
-      edificioId: Number(this.edificioId),
-      edificioNombre: this.edificioNombre.trim(),
-      unidad: this.unidad.trim(),
+    if (this.esSuperAdmin && !this.edificioId) {
+      this.mensaje.set('Seleccioná un edificio.');
+      return;
+    }
+
+    this.generando.set(true);
+
+    const request = {
+      rol: this.rolInvitacion,
+      diasValidez: this.diasValidez,
+      ...(this.esSuperAdmin ? { idEdificio: this.edificioId! } : {}),
+    };
+
+    this.invitacionesService.crearInvitacion(request).subscribe({
+      next: respuesta => {
+        this.codigoGenerado.set(respuesta.codigo);
+        this.mensaje.set(respuesta.message);
+        this.generando.set(false);
+      },
+      error: error => {
+        this.mensaje.set(
+          error.error?.message ?? 'No se pudo generar la invitación.',
+        );
+        this.generando.set(false);
+      },
     });
-
-    if (!creado) {
-      this.mensaje.set('Ya existe un residente con ese email o documento.');
-      return;
-    }
-
-    this.nombre = '';
-    this.apellido = '';
-    this.email = '';
-    this.documento = '';
-    this.unidad = '';
-
-    this.mensaje.set('Residente registrado correctamente.');
-    this.mostrarFormulario = false;
   }
+
 }

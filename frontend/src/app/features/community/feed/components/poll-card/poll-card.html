@@ -4,46 +4,45 @@
     <span class="poll-card__badge">Encuesta</span>
 
     @if (encuesta().prioritaria) {
-      <span class="poll-card__priority">Prioritaria</span>
+    <span class="poll-card__priority">Prioritaria</span>
     }
   </header>
 
   <div class="poll-card__content">
-    @if (yaVoto() || encuesta().estado === 'cerrada') {
-      <h3 class="poll-card__title">
-        {{ encuesta().titulo }}
-      </h3>
-    }
+    <h3 class="poll-card__title">
+      {{ encuesta().titulo }}
+    </h3>
 
     @if (encuesta().descripcion) {
-      <p class="poll-card__description">
-        {{ encuesta().descripcion }}
-      </p>
+    <p class="poll-card__description">
+      {{ encuesta().descripcion }}
+    </p>
     }
   </div>
 
-  @if (encuesta().estado === 'cerrada') {
-    <p class="poll-card__status">
-      Esta encuesta está cerrada.
-    </p>
-  } @else if (yaVoto()) {
-    <p class="poll-card__status">
-      Ya registraste tu voto.
-    </p>
-  } @else if (encuesta().votacionActiva) {
-    <app-poll-voting
-      [question]="encuesta().titulo"
-      [options]="opciones()"
-      [disabled]="false"
-      (vote)="registrarVoto($event)"
-    />
+  @if (yaVoto()) {
+  <p class="poll-card__status">
+    Ya registraste tu voto.
+  </p>
   }
+
+  @if (encuesta().estado === 'cerrada') {
+  <p class="poll-card__status">
+    Esta encuesta está cerrada.
+  </p>
+  }
+
+  <app-poll-voting [question]="encuesta().titulo"
+                   [options]="opciones()"
+                   [disabled]="yaVoto() || encuesta().estado === 'cerrada' || !encuesta().votacionActiva"
+                   [votedOptionId]="miVoto()"
+                   (vote)="registrarVoto($event)" />
 
   <footer class="poll-card__footer">
     @if (encuesta().fechaLimite) {
-      <span>
-        Cierre: {{ encuesta().fechaLimite | date:'dd/MM/yyyy' }}
-      </span>
+    <span>
+      Cierre: {{ encuesta().fechaLimite | date:'dd/MM/yyyy' }}
+    </span>
     }
   </footer>
 </section>

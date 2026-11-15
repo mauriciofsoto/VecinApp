@@ -83,6 +83,14 @@ export const routes: Routes = [
                 .then(m => m.AdminDashboardComponent),
           },
           {
+            path: 'edificios',
+            canActivate: [roleGuard],
+            data: { roles: ['SuperAdministrador'] },
+            loadComponent: () =>
+              import('./features/operations/edificios/pages/edificios-list/edificios-list')
+                .then(m => m.EdificiosList),
+          },
+          {
             path: 'incidencias',
             canActivate: [roleGuard],
             data: { roles: ['Administrador'] },

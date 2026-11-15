@@ -7,27 +7,30 @@ import { environment } from '../../../environments/environment';
 export interface CodigoInvitacionResponse {
   message: string;
   codigo: string;
+  rol?: string;
+  idEdificio?: number;
   fechaExpiracion: string;
   usosMaximos: number;
 }
 
-@Injectable({ providedIn: 'root' })
+export interface CrearInvitacionRequest {
+  rol: string;
+  idEdificio?: number;
+  diasValidez?: number;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
 export class CodigosInvitacionService {
-  private http = inject(HttpClient);
-  private readonly API_URL = `${environment.apiUrl}/api/codigos-invitacion`;
+  private readonly http = inject(HttpClient);
 
-  crearInvitacionInquilino(diasValidez: number = 7): Observable<CodigoInvitacionResponse> {
-    return this.http.post<CodigoInvitacionResponse>(
-      `${this.API_URL}/inquilino`,
-      { diasValidez }
-    );
-  }
+  private readonly API_URL =
+    `${environment.apiUrl}/api/codigos-invitacion`;
 
-  crearInvitacion(payload: {
-    rol: string;
-    idEdificio?: number;
-    diasValidez?: number;
-  }): Observable<CodigoInvitacionResponse> {
+  crearInvitacion(
+    payload: CrearInvitacionRequest
+  ): Observable<CodigoInvitacionResponse> {
     return this.http.post<CodigoInvitacionResponse>(
       this.API_URL,
       {
