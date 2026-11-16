@@ -11,6 +11,10 @@ public class DeclaracionUnidadComunitaria
     public string? IdentificacionDeclarada { get; set; }
     public bool EsPrincipal { get; set; }
     public bool? EstaAlquilada { get; set; }
+    public string? PersonaRelacionNombre { get; set; }
+    public string? PersonaRelacionApellido { get; set; }
+    public string? PisoRelacion { get; set; }
+    public string? IdentificacionRelacion { get; set; }
     public string EstadoConfirmacion { get; set; } = "Declarada";
     public DateTime FechaDeclaracion { get; set; } = DateTime.UtcNow;
 

@@ -8,6 +8,5 @@ export interface DestinatarioPaquete {
   id: string;
   nombre: string;
   apellido: string;
-  rol: 'Inquilino' | 'Propietario';
   unidadesDeclaradas: UnidadDeclaradaPaquete[];
 }

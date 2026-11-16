@@ -7,6 +7,15 @@
   <section class="package-workspace">
     <div class="package-list">
       <h2>Mis entregas</h2>
+      @if (cargando()) {
+        <p role="status">Cargando tus paquetes…</p>
+      } @else if (errorCarga()) {
+        <div role="alert">
+          <p>{{ errorCarga() }}</p>
+          <button type="button" (click)="cargarPaquetes()">Reintentar</button>
+        </div>
+      }
+      @if (errorAccion()) { <p role="status">{{ errorAccion() }}</p> }
 
       <div class="item-list">
         @for (paquete of misPaquetes(); track paquete.id) {
@@ -18,27 +27,29 @@
             (click)="seleccionarPaquete(paquete)"
           >
             <div>
-              <h3>{{ paquete.descripcion }}</h3>
+              <h3>{{ paquete.identificacion }}</h3>
               <p>Remitente: {{ paquete.remitente }}</p>
-              <p>Unidad {{ paquete.unidad }} · {{ paquete.edificioNombre }}</p>
               <p>Recepción: {{ paquete.fechaRecepcion | date:'short' }}</p>
 
               @if (paquete.fechaEntrega) {
                 <p>Entrega: {{ paquete.fechaEntrega | date:'short' }}</p>
               }
+              @if (paquete.fechaConfirmacion) {
+                <p>Confirmación: {{ paquete.fechaConfirmacion | date:'short' }}</p>
+              }
             </div>
 
             <span
               class="status"
-              [class.delivered]="paquete.estado === 'entregado'"
+              [class.delivered]="paquete.estado !== 'Pendiente'"
             >
-              {{ paquete.estado === 'pendiente' ? 'Esperando retiro' : 'Entregado' }}
+              {{ paquete.estado === 'Pendiente' ? 'Pendiente de entrega física' : paquete.estado }}
             </span>
           </button>
         } @empty {
-          <article class="item-card">
-            Todavía no tenés paquetes registrados.
-          </article>
+          @if (!cargando() && !errorCarga()) {
+            <article class="item-card">Todavía no tenés paquetes registrados.</article>
+          }
         }
       </div>
     </div>
@@ -47,19 +58,20 @@
       @if (paqueteSeleccionado(); as paquete) {
         <app-chat-paquete
           [paquete]="paquete"
-          rolVista="residente"
         />
-      @if (paquete.estado === 'pendiente') {
+      @if (paquete.estado === 'Entregado') {
         <button
         type="button"
         class="confirm-reception-button"
+          [disabled]="accionEnCurso()"
         (click)="abrirConfirmacion()"
       >
-        Confirmar recepción
+        {{ accionEnCurso() ? 'Confirmando…' : 'Confirmar recepción' }}
       </button>}
       
        <app-confirmar-recepcion-modal
       [paquete]="paquete"
+      [disabled]="accionEnCurso()"
       [(open)]="confirmacionAbierta"
       (confirmar)="confirmarRecepcion()"
     />

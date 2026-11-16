@@ -9,7 +9,7 @@ import {
 } from '../../models/reserva';
 import { Modal } from '../../../../../shared/components/organisms/modal/modal';
 
-import { CrearReserva } from '../../services/reservas';
+import { CrearEventoAdmin } from '../../services/reservas';
 import { InputComponent } from '../../../../../shared/components/atoms/input/input';
 
 @Component({
@@ -27,22 +27,15 @@ import { InputComponent } from '../../../../../shared/components/atoms/input/inp
 export class FormReservas {
   readonly espacios = input.required<EspacioComun[]>();
 
+  // Mantiene compatibilidad con el template heredado
   readonly creadaPorAdministracion = input(false);
 
-  readonly guardar = output<CrearReserva>();
+  readonly guardar = output<CrearEventoAdmin>();
 
   readonly mensaje = signal('');
-
   readonly modalAbierto = signal(false);
 
-  // Datos del residente y su unidad
-  usuarioId = '';
-  usuarioNombre = '';
-  unidadId: number | null = null;
-  unidadNombre = '';
-  edificioId: number | null = null;
-
-  // Datos de la reserva
+  // Campos del formulario de administración
   titulo = '';
   descripcion = '';
   fecha = '';
@@ -50,19 +43,21 @@ export class FormReservas {
   horaFin = '';
   cantidadParticipantes = 1;
   espacioId: number | null = null;
-
-  tipoEvento: TipoEvento = 'privado';
+  tipoEvento: TipoEvento = 'publico';
   categoriaEvento: CategoriaEvento | null = null;
+
+  // Campos heredados del template — se mantienen para compatibilidad visual,
+  // pero NO se envían al backend (el titular lo obtiene el backend del JWT)
+  usuarioId = '';
+  usuarioNombre = '';
+  unidadId: number | null = null;
+  unidadNombre = '';
+  edificioId: number | null = null;
 
   crear(): void {
     this.mensaje.set('');
 
     if (
-      !this.usuarioId.trim() ||
-      !this.usuarioNombre.trim() ||
-      !this.unidadId ||
-      !this.unidadNombre.trim() ||
-      !this.edificioId ||
       !this.titulo.trim() ||
       !this.descripcion.trim() ||
       !this.fecha ||
@@ -80,14 +75,6 @@ export class FormReservas {
       return;
     }
 
-    if (
-      this.tipoEvento === 'publico' &&
-      !this.categoriaEvento
-    ) {
-      this.mensaje.set('Seleccioná una categoría para el evento.');
-      return;
-    }
-
     const fechaReserva = new Date(`${this.fecha}T00:00:00`);
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
@@ -98,11 +85,6 @@ export class FormReservas {
     }
 
     this.guardar.emit({
-      usuarioId: this.usuarioId.trim(),
-      usuarioNombre: this.usuarioNombre.trim(),
-      unidadId: this.unidadId,
-      unidadNombre: this.unidadNombre.trim(),
-      edificioId: this.edificioId,
       espacioId: this.espacioId,
       titulo: this.titulo.trim(),
       descripcion: this.descripcion.trim(),
@@ -110,22 +92,14 @@ export class FormReservas {
       horaInicio: this.horaInicio,
       horaFin: this.horaFin,
       cantidadParticipantes: this.cantidadParticipantes,
-      tipoEvento: this.tipoEvento,
-      categoriaEvento:
-        this.tipoEvento === 'publico'
-          ? this.categoriaEvento
-          : null,
-      creadaPorAdministracion: this.creadaPorAdministracion(),
+      categoriaEvento: this.categoriaEvento,
     });
+
+    this.limpiarFormulario();
+    this.cerrar();
   }
 
   limpiarFormulario(): void {
-    this.usuarioId = '';
-    this.usuarioNombre = '';
-    this.unidadId = null;
-    this.unidadNombre = '';
-    this.edificioId = null;
-
     this.titulo = '';
     this.descripcion = '';
     this.fecha = '';
@@ -133,19 +107,21 @@ export class FormReservas {
     this.horaFin = '';
     this.cantidadParticipantes = 1;
     this.espacioId = null;
-
-    this.tipoEvento = 'privado';
+    this.tipoEvento = 'publico';
     this.categoriaEvento = null;
-
+    this.usuarioId = '';
+    this.usuarioNombre = '';
+    this.unidadId = null;
+    this.unidadNombre = '';
+    this.edificioId = null;
     this.mensaje.set('');
   }
 
-    abrir(): void {
+  abrir(): void {
     this.modalAbierto.set(true);
   }
 
   cerrar(): void {
     this.modalAbierto.set(false);
   }
-
 }

@@ -4,4 +4,5 @@ export interface User {
   apellido: string;
   email: string;
   rol: string;
+  declaraUnidadesAlquiladas: boolean;
 }

@@ -1,144 +1,69 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { Paquete, CrearPaquete } from '../models/paquete';
 import { DestinatarioPaquete } from '../models/destinatario-paquete';
-import {
-  MensajePaquete,
-  CrearMensajePaquete,
-} from '../models/mensaje-paquete';
+import { MensajePaquete, CrearMensajePaquete } from '../models/mensaje-paquete';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class Paqueteria {
   private readonly apiUrl = `${environment.apiUrl}/api/paqueteria`;
+  private readonly estadoPaquetes = signal<Paquete[]>([]);
+  private readonly estadoMensajes = signal<MensajePaquete[]>([]);
 
   constructor(private readonly http: HttpClient) {}
 
-  private readonly estadoPaquetes = signal<Paquete[]>([
-    {
-      id: 1,
-      destinatarioId: 1,
-      destinatarioNombre: 'Residente de prueba',
-      edificioId: 1,
-      edificioNombre: 'Edificio A',
-      unidad: '1A',
-      descripcion: 'Caja mediana',
-      remitente: 'Correo',
-      fechaRecepcion: new Date().toISOString(),
-      estado: 'pendiente',
-    },
-  ]);
-
-  private readonly estadoMensajes = signal<MensajePaquete[]>([
-    {
-      id: 1,
-      paqueteId: 1,
-      emisorId: 0,
-      emisorNombre: 'Portería',
-      rolEmisor: 'porteria',
-      contenido: 'Hola, recibimos un paquete a tu nombre. Podés pasar a retirarlo.',
-      fechaEnvio: new Date().toISOString(),
-    },
-  ]);
-
   readonly paquetes = this.estadoPaquetes.asReadonly();
   readonly mensajes = this.estadoMensajes.asReadonly();
-
-  readonly pendientes = computed(() =>
-    this.estadoPaquetes().filter(
-      paquete => paquete.estado === 'pendiente',
-    ),
-  );
-
-  readonly entregados = computed(() =>
-    this.estadoPaquetes().filter(
-      paquete => paquete.estado === 'entregado',
-    ),
-  );
+  readonly pendientes = computed(() => this.estadoPaquetes().filter(p => p.estado === 'Pendiente'));
+  readonly entregados = computed(() => this.estadoPaquetes().filter(p => p.estado === 'Entregado'));
+  readonly confirmados = computed(() => this.estadoPaquetes().filter(p => p.estado === 'Confirmado'));
 
   obtenerDestinatarios(): Observable<DestinatarioPaquete[]> {
     return this.http.get<DestinatarioPaquete[]>(`${this.apiUrl}/destinatarios`);
   }
 
-  registrar(datos: CrearPaquete): Paquete {
-    const paquete: Paquete = {
-      ...datos,
-      id: Date.now(),
-      fechaRecepcion: new Date().toISOString(),
-      estado: 'pendiente',
-    };
-
-    this.estadoPaquetes.update(lista => [paquete, ...lista]);
-
-    return paquete;
+  listar(): Observable<Paquete[]> {
+    return this.http.get<Paquete[]>(this.apiUrl).pipe(tap(paquetes => this.estadoPaquetes.set(paquetes)));
   }
 
-  paquetesDeResidente(residenteId: number): Paquete[] {
-    return this.estadoPaquetes().filter(
-      paquete => paquete.destinatarioId === residenteId,
+  misPaquetes(): Observable<Paquete[]> {
+    return this.http.get<Paquete[]>(`${this.apiUrl}/mis-paquetes`).pipe(tap(paquetes => this.estadoPaquetes.set(paquetes)));
+  }
+
+  registrar(datos: CrearPaquete): Observable<Paquete> {
+    return this.http.post<Paquete>(this.apiUrl, datos).pipe(
+      tap(paquete => this.estadoPaquetes.update(paquetes => [paquete, ...paquetes.filter(p => p.id !== paquete.id)])),
+    );
+  }
+
+  registrarEntrega(paqueteId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${paqueteId}/entrega`, null);
+  }
+
+  confirmarRecepcion(paqueteId: number): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${paqueteId}/confirmacion`, null);
+  }
+
+  obtenerMensajes(paqueteId: number): Observable<MensajePaquete[]> {
+    return this.http.get<Omit<MensajePaquete, 'paqueteId' | 'propio'>[]>(`${this.apiUrl}/${paqueteId}/mensajes`).pipe(
+      tap(mensajes => this.estadoMensajes.update(actuales => [
+        ...actuales.filter(mensaje => mensaje.paqueteId !== paqueteId),
+        ...mensajes.map(mensaje => ({ ...mensaje, paqueteId })),
+      ])),
+      map(mensajes => mensajes.map(mensaje => ({ ...mensaje, paqueteId }))),
     );
   }
 
   mensajesDe(paqueteId: number): MensajePaquete[] {
-    return this.estadoMensajes()
-      .filter(mensaje => mensaje.paqueteId === paqueteId)
-      .sort(
-        (a, b) =>
-          new Date(a.fechaEnvio).getTime() -
-          new Date(b.fechaEnvio).getTime(),
-      );
+    return this.estadoMensajes().filter(mensaje => mensaje.paqueteId === paqueteId);
   }
 
-  enviarMensaje(datos: CrearMensajePaquete): void {
-    const paqueteExiste = this.estadoPaquetes().some(
-      paquete => paquete.id === datos.paqueteId,
+  enviarMensaje(paqueteId: number, datos: CrearMensajePaquete): Observable<MensajePaquete> {
+    return this.http.post<Omit<MensajePaquete, 'paqueteId' | 'propio'>>(`${this.apiUrl}/${paqueteId}/mensajes`, datos).pipe(
+      map(mensaje => ({ ...mensaje, paqueteId, propio: true })),
+      tap(mensaje => this.estadoMensajes.update(actuales => [...actuales, mensaje])),
     );
-
-    if (!paqueteExiste || !datos.contenido.trim()) {
-      return;
-    }
-
-    const mensaje: MensajePaquete = {
-      ...datos,
-      id: Date.now(),
-      contenido: datos.contenido.trim(),
-      fechaEnvio: new Date().toISOString(),
-    };
-
-    this.estadoMensajes.update(lista => [...lista, mensaje]);
-  }
-
-  confirmarRecepcion(
-    paqueteId: number,
-    residenteId: number,
-  ): boolean {
-    const paquete = this.estadoPaquetes().find(
-      item => item.id === paqueteId,
-    );
-
-    if (
-      !paquete ||
-      paquete.destinatarioId !== residenteId ||
-      paquete.estado !== 'pendiente'
-    ) {
-      return false;
-    }
-
-    this.estadoPaquetes.update(lista =>
-      lista.map(item =>
-        item.id === paqueteId
-          ? {
-              ...item,
-              estado: 'entregado',
-              fechaEntrega: new Date().toISOString(),
-            }
-          : item,
-      ),
-    );
-
-    return true;
   }
 }

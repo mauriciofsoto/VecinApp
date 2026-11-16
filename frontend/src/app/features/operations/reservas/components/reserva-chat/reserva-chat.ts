@@ -25,16 +25,9 @@ export class ReservaChat {
 
   enviarMensaje(contenido: string): void {
     const texto = contenido.trim();
-
     if (!texto) return;
 
-    this.reservasService.enviarMensaje({
-      reservaId: this.reserva().id,
-      emisorId: this.emisorId(),
-      emisorNombre: this.emisorNombre(),
-      rolEmisor: 'residente',
-      contenido: texto,
-    });
+    this.reservasService.enviarMensaje(this.reserva().id, texto).subscribe();
   }
 
   esMensajePropio(emisorId: string): boolean {

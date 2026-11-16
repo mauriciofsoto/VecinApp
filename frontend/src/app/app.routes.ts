@@ -5,6 +5,7 @@ import {
   authGuard,
   roleGuard,
   dashboardRedirectGuard,
+  incidenciasDerivadasGuard,
 } from './core/guards/auth.guard';
 
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
@@ -58,6 +59,14 @@ export const routes: Routes = [
         pathMatch: 'full',
         canActivate: [dashboardRedirectGuard],
         children: [],
+      },
+      {
+        path: 'perfil',
+        canActivate: [roleGuard],
+        data: { roles: [...ADMIN_ROLES, ...RESIDENT_ROLES, 'Portero'] },
+        loadComponent: () =>
+          import('./features/profile/pages/perfil/perfil')
+            .then(m => m.Perfil),
       },
 
       // DASHBOARDS
@@ -198,6 +207,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/operations/incidencias/pages/mis-incidencias/mis-incidencias')
             .then(m => m.MisIncidencias),
+      },
+      {
+        path: 'incidencias-derivadas',
+        canActivate: [incidenciasDerivadasGuard],
+        loadComponent: () =>
+          import('./features/operations/incidencias/pages/incidencias-derivadas/incidencias-derivadas')
+            .then(m => m.IncidenciasDerivadas),
       },
       {
         path: 'incidencias/crear',

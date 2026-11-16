@@ -14,7 +14,7 @@ import { InputComponent } from '../../../../shared/components/atoms/input/input'
 type Role = 'owner' | 'tenant' | 'staff';
 type Step = 'account' | 'role' | 'owner-info' | 'owner-rentals' | 'owner-home' | 'owner-resident' | 'owner-units' | 'tenant-info' | 'tenant-home' | 'tenant-owner' | 'staff-details' | 'summary';
 type Phase = 1 | 2 | 3 | 4;
-interface Unit { id: number; floor: string; number: string; }
+interface Unit { id: number; floor: string; number: string; tenantName?: string; tenantSurname?: string; tenantFloor?: string; tenantUnit?: string; }
 
 @Component({
   selector: 'app-registro-users',
@@ -145,7 +145,7 @@ export class RegistroUsers implements OnInit {
   }
 
   get finalProfile(): 'Propietario' | 'Inquilino' | 'Personal' | null {
-    if (this.role === 'owner') return this.ownerHasRentalUnits ? 'Propietario' : 'Inquilino';
+    if (this.role === 'owner') return 'Propietario';
     if (this.role === 'tenant') return 'Inquilino';
     if (this.role === 'staff') return 'Personal';
     return null;
@@ -184,7 +184,7 @@ export class RegistroUsers implements OnInit {
 
   setOwnerLivesHere(value: boolean): void {
     this.ownerLivesHere = value;
-    if (!value) this.clearOwnerDetails();
+    if (!value) { this.ownerFloor = ''; this.ownerUnitNumber = ''; }
   }
 
   chooseStaffFunction(value: string): void {
@@ -205,7 +205,7 @@ export class RegistroUsers implements OnInit {
   private normalizeUnitPart(value: string): string {
     return value.normalize('NFKC').trim().replace(/\s+/g, ' ');
   }
-  private newUnit(): Unit { return { id: this.unitSequence++, floor: '', number: '' }; }
+  private newUnit(): Unit { return { id: this.unitSequence++, floor: '', number: '', tenantName: '', tenantSurname: '', tenantFloor: '', tenantUnit: '' }; }
   private clearOwnerDetails(): void {
     this.ownerName = ''; this.ownerSurname = ''; this.ownerFloor = ''; this.ownerUnitNumber = '';
   }
@@ -220,7 +220,7 @@ export class RegistroUsers implements OnInit {
       case 'owner-resident': return this.residentUnitValid;
       case 'owner-units': return this.ownerUnitsValid;
       case 'tenant-home': return !!this.floor.trim() && !!this.unitNumber.trim() && this.rentalMethod !== null;
-      case 'tenant-owner': return this.ownerLivesHere !== null;
+      case 'tenant-owner': return true;
       case 'staff-details': return !!this.staffFunction && (this.staffFunction !== 'Otro' || !!this.staffFunctionOther.trim());
       default: return true;
     }
@@ -319,9 +319,13 @@ export class RegistroUsers implements OnInit {
         base.unidades.push(...this.rentalUnits.map(unit => ({
           tipo: 'Titularidad' as const, piso: unit.floor.trim(),
           identificacion: unit.number.trim(), estaAlquilada: true, esPrincipal: false,
+          personaRelacionNombre: unit.tenantName?.trim() || undefined,
+          personaRelacionApellido: unit.tenantSurname?.trim() || undefined,
+          pisoRelacion: unit.tenantFloor?.trim() || undefined,
+          identificacionRelacion: unit.tenantUnit?.trim() || undefined,
         })));
       } else {
-        base.perfil = 'Inquilino';
+        base.perfil = 'Propietario';
         base.viveEnEdificio = true;
         base.tieneOtrasUnidades = false;
         base.declaraUnidadesAlquiladas = false;
@@ -340,6 +344,10 @@ export class RegistroUsers implements OnInit {
       base.unidades = [{
         tipo: 'Ocupacion', piso: this.floor.trim() || null,
         identificacion: this.unitNumber.trim() || null, estaAlquilada: null,
+        personaRelacionNombre: this.ownerName.trim() || null,
+        personaRelacionApellido: this.ownerSurname.trim() || null,
+        pisoRelacion: this.ownerLivesHere === true ? this.ownerFloor.trim() || null : null,
+        identificacionRelacion: this.ownerLivesHere === true ? this.ownerUnitNumber.trim() || null : null,
       }];
     } else {
       base.funcionPersonal = this.staffFunction;

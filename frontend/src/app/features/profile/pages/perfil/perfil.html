@@ -1,0 +1,291 @@
+<main class="profile-page">
+  <header class="profile-page__header">
+    <div>
+      <h1>Mi perfil</h1>
+      <p>Consultá tus datos y la información comunitaria registrada.</p>
+    </div>
+    @if (perfil(); as usuario) {
+      @if (!editando()) {
+        <button class="profile-action" type="button" (click)="iniciarEdicion()">Editar perfil</button>
+      }
+    }
+  </header>
+
+  @if (confirmacion()) {
+    <p class="profile-page__state profile-page__state--success" role="status">{{ confirmacion() }}</p>
+  }
+
+  @if (solicitudes().length) {
+    <app-card variant="glass" size="full">
+      <div card-title><h2>Vinculaciones de alquiler</h2></div>
+      <ul class="profile-list">
+        @for (solicitud of solicitudes(); track solicitud.id) {
+          <li class="profile-list__item">
+            <div>
+              <strong>{{ solicitud.nombreOtraParte }} · Piso {{ solicitud.pisoUnidad }}, unidad {{ solicitud.identificacionUnidad }}</strong>
+              <p>{{ solicitud.estado }}@if (solicitud.estado === 'Pendiente' && solicitud.miParteAcepto) { · Falta la respuesta de la otra parte }</p>
+            </div>
+            <button class="profile-action profile-action--secondary" type="button" (click)="abrirDetalleSolicitud(solicitud)">Ver solicitud</button>
+          </li>
+        }
+      </ul>
+    </app-card>
+  }
+
+  @if (cargando()) {
+    <p class="profile-page__state" role="status">Cargando perfil…</p>
+  } @else if (error()) {
+    <p class="profile-page__state profile-page__state--error" role="alert">{{ error() }}</p>
+  } @else if (perfil(); as usuario) {
+    <app-card variant="glass" size="full" customClass="profile-card">
+      <div card-title class="profile-card__heading">
+        <div>
+          <h2>{{ usuario.nombre }} {{ usuario.apellido }}</h2>
+          <p>{{ usuario.email || 'No hay información registrada' }}</p>
+        </div>
+        <app-badge variant="accent">{{ rolVisible() }}</app-badge>
+      </div>
+
+      @if (editando()) {
+        <form class="profile-edit-form" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+          <div class="profile-details">
+            <label class="profile-field" for="profile-nombre">
+              <span>Nombre</span>
+              <app-input
+                id="profile-nombre"
+                formControlName="nombre"
+                [required]="true"
+                [maxlength]="100"
+                [errorMessage]="errorCampo('nombre')"
+                autocomplete="given-name"
+              />
+            </label>
+            <label class="profile-field" for="profile-apellido">
+              <span>Apellido</span>
+              <app-input
+                id="profile-apellido"
+                formControlName="apellido"
+                [required]="true"
+                [maxlength]="100"
+                [errorMessage]="errorCampo('apellido')"
+                autocomplete="family-name"
+              />
+            </label>
+            <label class="profile-field" for="profile-telefono">
+              <span>Teléfono</span>
+              <app-input
+                id="profile-telefono"
+                formControlName="telefono"
+                type="tel"
+                placeholder="No hay información registrada"
+                [maxlength]="30"
+                [errorMessage]="errorCampo('telefono')"
+                autocomplete="tel"
+              />
+            </label>
+            <div class="profile-field">
+              <span>Correo electrónico</span>
+              <p>{{ usuario.email || 'No hay información registrada' }}</p>
+            </div>
+            <div class="profile-field">
+              <span>Edificio</span>
+              <p>{{ usuario.edificioNombre || 'No hay información registrada' }}</p>
+            </div>
+          </div>
+          @if (errorGuardado()) {
+            <p class="profile-page__state profile-page__state--error" role="alert">{{ errorGuardado() }}</p>
+          }
+          <div class="profile-edit-form__actions">
+            <button class="profile-action" type="submit" [disabled]="guardando()">
+              {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
+            <button class="profile-action profile-action--secondary" type="button" (click)="cancelarEdicion()" [disabled]="guardando()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      } @else {
+        <dl class="profile-details">
+          <div>
+            <dt>Nombre</dt>
+            <dd>{{ usuario.nombre || 'No hay información registrada' }}</dd>
+          </div>
+          <div>
+            <dt>Apellido</dt>
+            <dd>{{ usuario.apellido || 'No hay información registrada' }}</dd>
+          </div>
+          <div>
+            <dt>Correo electrónico</dt>
+            <dd>{{ usuario.email || 'No hay información registrada' }}</dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd>{{ usuario.telefono || 'No hay información registrada' }}</dd>
+          </div>
+          <div>
+            <dt>Edificio</dt>
+            <dd>{{ usuario.edificioNombre || 'No hay información registrada' }}</dd>
+          </div>
+        </dl>
+      }
+    </app-card>
+
+    @if (esResidente()) {
+      <div class="profile-page__sections">
+        <app-card variant="glass" size="full">
+          <div card-title><h2>Unidades vinculadas</h2></div>
+          @if (usuario.unidadesVinculadas.length) {
+            <ul class="profile-list">
+              @for (unidad of usuario.unidadesVinculadas; track unidad.id) {
+                <li class="profile-list__item">
+                  <div>
+                    <strong>Piso {{ unidad.piso }}, unidad {{ unidad.identificacion }}</strong>
+                    <p>{{ unidad.edificioNombre }}</p>
+                  </div>
+                  <app-badge variant="neutral">{{ unidad.tipoRelacion }}</app-badge>
+                </li>
+              }
+            </ul>
+          } @else {
+            <app-empty-state
+              title="No hay información registrada"
+              description="Todavía no hay unidades vinculadas a tu cuenta."
+            />
+          }
+        </app-card>
+
+        <app-card variant="glass" size="full">
+          <div card-title class="profile-card__heading">
+            <h2>Declaraciones de unidades</h2>
+            <button class="profile-action profile-action--secondary" type="button" (click)="toggleEdicionDeclaraciones()">
+              {{ editandoDeclaraciones() ? 'Cerrar edición' : 'Completar o corregir' }}
+            </button>
+          </div>
+          @if (errorDeclaraciones()) { <p class="profile-page__state profile-page__state--error" role="alert">{{ errorDeclaraciones() }}</p> }
+          @if (usuario.unidadesDeclaradas.length) {
+            <ul class="profile-list">
+              @for (unidad of usuario.unidadesDeclaradas; track unidad.id) {
+                <li class="profile-list__item profile-list__item--declaration">
+                  <div>
+                    <strong>{{ unidad.tipo }}</strong>
+                    @if (editandoDeclaraciones()) {
+                      <label>Unidad declarada
+                        <input [(ngModel)]="unidad.pisoDeclarado" [ngModelOptions]="{standalone: true}" placeholder="Piso" />
+                        <input [(ngModel)]="unidad.identificacionDeclarada" [ngModelOptions]="{standalone: true}" placeholder="Unidad" />
+                      </label>
+                      <label>Nombre de la otra parte <span class="optional">Opcional</span><input [(ngModel)]="unidad.personaRelacionNombre" [ngModelOptions]="{standalone: true}" /></label>
+                      <label>Apellido de la otra parte <span class="optional">Opcional</span><input [(ngModel)]="unidad.personaRelacionApellido" [ngModelOptions]="{standalone: true}" /></label>
+                      <label>Piso donde reside la otra parte <span class="optional">Opcional</span><input [(ngModel)]="unidad.pisoRelacion" [ngModelOptions]="{standalone: true}" /></label>
+                      <label>Unidad donde reside la otra parte <span class="optional">Opcional</span><input [(ngModel)]="unidad.identificacionRelacion" [ngModelOptions]="{standalone: true}" /></label>
+                      <button class="profile-action" type="button" [disabled]="guardandoDeclaracionId() !== null" (click)="guardarDeclaracion(unidad)">
+                        {{ guardandoDeclaracionId() === unidad.id ? 'Guardando…' : 'Guardar declaración' }}
+                      </button>
+                    } @else {
+                      <p>{{ ubicacionDeclarada(unidad) }}</p>
+                      @if (unidad.personaRelacionNombre || unidad.personaRelacionApellido) { <p>Otra parte declarada: {{ unidad.personaRelacionNombre }} {{ unidad.personaRelacionApellido }}</p> }
+                      @if (unidad.pisoRelacion || unidad.identificacionRelacion) { <p>Residencia declarada: {{ unidad.pisoRelacion || 'Piso no informado' }} / {{ unidad.identificacionRelacion || 'Unidad no informada' }}</p> }
+                      @if (unidad.tipo === 'Titularidad' && unidad.estaAlquiladaDeclarada !== null) { <p>Alquilada según declaración: {{ unidad.estaAlquiladaDeclarada ? 'Sí' : 'No' }}</p> }
+                      @if (unidad.esPrincipalDeclarada) { <p>Declarada como unidad principal.</p> }
+                    }
+                  </div>
+                  <app-badge variant="warning">{{ unidad.estadoConfirmacion }}</app-badge>
+                </li>
+              }
+            </ul>
+          } @else {
+            <app-empty-state
+              title="No hay información registrada"
+              description="No hay declaraciones de unidades asociadas a tu cuenta."
+            />
+          }
+          @if (editandoDeclaraciones() && (esPropietario() || esInquilino())) {
+            <form class="declaration-add-form" (ngSubmit)="agregarDeclaracion()">
+              <h3>{{ esPropietario() ? 'Agregar una unidad alquilada' : 'Agregar una unidad ocupada' }}</h3>
+              <p>La unidad debe existir en el catálogo del edificio. Agregarla conserva la declaración como pendiente.</p>
+              <div class="profile-details">
+                <label>Piso <input name="nuevaUnidadPiso" [(ngModel)]="nuevaDeclaracion.piso" required maxlength="100" /></label>
+                <label>Unidad <input name="nuevaUnidadIdentificacion" [(ngModel)]="nuevaDeclaracion.identificacion" required maxlength="100" /></label>
+                <label>Nombre de la otra parte <input name="nuevaPersonaNombre" [(ngModel)]="nuevaDeclaracion.personaRelacionNombre" maxlength="100" /></label>
+                <label>Apellido de la otra parte <input name="nuevaPersonaApellido" [(ngModel)]="nuevaDeclaracion.personaRelacionApellido" maxlength="100" /></label>
+                <label>Piso de residencia declarado <input name="nuevaPisoRelacion" [(ngModel)]="nuevaDeclaracion.pisoRelacion" maxlength="100" /></label>
+                <label>Unidad de residencia declarada <input name="nuevaUnidadRelacion" [(ngModel)]="nuevaDeclaracion.identificacionRelacion" maxlength="100" /></label>
+              </div>
+              <button class="profile-action" type="submit" [disabled]="guardandoDeclaracionId() !== null">{{ guardandoDeclaracionId() === -1 ? 'Guardando…' : 'Agregar declaración' }}</button>
+            </form>
+          }
+        </app-card>
+      </div>
+
+      @if (esInquilino()) {
+        <app-card variant="glass" size="full">
+          <div card-title><h2>Información de alquiler</h2></div>
+          <dl class="profile-details">
+            <div>
+              <dt>Modalidad registrada</dt>
+              <dd>{{ usuario.modalidadAlquiler || 'No hay información registrada' }}</dd>
+            </div>
+          </dl>
+        </app-card>
+      }
+
+      @if (esPropietario()) {
+        <app-card variant="glass" size="full">
+          <div card-title><h2>Información declarada</h2></div>
+          <dl class="profile-details">
+            <div>
+              <dt>Declaró unidades alquiladas</dt>
+              <dd>
+                @if (usuario.declaraUnidadesAlquiladas === null) {
+                  No hay información registrada
+                } @else {
+                  {{ usuario.declaraUnidadesAlquiladas ? 'Sí' : 'No' }}
+                }
+              </dd>
+            </div>
+          </dl>
+        </app-card>
+      }
+    }
+
+    @if (esPersonal()) {
+      <app-card variant="glass" size="full">
+        <div card-title><h2>Información de Personal</h2></div>
+        <dl class="profile-details">
+          <div>
+            <dt>Función</dt>
+            <dd>{{ funcionPersonal() || 'No hay información registrada' }}</dd>
+          </div>
+          <div>
+            <dt>Horario</dt>
+            <dd>{{ usuario.horarioPersonal || 'No hay información registrada' }}</dd>
+          </div>
+        </dl>
+      </app-card>
+    }
+  }
+</main>
+
+@if (solicitudActiva(); as solicitud) {
+  <app-modal [(open)]="modalSolicitudAbierto" heading="Solicitud de vinculación" size="md" [preventClose]="respondiendoSolicitud()">
+    <p>{{ perfil()?.nombre }}, {{ solicitud.nombreOtraParte }} quiere dejar registrada una relación de {{ solicitud.rolOtraParte === 'Propietario' ? 'inquilino y propietario' : 'propietaria e inquilina' }} respecto de la unidad {{ solicitud.pisoUnidad }} / {{ solicitud.identificacionUnidad }}.</p>
+    @if (solicitud.pisoResidenciaOtraParte || solicitud.identificacionResidenciaOtraParte) {
+      <p>Residencia declarada: {{ solicitud.pisoResidenciaOtraParte || 'Piso no informado' }} / {{ solicitud.identificacionResidenciaOtraParte || 'Unidad no informada' }}.</p>
+    }
+    @if (solicitud.estado === 'Pendiente') {
+      <p>{{ solicitud.miParteAcepto ? 'Ya aceptaste. Falta la respuesta de la otra parte.' : 'Revisá la información antes de responder.' }}</p>
+    } @else {
+      <p>Estado de la solicitud: <strong>{{ solicitud.estado }}</strong></p>
+    }
+    @if (respuestaSolicitud()) { <p class="profile-page__state profile-page__state--success" role="status">{{ respuestaSolicitud() }}</p> }
+    @if (solicitud.estado === 'Pendiente' && !solicitud.miParteAcepto) {
+      <label class="profile-field">Motivo del rechazo <span>Opcional</span><textarea maxlength="500" [ngModel]="motivoRechazo()" (ngModelChange)="motivoRechazo.set($event)"></textarea></label>
+    }
+    <div modal-footer class="profile-edit-form__actions">
+      @if (solicitud.estado === 'Pendiente' && !solicitud.miParteAcepto) {
+        <button class="profile-action" type="button" [disabled]="respondiendoSolicitud()" (click)="responderSolicitud(true)">{{ respondiendoSolicitud() ? 'Procesando…' : 'Aceptar vinculación' }}</button>
+        <button class="profile-action profile-action--secondary" type="button" [disabled]="respondiendoSolicitud()" (click)="responderSolicitud(false)">{{ respondiendoSolicitud() ? 'Procesando…' : 'Rechazar vinculación' }}</button>
+      }
+      <button class="profile-action profile-action--secondary" type="button" [disabled]="respondiendoSolicitud()" (click)="cerrarSolicitud()">Cerrar</button>
+    </div>
+  </app-modal>
+}

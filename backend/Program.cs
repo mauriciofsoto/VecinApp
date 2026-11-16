@@ -111,6 +111,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<NotificacionesService>();
+builder.Services.AddScoped<VinculacionesService>();
 
 
 builder.Services.AddSwaggerGen(options =>
@@ -455,6 +456,53 @@ if (!builder.Configuration.GetValue<bool>("VecinApp:SkipDevelopmentSeed")) using
         }
     }
 
+    // 6. Espacios comunes de prueba
+    if (!await context.EspaciosComunes.AnyAsync(e => e.IdEdificio == edificio.IdEdificio))
+    {
+        context.EspaciosComunes.AddRange(
+            new EspacioComun
+            {
+                IdEdificio = edificio.IdEdificio,
+                Nombre = "SUM",
+                Descripcion = "Salón de usos múltiples para reuniones y eventos.",
+                HoraApertura = new TimeSpan(9, 0, 0),
+                HoraCierre = new TimeSpan(23, 0, 0),
+                CapacidadMaxima = 50,
+                Activo = true
+            },
+            new EspacioComun
+            {
+                IdEdificio = edificio.IdEdificio,
+                Nombre = "Pileta",
+                Descripcion = "Espacio recreativo del edificio.",
+                HoraApertura = new TimeSpan(10, 0, 0),
+                HoraCierre = new TimeSpan(20, 0, 0),
+                CapacidadMaxima = 20,
+                Activo = true
+            },
+            new EspacioComun
+            {
+                IdEdificio = edificio.IdEdificio,
+                Nombre = "Parrilla",
+                Descripcion = "Sector de parrillas y mesas.",
+                HoraApertura = new TimeSpan(10, 0, 0),
+                HoraCierre = new TimeSpan(22, 0, 0),
+                CapacidadMaxima = 15,
+                Activo = true
+            },
+            new EspacioComun
+            {
+                IdEdificio = edificio.IdEdificio,
+                Nombre = "Terraza",
+                Descripcion = "Espacio común al aire libre.",
+                HoraApertura = new TimeSpan(9, 0, 0),
+                HoraCierre = new TimeSpan(22, 0, 0),
+                CapacidadMaxima = 25,
+                Activo = true
+            }
+        );
+        await context.SaveChangesAsync();
+    }
 }
 
 

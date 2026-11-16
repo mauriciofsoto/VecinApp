@@ -1,19 +1,15 @@
-export type RolEmisorPaquete =
-  | 'administracion'
-  | 'porteria'
-  | 'residente';
-
+/** Contrato de MensajePaqueteDto, asociado al paquete por la pantalla. */
 export interface MensajePaquete {
   id: number;
   paqueteId: number;
-  emisorId: number;
-  emisorNombre: string;
-  rolEmisor: RolEmisorPaquete;
+  nombreEmisor: string;
+  apellidoEmisor: string;
   contenido: string;
   fechaEnvio: string;
+  propio?: boolean;
 }
 
-export type CrearMensajePaquete = Omit<
-  MensajePaquete,
-  'id' | 'fechaEnvio'
->;
+/** El backend deriva emisor, identidad y rol desde la sesión. */
+export interface CrearMensajePaquete {
+  contenido: string;
+}

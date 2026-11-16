@@ -110,6 +110,63 @@
     overflow-wrap: anywhere;
   }
 
+  &__acciones {
+    white-space: nowrap;
+
+    app-button + app-button {
+      margin-inline-start: $space-2;
+    }
+  }
+
+  &__mensaje,
+  &__feedback {
+    margin: 0;
+    padding: $space-3 $space-4;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+
+  &__feedback {
+    color: var(--color-text-muted);
+
+    &--error {
+      @include status-tint(var(--color-danger), 0.12, 0.4);
+    }
+  }
+
+  &__derivacion {
+    @include flex-col($space-4);
+  }
+
+  &__derivacion-info {
+    @include flex-col($space-2);
+    padding: $space-3;
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+
+    strong {
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__nota-declaracion {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+  }
+
+  &__modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: $space-3;
+  }
+
   &__vacio {
     @include flex-col($space-2);
     align-items: center;
@@ -188,6 +245,12 @@
 
     &__filtros {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__modal-footer {
+      app-button {
+        flex: 1 1 auto;
+      }
     }
   }
 

@@ -38,6 +38,10 @@ export interface UnidadRegistroComunitarioRequest {
   estaAlquilada: boolean | null;
   esPrincipal?: boolean;
   tipo: 'Titularidad' | 'Residencia' | 'Ocupacion';
+  personaRelacionNombre?: string | null;
+  personaRelacionApellido?: string | null;
+  pisoRelacion?: string | null;
+  identificacionRelacion?: string | null;
 }
 
 export interface RegistroComunitarioRequest {

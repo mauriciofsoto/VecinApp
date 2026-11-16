@@ -29,6 +29,34 @@ export interface IncidenciaDashboardDto {
   estado: string;
 }
 
+export interface DerivacionIncidenciaDto {
+  idDerivacion: number;
+  tipoDestinatario: 'Propietario' | 'Personal';
+  fechaDerivacion: string;
+  administrador: string;
+  titulo: string;
+  descripcion: string;
+  fechaCreacion: string;
+  estado: string;
+  ubicacion: string | null;
+  unidad: string | null;
+}
+
+export interface DestinatarioDerivacionDto {
+  id: string;
+  nombre: string;
+  apellido: string;
+  perfilRegistro: string | null;
+  declaraUnidadesAlquiladas: boolean | null;
+  unidadesDeclaradas: { piso: string | null; unidad: string | null; estado: string; tipo: string; alquilada: boolean | null }[];
+}
+
+export interface UnidadDerivacionDto {
+  idUnidad: number;
+  piso: string;
+  identificacion: string;
+}
+
 interface IncidenciaApiDto {
   idIncidencia: number;
   idEstadoIncidencia: number;
@@ -101,6 +129,22 @@ export class Incidencias {
 
   cargarEstados(): Observable<EstadoIncidenciaDto[]> {
     return this.http.get<EstadoIncidenciaDto[]>(`${this.apiUrl}/estados`);
+  }
+
+  cargarDerivaciones(): Observable<DerivacionIncidenciaDto[]> {
+    return this.http.get<DerivacionIncidenciaDto[]>(`${this.apiUrl}/derivadas`);
+  }
+
+  cargarDestinatarios(tipo: 'Propietario' | 'Personal'): Observable<DestinatarioDerivacionDto[]> {
+    return this.http.get<DestinatarioDerivacionDto[]>(`${this.apiUrl}/derivaciones/destinatarios`, { params: { tipo } });
+  }
+
+  cargarUnidadesDerivacion(): Observable<UnidadDerivacionDto[]> {
+    return this.http.get<UnidadDerivacionDto[]>(`${this.apiUrl}/derivaciones/unidades`);
+  }
+
+  derivar(id: number, request: { idUsuarioDestinatario: string; tipoDestinatario: 'Propietario' | 'Personal'; idUnidad?: number }): Observable<unknown> {
+    return this.http.post(`${this.apiUrl}/${id}/derivaciones`, request);
   }
 
   obtenerDetalle(id: number): Observable<DetalleIncidencia> {

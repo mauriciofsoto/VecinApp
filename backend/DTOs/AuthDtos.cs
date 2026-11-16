@@ -7,7 +7,8 @@ public record AuthUserDto(
     string Nombre,
     string Apellido,
     string Email,
-    string Rol
+    string Rol,
+    bool DeclaraUnidadesAlquiladas = false
 );
 
 public record AuthResponse(string AccessToken, string RefreshToken, DateTime ExpiresAt, AuthUserDto User);

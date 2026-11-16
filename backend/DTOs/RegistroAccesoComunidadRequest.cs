@@ -36,4 +36,8 @@ public sealed class UnidadRegistroComunitarioRequest
     [MaxLength(100)] public string? Identificacion { get; set; }
     public bool? EstaAlquilada { get; set; }
     public bool EsPrincipal { get; set; }
+    [MaxLength(100)] public string? PersonaRelacionNombre { get; set; }
+    [MaxLength(100)] public string? PersonaRelacionApellido { get; set; }
+    [MaxLength(100)] public string? PisoRelacion { get; set; }
+    [MaxLength(100)] public string? IdentificacionRelacion { get; set; }
 }

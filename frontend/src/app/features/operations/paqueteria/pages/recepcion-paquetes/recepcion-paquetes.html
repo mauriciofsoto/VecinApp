@@ -9,23 +9,30 @@
     </app-button>
   </header>
 
-  <p class="local-data-notice" role="status">
-    La lista y el chat de esta pantalla son datos locales de demostración; todavía no se guardan en el servidor.
-  </p>
 
   <section class="package-workspace" aria-label="Paquetes y conversación">
     <div class="panel package-list">
       <header class="section-header">
         <div>
           <h2>Paquetes recibidos</h2>
-          <p>{{ paqueteria.paquetes().length }} en esta sesión</p>
+          <p>{{ paqueteria.paquetes().length }} paquetes</p>
         </div>
       </header>
 
-      <div class="package-list__counters" aria-label="Contadores locales">
-        <app-badge variant="warning">Estado pendiente (local): {{ paqueteria.pendientes().length }}</app-badge>
-        <app-badge variant="success">Estado entregado (local): {{ paqueteria.entregados().length }}</app-badge>
+      <div class="package-list__counters" aria-label="Estados de paquetes">
+        <app-badge variant="warning">Pendientes: {{ paqueteria.pendientes().length }}</app-badge>
+        <app-badge variant="success">Entregados: {{ paqueteria.entregados().length }}</app-badge>
       </div>
+
+      @if (cargandoPaquetes()) {
+        <p class="state-message" role="status">Cargando paquetes…</p>
+      } @else if (errorPaquetes()) {
+        <div class="state-message state-message--error" role="alert">
+          <p>{{ errorPaquetes() }}</p>
+          <app-button type="button" variant="outline" (buttonClick)="cargarPaquetes()">Reintentar</app-button>
+        </div>
+      }
+      @if (errorAccion()) { <p class="state-message" role="status">{{ errorAccion() }}</p> }
 
       <div class="item-list">
         @for (paquete of paqueteria.paquetes(); track paquete.id) {
@@ -37,29 +44,33 @@
             (click)="seleccionarPaquete(paquete)"
           >
             <div class="item-card__content">
-              <h3>{{ paquete.descripcion }}</h3>
-              <p>{{ paquete.destinatarioNombre }}</p>
-              <p>Unidad {{ paquete.unidad }} · {{ paquete.edificioNombre }}</p>
+              <h3>{{ paquete.identificacion }}</h3>
+              <p>{{ paquete.nombreDestinatario }} {{ paquete.apellidoDestinatario }}</p>
               <p>Remitente: {{ paquete.remitente }}</p>
-              <app-badge [variant]="paquete.estado === 'pendiente' ? 'warning' : 'success'">
-                Estado local: {{ paquete.estado }}
+              <p>Recepción: {{ paquete.fechaRecepcion | date:'short' }}</p>
+              <app-badge [variant]="paquete.estado === 'Pendiente' ? 'warning' : 'success'">
+                {{ paquete.estado }}
               </app-badge>
             </div>
           </button>
         } @empty {
-          <p class="empty-state">No hay paquetes para mostrar.</p>
+          @if (!cargandoPaquetes() && !errorPaquetes()) { <p class="empty-state">No hay paquetes para mostrar.</p> }
         }
       </div>
     </div>
 
     <section class="panel package-conversation" aria-label="Chat del paquete">
       @if (paqueteSeleccionado(); as paquete) {
-        <app-chat-paquete [paquete]="paquete" rolVista="porteria" />
+        <app-chat-paquete [paquete]="paquete" />
+        @if (paquete.estado === 'Pendiente') {
+          <app-button type="button" [disabled]="accionEnCurso()" (buttonClick)="registrarEntrega(paquete)">
+            Registrar entrega física
+          </app-button>
+        }
       } @else {
         <div class="conversation-empty">
           <h2>Conversaciones</h2>
           <p>Seleccioná un paquete para consultar o iniciar su conversación.</p>
-          <p class="local-note">Los mensajes se conservan solo en memoria durante esta sesión.</p>
         </div>
       }
     </section>
@@ -68,9 +79,7 @@
 
 <app-modal [(open)]="formularioAbierto" heading="Registrar paquete" size="lg">
   <form class="registration-form" (ngSubmit)="intentarRegistrar()">
-    <p class="form-intro">
-      Seleccioná al destinatario y completá los datos. La operación no se enviará hasta que exista un endpoint de alta compatible.
-    </p>
+    <p class="form-intro">Seleccioná al destinatario y completá los datos del paquete.</p>
 
     <label class="search-field">
       <span>Buscar por nombre o apellido</span>
@@ -132,8 +141,8 @@
         <app-input name="remitente" [(ngModel)]="remitente" [required]="true" placeholder="Correo, mensajería…" />
       </label>
       <label>
-        Descripción o identificación del paquete
-        <app-input name="descripcion" [(ngModel)]="descripcion" [required]="true" placeholder="Sobre, caja, documentación…" />
+        Identificación del paquete
+        <app-input name="identificacion" [(ngModel)]="identificacion" [required]="true" placeholder="Sobre, caja, documentación…" />
       </label>
       <label class="form-grid__wide">
         Observaciones (opcional)
@@ -147,7 +156,7 @@
 
     <div modal-footer class="form-actions">
       <app-button type="button" variant="outline" (buttonClick)="cerrarFormulario()">Cancelar</app-button>
-      <app-button type="submit" [disabled]="!puedeIntentarRegistro()">Registrar paquete</app-button>
+      <app-button type="submit" [disabled]="!puedeIntentarRegistro()">{{ accionEnCurso() ? 'Registrando…' : 'Registrar paquete' }}</app-button>
     </div>
   </form>
 </app-modal>

@@ -13,6 +13,7 @@ import { Modal } from '../../../../../shared/components/organisms/modal/modal';
 })
 export class ConfirmarRecepcionModal {
   readonly paquete = input.required<Paquete>();
+  readonly disabled = input(false);
   readonly open = model(false);
 
   readonly confirmar = output<void>();
@@ -22,7 +23,7 @@ export class ConfirmarRecepcionModal {
   }
 
   confirmarRecepcion(): void {
+    if (this.disabled()) return;
     this.confirmar.emit();
-    this.open.set(false);
   }
 }

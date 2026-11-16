@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 
 import { AuthService } from '../../../../../core/services/auth';
 
-import { Reservas, CrearReserva } from '../../services/reservas';
+import { Reservas, CrearEventoAdmin } from '../../services/reservas';
 import { Reserva } from '../../models/reserva';
 
 import { ReservaChat } from '../../components/reserva-chat/reserva-chat';
@@ -22,23 +22,21 @@ import { FormReservas } from '../../components/form-reservas/form-reservas';
   templateUrl: './gestionar-reservas.html',
   styleUrl: './gestionar-reservas.scss',
 })
-export class GestionarReservas {
+export class GestionarReservas implements OnInit {
   private readonly authService = inject(AuthService);
   readonly reservasService = inject(Reservas);
 
   readonly usuario = this.authService.currentUser;
 
   readonly fechaSeleccionada = signal(this.formatearFecha(new Date()));
-
   readonly reservaSeleccionada = signal<Reserva | null>(null);
 
   readonly mensajeFormulario = signal<string | null>(null);
   readonly exitoFormulario = signal<string | null>(null);
 
-  // Todas las reservas registradas
+  // Todas las reservas del edificio
   readonly reservas = this.reservasService.reservas;
 
-  // Reservas correspondientes a la fecha seleccionada
   readonly reservasDelDia = computed(() =>
     this.reservas().filter(
       reserva =>
@@ -46,59 +44,56 @@ export class GestionarReservas {
     ),
   );
 
+  ngOnInit(): void {
+    this.reservasService.cargarTodasLasReservas().subscribe();
+    this.reservasService.cargarEspacios().subscribe();
+  }
+
   seleccionarFecha(fecha: string): void {
     this.fechaSeleccionada.set(fecha);
     this.reservaSeleccionada.set(null);
+    this.reservasService.limpiarMensajes();
   }
 
   seleccionarReserva(reserva: Reserva): void {
     this.reservaSeleccionada.set(reserva);
+    this.reservasService.cargarMensajes(reserva.id).subscribe();
   }
 
-  crearReserva(datos: CrearReserva): void {
+  crearReserva(datos: CrearEventoAdmin): void {
     this.mensajeFormulario.set(null);
     this.exitoFormulario.set(null);
 
-    try {
-      this.reservasService.crear(datos);
-
-      this.fechaSeleccionada.set(datos.fecha);
-
-      const nuevaReserva = this.reservas().find(
-        reserva =>
-          reserva.usuarioId === datos.usuarioId &&
-          reserva.fecha === datos.fecha &&
-          reserva.titulo === datos.titulo &&
-          reserva.espacioId === datos.espacioId,
-      );
-
-      if (nuevaReserva) {
+    this.reservasService.crearEventoAdmin(datos).subscribe({
+      next: nuevaReserva => {
+        this.fechaSeleccionada.set(datos.fecha);
         this.reservaSeleccionada.set(nuevaReserva);
-      }
-
-      this.exitoFormulario.set('La reserva fue creada correctamente.');
-    } catch (error) {
-      this.mensajeFormulario.set(
-        error instanceof Error
-          ? error.message
-          : 'No se pudo crear la reserva.',
-      );
-    }
+        this.exitoFormulario.set('El evento comunitario fue creado correctamente.');
+      },
+      error: err => {
+        const mensaje = err?.error?.mensaje ?? 'No se pudo crear el evento.';
+        this.mensajeFormulario.set(mensaje);
+      },
+    });
   }
 
   cambiarEstado(
     reservaId: number,
     estado: 'confirmada' | 'rechazada',
   ): void {
-    this.reservasService.cambiarEstado(reservaId, estado);
+    const accion = estado === 'confirmada'
+      ? this.reservasService.confirmar(reservaId)
+      : this.reservasService.rechazar(reservaId);
 
-    const reservaActualizada = this.reservas().find(
-      reserva => reserva.id === reservaId,
-    );
-
-    if (reservaActualizada) {
-      this.reservaSeleccionada.set(reservaActualizada);
-    }
+    accion.subscribe({
+      next: reservaActualizada => {
+        this.reservaSeleccionada.set(reservaActualizada);
+      },
+      error: err => {
+        const mensaje = err?.error?.mensaje ?? 'No se pudo cambiar el estado.';
+        this.mensajeFormulario.set(mensaje);
+      },
+    });
   }
 
   nombreEspacio(espacioId: number): string {

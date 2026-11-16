@@ -45,7 +45,7 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpGet("estados")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Propietario,Portero")]
     public async Task<IActionResult> ListarEstados()
     {
         var usuario = await UsuarioActivoAsync();
@@ -208,7 +208,7 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario,Portero")]
     public async Task<IActionResult> ObtenerDetalle(int id)
     {
         var usuarioResult = await UsuarioActivoAsync();
@@ -244,14 +244,19 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpPut("{id:int}/estado")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Propietario,Portero")]
     public async Task<IActionResult> CambiarEstado(int id, [FromBody] CambiarEstadoIncidenciaRequest request)
     {
         var usuarioResult = await UsuarioActivoAsync();
         if (usuarioResult.Result != null) return usuarioResult.Result;
         var usuario = usuarioResult.Value!;
 
-        if (!usuario.IdEdificio.HasValue)
+        var esAdministrador = User.IsInRole("Administrador");
+        var esDestinatario = !esAdministrador && await _context.DerivacionesIncidencia.AnyAsync(d =>
+            d.IdIncidencia == id && d.IdUsuarioDestinatario == usuario.Id &&
+            (User.IsInRole("Propietario") || d.Incidencia.IdEdificio == usuario.IdEdificio), HttpContext.RequestAborted);
+        if (!esAdministrador && !esDestinatario) return NotFound(new { mensaje = "No se encontró la incidencia asignada a tu usuario." });
+        if (esAdministrador && !usuario.IdEdificio.HasValue)
             return BadRequest(new { mensaje = "El administrador no tiene un edificio asignado." });
 
         var incidencia = await _context.Incidencias
@@ -269,8 +274,11 @@ public class IncidenciasController : ControllerBase
 
         incidencia.IdEstadoIncidencia = nuevoEstado.IdEstadoIncidencia;
         incidencia.EstadoIncidencia = nuevoEstado;
-        incidencia.IdUsuarioResponsable = usuario.Id;
-        incidencia.UsuarioResponsable = usuario;
+        if (esAdministrador || esDestinatario)
+        {
+            incidencia.IdUsuarioResponsable = usuario.Id;
+            incidencia.UsuarioResponsable = usuario;
+        }
         await _context.SaveChangesAsync();
 
         await _notificacionesService.CrearParaUsuariosAsync(
@@ -288,7 +296,7 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpGet("{id:int}/mensajes")]
-    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario,Portero")]
     public async Task<IActionResult> ListarMensajes(int id)
     {
         var usuarioResult = await UsuarioActivoAsync();
@@ -321,7 +329,7 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpPost("{id:int}/mensajes")]
-    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario,Portero")]
     public async Task<IActionResult> CrearMensaje(int id, [FromBody] CrearMensajeIncidenciaRequest request)
     {
         var usuarioResult = await UsuarioActivoAsync();
@@ -355,8 +363,11 @@ public class IncidenciasController : ControllerBase
 
         if (User.IsInRole("Administrador"))
         {
+            var destinatariosDerivados = await _context.DerivacionesIncidencia
+                .Where(d => d.IdIncidencia == incidencia.IdIncidencia)
+                .Select(d => d.IdUsuarioDestinatario).ToListAsync();
             await _notificacionesService.CrearParaUsuariosAsync(
-                new[] { incidencia.IdUsuarioReportante },
+                destinatariosDerivados.Append(incidencia.IdUsuarioReportante),
                 "Incidencia",
                 $"Administración respondió en la incidencia '{incidencia.Titulo}'.",
                 "Nueva respuesta",
@@ -401,7 +412,14 @@ public class IncidenciasController : ControllerBase
             return query.Where(i => i.IdEdificio == usuario.IdEdificio.Value);
         }
 
-        return query.Where(i => i.IdUsuarioReportante == usuario.Id);
+        if (User.IsInRole("Inquilino"))
+            return query.Where(i => i.IdUsuarioReportante == usuario.Id);
+        if (User.IsInRole("Propietario"))
+            return query.Where(i => i.IdUsuarioReportante == usuario.Id ||
+                _context.DerivacionesIncidencia.Any(d => d.IdIncidencia == i.IdIncidencia && d.IdUsuarioDestinatario == usuario.Id));
+        return query.Where(i => i.IdEdificio == usuario.IdEdificio &&
+            _context.DerivacionesIncidencia.Any(d => d.IdIncidencia == i.IdIncidencia &&
+                d.IdUsuarioDestinatario == usuario.Id));
     }
 
     private static bool TransicionPermitida(string actual, string destino)

@@ -48,6 +48,22 @@ export const roleGuard: CanActivateFn = (route) => {
   return true;
 };
 
+export const incidenciasDerivadasGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const user = authService.currentUser();
+
+  if (!authService.isAuthenticated() || !user) {
+    return router.parseUrl('/login');
+  }
+
+  if (user.rol === 'Portero' || user.rol === 'Propietario') {
+    return true;
+  }
+
+  return router.parseUrl(getDashboardUrl(authService));
+};
+
 export const dashboardRedirectGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
@@ -7,7 +7,9 @@ import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia
 import {
   Incidencias,
   DetalleIncidencia,
-  EstadoIncidenciaDto
+  EstadoIncidenciaDto,
+  DestinatarioDerivacionDto,
+  UnidadDerivacionDto,
 } from '../../services/incidencias';
 
 @Component({
@@ -29,9 +31,20 @@ export class DetalleIncidenciaComponent implements OnInit {
   guardando = false;
   error = '';
   mensaje = '';
+  @ViewChild('modalDerivacion') modalDerivacion?: ElementRef<HTMLDialogElement>;
+  tipoDestinatario: 'Propietario' | 'Personal' = 'Propietario';
+  destinatarioId = '';
+  unidadId: number | null = null;
+  destinatarios: DestinatarioDerivacionDto[] = [];
+  unidades: UnidadDerivacionDto[] = [];
+  guardandoDerivacion = false;
+  get destinatarioSeleccionado(): DestinatarioDerivacionDto | undefined {
+    return this.destinatarios.find(item => item.id === this.destinatarioId);
+  }
 
 
   ngOnInit(): void {
+    this.incidenciasService.cargarUnidadesDerivacion().subscribe({ next: rows => this.unidades = rows });
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -69,6 +82,53 @@ export class DetalleIncidenciaComponent implements OnInit {
           this.cdr.detectChanges();
         }
       });
+  }
+
+  abrirDerivacion(): void {
+    this.error = '';
+    this.destinatarioId = '';
+    this.unidadId = null;
+    this.modalDerivacion?.nativeElement.showModal();
+    this.cargarDestinatarios();
+  }
+
+  cerrarDerivacion(): void {
+    this.modalDerivacion?.nativeElement.close();
+  }
+
+  cambiarTipoDestinatario(tipo: 'Propietario' | 'Personal'): void {
+    this.tipoDestinatario = tipo;
+    this.destinatarioId = '';
+    this.unidadId = null;
+    this.cargarDestinatarios();
+  }
+
+  private cargarDestinatarios(): void {
+    this.incidenciasService.cargarDestinatarios(this.tipoDestinatario).subscribe({
+      next: rows => this.destinatarios = rows,
+      error: () => this.error = 'No se pudieron cargar los destinatarios autorizados del edificio.',
+    });
+  }
+
+  confirmarDerivacion(): void {
+    if (!this.incidencia || !this.destinatarioId || (this.tipoDestinatario === 'Propietario' && !this.unidadId) || this.guardandoDerivacion) return;
+    this.guardandoDerivacion = true;
+    this.error = '';
+    this.incidenciasService.derivar(this.incidencia.idIncidencia, {
+      idUsuarioDestinatario: this.destinatarioId,
+      tipoDestinatario: this.tipoDestinatario,
+      ...(this.tipoDestinatario === 'Propietario' ? { idUnidad: this.unidadId! } : {}),
+    }).subscribe({
+      next: () => {
+        this.mensaje = 'La incidencia se derivó correctamente.';
+        this.guardandoDerivacion = false;
+        this.modalDerivacion?.nativeElement.close();
+      },
+      error: err => {
+        this.error = err.status === 409 ? 'Esta incidencia ya fue derivada a ese destinatario.' : 'No se pudo registrar la derivación. Verificá el destinatario y la unidad.';
+        this.guardandoDerivacion = false;
+      },
+    });
   }
 
 

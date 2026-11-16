@@ -54,6 +54,8 @@
     margin-top: $space-3;
 
     .user-avatar { display: grid; place-items: center; }
+
+    .user-name { text-decoration: none; }
   }
 
   .sidebar-nav {

@@ -1,130 +1,43 @@
 <section class="incidencias-derivadas">
   <header class="incidencias-derivadas__header">
     <div>
-      <span class="incidencias-derivadas__eyebrow">PROPIETARIA / GESTIÓN</span>
+      <span class="incidencias-derivadas__eyebrow">{{ perfil.toLocaleUpperCase('es-AR') }}</span>
       <h1>Incidencias derivadas</h1>
-      <p>
-        Consultá las incidencias que Administración te derivó para su gestión.
-      </p>
+      <p>@if (perfil === 'Personal') { Incidencias asignadas a tu usuario por Administración. } @else { Incidencias derivadas por Administración para las unidades vinculadas. }</p>
     </div>
   </header>
 
-  <section class="incidencias-derivadas__resumen" aria-label="Resumen de derivaciones">
-    <app-card variant="glass" size="full">
-      <div class="incidencias-derivadas__stat">
-        <span>Total de incidencias derivadas</span>
-        <strong aria-label="Pendiente de datos">—</strong>
-      </div>
-    </app-card>
-
-    <app-card variant="glass" size="full">
-      <div class="incidencias-derivadas__stat">
-        <span>Pendientes de aceptación</span>
-        <strong aria-label="Pendiente de datos">—</strong>
-      </div>
-    </app-card>
-
-    <app-card variant="glass" size="full">
-      <div class="incidencias-derivadas__stat">
-        <span>Aceptadas / en gestión</span>
-        <strong aria-label="Pendiente de datos">—</strong>
-      </div>
-    </app-card>
-
-    <app-card variant="glass" size="full">
-      <div class="incidencias-derivadas__stat">
-        <span>Resueltas</span>
-        <strong aria-label="Pendiente de datos">—</strong>
-      </div>
-    </app-card>
-  </section>
-
-  <section class="incidencias-derivadas__filtros" aria-label="Filtros de incidencias derivadas">
-    <div class="incidencias-derivadas__busqueda">
-      <app-input
-        type="search"
-        placeholder="Buscar por título o descripción..."
-        aria-label="Buscar incidencias derivadas por título o descripción"
-      />
-    </div>
-
-    <div class="incidencias-derivadas__filtro">
-      <app-select
-        ariaLabel="Filtrar por estado de derivación"
-        placeholder="Estado de derivación"
-        [options]="[
-          { label: 'Pendiente de aceptación', value: 'pendiente' },
-          { label: 'Aceptada', value: 'aceptada' },
-          { label: 'Rechazada', value: 'rechazada' }
-        ]"
-      />
-    </div>
-
-    <div class="incidencias-derivadas__filtro">
-      <app-select
-        ariaLabel="Filtrar por estado de gestión"
-        placeholder="Estado de gestión"
-        [options]="[
-          { label: 'Pendiente', value: 'pendiente' },
-          { label: 'En proceso', value: 'en-proceso' },
-          { label: 'Resuelta', value: 'resuelta' }
-        ]"
-      />
-    </div>
-
-    <app-button variant="outline" type="button">Limpiar filtros</app-button>
-  </section>
-
-  <!-- Presentación de carga y error lista para conectarse al estado de la página. -->
-  <ng-template #estadoCarga>
-    <p class="incidencias-derivadas__feedback" role="status">
-      Cargando incidencias derivadas…
-    </p>
-  </ng-template>
-
-  <ng-template #estadoError>
-    <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">
-      No se pudieron cargar las incidencias derivadas. Intentá nuevamente más tarde.
-    </p>
-  </ng-template>
-
-  <!-- La vista inicia vacía hasta que exista la integración de derivaciones. -->
   <section class="incidencias-derivadas__contenido" aria-label="Incidencias derivadas">
-    <app-empty-state
-      title="Todavía no tenés incidencias derivadas"
-      description="Cuando Administración derive una incidencia para tu gestión, aparecerá en este listado."
-    >
-      <span emptyIcon aria-hidden="true">↗</span>
-    </app-empty-state>
-  </section>
-
-  <!-- Estructura de resultados: las filas y acciones se conectarán al modelo en otra etapa. -->
-  <ng-template #resultadosDisponibles>
-    <section class="incidencias-derivadas__contenido" aria-label="Resultados de incidencias derivadas">
+    @if (cargando()) {
+      <p class="incidencias-derivadas__feedback" role="status">Cargando incidencias derivadas…</p>
+    } @else if (error()) {
+      <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ error() }}</p>
+    } @else if (items().length === 0) {
+      <p class="incidencias-derivadas__feedback" role="status">Todavía no tenés incidencias derivadas.</p>
+    } @else {
       <div class="incidencias-derivadas__tabla-wrapper">
         <table class="incidencias-derivadas__tabla">
-          <thead>
-            <tr>
-              <th scope="col">Identificador</th>
-              <th scope="col">Incidencia</th>
-              <th scope="col">Unidad</th>
-              <th scope="col">Fecha de derivación</th>
-              <th scope="col">Estado de derivación</th>
-              <th scope="col">Estado de gestión</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Incidencia</th><th>Descripción</th><th>Unidad / asignación</th><th>Ubicación</th><th>Fecha</th><th>Estado</th><th>Derivada por</th></tr></thead>
           <tbody>
-            <!-- Sin datos del modelo todavía: no se agregan filas de ejemplo. -->
+            @for (item of items(); track item.idDerivacion) {
+              <tr>
+                <td>{{ item.titulo }}</td><td>{{ item.descripcion }}</td>
+                <td>
+                  @if (item.tipoDestinatario === 'Personal') {
+                    Asignada a vos@if (item.unidad) { · {{ item.unidad }} }
+                  } @else {
+                    {{ item.unidad || 'Sin unidad relacionada' }}
+                  }
+                </td>
+                <td>{{ item.ubicacion || 'Sin ubicación indicada' }}</td>
+                <td>{{ item.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ item.estado }}</td>
+                <td>{{ item.fechaDerivacion | date: 'dd/MM/yyyy HH:mm' }}<br><small>{{ item.administrador }}</small></td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
-    </section>
-  </ng-template>
-
-  <ng-template #accionDetalleCompleto>
-    <app-button variant="outline" type="button" [disabled]="true">
-      Detalle completo
-    </app-button>
-  </ng-template>
+    }
+  </section>
 </section>

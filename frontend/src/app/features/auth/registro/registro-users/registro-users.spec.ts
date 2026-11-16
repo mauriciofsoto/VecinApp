@@ -149,15 +149,15 @@ describe('RegistroUsers', () => {
     expect(questionnaire.ownerUnitNumber).toBe('');
   });
 
-  it('clears optional owner details when the tenant says the owner does not live in the building', () => {
+  it('keeps the owner name while clearing only the unavailable residence when the owner lives elsewhere', () => {
     questionnaire.ownerName = 'Ana';
     questionnaire.ownerSurname = 'Pérez';
     questionnaire.ownerFloor = '3';
     questionnaire.ownerUnitNumber = 'A';
     questionnaire.setOwnerLivesHere(false);
 
-    expect(questionnaire.ownerName).toBe('');
-    expect(questionnaire.ownerSurname).toBe('');
+    expect(questionnaire.ownerName).toBe('Ana');
+    expect(questionnaire.ownerSurname).toBe('Pérez');
     expect(questionnaire.ownerFloor).toBe('');
     expect(questionnaire.ownerUnitNumber).toBe('');
   });
@@ -242,7 +242,7 @@ describe('RegistroUsers', () => {
     expect(payload.unidades.some(unit => unit.esPrincipal)).toBe(false);
   });
 
-  it('turns an owner selection without rentals into an Inquilino with only a principal residence', () => {
+  it('keeps an owner selection without rentals as Propietario with only a principal residence', () => {
     questionnaire.chooseRole('owner');
     questionnaire.current = 'owner-info';
     questionnaire.next();
@@ -254,10 +254,10 @@ describe('RegistroUsers', () => {
     questionnaire.floor = '1';
     questionnaire.unitNumber = 'D';
     questionnaire.next();
-    expect(questionnaire.finalProfile).toBe('Inquilino');
+    expect(questionnaire.finalProfile).toBe('Propietario');
 
     const payload = enviarRegistro();
-    expect(payload.perfil).toBe('Inquilino');
+    expect(payload.perfil).toBe('Propietario');
     expect(payload.viveEnEdificio).toBe(true);
     expect(payload.tieneOtrasUnidades).toBe(false);
     expect(payload.declaraUnidadesAlquiladas).toBe(false);

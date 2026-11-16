@@ -149,6 +149,12 @@ export class SidebarComponent {
           roles: ['Inquilino', 'Propietario'],
         },
         {
+          label: 'Incidencias derivadas',
+          icon: '↗',
+          route: '/incidencias-derivadas',
+          roles: ['Propietario', 'Portero'],
+        },
+        {
           label: 'Recepción de paquetes',
           icon: '▣',
           route: '/recepcion-paquetes',
@@ -202,9 +208,7 @@ export class SidebarComponent {
     return this.sections
       .map(section => ({
         ...section,
-        items: section.items.filter(item =>
-          item.roles.includes(currentRole)
-        ),
+        items: section.items.filter(item => item.roles.includes(currentRole)),
       }))
       .filter(section => section.items.length > 0);
   });

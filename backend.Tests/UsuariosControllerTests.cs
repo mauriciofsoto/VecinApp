@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,6 +24,38 @@ namespace VecinApp.Tests;
 
 public sealed class UsuariosControllerTests
 {
+    [Fact]
+    public async Task Perfil_autenticado_devuelve_datos_y_relaciones_solo_del_usuario_solicitante()
+    {
+        await using var fixture = await Fixture.CrearAsync(incluirPersonas: true);
+
+        var resultadoInquilino = await fixture.CrearController("inquilino-a").ObtenerMiPerfil(CancellationToken.None);
+        var inquilino = Assert.IsType<OkObjectResult>(resultadoInquilino.Result).Value as PerfilUsuarioDto;
+        Assert.NotNull(inquilino);
+        Assert.Equal("Inquilino", inquilino.Rol);
+        Assert.Empty(inquilino.UnidadesVinculadas);
+        Assert.Equal("Ocupacion", Assert.Single(inquilino.UnidadesDeclaradas).Tipo);
+
+        var resultadoPropietario = await fixture.CrearController("propietario-a").ObtenerMiPerfil(CancellationToken.None);
+        var propietario = Assert.IsType<OkObjectResult>(resultadoPropietario.Result).Value as PerfilUsuarioDto;
+        Assert.NotNull(propietario);
+        Assert.Equal("Propietario", propietario.Rol);
+        Assert.Equal("Propietario", Assert.Single(propietario.UnidadesVinculadas).TipoRelacion);
+        var declaracion = Assert.Single(propietario.UnidadesDeclaradas);
+        Assert.Equal("Pendiente", declaracion.EstadoConfirmacion);
+        Assert.True(declaracion.EstaAlquiladaDeclarada);
+        Assert.DoesNotContain(propietario.UnidadesDeclaradas, unidad => unidad.Tipo == "Ocupacion");
+
+        var resultadoPortero = await fixture.CrearController("portero-a").ObtenerMiPerfil(CancellationToken.None);
+        var portero = Assert.IsType<OkObjectResult>(resultadoPortero.Result).Value as PerfilUsuarioDto;
+        Assert.NotNull(portero);
+        Assert.Equal("Portero", portero.Rol);
+        Assert.Empty(portero.UnidadesVinculadas);
+        Assert.Empty(portero.UnidadesDeclaradas);
+        Assert.Equal("Seguridad", portero.FuncionPersonal);
+        Assert.Equal("Turno mañana", portero.HorarioPersonal);
+    }
+
     [Fact]
     public async Task Devuelve_solo_perfiles_comunitarios_del_edificio_del_administrador_y_sus_declaraciones()
     {
@@ -110,6 +143,87 @@ public sealed class UsuariosControllerTests
         Assert.Equal("[]", await response.Content.ReadAsStringAsync());
     }
 
+    [Fact]
+    public async Task Actualiza_y_persiste_solo_los_campos_permitidos_del_usuario_autenticado()
+    {
+        await using var api = await ApiFixture.CrearAsync();
+        using var request = new HttpRequestMessage(HttpMethod.Put, "/api/usuarios/me/perfil");
+        request.Headers.Add("X-Test-User", "admin-api");
+        request.Headers.Add("X-Test-Role", "Administrador");
+        request.Content = JsonContent.Create(new
+        {
+            nombre = " Ada ", apellido = "Nueva ", telefono = "+54 11 5555-1010",
+            id = "otro-usuario", rol = "Propietario", idEdificio = 999, estado = "Desactivado"
+        });
+
+        var response = await api.Client.SendAsync(request);
+        Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
+        var updated = await response.Content.ReadFromJsonAsync<PerfilUsuarioDto>();
+        Assert.NotNull(updated);
+        Assert.Equal("Ada", updated.Nombre);
+        Assert.Equal("Nueva", updated.Apellido);
+        Assert.Equal("+54 11 5555-1010", updated.Telefono);
+        Assert.Equal("Administrador", updated.Rol);
+        Assert.Equal("Edificio API", updated.EdificioNombre);
+
+        using var get = new HttpRequestMessage(HttpMethod.Get, "/api/usuarios/me/perfil");
+        get.Headers.Add("X-Test-User", "admin-api");
+        get.Headers.Add("X-Test-Role", "Administrador");
+        var persistedResponse = await api.Client.SendAsync(get);
+        Assert.Equal(StatusCodes.Status200OK, (int)persistedResponse.StatusCode);
+        var persisted = await persistedResponse.Content.ReadFromJsonAsync<PerfilUsuarioDto>();
+        Assert.NotNull(persisted);
+        Assert.Equal("Ada", persisted.Nombre);
+        Assert.Equal("Nueva", persisted.Apellido);
+        Assert.Equal("+54 11 5555-1010", persisted.Telefono);
+        Assert.Equal("Administrador", persisted.Rol);
+        Assert.Equal("Edificio API", persisted.EdificioNombre);
+
+        using var otherUserRequest = new HttpRequestMessage(HttpMethod.Get, "/api/usuarios/me/perfil");
+        otherUserRequest.Headers.Add("X-Test-User", "otro-api");
+        otherUserRequest.Headers.Add("X-Test-Role", "Administrador");
+        var otherUserResponse = await api.Client.SendAsync(otherUserRequest);
+        Assert.Equal(StatusCodes.Status200OK, (int)otherUserResponse.StatusCode);
+        var otherUserProfile = await otherUserResponse.Content.ReadFromJsonAsync<PerfilUsuarioDto>();
+        Assert.NotNull(otherUserProfile);
+        Assert.Equal("Otro", otherUserProfile.Nombre);
+        Assert.Equal("Usuario", otherUserProfile.Apellido);
+    }
+
+    [Fact]
+    public async Task Actualizacion_de_perfil_rechaza_sesion_ausente_cuenta_inactiva_y_datos_invalidos()
+    {
+        await using var api = await ApiFixture.CrearAsync();
+
+        using var anonymous = new HttpRequestMessage(HttpMethod.Put, "/api/usuarios/me/perfil")
+        {
+            Content = JsonContent.Create(new { nombre = "Ana", apellido = "Pérez", telefono = (string?)null })
+        };
+        var anonymousResponse = await api.Client.SendAsync(anonymous);
+        Assert.Equal(StatusCodes.Status401Unauthorized, (int)anonymousResponse.StatusCode);
+
+        using var missingUser = new HttpRequestMessage(HttpMethod.Put, "/api/usuarios/me/perfil");
+        missingUser.Headers.Add("X-Test-User", "usuario-no-existe");
+        missingUser.Headers.Add("X-Test-Role", "Inquilino");
+        missingUser.Content = JsonContent.Create(new { nombre = "Ana", apellido = "Pérez", telefono = (string?)null });
+        var missingUserResponse = await api.Client.SendAsync(missingUser);
+        Assert.Equal(StatusCodes.Status401Unauthorized, (int)missingUserResponse.StatusCode);
+
+        using var inactive = new HttpRequestMessage(HttpMethod.Put, "/api/usuarios/me/perfil");
+        inactive.Headers.Add("X-Test-User", "usuario-inactivo-api");
+        inactive.Headers.Add("X-Test-Role", "Inquilino");
+        inactive.Content = JsonContent.Create(new { nombre = "Ana", apellido = "Pérez", telefono = (string?)null });
+        var inactiveResponse = await api.Client.SendAsync(inactive);
+        Assert.Equal(StatusCodes.Status403Forbidden, (int)inactiveResponse.StatusCode);
+
+        using var invalid = new HttpRequestMessage(HttpMethod.Put, "/api/usuarios/me/perfil");
+        invalid.Headers.Add("X-Test-User", "admin-api");
+        invalid.Headers.Add("X-Test-Role", "Administrador");
+        invalid.Content = JsonContent.Create(new { nombre = " ", apellido = "Pérez", telefono = "no-es-un-teléfono" });
+        var invalidResponse = await api.Client.SendAsync(invalid);
+        Assert.Equal(StatusCodes.Status400BadRequest, (int)invalidResponse.StatusCode);
+    }
+
     private sealed class ApiFixture : IAsyncDisposable
     {
         private readonly WebApplication _app;
@@ -154,6 +268,18 @@ public sealed class UsuariosControllerTests
                     Id = "admin-api", UserName = "admin-api@example.com", NormalizedUserName = "ADMIN-API@EXAMPLE.COM",
                     Email = "admin-api@example.com", NormalizedEmail = "ADMIN-API@EXAMPLE.COM", Nombre = "Admin",
                     Apellido = "API", IdRol = 1, IdEdificio = 1, Estado = EstadoUsuario.Activo
+                });
+                db.Users.Add(new Usuario
+                {
+                    Id = "usuario-inactivo-api", UserName = "inactivo@example.com", NormalizedUserName = "INACTIVO@EXAMPLE.COM",
+                    Email = "inactivo@example.com", NormalizedEmail = "INACTIVO@EXAMPLE.COM", Nombre = "Inactivo",
+                    Apellido = "API", IdRol = 1, IdEdificio = 1, Estado = EstadoUsuario.Desactivado
+                });
+                db.Users.Add(new Usuario
+                {
+                    Id = "otro-api", UserName = "otro@example.com", NormalizedUserName = "OTRO@EXAMPLE.COM",
+                    Email = "otro@example.com", NormalizedEmail = "OTRO@EXAMPLE.COM", Nombre = "Otro",
+                    Apellido = "Usuario", IdRol = 1, IdEdificio = 1, Estado = EstadoUsuario.Activo
                 });
                 await db.SaveChangesAsync();
             }
@@ -217,12 +343,12 @@ public sealed class UsuariosControllerTests
             return fixture;
         }
 
-        public UsuariosController CrearController()
+        public UsuariosController CrearController(string userId = "admin-edificio-a")
         {
             var controller = new UsuariosController(_context, _userManager);
             var httpContext = new DefaultHttpContext();
             httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(
-                [new Claim(ClaimTypes.NameIdentifier, "admin-edificio-a")], "test"));
+                [new Claim(ClaimTypes.NameIdentifier, userId)], "test"));
             controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
             return controller;
         }
@@ -252,12 +378,23 @@ public sealed class UsuariosControllerTests
                 AgregarPersona("inquilino-otro-edificio", "Inquilino", 2, 2);
                 AgregarPersona("admin-otro-rol", "Administrador", 1, 1);
                 _context.RegistrosComunitarios.Add(new RegistroComunitario
-                { IdUsuario = "inquilino-a", Perfil = "Inquilino", OrigenDeclaracion = "DeclaracionInquilino", FechaRegistro = new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc) });
+                { IdUsuario = "inquilino-a", Perfil = "Inquilino", OrigenDeclaracion = "DeclaracionInquilino", ModalidadAlquiler = "Contrato", FechaRegistro = new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc) });
+                _context.RegistrosComunitarios.Add(new RegistroComunitario
+                { IdUsuario = "portero-a", Perfil = "Personal", OrigenDeclaracion = "CuestionarioPersonal", FuncionPersonal = "Seguridad", HorarioPersonal = "Turno mañana" });
+                _context.Unidades.Add(new Unidad { IdUnidad = 1, IdEdificio = 1, Piso = "4", Identificacion = "B" });
+                _context.UsuariosUnidades.Add(new UsuarioUnidad { IdUsuarioUnidad = 1, IdUsuario = "propietario-a", IdUnidad = 1, TipoRelacion = "Propietario" });
                 _context.DeclaracionesUnidadesComunitarias.Add(new DeclaracionUnidadComunitaria
                 {
                     IdDeclaracionUnidad = 1, IdUsuario = "inquilino-a", IdEdificio = 1, Tipo = "Ocupacion",
                     PisoDeclarado = "4", IdentificacionDeclarada = "B", EsPrincipal = true, EstadoConfirmacion = "Declarada",
                     FechaDeclaracion = new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc)
+                });
+                _context.DeclaracionesUnidadesComunitarias.Add(new DeclaracionUnidadComunitaria
+                {
+                    IdDeclaracionUnidad = 2, IdUsuario = "propietario-a", IdEdificio = 1, IdUnidad = 1,
+                    Tipo = "Titularidad", PisoDeclarado = "4", IdentificacionDeclarada = "B",
+                    EsPrincipal = true, EstaAlquilada = true, EstadoConfirmacion = "Pendiente",
+                    FechaDeclaracion = new DateTime(2026, 1, 3, 3, 4, 5, DateTimeKind.Utc)
                 });
             }
 

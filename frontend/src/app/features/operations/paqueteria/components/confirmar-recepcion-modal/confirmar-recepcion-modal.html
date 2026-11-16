@@ -16,14 +16,12 @@
     </p>
 
     <div class="package-summary">
-      <strong>{{ paquete().descripcion }}</strong>
+      <strong>{{ paquete().identificacion }}</strong>
       <span>Remitente: {{ paquete().remitente }}</span>
-      <span>Unidad: {{ paquete().unidad }}</span>
-      <span>{{ paquete().edificioNombre }}</span>
     </div>
 
     <p class="confirmation-note">
-      Una vez confirmada la recepción, el paquete cambiará a estado entregado.
+      Solo podés confirmar después de que el personal registre la entrega física.
     </p>
   </div>
 
@@ -39,9 +37,10 @@
     <button
       type="button"
       class="button-primary"
+      [disabled]="disabled()"
       (click)="confirmarRecepcion()"
     >
-      Confirmar recepción
+      {{ disabled() ? 'Confirmando…' : 'Confirmar recepción' }}
     </button>
   </div>
 </app-modal>

@@ -160,6 +160,12 @@
               <div class="unit-row">
                 <label>Piso <app-input [id]="'rental-floor-' + i" [name]="'rental-floor-' + i" placeholder="Ej. 2" [maxlength]="100" [required]="true" [(ngModel)]="unit.floor" /></label>
                 <label>Número de unidad <app-input [id]="'rental-unit-' + i" [name]="'rental-unit-' + i" placeholder="Ej. A" [maxlength]="100" [required]="true" [(ngModel)]="unit.number" /></label>
+                <div class="field-grid tenant-reference">
+                  <label>Nombre del inquilino <span class="optional">Opcional</span><app-input [id]="'rental-tenant-name-' + i" [name]="'rental-tenant-name-' + i" placeholder="Nombre" [(ngModel)]="unit.tenantName" /></label>
+                  <label>Apellido del inquilino <span class="optional">Opcional</span><app-input [id]="'rental-tenant-surname-' + i" [name]="'rental-tenant-surname-' + i" placeholder="Apellido" [(ngModel)]="unit.tenantSurname" /></label>
+                  <label>Piso de residencia del inquilino <span class="optional">Opcional</span><app-input [id]="'rental-tenant-floor-' + i" [name]="'rental-tenant-floor-' + i" placeholder="Ej. 6" [(ngModel)]="unit.tenantFloor" /></label>
+                  <label>Unidad de residencia del inquilino <span class="optional">Opcional</span><app-input [id]="'rental-tenant-unit-' + i" [name]="'rental-tenant-unit-' + i" placeholder="Ej. A" [(ngModel)]="unit.tenantUnit" /></label>
+                </div>
                 @if (rentalUnits.length > 1) { <button type="button" class="remove-button" [attr.aria-label]="'Quitar unidad ' + (i + 1)" (click)="removeUnit(rentalUnits, i)">×</button> }
               </div>
             }
@@ -213,19 +219,19 @@
           <div class="choice-grid binary-grid">
             <button class="choice-card compact" type="button" [class.selected]="ownerLivesHere === true" [attr.aria-pressed]="ownerLivesHere === true" (click)="setOwnerLivesHere(true)">Sí</button>
             <button class="choice-card compact" type="button" [class.selected]="ownerLivesHere === false" [attr.aria-pressed]="ownerLivesHere === false" (click)="setOwnerLivesHere(false)">No</button>
+            <button class="choice-card compact" type="button" [class.selected]="ownerLivesHere === null" [attr.aria-pressed]="ownerLivesHere === null" (click)="ownerLivesHere = null">No lo sé</button>
           </div>
-          @if (submitted && ownerLivesHere === null) { <p class="field-error">Indicá si el propietario vive en este edificio.</p> }
-          @if (ownerLivesHere === true) {
-            <div class="owner-card">
-              <div class="owner-card-heading"><span class="owner-avatar" aria-hidden="true">⌂</span><div><h2>Datos de referencia</h2><p>Opcional · Es una declaración, no una verificación de titularidad.</p></div></div>
+          <div class="owner-card">
+              <div class="owner-card-heading"><span class="owner-avatar" aria-hidden="true">⌂</span><div><h2>Datos opcionales del propietario</h2><p>Se usan para encontrar coincidencias, no para verificar identidad.</p></div></div>
               <div class="field-grid">
                 <label>Nombre <span class="optional">Opcional</span><app-input id="owner-first-name" name="ownerFirstName" autocomplete="given-name" placeholder="Nombre" [(ngModel)]="ownerName" /></label>
                 <label>Apellido <span class="optional">Opcional</span><app-input id="owner-last-name" name="ownerLastName" autocomplete="family-name" placeholder="Apellido" [(ngModel)]="ownerSurname" /></label>
-                <label>Piso <span class="optional">Opcional</span><app-input id="owner-residence-floor" name="ownerFloor" placeholder="Ej. 4" [(ngModel)]="ownerFloor" /></label>
-                <label>Unidad <span class="optional">Opcional</span><app-input id="owner-residence-unit" name="ownerUnit" placeholder="Ej. B" [(ngModel)]="ownerUnitNumber" /></label>
+                @if (ownerLivesHere === true) {
+                  <label>Piso donde vive <span class="optional">Opcional</span><app-input id="owner-residence-floor" name="ownerFloor" placeholder="Ej. 4" [(ngModel)]="ownerFloor" /></label>
+                  <label>Unidad donde vive <span class="optional">Opcional</span><app-input id="owner-residence-unit" name="ownerUnit" placeholder="Ej. B" [(ngModel)]="ownerUnitNumber" /></label>
+                }
               </div>
-            </div>
-          }
+          </div>
           <div class="actions"><app-button variant="ghost" (buttonClick)="back()">← Volver</app-button><app-button (buttonClick)="next()">Ver resumen <span aria-hidden="true">→</span></app-button></div>
         }
 

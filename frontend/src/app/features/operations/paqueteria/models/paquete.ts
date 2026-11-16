@@ -1,20 +1,24 @@
-export type EstadoPaquete = 'pendiente' | 'entregado';
+export type EstadoPaquete = 'Pendiente' | 'Entregado' | 'Confirmado';
 
+/** Contrato de PaqueteDto. Los IDs de Identity son strings. */
 export interface Paquete {
   id: number;
-  destinatarioId: number;
-  destinatarioNombre: string;
-  edificioId: number;
-  edificioNombre: string;
-  unidad: string;
-  descripcion: string;
+  identificacion: string;
   remitente: string;
-  fechaRecepcion: string;
+  idUsuarioDestinatario: string;
+  nombreDestinatario: string;
+  apellidoDestinatario: string;
   estado: EstadoPaquete;
-  fechaEntrega?: string;
+  fechaRecepcion: string;
+  fechaEntrega: string | null;
+  fechaConfirmacion: string | null;
+  observaciones: string | null;
 }
 
-export type CrearPaquete = Omit<
-  Paquete,
-  'id' | 'fechaRecepcion' | 'estado' | 'fechaEntrega'
->;
+/** Contrato de RegistrarPaqueteRequest. */
+export interface CrearPaquete {
+  idUsuarioDestinatario: string;
+  remitente: string;
+  identificacion: string;
+  observaciones?: string | null;
+}

@@ -11,7 +11,6 @@ const destinatarios: DestinatarioPaquete[] = [
     id: 'identity-user-42',
     nombre: 'María',
     apellido: 'Gómez',
-    rol: 'Inquilino',
     unidadesDeclaradas: [
       { pisoDeclarado: '3', identificacionDeclarada: 'B', estadoConfirmacion: 'Declarada' },
       { pisoDeclarado: '3', identificacionDeclarada: 'B', estadoConfirmacion: 'Otra referencia interna' },
@@ -22,7 +21,6 @@ const destinatarios: DestinatarioPaquete[] = [
     id: 'identity-user-57',
     nombre: 'Bruno',
     apellido: 'Díaz',
-    rol: 'Propietario',
     unidadesDeclaradas: [],
   },
 ];
@@ -31,6 +29,19 @@ describe('RecepcionPaquetes', () => {
   let fixture: ComponentFixture<RecepcionPaquetes>;
   let component: RecepcionPaquetes;
   let http: HttpTestingController;
+  const paquete = {
+    id: 17,
+    identificacion: 'Caja 17',
+    remitente: 'Correo',
+    idUsuarioDestinatario: 'identity-user-57',
+    nombreDestinatario: 'Bruno',
+    apellidoDestinatario: 'Díaz',
+    estado: 'Pendiente',
+    fechaRecepcion: '2026-11-15T10:00:00Z',
+    fechaEntrega: null,
+    fechaConfirmacion: null,
+    observaciones: null,
+  };
 
   beforeEach(async () => {
     if (!HTMLDialogElement.prototype.showModal) {
@@ -64,10 +75,22 @@ describe('RecepcionPaquetes', () => {
     return request;
   }
 
+  function expectListRequest() {
+    const request = http.expectOne(`${environment.apiUrl}/api/paqueteria`);
+    expect(request.request.method).toBe('GET');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
+    return request;
+  }
+
+  function loadInitialData(paquetes = [paquete]) {
+    expectDestinatariosRequest().flush(destinatarios);
+    expectListRequest().flush(paquetes);
+    fixture.detectChanges();
+  }
+
   it('muestra carga y obtiene destinatarios reales mostrando solo nombre y referencias declaradas', () => {
     expect(fixture.nativeElement.textContent).toContain('Cargando destinatarios');
-    expectDestinatariosRequest().flush(destinatarios);
-    fixture.detectChanges();
+    loadInitialData([]);
 
     fixture.nativeElement.querySelector('.register-button')?.click();
     fixture.detectChanges();
@@ -85,8 +108,7 @@ describe('RecepcionPaquetes', () => {
   });
 
   it('busca por nombre y apellido y conserva el ID Identity como string al seleccionar', () => {
-    expectDestinatariosRequest().flush(destinatarios);
-    fixture.detectChanges();
+    loadInitialData([]);
 
     fixture.nativeElement.querySelector('.register-button')?.click();
     fixture.detectChanges();
@@ -114,9 +136,8 @@ describe('RecepcionPaquetes', () => {
     expect(fixture.nativeElement.textContent).toContain('Destinatario: Bruno Díaz');
   });
 
-  it('permite seleccionar una persona sin unidades declaradas y no finge registrar el paquete', () => {
-    expectDestinatariosRequest().flush(destinatarios);
-    fixture.detectChanges();
+  it('registra para una persona sin unidad y conserva su ID Identity string', () => {
+    loadInitialData([]);
     fixture.nativeElement.querySelector('.register-button')?.click();
     fixture.detectChanges();
 
@@ -127,29 +148,53 @@ describe('RecepcionPaquetes', () => {
     expect(typeof component.destinatarioSeleccionadoId()).toBe('string');
 
     component.remitente = 'Correo';
-    component.descripcion = 'Caja';
+    component.identificacion = 'Caja';
     component.intentarRegistrar();
-    expect(component.paqueteria.paquetes().length).toBe(1);
-    expect(component.mensajeRegistro()).toContain('No se registró el paquete');
+    const request = http.expectOne(`${environment.apiUrl}/api/paqueteria`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      idUsuarioDestinatario: 'identity-user-57',
+      remitente: 'Correo',
+      identificacion: 'Caja',
+      observaciones: null,
+    });
+    request.flush({ ...paquete, identificacion: 'Caja' });
+    expect(component.paqueteria.paquetes()[0].id).toBe(17);
+    expect(component.mensajeRegistro()).toContain('registrado correctamente');
   });
 
-  it('recupera lista, contadores y chat, marcándolos como datos locales', () => {
-    expectDestinatariosRequest().flush(destinatarios);
-    fixture.detectChanges();
+  it('muestra la lista recibida del backend y carga el chat desde el endpoint', () => {
+    loadInitialData();
 
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('Registrar paquete');
     expect(text).toContain('Paquetes recibidos');
-    expect(text).toContain('Estado pendiente (local): 1');
-    expect(text).toContain('datos locales de demostración');
+    expect(text).toContain('Caja 17');
+    expect(text).toContain('Pendientes: 1');
+    expect(text).not.toContain('demostración');
 
     (fixture.nativeElement.querySelector('.item-card') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-chat-paquete')).not.toBeNull();
+    const messages = http.expectOne(`${environment.apiUrl}/api/paqueteria/17/mensajes`);
+    expect(messages.request.method).toBe('GET');
+    messages.flush([]);
+  });
+
+  it('registra entrega física y actualiza el listado con la respuesta GET del backend', () => {
+    loadInitialData();
+    component.registrarEntrega(paquete as never);
+    const post = http.expectOne(`${environment.apiUrl}/api/paqueteria/17/entrega`);
+    expect(post.request.method).toBe('POST');
+    post.flush(null);
+    const refresh = http.expectOne(`${environment.apiUrl}/api/paqueteria`);
+    refresh.flush([{ ...paquete, estado: 'Entregado', fechaEntrega: '2026-11-15T11:00:00Z' }]);
+    expect(component.paqueteria.paquetes()[0].estado).toBe('Entregado');
   });
 
   it('muestra estado vacío y error sin conservar destinatarios ficticios', () => {
     expectDestinatariosRequest().flush([]);
+    expectListRequest().flush([]);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No hay residentes activos');
     expect(component.destinatarios()).toEqual([]);
@@ -160,6 +205,7 @@ describe('RecepcionPaquetes', () => {
       { message: 'Unavailable' },
       { status: 500, statusText: 'Server Error' },
     );
+    expectListRequest().flush([]);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('No se pudieron cargar los destinatarios');
@@ -168,7 +214,8 @@ describe('RecepcionPaquetes', () => {
     const retry = fixture.nativeElement.querySelector('.retry-button') as HTMLButtonElement;
     retry.click();
     fixture.detectChanges();
-    expectDestinatariosRequest().flush(destinatarios);
+    const retryRequest = http.expectOne(`${environment.apiUrl}/api/paqueteria/destinatarios`);
+    retryRequest.flush(destinatarios);
     fixture.detectChanges();
     expect(component.destinatarios().length).toBe(2);
   });

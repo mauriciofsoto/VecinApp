@@ -20,19 +20,22 @@ public class AuthController : ControllerBase
     private readonly AppDbContext _context;
     private readonly TokenService _tokenService;
     private readonly AccesoEdificioService _accesoEdificioService;
+    private readonly VinculacionesService _vinculacionesService;
 
     public AuthController(
         UserManager<Usuario> userManager,
         SignInManager<Usuario> signInManager,
         AppDbContext context,
         TokenService tokenService,
-        AccesoEdificioService accesoEdificioService)
+        AccesoEdificioService accesoEdificioService,
+        VinculacionesService vinculacionesService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _context = context;
         _tokenService = tokenService;
         _accesoEdificioService = accesoEdificioService;
+        _vinculacionesService = vinculacionesService;
     }
 
     // POST /auth/registro-administrador
@@ -225,6 +228,10 @@ public class AuthController : ControllerBase
                     IdentificacionDeclarada = declaracion.Identificacion?.Trim(),
                     EsPrincipal = declaracion.EsPrincipal,
                     EstaAlquilada = declaracion.Tipo == "Titularidad" ? declaracion.EstaAlquilada : null,
+                    PersonaRelacionNombre = declaracion.PersonaRelacionNombre?.Trim(),
+                    PersonaRelacionApellido = declaracion.PersonaRelacionApellido?.Trim(),
+                    PisoRelacion = declaracion.PisoRelacion?.Trim(),
+                    IdentificacionRelacion = declaracion.IdentificacionRelacion?.Trim(),
                     EstadoConfirmacion = "Declarada",
                     FechaDeclaracion = DateTime.UtcNow
                 });
@@ -233,6 +240,7 @@ public class AuthController : ControllerBase
             await _context.SaveChangesAsync(HttpContext.RequestAborted);
 
             await transaction.CommitAsync();
+            await _vinculacionesService.EvaluarAsync(usuario.Id, HttpContext.RequestAborted);
             return Ok(new { message = "Cuenta y respuestas comunitarias guardadas correctamente. Ya podés iniciar sesión." });
         }
         catch
@@ -292,14 +300,12 @@ public class AuthController : ControllerBase
         {
             if (perfil != "Inquilino" || request.Unidades.Count != 1 || ocupaciones.Count != 1)
                 return "El perfil de inquilino debe declarar una unidad de ocupación.";
-            if (request.ModalidadAlquiler == "Directo" && request.PropietarioDeclaradoViveEnEdificio == null)
-                return "Indicá si el propietario declarado vive en el edificio.";
             if (request.ViveEnEdificio == false || request.TieneOtrasUnidades == true || request.DeclaraUnidadesAlquiladas == true)
                 return "La declaración de alquiler del inquilino contradice las respuestas sobre otras unidades.";
         }
         else if (request.ViveEnEdificio == true && request.TieneOtrasUnidades == false && request.DeclaraUnidadesAlquiladas == false)
         {
-            if (perfil != "Inquilino" || request.Unidades.Count != 1 || residencias.Count != 1 ||
+            if (perfil is not ("Inquilino" or "Propietario") || request.Unidades.Count != 1 || residencias.Count != 1 ||
                 !residencias[0].EsPrincipal || titularidades.Count != 0 || ocupaciones.Count != 0 ||
                 request.ModalidadAlquiler != null)
                 return "El residente sin otras unidades debe declarar únicamente su residencia como unidad principal.";
@@ -337,9 +343,7 @@ public class AuthController : ControllerBase
     private static string DerivarPerfilComunidad(RegistroAccesoComunidadRequest request)
     {
         if (request.Perfil == "Personal") return "Personal";
-        return request.Unidades.Any(unidad => unidad.Tipo == "Titularidad" && unidad.EstaAlquilada == true)
-            ? "Propietario"
-            : "Inquilino";
+        return request.Perfil;
     }
 
     private static RegistroComunitario CrearRegistroComunitario(string idUsuario, RegistroAccesoComunidadRequest request, string perfilDerivado)
@@ -555,7 +559,10 @@ public class AuthController : ControllerBase
         });
         await _context.SaveChangesAsync();
 
-        var authUser = new AuthUserDto(user.Id,user.Nombre,user.Apellido,user.Email ?? string.Empty,rolNombre ?? string.Empty);
+        var declaraUnidadesAlquiladas = await _context.DeclaracionesUnidadesComunitarias
+            .AnyAsync(declaracion => declaracion.IdUsuario == user.Id &&
+                declaracion.Tipo == "Titularidad" && declaracion.EstaAlquilada == true);
+        var authUser = new AuthUserDto(user.Id,user.Nombre,user.Apellido,user.Email ?? string.Empty,rolNombre ?? string.Empty, declaraUnidadesAlquiladas);
          return Ok(new AuthResponse(
             accessToken,
             refreshToken,
@@ -604,7 +611,10 @@ public class AuthController : ControllerBase
         });
         await _context.SaveChangesAsync();
 
-        var authUser = new AuthUserDto(savedToken.User.Id,savedToken.User.Nombre,savedToken.User.Apellido,savedToken.User.Email ?? string.Empty,rolNombre ?? string.Empty);
+        var declaraUnidadesAlquiladas = await _context.DeclaracionesUnidadesComunitarias
+            .AnyAsync(declaracion => declaracion.IdUsuario == savedToken.User.Id &&
+                declaracion.Tipo == "Titularidad" && declaracion.EstaAlquilada == true);
+        var authUser = new AuthUserDto(savedToken.User.Id,savedToken.User.Nombre,savedToken.User.Apellido,savedToken.User.Email ?? string.Empty,rolNombre ?? string.Empty, declaraUnidadesAlquiladas);
 
         return Ok(new AuthResponse(
             newAccessToken,

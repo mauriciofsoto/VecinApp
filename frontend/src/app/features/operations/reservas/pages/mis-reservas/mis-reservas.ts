@@ -6,7 +6,7 @@ import { AuthService } from '../../../../../core/services/auth';
 import { UnitsService } from '../../../../../core/services/units';
 import { Unit } from '../../../../../core/models/unit';
 
-import { Reservas } from '../../services/reservas';
+import { Reservas, CrearReserva } from '../../services/reservas';
 import {
   Reserva,
   TipoEvento,
@@ -33,7 +33,7 @@ import { InputComponent } from '../../../../../shared/components/atoms/input/inp
 export class MisReservas implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly unitsService = inject(UnitsService);
-  private readonly reservasService = inject(Reservas);
+  readonly reservasService = inject(Reservas);
 
   readonly usuario = this.authService.currentUser;
 
@@ -70,13 +70,8 @@ export class MisReservas implements OnInit {
   );
 
   readonly espaciosDisponibles = computed(() => {
-    const unidad = this.unidadSeleccionada();
-
-    if (!unidad) return [];
-
-    return this.reservasService.espaciosActivos().filter(
-      espacio => espacio.edificioId === unidad.edificioId,
-    );
+    // El backend ya filtra por edificio del usuario — devolvemos todos los activos
+    return this.reservasService.espaciosActivos();
   });
 
   readonly espacioSeleccionado = computed(() =>
@@ -87,9 +82,7 @@ export class MisReservas implements OnInit {
 
   readonly reservas = computed(() => {
     const usuarioId = this.usuario()?.id;
-
     if (!usuarioId) return [];
-
     return this.reservasService.reservasDeUsuario(usuarioId);
   });
 
@@ -103,6 +96,8 @@ export class MisReservas implements OnInit {
 
   ngOnInit(): void {
     this.cargarUnidades();
+    this.reservasService.cargarMisReservas().subscribe();
+    this.reservasService.cargarEspacios().subscribe();
   }
 
   private cargarUnidades(): void {
@@ -139,24 +134,22 @@ export class MisReservas implements OnInit {
     this.fechaSeleccionada.set(fecha);
     this.formulario.fecha = fecha;
     this.reservaSeleccionada.set(null);
+    this.reservasService.limpiarMensajes();
   }
 
   seleccionarReserva(reserva: Reserva): void {
     this.reservaSeleccionada.set(reserva);
+    this.reservasService.cargarMensajes(reserva.id).subscribe();
   }
 
   crearReserva(): void {
     this.errorFormulario.set(null);
     this.exitoFormulario.set(null);
 
-    const usuario = this.usuario();
-    const unidad = this.unidadSeleccionada();
     const espacio = this.espacioSeleccionado();
 
-    if (!usuario || !unidad || !espacio) {
-      this.errorFormulario.set(
-        'Seleccioná una unidad y un espacio disponible.',
-      );
+    if (!espacio) {
+      this.errorFormulario.set('Seleccioná un espacio disponible.');
       return;
     }
 
@@ -192,51 +185,55 @@ export class MisReservas implements OnInit {
       return;
     }
 
-    try {
-      this.reservasService.crear({
-        usuarioId: usuario.id,
-        usuarioNombre: `${usuario.nombre} ${usuario.apellido}`,
-        unidadId: unidad.id,
-        unidadNombre: `${unidad.piso} ${unidad.identificacion}`,
-        edificioId: unidad.edificioId,
-        espacioId: espacio.id,
-        titulo: titulo.trim(),
-        descripcion: descripcion.trim(),
-        fecha,
-        horaInicio,
-        horaFin,
-        cantidadParticipantes,
-        tipoEvento,
-        categoriaEvento: tipoEvento === 'publico' ? categoriaEvento : null,
-        creadaPorAdministracion: false,
-      });
+    const unidad = this.unidadSeleccionada();
 
-      const nuevaReserva = this.reservasService
-        .reservasDeUsuario(usuario.id)[0];
+    const datos: CrearReserva = {
+      espacioId: espacio.id,
+      unidadId: unidad?.id ?? null,
+      titulo: titulo.trim(),
+      descripcion: descripcion.trim(),
+      fecha,
+      horaInicio,
+      horaFin,
+      cantidadParticipantes,
+      tipoEvento,
+      categoriaEvento: tipoEvento === 'publico' ? categoriaEvento : null,
+    };
 
-      if (nuevaReserva) {
+    this.reservasService.crear(datos).subscribe({
+      next: nuevaReserva => {
         this.reservaSeleccionada.set(nuevaReserva);
-      }
+        this.fechaSeleccionada.set(fecha);
+        this.exitoFormulario.set('Tu solicitud de reserva fue creada.');
 
-      this.fechaSeleccionada.set(fecha);
-      this.exitoFormulario.set('Tu solicitud de reserva fue creada.');
+        this.formulario.titulo = '';
+        this.formulario.descripcion = '';
+        this.formulario.horaInicio = '';
+        this.formulario.horaFin = '';
+        this.formulario.cantidadParticipantes = 1;
+        this.formulario.tipoEvento = 'privado';
+        this.formulario.categoriaEvento = null;
 
-      this.formulario.titulo = '';
-      this.formulario.descripcion = '';
-      this.formulario.horaInicio = '';
-      this.formulario.horaFin = '';
-      this.formulario.cantidadParticipantes = 1;
-      this.formulario.tipoEvento = 'privado';
-      this.formulario.categoriaEvento = null;
+        this.espacioSeleccionadoId.set(null);
+        this.formularioVisible.set(false);
+      },
+      error: err => {
+        const mensaje = err?.error?.mensaje ?? 'No se pudo crear la solicitud de reserva.';
+        this.errorFormulario.set(mensaje);
+      },
+    });
+  }
 
-      this.espacioSeleccionadoId.set(null);
-    } catch (error) {
-      this.errorFormulario.set(
-        error instanceof Error
-          ? error.message
-          : 'No se pudo crear la solicitud de reserva.',
-      );
-    }
+  cancelarReserva(reserva: Reserva): void {
+    this.reservasService.cancelar(reserva.id).subscribe({
+      next: actualizada => {
+        this.reservaSeleccionada.set(actualizada);
+      },
+      error: err => {
+        const mensaje = err?.error?.mensaje ?? 'No se pudo cancelar la reserva.';
+        this.errorFormulario.set(mensaje);
+      },
+    });
   }
 
   nombreEspacio(espacioId: number): string {

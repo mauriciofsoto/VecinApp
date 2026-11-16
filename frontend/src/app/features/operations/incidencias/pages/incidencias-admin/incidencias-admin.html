@@ -16,7 +16,7 @@
   </header>
 
   @if (mensaje()) {
-    <p role="status">{{ mensaje() }}</p>
+    <p class="incidencias-admin__mensaje" role="status">{{ mensaje() }}</p>
   }
 
   @if (cargando()) {
@@ -168,7 +168,15 @@
                 </span>
               </td>
 
-              <td>
+              <td class="incidencias-admin__acciones">
+                <app-button
+                  variant="outline"
+                  size="sm"
+                  (buttonClick)="abrirDerivacion(incidencia)"
+                  [disabled]="cargandoDerivacion() || guardandoDerivacion()"
+                >
+                  Derivar
+                </app-button>
                 <app-button
                   variant="outline"
                   [routerLink]="['/administrador/incidencias', incidencia.id]"
@@ -199,6 +207,88 @@
     </div>
 
   </section>
+
+  <app-modal
+    [open]="modalDerivacionAbierto()"
+    (openChange)="modalDerivacionAbierto.set($event)"
+    heading="Derivar incidencia"
+    size="md"
+    [preventClose]="guardandoDerivacion()"
+  >
+    @if (incidenciaSeleccionada(); as incidencia) {
+      <div class="incidencias-admin__derivacion">
+        <div class="incidencias-admin__derivacion-info">
+          <strong>Incidencia #{{ incidencia.id }} · {{ incidencia.titulo }}</strong>
+          <span>Reportada por {{ incidencia.usuarioNombre }}</span>
+          @if (unidadRelacionada(); as unidad) {
+            <span>Unidad declarada relacionada: piso {{ unidad.piso }}, unidad {{ unidad.identificacion }}</span>
+          } @else {
+            <span>No se pudo identificar una única unidad declarada del reportante; no se muestran Propietarios como alternativa.</span>
+          }
+        </div>
+
+        @if (cargandoDerivacion()) {
+          <p class="incidencias-admin__feedback" role="status">Consultando destinatarios y declaraciones del edificio…</p>
+        } @else if (errorDerivacion()) {
+          <p class="incidencias-admin__feedback incidencias-admin__feedback--error" role="alert">{{ errorDerivacion() }}</p>
+        } @else {
+          @if (unidadRelacionada() && propietariosRelacionados().length === 0) {
+            <p class="incidencias-admin__feedback" role="status">No hay Propietarios con una declaración alquilada coincidente para esta unidad. Solo se ofrece Personal del edificio.</p>
+          }
+
+          <app-select
+            id="tipo-destinatario-derivacion"
+            name="tipoDestinatarioDerivacion"
+            ariaLabel="Tipo de destinatario"
+            [options]="opcionesTipoDestinatario()"
+            [value]="tipoDestinatario()"
+            (valueChange)="cambiarTipoDestinatario($event)"
+          />
+
+          @if (opcionesDestinatario().length) {
+            <app-select
+              id="destinatario-derivacion"
+              name="destinatarioDerivacion"
+              [ariaLabel]="tipoDestinatario() === 'Personal' ? 'Personal destinatario' : 'Propietario destinatario'"
+              placeholder="Seleccioná un destinatario"
+              [options]="opcionesDestinatario()"
+              [value]="destinatarioSeleccionado()"
+              (valueChange)="seleccionarDestinatario($event)"
+            />
+          } @else {
+            <app-empty-state
+              title="No hay Personal disponible"
+              description="No se encontraron destinatarios de Personal activos para este edificio."
+            />
+          }
+
+          @if (tipoDestinatario() === 'Propietario' && propietariosRelacionados().length) {
+            <p class="incidencias-admin__nota-declaracion">La coincidencia se basa en declaraciones de unidad; no verifica titularidad legal.</p>
+          }
+        }
+
+      </div>
+    }
+
+    <div modal-footer class="incidencias-admin__modal-footer">
+      <app-button
+        variant="secondary"
+        type="button"
+        (buttonClick)="cerrarModalDerivacion()"
+        [disabled]="guardandoDerivacion()"
+      >
+        Cancelar
+      </app-button>
+      <app-button
+        variant="primary"
+        type="button"
+        (buttonClick)="confirmarDerivacion()"
+        [disabled]="cargandoDerivacion() || guardandoDerivacion() || !destinatarioSeleccionado() || (tipoDestinatario() === 'Propietario' && !unidadRelacionada())"
+      >
+        {{ guardandoDerivacion() ? 'Derivando…' : 'Confirmar derivación' }}
+      </app-button>
+    </div>
+  </app-modal>
 
   }
 
