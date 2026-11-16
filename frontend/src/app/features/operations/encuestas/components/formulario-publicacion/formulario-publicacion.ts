@@ -2,14 +2,9 @@ import { Component, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { EncuestaAdmin } from '../../models/encuesta.model';
 import { EncuestasService } from '../../services/encuestas';
 
 import { Feed } from '../../../../community/feed/services/feed';
-import {
-  AuthorRole,
-  PostAttachment,
-} from '../../../../community/feed/models/post';
 
 import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
 import { InputComponent } from '../../../../../shared/components/atoms/input/input';
@@ -124,37 +119,23 @@ export class FormularioPublicacion {
     this.publicarEncuesta(titulo, descripcion, opcionesValidas);
   }
 
-  private obtenerAdjuntos(): PostAttachment[] {
-    return this.archivosAdjuntos().map((archivo, index) => ({
-      id: `${Date.now()}-${index}`,
-      url: URL.createObjectURL(archivo),
-      type: archivo.type.startsWith('video/') ? 'video' : 'image',
-      name: archivo.name,
-    }));
-  }
-
   private publicarAviso(titulo: string, descripcion: string): void {
-    this.feedService.addPost({
-      id: Date.now(),
-      authorRole: 'admin' as AuthorRole,
-      type: 'aviso',
-      userId: 1,
-      userName: 'Administración',
-      title: titulo,
-      content: descripcion,
-      createdAt: new Date().toISOString(),
-      reactions: [],
-      comments: [],
-      commentsCount: 0,
-      comentariosActivos: this.comentariosActivos,
+    this.feedService.createAdministrativePublication({
+      titulo,
+      tipo: 'aviso',
+      contenido: descripcion,
       prioritaria: this.prioritaria,
-      fechaLimite: this.establecerVencimiento
-        ? this.fechaLimite
-        : '',
-      attachments: this.obtenerAdjuntos(),
+      comentariosActivos: this.comentariosActivos,
+      fechaLimite: this.establecerVencimiento ? this.fechaLimite : undefined,
+    }).subscribe({
+      next: () => {
+        this.feedService.loadPosts();
+        this.finalizarPublicacion();
+      },
+      error: () => {
+        this.errorFormulario = 'No se pudo publicar el aviso. Intentá nuevamente.';
+      },
     });
-
-    this.finalizarPublicacion();
   }
 
   private publicarEncuesta(
@@ -162,44 +143,22 @@ export class FormularioPublicacion {
     descripcion: string,
     opciones: string[],
   ): void {
-    const nuevaEncuesta: EncuestaAdmin = {
-      id: Date.now(),
+    this.encuestasService.publicar({
       titulo,
       descripcion,
       opciones,
-      votacionActiva: true,
       comentariosActivos: this.comentariosActivos,
       prioritaria: this.prioritaria,
-      fechaLimite: this.establecerVencimiento
-        ? this.fechaLimite
-        : '',
-      fechaPublicacion: this.fechaActual,
-      estado: 'en-proceso',
-      totalVotos: 0,
-    };
-
-    this.encuestasService.publicar(nuevaEncuesta);
-
-    this.feedService.addPost({
-      id: Date.now(),
-      authorRole: 'admin',
-      type: 'encuesta',
-      encuestaId: nuevaEncuesta.id,
-      userId: 1,
-      userName: 'Administración',
-      title: nuevaEncuesta.titulo,
-      content: nuevaEncuesta.descripcion,
-      createdAt: new Date().toISOString(),
-      reactions: [],
-      comments: [],
-      commentsCount: 0,
-      comentariosActivos: nuevaEncuesta.comentariosActivos,
-      prioritaria: nuevaEncuesta.prioritaria,
-      fechaLimite: nuevaEncuesta.fechaLimite,
-      attachments: this.obtenerAdjuntos(),
+      fechaLimite: this.establecerVencimiento ? this.fechaLimite : undefined,
+    }).subscribe({
+      next: () => {
+        this.feedService.loadPosts();
+        this.finalizarPublicacion();
+      },
+      error: () => {
+        this.errorFormulario = 'No se pudo publicar la encuesta. Intentá nuevamente.';
+      },
     });
-
-    this.finalizarPublicacion();
   }
 
   private finalizarPublicacion(): void {

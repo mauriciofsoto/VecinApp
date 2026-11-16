@@ -23,6 +23,7 @@ import { EncuestaAdmin } from '../../../../operations/encuestas/models/encuesta.
 import { HistorialEncuestas } from '../../../../operations/encuestas/pages/historial-encuestas/historial-encuestas';
 import { FormularioPublicacion } from '../../../../operations/encuestas/components/formulario-publicacion/formulario-publicacion';
 import { ExpandablePublicationList } from '../../../../../shared/components/organisms/expandable-publication-list/expandable-publication-list';
+import { AuthService } from '../../../../../core/services/auth';
 
 
 @Component({
@@ -46,11 +47,13 @@ import { ExpandablePublicationList } from '../../../../../shared/components/orga
 export class FeedPrincipal {
   protected readonly feedService = inject(Feed);
   private readonly encuestasService = inject(EncuestasService);
+  private readonly authService = inject(AuthService);
   protected readonly isCreatePostOpen = signal(false);
   protected readonly isPollsOpen = signal(false);
 
   constructor() {
     this.feedService.loadPosts();
+    this.encuestasService.cargar();
   }
 
   readonly posts = this.feedService.posts;
@@ -71,42 +74,37 @@ export class FeedPrincipal {
 
 
   readonly postsVisibles = computed(() => {
-  const encuestas = this.encuestasService.encuestas();
+    const esAdmin = this.userRole() === 'admin';
+    const encuestas = this.encuestasService.encuestas();
 
-  return this.feedService.posts().filter(post => {
-    if (post.type !== 'encuesta') {
-      return true;
-    }
-
-    const encuesta = encuestas.find(
-      item => item.id === post.encuestaId,
-    );
-
-    return encuesta?.estado === 'en-proceso';
+    return this.feedService.posts().filter(post => {
+      if (post.type !== 'encuesta') return true;
+      const encuesta = encuestas.find(item => item.id === post.encuestaId);
+      return !!encuesta && (esAdmin || (!encuesta.yaVote && encuesta.votacionActiva));
+    });
   });
-});
 
 
-readonly encuestasParaLista = computed(() => {
-  const encuestas = this.encuestas();
+  readonly encuestasParaLista = computed(() => {
+    const esAdmin = this.userRole() === 'admin';
+    const encuestas = this.encuestas();
 
-  return this.posts().filter(post => {
-    if (post.type !== 'encuesta') {
-      return false;
-    }
-
-    const encuesta = encuestas.find(
-      item => item.id === post.encuestaId,
-    );
-
-    return encuesta !== undefined;
+    return this.posts().filter(post => {
+      if (post.type !== 'encuesta') return false;
+      const encuesta = encuestas.find(item => item.id === post.encuestaId);
+      return !!encuesta && (esAdmin || encuesta.yaVote || !encuesta.votacionActiva);
+    });
   });
-});
 
 
 
 
-  protected readonly userRole: AuthorRole = 'admin';
+  protected readonly userRole = computed<AuthorRole>(() => {
+    const rol = this.authService.currentUser()?.rol;
+    return rol === 'Administrador' || rol === 'SuperAdministrador'
+      ? 'admin'
+      : 'vecino';
+  });
   protected readonly formularioPublicacion = viewChild(FormularioPublicacion);
 
   protected createPost(data: CreatePostData): void {

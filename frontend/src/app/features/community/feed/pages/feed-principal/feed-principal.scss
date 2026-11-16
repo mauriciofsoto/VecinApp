@@ -1,3 +1,4 @@
+
 @use '../../../../../../styles/abstracts' as *;
 
 .feed {
@@ -20,7 +21,7 @@
 
   &__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 20rem;
+    grid-template-columns: minmax(0, 1fr) 32rem;
     align-items: start;
     gap: $space-5;
     min-width: 0;
@@ -192,18 +193,20 @@
 }
 
 @media (max-width: $tablet) {
-  .feed__layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .feed {
+    &__layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
 
-  .feed__sidebar {
-    position: static;
-    max-height: none;
-    overflow: visible;
-  }
+    &__sidebar {
+      position: static;
+      max-height: none;
+      overflow: visible;
+    }
 
-  .feed__scroll-container {
-    max-height: none;
-    overflow: visible;
+    &__scroll-container {
+      max-height: none;
+      overflow: visible;
+    }
   }
 }

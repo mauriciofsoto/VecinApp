@@ -1,4 +1,3 @@
-
 export type EstadoEncuesta = 'en-proceso' | 'cerrada';
 
 export interface OpcionEncuesta {
@@ -7,33 +6,61 @@ export interface OpcionEncuesta {
   votos: number;
 }
 
-export interface VotoEncuesta {
-  encuestaId: number;
-  usuarioId: number;
-  opcionId: string;
-  fechaVoto: string;
-}
-
 export interface EncuestaAdmin {
   id: number;
+  idPublicacion: number;
   titulo: string;
   descripcion: string;
-
-  // Conservamos opciones como string[] para no romper
-  // el formulario de creación que ya tenés.
   opciones: string[];
-
   votacionActiva: boolean;
   comentariosActivos: boolean;
   prioritaria: boolean;
-
   fechaLimite: string;
   fechaPublicacion: string;
-
   estado: EstadoEncuesta;
   totalVotos: number;
+  votosPorOpcion: OpcionEncuesta[];
+  yaVote: boolean;
+  miOpcionId: string | null;
+}
 
-  // Nuevos datos para registrar y consultar los votos.
-  votos?: VotoEncuesta[];
-  votosPorOpcion?: OpcionEncuesta[];
+export interface CrearEncuestaData {
+  titulo: string;
+  descripcion: string;
+  opciones: string[];
+  comentariosActivos: boolean;
+  prioritaria: boolean;
+  fechaLimite?: string;
+}
+
+export interface EncuestaApiResponse {
+  id: number;
+  idPublicacion: number;
+  titulo: string;
+  descripcion: string;
+  opciones: Array<{ id: number; texto: string; votos: number }>;
+  votacionActiva: boolean;
+  comentariosActivos: boolean;
+  prioritaria: boolean;
+  fechaLimite: string;
+  fechaPublicacion: string;
+  estado: EstadoEncuesta;
+  totalVotos: number;
+  yaVote: boolean;
+  miOpcionId: number | null;
+}
+
+export interface VotanteEncuesta {
+  nombre: string;
+  opcion: string;
+  fechaVoto: string;
+}
+
+export interface EncuestaVotantesResponse {
+  encuestaId: number;
+  titulo: string;
+  estado: EstadoEncuesta;
+  fechaLimite: string;
+  totalVotos: number;
+  votantes: VotanteEncuesta[];
 }

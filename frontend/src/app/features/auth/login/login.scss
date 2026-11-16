@@ -54,7 +54,7 @@
   display: grid;
   gap: 1.25rem;
 
-  button {
+  .login-submit {
     width: 100%;
     padding: 0.9rem 1rem;
     color: var(--color-text-inverse);
@@ -109,6 +109,49 @@
     }
 
     &:disabled {
+      opacity: var(--state-disabled-opacity);
+    }
+  }
+}
+
+.password-input {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+
+  input {
+    padding-right: 3.25rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    place-items: center;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
+    border-radius: 0.5rem;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: color 200ms ease, background-color 200ms ease;
+
+    &:hover:not(:disabled) {
+      color: var(--color-primary);
+      background: var(--color-surface-muted);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-focus-border);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
       opacity: var(--state-disabled-opacity);
     }
   }

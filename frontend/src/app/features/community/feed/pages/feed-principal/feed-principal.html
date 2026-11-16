@@ -24,7 +24,7 @@
           (buttonClick)="openCreatePost()"
         >
           <span class="feed__create-avatar" aria-hidden="true">
-            {{ userRole === 'admin' ? 'A' : 'U' }}
+            {{ userRole() === 'admin' ? 'A' : 'U' }}
           </span>
 
           <span class="feed__create-placeholder">
@@ -101,7 +101,7 @@
     heading="Crear publicación"
     size="lg"
   >
-    @if (userRole === 'admin') {
+    @if (userRole() === 'admin') {
       <!-- ADMINISTRACIÓN: AVISOS Y ENCUESTAS -->
       <app-formulario-publicacion
         (publicada)="closeCreatePost()"
@@ -109,7 +109,7 @@
     } @else {
       <!-- USUARIO: PUBLICACIÓN NORMAL -->
       <app-create-post-form
-        [role]="userRole"
+        [role]="userRole()"
         (postCreated)="createPost($event)"
       />
     }

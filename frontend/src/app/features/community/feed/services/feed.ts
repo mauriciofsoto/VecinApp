@@ -87,10 +87,31 @@ export class Feed {
 
 createPost(data: CreatePostPayload) {
   this.errorState.set(null);
+  const content = data.content.trim();
 
   return this.http.post<Post>(`${this.apiUrl}/publicaciones`, {
     tipo: data.type,
-    contenido: data.content,
+    titulo: content.split(/\r?\n/, 1)[0],
+    contenido: content,
+  });
+}
+
+createAdministrativePublication(data: {
+  titulo: string;
+  tipo: 'aviso';
+  contenido: string;
+  prioritaria: boolean;
+  comentariosActivos: boolean;
+  fechaLimite?: string;
+}) {
+  this.errorState.set(null);
+  return this.http.post<Post>(`${this.apiUrl}/publicaciones`, {
+    titulo: data.titulo,
+    tipo: data.tipo,
+    contenido: data.contenido,
+    prioritaria: data.prioritaria,
+    comentariosActivos: data.comentariosActivos,
+    fechaLimite: data.fechaLimite,
   });
 }
 

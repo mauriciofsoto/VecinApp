@@ -17,7 +17,13 @@ public class Publicacion
 
     public DateTime FechaPublicacion { get; set; }
 
+    public DateTime? FechaLimite { get; set; }
+
     public string Estado { get; set; } = string.Empty;
+
+    public bool Prioritaria { get; set; }
+
+    public bool ComentariosActivos { get; set; } = true;
 
     // Relaciones
     public Usuario Usuario { get; set; } = null!;
@@ -27,6 +33,8 @@ public class Publicacion
     public CategoriaPublicacion CategoriaPublicacion { get; set; } = null!;
 
     public ICollection<Comentario> Comentarios { get; set; } = new List<Comentario>();
+
+    public ICollection<ReaccionPublicacion> Reacciones { get; set; } = new List<ReaccionPublicacion>();
 
     public Encuesta? Encuesta { get; set; }
 }

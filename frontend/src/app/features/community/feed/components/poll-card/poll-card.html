@@ -30,13 +30,26 @@
     <p class="poll-card__status">
       Ya registraste tu voto.
     </p>
-  } @else if (encuesta().votacionActiva) {
+  } @else if (encuesta().votacionActiva && puedeVotar()) {
     <app-poll-voting
       [question]="encuesta().titulo"
       [options]="opciones()"
       [disabled]="false"
       (vote)="registrarVoto($event)"
     />
+  }
+
+  @if (yaVoto() || encuesta().estado === 'cerrada') {
+    <app-poll-statistics
+      [question]="encuesta().titulo"
+      [options]="resultados()"
+      [myVote]="miVoto()"
+      [totalVotes]="encuesta().totalVotos"
+    />
+  }
+
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
   }
 
   <footer class="poll-card__footer">

@@ -36,6 +36,7 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
     public DbSet<Publicacion> Publicaciones { get; set; }
     public DbSet<CategoriaPublicacion> CategoriasPublicacion { get; set; }
     public DbSet<Comentario> Comentarios { get; set; }
+    public DbSet<ReaccionPublicacion> ReaccionesPublicacion { get; set; }
     public DbSet<Evento> Eventos { get; set; }
     public DbSet<Encuesta> Encuestas { get; set; }
     public DbSet<OpcionEncuesta> OpcionesEncuesta { get; set; }
@@ -535,7 +536,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
             entity.Property(e => e.Titulo).HasColumnName("titulo").IsRequired();
             entity.Property(e => e.Contenido).HasColumnName("contenido").IsRequired();
             entity.Property(e => e.FechaPublicacion).HasColumnName("fecha_publicacion").IsRequired();
+            entity.Property(e => e.FechaLimite).HasColumnName("fecha_limite");
             entity.Property(e => e.Estado).HasColumnName("estado").IsRequired();
+            entity.Property(e => e.Prioritaria).HasColumnName("Prioritaria").HasDefaultValue(false);
+            entity.Property(e => e.ComentariosActivos).HasColumnName("ComentariosActivos").HasDefaultValue(true);
 
             entity.HasOne(e => e.Usuario)
                 .WithMany()
@@ -574,6 +578,29 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
                 .WithMany()
                  .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ReaccionPublicacion>(entity =>
+        {
+            entity.ToTable("reaccion_publicacion");
+            entity.HasKey(e => e.IdReaccion);
+            entity.Property(e => e.IdReaccion).HasColumnName("id_reaccion");
+            entity.Property(e => e.IdPublicacion).HasColumnName("id_publicacion").IsRequired();
+            entity.Property(e => e.IdUsuario).HasColumnName("IdUsuario").IsRequired();
+            entity.Property(e => e.Emoji).HasColumnName("emoji").HasMaxLength(20).IsRequired();
+            entity.Property(e => e.Fecha).HasColumnName("fecha").IsRequired();
+
+            entity.HasOne(e => e.Publicacion)
+                .WithMany(e => e.Reacciones)
+                .HasForeignKey(e => e.IdPublicacion)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Usuario)
+                .WithMany()
+                .HasForeignKey(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.IdPublicacion, e.IdUsuario, e.Emoji }).IsUnique();
         });
 
         // =========================
@@ -665,6 +692,8 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
                 .WithMany()
                  .HasForeignKey(e => e.IdUsuario)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.IdEncuesta, e.IdUsuario }).IsUnique();
         });
 
         // =========================

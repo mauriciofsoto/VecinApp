@@ -26,16 +26,60 @@
 
         <div class="form-field">
           <label for="password">Contraseña</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            [(ngModel)]="password"
-            placeholder="********"
-            autocomplete="current-password"
-            required
-            [disabled]="loading()"
-          />
+          <div class="password-input">
+            <input
+              id="password"
+              name="password"
+              [type]="passwordVisible ? 'text' : 'password'"
+              [(ngModel)]="password"
+              placeholder="********"
+              autocomplete="current-password"
+              required
+              [disabled]="loading()"
+            />
+            <button
+              class="password-toggle"
+              type="button"
+              [attr.aria-label]="passwordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="passwordVisible"
+              [disabled]="loading()"
+              (click)="togglePasswordVisibility()"
+            >
+              @if (passwordVisible) {
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6a2 2 0 002.8 2.8" />
+                  <path d="M9.9 5.2A11.6 11.6 0 0112 5c5 0 8.7 4.5 10 7-.5 1-1.3 2.1-2.4 3.1" />
+                  <path d="M6.2 6.2C3.8 7.7 2.4 10 2 12c1.3 2.5 5 7 10 7 1 0 2-.2 2.9-.6" />
+                </svg>
+              } @else {
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              }
+            </button>
+          </div>
         </div>
 
         <div class="login-links">
@@ -48,7 +92,7 @@
           </p>
         }
 
-        <button type="submit" [disabled]="loading()">
+        <button class="login-submit" type="submit" [disabled]="loading()">
           {{ loading() ? 'Ingresando...' : 'Iniciar sesión' }}
         </button>
       </form>

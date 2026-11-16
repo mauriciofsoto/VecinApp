@@ -1052,6 +1052,12 @@ namespace VecinApp.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdPublicacion"));
 
+                    b.Property<bool>("ComentariosActivos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("ComentariosActivos");
+
                     b.Property<string>("Contenido")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1061,6 +1067,10 @@ namespace VecinApp.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("estado");
+
+                    b.Property<DateTime?>("FechaLimite")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha_limite");
 
                     b.Property<DateTime>("FechaPublicacion")
                         .HasColumnType("timestamp with time zone")
@@ -1078,6 +1088,12 @@ namespace VecinApp.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("Prioritaria")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("Prioritaria");
+
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1092,6 +1108,44 @@ namespace VecinApp.Migrations
                     b.HasIndex("IdUsuario");
 
                     b.ToTable("publicacion", (string)null);
+                });
+
+            modelBuilder.Entity("VecinApp.Models.ReaccionPublicacion", b =>
+                {
+                    b.Property<int>("IdReaccion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id_reaccion");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdReaccion"));
+
+                    b.Property<string>("Emoji")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("emoji");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("fecha");
+
+                    b.Property<int>("IdPublicacion")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_publicacion");
+
+                    b.Property<string>("IdUsuario")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("IdUsuario");
+
+                    b.HasKey("IdReaccion");
+
+                    b.HasIndex("IdUsuario");
+
+                    b.HasIndex("IdPublicacion", "IdUsuario", "Emoji")
+                        .IsUnique();
+
+                    b.ToTable("reaccion_publicacion", (string)null);
                 });
 
             modelBuilder.Entity("VecinApp.Models.RefreshToken", b =>
@@ -1329,11 +1383,12 @@ namespace VecinApp.Migrations
 
                     b.HasKey("IdRespuesta");
 
-                    b.HasIndex("IdEncuesta");
-
                     b.HasIndex("IdOpcion");
 
                     b.HasIndex("IdUsuario");
+
+                    b.HasIndex("IdEncuesta", "IdUsuario")
+                        .IsUnique();
 
                     b.ToTable("respuesta_encuesta", (string)null);
                 });
@@ -2071,6 +2126,25 @@ namespace VecinApp.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("VecinApp.Models.ReaccionPublicacion", b =>
+                {
+                    b.HasOne("VecinApp.Models.Publicacion", "Publicacion")
+                        .WithMany("Reacciones")
+                        .HasForeignKey("IdPublicacion")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VecinApp.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Publicacion");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("VecinApp.Models.RefreshToken", b =>
                 {
                     b.HasOne("VecinApp.Models.Usuario", "User")
@@ -2323,6 +2397,8 @@ namespace VecinApp.Migrations
                     b.Navigation("Comentarios");
 
                     b.Navigation("Encuesta");
+
+                    b.Navigation("Reacciones");
                 });
 
             modelBuilder.Entity("VecinApp.Models.Reserva", b =>

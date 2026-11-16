@@ -11,6 +11,7 @@
     </div>
 
     <!-- BOTÓN DE CREACIÓN GRANDE -->
+    @if (puedeGestionar()) {
     <app-button
       type="button"
       variant="primary"
@@ -19,8 +20,13 @@
     >
       Nueva publicación
   </app-button>
+    }
 
   </header>
+
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
 
   <!-- SECCIÓN DE RESUMEN -->
   <section class="surveys-summary" aria-label="Resumen de encuestas">
@@ -156,7 +162,7 @@
               </div>
             }
 
-            @if (encuesta.estado === 'en-proceso') {
+            @if (puedeGestionar() && encuesta.estado === 'en-proceso') {
               <div class="survey-entry__actions">
                 <app-button
                   variant="outline"
@@ -165,6 +171,56 @@
                   Cerrar encuesta
                 </app-button>
               </div>
+            }
+
+            @if (puedeGestionar()) {
+              <section class="voters-panel" [attr.aria-label]="'Votantes de ' + encuesta.titulo">
+                <button
+                  type="button"
+                  class="voters-panel__toggle"
+                  [attr.aria-expanded]="panelesVotantes()[encuesta.id]?.abierto ?? false"
+                  (click)="alternarVotantes(encuesta.id)"
+                >
+                  {{ panelesVotantes()[encuesta.id]?.abierto ? 'Ocultar votantes' : 'Ver votantes' }}
+                </button>
+
+                @if (panelesVotantes()[encuesta.id]?.abierto) {
+                  @let panel = panelesVotantes()[encuesta.id];
+                  <div class="voters-panel__content">
+                    <h4>{{ encuesta.titulo }}</h4>
+                    <p>
+                      Estado: {{ encuesta.estado === 'en-proceso' ? 'En proceso' : 'Cerrada' }}
+                      · Vence: {{ encuesta.fechaLimite | date:'short' }}
+                    </p>
+
+                    @if (panel?.cargando) {
+                      <p role="status">Cargando votantes…</p>
+                    } @else if (panel?.error) {
+                      <p role="alert">{{ panel?.error }}</p>
+                      <app-button variant="outline" (buttonClick)="reintentarVotantes(encuesta.id)">
+                        Reintentar
+                      </app-button>
+                    } @else if (panel?.datos; as detalle) {
+                      <p><strong>{{ detalle.totalVotos }}</strong> {{ detalle.totalVotos === 1 ? 'persona votó' : 'personas votaron' }}</p>
+                      @if (detalle.votantes.length === 0) {
+                        <p>Aún no hay votos en esta encuesta.</p>
+                      } @else {
+                        <ul class="voters-panel__list">
+                          @for (votante of detalle.votantes; track $index) {
+                            <li>
+                              <span><strong>{{ votante.nombre }}</strong> eligió {{ votante.opcion }}</span>
+                              <time [attr.datetime]="votante.fechaVoto">{{ votante.fechaVoto | date:'short' }}</time>
+                            </li>
+                          }
+                        </ul>
+                        <app-button variant="outline" (buttonClick)="descargarVotantes(encuesta.id)">
+                          Descargar CSV
+                        </app-button>
+                      }
+                    }
+                  </div>
+                }
+              </section>
             }
           </article>
         </app-card>
@@ -186,6 +242,7 @@
   </section>
 
   <!-- MODAL DE CREACIÓN -->
+  @if (puedeGestionar()) {
   <app-modal
     [open]="isModalCrearOpen()"
     (openChange)="isModalCrearOpen.set($event)"
@@ -196,7 +253,8 @@
       (publicada)="isModalCrearOpen.set(false)"
     />
   </app-modal>
+  }
 
 </div>
 
-  
+
