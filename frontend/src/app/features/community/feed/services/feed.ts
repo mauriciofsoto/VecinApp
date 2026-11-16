@@ -2,10 +2,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
-import { Post, PostComment } from '../models/post';
-
-import { CreatePostData } from '../components/create-post-form/create-post-form';
-type CreatePostPayload = Omit<CreatePostData, 'attachments'>;
+import { Post, PostComment, PostReaction, PostType } from '../models/post';
+import { tap } from 'rxjs';
+type CreatePostPayload = {
+  title: string;
+  type: PostType;
+  content: string;
+  prioritaria?: boolean;
+  fechaLimite?: string | null;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -63,35 +68,90 @@ export class Feed {
       ),
     );
   }
-
-  addComment(postId: number, comment: PostComment): void {
+  updatePostReactions(postId: number, reactions: PostReaction[]): void {
     this.postsState.update((posts) =>
       posts.map((post) =>
         post.id === postId
-          ? {
-              ...post,
-              comments: [...post.comments, comment],
-              commentsCount: post.commentsCount + 1,
-            }
+          ? { ...post, reactions }
           : post,
       ),
     );
   }
+  addComment(postId: number, content: string) {
+    this.errorState.set(null);
 
+    return this.http.post<PostComment>(
+      `${this.apiUrl}/publicaciones/${postId}/comentarios`,
+      {
+        contenido: content,
+      },
+    );
+  }
+  toggleReaction(postId: number, emoji: string) {
+    this.errorState.set(null);
+
+    return this.http.post<PostReaction[]>(
+      `${this.apiUrl}/publicaciones/${postId}/reacciones`,
+      {
+        emoji: emoji,
+      },
+    );
+  }
+  appendComment(postId: number, comment: PostComment): void {
+    this.postsState.update((posts) =>
+      posts.map((post) =>
+        post.id === postId
+          ? {
+            ...post,
+            comments: [...post.comments, comment],
+            commentsCount: post.commentsCount + 1,
+          }
+          : post,
+      ),
+    );
+  }
   removePost(postId: number): void {
     this.postsState.update((posts) =>
       posts.filter((post) => post.id !== postId),
     );
   }
-
-
-createPost(data: CreatePostPayload) {
+  createPost(data: CreatePostPayload) {
   this.errorState.set(null);
 
   return this.http.post<Post>(`${this.apiUrl}/publicaciones`, {
+    titulo: data.title,
     tipo: data.type,
     contenido: data.content,
+    prioritaria: data.prioritaria ?? false,
+    fechaLimite: data.fechaLimite ?? null,
   });
 }
+  cambiarEstadoPublicacion(postId: number, activa: boolean) {
+    this.errorState.set(null);
 
+    return this.http.patch<{
+      id: number;
+      estado: string;
+      activa: boolean;
+      fechaVencimiento: string;
+    }>(
+      `${this.apiUrl}/publicaciones/${postId}/estado`,
+      { activa },
+    ).pipe(
+      tap((respuesta) => {
+        this.postsState.update((posts) =>
+          posts.map((post) =>
+            post.id === postId
+              ? {
+                ...post,
+                estado: respuesta.estado,
+                activa: respuesta.activa,
+                fechaVencimiento: respuesta.fechaVencimiento,
+              }
+              : post,
+          ),
+        );
+      }),
+    );
+  }
 }

@@ -43,18 +43,20 @@ export class PostCard {
       encuesta => encuesta.id === encuestaId,
     ) ?? null;
   });
+  readonly puedeAdministrar = input(false);
 
-  protected readonly puedeComentar = computed(() => {
-  const post = this.post();
+  readonly statusChange = output<{
+    postId: number;
+    activa: boolean;
+  }>();
 
-  // Las publicaciones normales mantienen sus comentarios.
-  if (post.type !== 'encuesta') {
-    return true;
+  protected cambiarEstado(activa: boolean): void {
+    this.statusChange.emit({
+      postId: this.post().id,
+      activa,
+    });
   }
-
-  // Las encuestas respetan la configuración de comentarios.
-  return this.encuesta()?.comentariosActivos ?? false;
-});
+  protected readonly puedeComentar = computed(() => true);
 
   protected readonly commentsOpen = signal(false);
 
@@ -63,39 +65,10 @@ export class PostCard {
   }
 
   protected onReactionToggled(emoji: string): void {
-    const post = this.post();
-
-    const existing = post.reactions.find(
-      reaction => reaction.emoji === emoji,
-    );
-
-    const reactions = [...post.reactions];
-
-    if (existing) {
-      const index = reactions.findIndex(
-        reaction => reaction.emoji === emoji,
-      );
-
-      const updated = { ...existing };
-
-      if (updated.reacted) {
-        updated.count = Math.max(0, updated.count - 1);
-        updated.reacted = false;
-      } else {
-        updated.count += 1;
-        updated.reacted = true;
-      }
-
-      reactions[index] = updated;
-    } else {
-      reactions.push({
-        emoji,
-        count: 1,
-        reacted: true,
-      });
-    }
-
-    this.postChange.emit({ ...post, reactions });
+    this.reactionToggled.emit({
+      postId: this.post().id,
+      emoji,
+    });
   }
 
   protected onCommentAdded(content: string): void {
@@ -104,4 +77,8 @@ export class PostCard {
       content,
     });
   }
+  readonly reactionToggled = output<{
+    postId: number;
+    emoji: string;
+  }>();
 }

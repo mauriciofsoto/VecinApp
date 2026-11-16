@@ -146,72 +146,49 @@
         </summary>
 
         <div class="survey-settings-content">
-        <!-- Comentarios -->
-        <label class="setting-option">
-            <input
-            type="checkbox"
-            name="comentariosActivos"
-            [(ngModel)]="comentariosActivos"
-            />
+          <!-- Fecha de vencimiento -->
+          <label class="setting-option">
+            <input type="checkbox"
+                   name="establecerVencimiento"
+                   [(ngModel)]="establecerVencimiento" />
             <span class="setting-option__content">
-            <strong>Permitir comentarios</strong>
-            <span>Opiniones de vecinos.</span>
+              <strong>Fecha de vencimiento</strong>
+              <span>Día de cierre.</span>
             </span>
-        </label>
+          </label>
 
-        <!-- Fecha de vencimiento -->
-        <label class="setting-option">
-            <input
-            type="checkbox"
-            name="establecerVencimiento"
-            [(ngModel)]="establecerVencimiento"
-            />
-            <span class="setting-option__content">
-            <strong>Fecha de vencimiento</strong>
-            <span>Día de cierre.</span>
-            </span>
-        </label>
-
-        @if (establecerVencimiento) {
-            <div class="form-field deadline-field">
+          @if (establecerVencimiento) {
+          <div class="form-field deadline-field">
             <label for="survey-deadline">Fecha límite *</label>
-            <app-input
-                id="survey-deadline"
-                name="fechaLimite"
-                type="date"
-                [(ngModel)]="fechaLimite"
-                [min]="fechaActual"
-                [required]="true"
-            />
-            </div>
-        }
+            <app-input id="survey-deadline"
+                       name="fechaLimite"
+                       type="date"
+                       [(ngModel)]="fechaLimite"
+                       [min]="fechaActual"
+                       [required]="true" />
+          </div>
+          }
 
-        <!-- Prioridad -->
-        <label class="setting-option setting-option--priority">
-            <input
-            type="checkbox"
-            name="prioritaria"
-            [(ngModel)]="prioritaria"
-            />
+          <!-- Prioridad: SOLO ADMINISTRADOR -->
+          @if (esAdministrador) {
+          <label class="setting-option setting-option--priority">
+            <input type="checkbox"
+                   name="prioritaria"
+                   [(ngModel)]="prioritaria" />
             <span class="setting-option__content">
-            <strong>Marcar prioritaria</strong>
-            <span>Destacar en feed.</span>
+              <strong>Marcar prioritaria</strong>
+              <span>Destacar en feed.</span>
             </span>
             <span class="priority-label">TOP</span>
-        </label>
+          </label>
+          }
+          <!-- FOOTER: ACCIÓN PRINCIPAL -->
+          <footer class="survey-form__actions">
+            <app-button type="button"
+                        variant="primary"
+                        (buttonClick)="publicar()">
+              {{ tipoPublicacion === 'aviso' ? 'Publicar aviso' : 'Publicar encuesta' }}
+            </app-button>
+          </footer>
+
         </div>
-    </details>
-    </aside>
-
-    <!-- FOOTER: ACCIÓN PRINCIPAL -->
-    <footer class="survey-form__actions">
-    <app-button
-        type="button"
-        variant="primary"
-        (buttonClick)="publicar()"
-    >
-        {{ tipoPublicacion === 'aviso' ? 'Publicar aviso' : 'Publicar encuesta' }}
-    </app-button>
-    </footer>
-
-    </div>

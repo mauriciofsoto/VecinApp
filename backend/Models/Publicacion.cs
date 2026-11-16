@@ -1,4 +1,3 @@
-
 namespace VecinApp.Models;
 
 public class Publicacion
@@ -16,9 +15,13 @@ public class Publicacion
     public string Contenido { get; set; } = string.Empty;
 
     public DateTime FechaPublicacion { get; set; }
-
+    public DateTime? FechaLimite { get; set; }
     public string Estado { get; set; } = string.Empty;
 
+    public bool Prioritaria { get; set; } = false;
+
+    public bool ComentariosActivos { get; set; } = true;
+    public ICollection<ReaccionPublicacion> Reacciones { get; set; } = new List<ReaccionPublicacion>();
     // Relaciones
     public Usuario Usuario { get; set; } = null!;
 

@@ -316,7 +316,8 @@ namespace VecinApp.Migrations
 
                     b.Property<string>("IdUsuario")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("IdUsuario");
 
                     b.HasKey("IdComentario");
 
@@ -747,6 +748,9 @@ namespace VecinApp.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdPublicacion"));
 
+                    b.Property<bool>("ComentariosActivos")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Contenido")
                         .IsRequired()
                         .HasColumnType("text")
@@ -771,7 +775,11 @@ namespace VecinApp.Migrations
 
                     b.Property<string>("IdUsuario")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("IdUsuario");
+
+                    b.Property<bool>("Prioritaria")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
@@ -844,7 +852,8 @@ namespace VecinApp.Migrations
 
                     b.Property<string>("IdUsuario")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("IdUsuario");
 
                     b.HasKey("IdRespuesta");
 

@@ -20,9 +20,8 @@
 
   &__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 20rem;
-    align-items: start;
-    gap: $space-5;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
     min-width: 0;
   }
 
@@ -96,104 +95,96 @@
     min-width: 0;
   }
 
-  &__sidebar {
-    position: sticky;
-    top: $space-4;
-    display: flex;
-    flex-direction: column;
-    gap: $space-4;
-    max-height: calc(100dvh - #{$space-7});
+
+
+  .feed-widget {
+    @include flex-col($space-3);
+    width: 100%;
     min-width: 0;
-    overflow-y: auto;
+
+    h3,
+    h4,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      @include text-heading;
+      overflow-wrap: anywhere;
+    }
+
+    p {
+      color: $text-muted;
+      font-size: $text-small;
+      line-height: 1.5;
+    }
+
+    &__heading {
+      @include flex-row($space-2);
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    &__notice {
+      @include flex-col($space-2);
+      padding-top: $space-3;
+      border-top: 1px solid $glass-border;
+
+      h4 {
+        color: $text-main;
+        font-size: $text-small;
+        font-weight: $font-semibold;
+      }
+
+      time {
+        color: $text-muted;
+        font-size: $text-tiny;
+      }
+    }
+
+    &__empty {
+      padding-top: $space-3;
+      border-top: 1px solid $glass-border;
+    }
   }
-}
 
-.feed-widget {
-  @include flex-col($space-3);
-  width: 100%;
-  min-width: 0;
-
-  h3,
-  h4,
-  p {
-    margin: 0;
+  .feed__poll-results {
+    @include flex-col($space-4);
+    min-width: 0;
   }
 
-  h3 {
-    @include text-heading;
-    overflow-wrap: anywhere;
+  .feed__poll-result {
+    @include flex-col($space-3);
+    width: 100%;
+    min-width: 0;
+
+    p {
+      margin: 0;
+      color: $text-muted;
+    }
   }
 
-  p {
-    color: $text-muted;
-    font-size: $text-small;
-    line-height: 1.5;
-  }
-
-  &__heading {
-    @include flex-row($space-2);
-    align-items: center;
+  .feed__poll-result-header {
+    @include flex-row($space-3);
+    align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
-  }
 
-  &__notice {
-    @include flex-col($space-2);
-    padding-top: $space-3;
-    border-top: 1px solid $glass-border;
-
-    h4 {
+    h3 {
+      @include text-heading;
+      min-width: 0;
+      margin: 0;
       color: $text-main;
-      font-size: $text-small;
-      font-weight: $font-semibold;
-    }
-
-    time {
-      color: $text-muted;
-      font-size: $text-tiny;
+      overflow-wrap: anywhere;
     }
   }
 
-  &__empty {
-    padding-top: $space-3;
-    border-top: 1px solid $glass-border;
-  }
-}
-
-.feed__poll-results {
-  @include flex-col($space-4);
-  min-width: 0;
-}
-
-.feed__poll-result {
-  @include flex-col($space-3);
-  width: 100%;
-  min-width: 0;
-
-  p {
-    margin: 0;
-    color: $text-muted;
-  }
-}
-
-.feed__poll-result-header {
-  @include flex-row($space-3);
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-
-  h3 {
-    @include text-heading;
-    min-width: 0;
-    margin: 0;
-    color: $text-main;
-    overflow-wrap: anywhere;
-  }
-}
-
-@media (max-width: $tablet) {
-  .feed__layout {
-    grid-template-columns: minmax(0, 1fr);
+  @media (max-width: $tablet) {
+    .feed__scroll-container {
+      max-height: none;
+      overflow: visible;
+    }
   }
 
   .feed__sidebar {
@@ -206,4 +197,46 @@
     max-height: none;
     overflow: visible;
   }
+}
+.feed__tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  margin-bottom: 20px;
+}
+
+.feed__tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--text-primary, #374151);
+  }
+
+  &--active {
+    color: var(--primary, #6366f1);
+    border-bottom-color: var(--primary, #6366f1);
+  }
+}
+
+.feed__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 20px;
+  background: var(--surface-secondary, #f3f4f6);
+  font-size: 12px;
 }

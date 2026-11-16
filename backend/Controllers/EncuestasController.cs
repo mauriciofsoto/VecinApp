@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VecinApp.Data;
 using VecinApp.Models;
+using VecinApp.Helpers;
 
 namespace VecinApp.Controllers;
 
@@ -85,10 +86,8 @@ public class EncuestasController : ControllerBase
 
         // Si no se establece una fecha límite, la encuesta dura 7 días.
         var fechaFin = request.FechaFin.HasValue
-            ? DateTime.SpecifyKind(
-                request.FechaFin.Value.Date.AddDays(1).AddTicks(-1),
-                DateTimeKind.Utc)
-            : fechaInicio.AddDays(7);
+      ? FechaArgentina.FinDelDiaUtc(request.FechaFin.Value)
+      : fechaInicio.AddDays(7);
 
         if (fechaFin <= fechaInicio)
             return BadRequest("La fecha de cierre debe ser posterior a la fecha actual.");
@@ -249,20 +248,21 @@ public class EncuestasController : ControllerBase
             .FirstOrDefault(r => r.IdUsuario == usuarioId);
 
         return new EncuestaResponseDto(
-            encuesta.IdEncuesta,
-            encuesta.Publicacion.Titulo,
-            encuesta.Publicacion.Contenido,
-            opciones.Select(o => o.Texto).ToArray(),
-            !cerrada,
-            false,
-            false,
-            encuesta.FechaFin,
-            encuesta.FechaInicio,
-            cerrada ? "cerrada" : "en-proceso",
-            encuesta.Respuestas.Count,
-            opciones,
-            miVoto?.IdOpcion
-        );
+     encuesta.IdEncuesta,
+     encuesta.IdPublicacion,
+     encuesta.Publicacion.Titulo,
+     encuesta.Publicacion.Contenido,
+     opciones.Select(o => o.Texto).ToArray(),
+     !cerrada,
+     false,
+     false,
+     encuesta.FechaFin,
+     encuesta.FechaInicio,
+     cerrada ? "cerrada" : "en-proceso",
+     encuesta.Respuestas.Count,
+     opciones,
+     miVoto?.IdOpcion
+ );
     }
 }
 
@@ -272,6 +272,8 @@ public sealed class CrearEncuestaRequest
     public string Descripcion { get; set; } = string.Empty;
     public List<string> Opciones { get; set; } = new();
     public DateTime? FechaFin { get; set; }
+    public bool ComentariosActivos { get; set; } = true;
+    public bool Prioritaria { get; set; } = false;
 }
 
 public sealed class VotarEncuestaRequest
@@ -287,6 +289,7 @@ public sealed record OpcionEncuestaResponseDto(
 
 public sealed record EncuestaResponseDto(
     int Id,
+    int IdPublicacion,
     string Titulo,
     string Descripcion,
     string[] Opciones,

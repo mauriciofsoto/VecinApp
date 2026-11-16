@@ -41,6 +41,9 @@ export interface Post {
     prioritaria?: boolean;
   comentariosActivos?: boolean;
   fechaLimite?: string;
+  estado?: string;
+  fechaVencimiento?: string;
+  activa?: boolean;
 }
 
 export interface PostAttachment {

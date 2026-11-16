@@ -1,35 +1,51 @@
-<app-form-layout
-  [title]="role() === 'admin' ? 'Crear aviso' : 'Crear publicación'"
-  description="Compartí novedades con la comunidad."
->
-  <form
-    class="create-post-form"
-    (ngSubmit)="submitPost()"
-  >
-    <textarea
-      id="post-content"
-      name="content"
-      [ngModel]="content()"
-      (ngModelChange)="content.set($event)"
-      [placeholder]="role() === 'admin'
-        ? 'Escribí un aviso para la comunidad'
-        : '¿Qué querés compartir con la comunidad?'"
-      rows="4"
-      required
-    ></textarea>
 
-    <app-media-attachments
-      (attachmentsChange)="onAttachmentsChange($event)"
-    />
+<app-form-layout [title]="role() === 'admin' ? 'Crear aviso' : 'Crear publicación'"
+                 description="Compartí novedades con la comunidad.">
+  <form class="create-post-form" (ngSubmit)="submitPost()">
 
-    <div form-actions>
-      <app-button
-        type="submit"
-        variant="primary"
-        [disabled]="!content().trim()"
-      >
-        {{ role() === 'admin' ? 'Publicar aviso' : 'Publicar' }}
-      </app-button>
+    <div class="create-post-form__field">
+      <label for="post-title">Título</label>
+
+      <app-input id="post-title"
+                 name="title"
+                 [value]="title()"
+                 (valueChange)="title.set($event.toString())"
+                 placeholder="Escribí un título para tu publicación"
+                 [required]="true" />
     </div>
+
+    <div class="create-post-form__field">
+      <label for="post-content">Descripción</label>
+
+      <app-input id="post-content"
+                 name="content"
+                 [value]="content()"
+                 (valueChange)="content.set($event.toString())"
+                 [multiline]="true"
+                 [rows]="3"
+                 [required]="true"
+                 [placeholder]="role() === 'admin'
+          ? 'Escribí un aviso para la comunidad'
+          : '¿Qué querés compartir con la comunidad?'" />
+    </div>
+
+    @if (role() === 'admin') {
+    <label class="priority-option">
+      <input type="checkbox"
+             [ngModel]="prioritaria()"
+             (ngModelChange)="prioritaria.set($event)"
+             name="prioritaria" />
+      Marcar como publicación prioritaria
+    </label>
+    }
+
+    <app-media-attachments (attachmentsChange)="onAttachmentsChange($event)" />
+
+    <app-button type="submit"
+                variant="primary"
+                [disabled]="!title().trim() || !content().trim()">
+      {{ role() === 'admin' ? 'Publicar aviso' : 'Publicar' }}
+    </app-button>
+
   </form>
 </app-form-layout>

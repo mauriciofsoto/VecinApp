@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VecinApp.Data;
 using VecinApp.Models;
-
+using VecinApp.Helpers;
 namespace VecinApp.Controllers;
 
 [ApiController]
@@ -47,12 +47,15 @@ public class PublicacionesController : ControllerBase
     .ThenInclude(u => u.Rol)
     .Include(p => p.CategoriaPublicacion)
     .Include(p => p.Comentarios)
-    .ThenInclude(c => c.Usuario)
-    .Include(p => p.Encuesta)
+.ThenInclude(c => c.Usuario)
+.Include(p => p.Reacciones)
+.Include(p => p.Encuesta)
     .OrderByDescending(p => p.FechaPublicacion)
     .ToListAsync();
 
-        var resultado = publicaciones.Select(MapearPublicacion).ToList();
+        var resultado = publicaciones
+    .Select(p => MapearPublicacion(p, userId))
+    .ToList();
 
         return Ok(resultado);
     }
@@ -63,7 +66,8 @@ public class PublicacionesController : ControllerBase
         [FromBody] CrearPublicacionRequest request)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+        if (string.IsNullOrWhiteSpace(request.Titulo))
+            return BadRequest("El título es obligatorio.");
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
@@ -84,27 +88,29 @@ public class PublicacionesController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(request.Contenido))
             return BadRequest("El contenido es obligatorio.");
+        var fechaLimite = NormalizarFechaLimite(request.FechaLimite);
 
+        if (fechaLimite.HasValue && fechaLimite.Value <= DateTime.UtcNow)
+            return BadRequest("La fecha de vencimiento debe ser futura.");
         var categoria = await _context.CategoriasPublicacion
             .FirstOrDefaultAsync(c => c.Nombre.ToLower() == tipo);
 
         if (categoria == null)
             return BadRequest("No se encontró la categoría de publicación.");
-
+        var esAdministrador =
+    usuario.Rol?.Nombre == "Administrador" ||
+    usuario.Rol?.Nombre == "SuperAdministrador";
         var publicacion = new Publicacion
         {
             IdUsuario = usuario.Id,
             IdEdificio = usuario.IdEdificio.Value,
             IdCategoriaPublicacion = categoria.IdCategoriaPublicacion,
-            Titulo = tipo switch
-            {
-                "aviso" => "Aviso",
-                "encuesta" => "Encuesta",
-                _ => "Publicación"
-            },
+            Titulo = request.Titulo.Trim(),
             Contenido = request.Contenido.Trim(),
             FechaPublicacion = DateTime.UtcNow,
+            FechaLimite = tipo == "encuesta" ? null : fechaLimite,
             Estado = "Publicado",
+            Prioritaria = esAdministrador && request.Prioritaria,
             Usuario = usuario,
             CategoriaPublicacion = categoria
         };
@@ -112,17 +118,198 @@ public class PublicacionesController : ControllerBase
         _context.Publicaciones.Add(publicacion);
 
         await _context.SaveChangesAsync();
-
-        var resultado = MapearPublicacion(publicacion);
+        var resultado = MapearPublicacion(publicacion, userId);
 
         return CreatedAtAction(
             nameof(GetPublicaciones),
             resultado
         );
     }
+    // PATCH /publicaciones/{id}/estado
+    [HttpPatch("{id:int}/estado")]
+    public async Task<IActionResult> CambiarEstado(
+        int id,
+        [FromBody] CambiarEstadoPublicacionRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var usuario = await _context.Users
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (usuario == null)
+            return Unauthorized();
+
+        var esAdministrador =
+            usuario.Rol?.Nombre == "Administrador" ||
+            usuario.Rol?.Nombre == "SuperAdministrador";
+
+        if (!esAdministrador)
+            return Forbid();
+
+        if (!usuario.IdEdificio.HasValue)
+            return BadRequest("El usuario no tiene un edificio asignado.");
+
+        var publicacion = await _context.Publicaciones
+            .Include(p => p.Encuesta)
+            .FirstOrDefaultAsync(p =>
+                p.IdPublicacion == id &&
+                p.IdEdificio == usuario.IdEdificio.Value);
+
+        if (publicacion == null)
+            return NotFound("No se encontró la publicación.");
+        var fechaVencimiento =
+            publicacion.Encuesta?.FechaFin ??
+            publicacion.FechaLimite ??
+            publicacion.FechaPublicacion.AddDays(7);
+
+        var encuestaCerrada = publicacion.Encuesta != null &&
+            string.Equals(
+                publicacion.Encuesta.Estado,
+                "Cerrada",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+        if (request.Activa && encuestaCerrada)
+            return BadRequest("No se puede reactivar una encuesta cerrada.");
+
+        if (request.Activa && fechaVencimiento <= DateTime.UtcNow)
+            return BadRequest("No se puede reactivar una publicación vencida.");
+
+        publicacion.Estado = request.Activa ? "Publicado" : "Inactivo";
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            id = publicacion.IdPublicacion,
+            estado = publicacion.Estado,
+            activa = request.Activa,
+            fechaVencimiento
+        });
+    }
+    // POST /publicaciones/{id}/reacciones
+    [HttpPost("{id:int}/reacciones")]
+    public async Task<ActionResult<ReaccionResponseDto[]>> AlternarReaccion(
+        int id,
+        [FromBody] CrearReaccionRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var usuario = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (usuario == null)
+            return Unauthorized();
+
+        if (!usuario.IdEdificio.HasValue)
+            return BadRequest("El usuario no tiene un edificio asignado.");
+
+        if (string.IsNullOrWhiteSpace(request.Emoji))
+            return BadRequest("El emoji es obligatorio.");
+
+        var emoji = request.Emoji.Trim();
+
+        var publicacion = await _context.Publicaciones
+            .FirstOrDefaultAsync(p =>
+                p.IdPublicacion == id &&
+                p.IdEdificio == usuario.IdEdificio.Value);
+
+        if (publicacion == null)
+            return NotFound("No se encontró la publicación.");
+
+        var reaccionExistente = await _context.ReaccionesPublicacion
+            .FirstOrDefaultAsync(r =>
+                r.IdPublicacion == id &&
+                r.IdUsuario == userId &&
+                r.Emoji == emoji);
+
+        if (reaccionExistente != null)
+        {
+            _context.ReaccionesPublicacion.Remove(reaccionExistente);
+        }
+        else
+        {
+            _context.ReaccionesPublicacion.Add(new ReaccionPublicacion
+            {
+                IdPublicacion = id,
+                IdUsuario = userId,
+                Emoji = emoji,
+                Fecha = DateTime.UtcNow
+            });
+        }
+
+        await _context.SaveChangesAsync();
+
+        var reacciones = await _context.ReaccionesPublicacion
+            .Where(r => r.IdPublicacion == id)
+            .ToListAsync();
+
+        return Ok(AgruparReacciones(reacciones, userId));
+    }
+    // POST /publicaciones/{id}/comentarios
+    [HttpPost("{id:int}/comentarios")]
+    public async Task<ActionResult<ComentarioResponseDto>> CrearComentario(
+        int id,
+        [FromBody] CrearComentarioRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var usuario = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (usuario == null)
+            return Unauthorized();
+
+        if (!usuario.IdEdificio.HasValue)
+            return BadRequest("El usuario no tiene un edificio asignado.");
+
+        if (string.IsNullOrWhiteSpace(request.Contenido))
+            return BadRequest("El comentario no puede estar vacío.");
+
+        var publicacion = await _context.Publicaciones
+            .FirstOrDefaultAsync(p =>
+                p.IdPublicacion == id &&
+                p.IdEdificio == usuario.IdEdificio.Value);
+
+        if (publicacion == null)
+            return NotFound("No se encontró la publicación.");
+
+        var comentario = new Comentario
+        {
+            IdPublicacion = publicacion.IdPublicacion,
+            IdUsuario = usuario.Id,
+            Contenido = request.Contenido.Trim(),
+            Fecha = DateTime.UtcNow,
+            Publicacion = publicacion,
+            Usuario = usuario
+        };
+
+        _context.Comentarios.Add(comentario);
+
+        await _context.SaveChangesAsync();
+
+        var resultado = new ComentarioResponseDto(
+            comentario.IdComentario,
+            $"{usuario.Nombre} {usuario.Apellido}".Trim(),
+            comentario.Contenido,
+            comentario.Fecha
+        );
+
+        return Ok(resultado);
+    }
     private static PublicacionResponseDto MapearPublicacion(
-        Publicacion publicacion)
+    Publicacion publicacion,
+    string userId)
     {
         var rol = publicacion.Usuario.Rol?.Nombre;
 
@@ -142,26 +329,86 @@ public class PublicacionesController : ControllerBase
             ))
             .ToArray();
 
+        var fechaVencimiento =
+            publicacion.Encuesta?.FechaFin ??
+            publicacion.FechaLimite ??
+            publicacion.FechaPublicacion.AddDays(7);
+
+        var encuestaCerrada = publicacion.Encuesta != null &&
+     string.Equals(
+         publicacion.Encuesta.Estado,
+         "Cerrada",
+         StringComparison.OrdinalIgnoreCase
+     );
+
+        var activa =
+            !string.Equals(
+                publicacion.Estado,
+                "Inactivo",
+                StringComparison.OrdinalIgnoreCase
+            )
+            && !encuestaCerrada
+            && fechaVencimiento > DateTime.UtcNow;
+
         return new PublicacionResponseDto(
-      publicacion.IdPublicacion,
-      publicacion.Encuesta?.IdEncuesta,
-      esAdministrador ? "admin" : "vecino",
-      tipo,
-      publicacion.Usuario.Id,
-      $"{publicacion.Usuario.Nombre} {publicacion.Usuario.Apellido}".Trim(),
-      publicacion.Titulo,
-      publicacion.Contenido,
-      publicacion.FechaPublicacion,
-      Array.Empty<object>(),
-      comentarios,
-      comentarios.Length
-  );
+            publicacion.IdPublicacion,
+            publicacion.Encuesta?.IdEncuesta,
+            esAdministrador ? "admin" : "vecino",
+            tipo,
+            publicacion.Usuario.Id,
+            $"{publicacion.Usuario.Nombre} {publicacion.Usuario.Apellido}".Trim(),
+            publicacion.Titulo,
+            publicacion.Contenido,
+            publicacion.FechaPublicacion,
+            AgruparReacciones(publicacion.Reacciones, userId),
+            comentarios,
+            comentarios.Length,
+            publicacion.Prioritaria,
+            publicacion.Estado,
+            publicacion.FechaLimite,
+            fechaVencimiento,
+            activa
+        );
     }
+    private static ReaccionResponseDto[] AgruparReacciones(
+        IEnumerable<ReaccionPublicacion> reacciones,
+        string userId)
+    {
+        return reacciones
+            .GroupBy(r => r.Emoji)
+            .Select(grupo => new ReaccionResponseDto(
+                grupo.Key,
+                grupo.Count(),
+                grupo.Any(r => r.IdUsuario == userId)
+            ))
+            .ToArray();
+    }
+    private static DateTime? NormalizarFechaLimite(DateTime? fecha)
+    {
+        if (!fecha.HasValue)
+            return null;
+
+        return FechaArgentina.FinDelDiaUtc(fecha.Value);
+    }
+
 }
+
+// DTOs
 
 public sealed class CrearPublicacionRequest
 {
+    public string Titulo { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
+    public string Contenido { get; set; } = string.Empty;
+    public bool Prioritaria { get; set; }
+    public DateTime? FechaLimite { get; set; }
+}
+public sealed class CambiarEstadoPublicacionRequest
+{
+    public bool Activa { get; set; }
+}
+public sealed class CrearComentarioRequest
+{
     public string Contenido { get; set; } = string.Empty;
 }
 
@@ -172,9 +419,19 @@ public sealed record ComentarioResponseDto(
     DateTime CreatedAt
 );
 
+public sealed class CrearReaccionRequest
+{
+    public string Emoji { get; set; } = string.Empty;
+}
+
+public sealed record ReaccionResponseDto(
+    string Emoji,
+    int Count,
+    bool Reacted
+);
 public sealed record PublicacionResponseDto(
     int Id,
-      int? EncuestaId,
+    int? EncuestaId,
     string AuthorRole,
     string Type,
     string UserId,
@@ -182,7 +439,12 @@ public sealed record PublicacionResponseDto(
     string Title,
     string Content,
     DateTime CreatedAt,
-    object[] Reactions,
+    ReaccionResponseDto[] Reactions,
     ComentarioResponseDto[] Comments,
-    int CommentsCount
+    int CommentsCount,
+    bool Prioritaria,
+    string Estado,
+    DateTime? FechaLimite,
+    DateTime FechaVencimiento,
+    bool Activa
 );

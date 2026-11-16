@@ -16,6 +16,7 @@ export interface VotoEncuesta {
 
 export interface EncuestaAdmin {
   id: number;
+  idPublicacion: number;
   titulo: string;
   descripcion: string;
   opciones: string[];

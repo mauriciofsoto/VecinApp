@@ -22,8 +22,7 @@ import { EncuestasService } from '../../../../operations/encuestas/services/encu
 import { EncuestaAdmin } from '../../../../operations/encuestas/models/encuesta.model';
 import { HistorialEncuestas } from '../../../../operations/encuestas/pages/historial-encuestas/historial-encuestas';
 import { FormularioPublicacion } from '../../../../operations/encuestas/components/formulario-publicacion/formulario-publicacion';
-import { ExpandablePublicationList } from '../../../../../shared/components/organisms/expandable-publication-list/expandable-publication-list';
-
+import { AuthService } from '../../../../../core/services/auth';
 
 @Component({
   selector: 'app-feed-principal',
@@ -37,8 +36,7 @@ import { ExpandablePublicationList } from '../../../../../shared/components/orga
     EmptyState,
     Modal,
     HistorialEncuestas,
-    FormularioPublicacion,
-    ExpandablePublicationList
+    FormularioPublicacion
   ],
   templateUrl: './feed-principal.html',
   styleUrl: './feed-principal.scss',
@@ -46,9 +44,33 @@ import { ExpandablePublicationList } from '../../../../../shared/components/orga
 export class FeedPrincipal {
   protected readonly feedService = inject(Feed);
   private readonly encuestasService = inject(EncuestasService);
+  seccionSeleccionada: 'activas' | 'inactivas' = 'activas';
   protected readonly isCreatePostOpen = signal(false);
+  private readonly authService = inject(AuthService);
+  readonly puedeAdministrar = computed(() =>
+    this.authService.hasRole('Administrador', 'SuperAdministrador')
+  );
+  readonly userRole = computed(() =>
+    this.puedeAdministrar() ? 'admin' : 'vecino'
+  );
   protected readonly isPollsOpen = signal(false);
-
+  protected cambiarEstadoPublicacion(event: {
+    postId: number;
+    activa: boolean;
+  }): void {
+    this.feedService
+      .cambiarEstadoPublicacion(event.postId, event.activa)
+      .subscribe({
+        error: error => {
+          console.error('Error al cambiar el estado:', error);
+          alert(
+            error.error?.message ??
+            error.error ??
+            'No se pudo cambiar el estado de la publicación.'
+          );
+        },
+      });
+  }
   constructor() {
     this.feedService.loadPosts();
     this.encuestasService.cargar();
@@ -58,11 +80,6 @@ export class FeedPrincipal {
   readonly encuestas = this.encuestasService.encuestas;
 
 
-  readonly avisosOficiales = computed(() =>
-    this.posts()
-      .filter(post => post.type === 'aviso')
-      .slice(0, 3),
-  );
 
   readonly encuestasActivas = computed(() =>
     this.encuestas().filter(
@@ -71,43 +88,19 @@ export class FeedPrincipal {
   );
 
 
-  readonly postsVisibles = computed(() => {
-  const encuestas = this.encuestasService.encuestas();
+  readonly publicacionesActivas = computed(() =>
+    this.feedService.posts().filter(post => post.activa === true)
+  );
 
-  return this.feedService.posts().filter(post => {
-    if (post.type !== 'encuesta') {
-      return true;
-    }
-
-    const encuesta = encuestas.find(
-      item => item.id === post.encuestaId,
-    );
-
-    return encuesta?.estado === 'en-proceso';
-  });
-});
-
-
-readonly encuestasParaLista = computed(() => {
-  const encuestas = this.encuestas();
-
-  return this.posts().filter(post => {
-    if (post.type !== 'encuesta') {
-      return false;
-    }
-
-    const encuesta = encuestas.find(
-      item => item.id === post.encuestaId,
-    );
-
-    return encuesta !== undefined;
-  });
-});
+  readonly publicacionesInactivas = computed(() =>
+    this.feedService.posts().filter(post => post.activa === false)
+  );
 
 
 
 
-  protected readonly userRole: AuthorRole = 'admin';
+
+
   protected readonly formularioPublicacion = viewChild(FormularioPublicacion);
 
   protected createPost(data: CreatePostData): void {
@@ -144,19 +137,37 @@ readonly encuestasParaLista = computed(() => {
   ): void {
     this.feedService.updatePost(post);
   }
-
+  protected toggleReaction(event: {
+    postId: number;
+    emoji: string;
+  }): void {
+    this.feedService
+      .toggleReaction(event.postId, event.emoji)
+      .subscribe({
+        next: reactions => {
+          this.feedService.updatePostReactions(
+            event.postId,
+            reactions,
+          );
+        },
+        error: error => {
+          console.error('Error al guardar la reacción:', error);
+        },
+      });
+  }
   protected addComment(event: {
     postId: number;
     content: string;
   }): void {
-    this.feedService.addComment(event.postId, {
-      id: Date.now(),
-      userName: 'Vos',
-      content: event.content,
-      createdAt: new Date().toISOString(),
+    this.feedService.addComment(event.postId, event.content).subscribe({
+      next: comment => {
+        this.feedService.appendComment(event.postId, comment);
+      },
+      error: error => {
+        console.error('Error al guardar el comentario:', error);
+      },
     });
   }
-
   protected openCreatePost(): void {
     this.isCreatePostOpen.set(true);
   }

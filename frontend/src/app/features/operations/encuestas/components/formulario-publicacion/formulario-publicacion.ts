@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { EncuestaAdmin } from '../../models/encuesta.model';
 import { EncuestasService } from '../../services/encuestas';
-
+import { AuthService } from '../../../../../core/services/auth';
 import { Feed } from '../../../../community/feed/services/feed';
 import {
   AuthorRole,
@@ -33,7 +33,9 @@ export type TipoPublicacion = 'aviso' | 'encuesta';
 export class FormularioPublicacion {
   private readonly encuestasService = inject(EncuestasService);
   private readonly feedService = inject(Feed);
+  private readonly auth = inject(AuthService);
 
+  readonly esAdministrador = this.auth.hasRole('Administrador');
   readonly publicada = output<void>();
 
   tipoPublicacion: TipoPublicacion = 'encuesta';
@@ -42,7 +44,6 @@ export class FormularioPublicacion {
   descripcion = '';
   opciones: string[] = ['', ''];
 
-  comentariosActivos = true;
   prioritaria = false;
   establecerVencimiento = false;
   fechaLimite = '';
@@ -54,10 +55,6 @@ export class FormularioPublicacion {
   cambiarTipo(tipo: TipoPublicacion): void {
     this.tipoPublicacion = tipo;
     this.errorFormulario = '';
-
-    if (tipo === 'aviso') {
-      this.comentariosActivos = true;
-    }
   }
 
   cambiarArchivosAdjuntos(archivos: File[]): void {
@@ -81,7 +78,9 @@ export class FormularioPublicacion {
 
     const titulo = this.titulo.trim();
     const descripcion = this.descripcion.trim();
-
+    if (!this.esAdministrador) {
+      this.prioritaria = false;
+    }
     if (!titulo) {
       this.errorFormulario = 'Ingresá un título.';
       return;
@@ -134,8 +133,13 @@ export class FormularioPublicacion {
   }
   private publicarAviso(titulo: string, descripcion: string): void {
     this.feedService.createPost({
+      title: titulo,
       type: 'aviso',
-      content: `${titulo}\n\n${descripcion}`,
+      content: descripcion,
+      prioritaria: this.prioritaria,
+      fechaLimite: this.establecerVencimiento
+        ? this.fechaLimite
+        : null,
     }).subscribe({
       next: post => {
         this.feedService.addPost({
@@ -143,11 +147,6 @@ export class FormularioPublicacion {
           reactions: post.reactions ?? [],
           comments: post.comments ?? [],
           commentsCount: post.commentsCount ?? 0,
-          prioritaria: this.prioritaria,
-          comentariosActivos: this.comentariosActivos,
-          fechaLimite: this.establecerVencimiento
-            ? this.fechaLimite
-            : '',
         });
 
         this.finalizarPublicacion();
@@ -159,8 +158,6 @@ export class FormularioPublicacion {
       },
     });
   }
-
-
   private publicarEncuesta(
     titulo: string,
     descripcion: string,
@@ -174,25 +171,10 @@ export class FormularioPublicacion {
         ? this.fechaLimite
         : null,
     }).subscribe({
-      next: nuevaEncuesta => {
-        this.feedService.addPost({
-          id: Date.now(),
-          authorRole: 'admin',
-          type: 'encuesta',
-          encuestaId: nuevaEncuesta.id,
-          userId: 1,
-          userName: 'Administración',
-          title: nuevaEncuesta.titulo,
-          content: nuevaEncuesta.descripcion,
-          createdAt: nuevaEncuesta.fechaPublicacion,
-          reactions: [],
-          comments: [],
-          commentsCount: 0,
-          comentariosActivos: nuevaEncuesta.comentariosActivos,
-          prioritaria: nuevaEncuesta.prioritaria,
-          fechaLimite: nuevaEncuesta.fechaLimite,
-          attachments: this.obtenerAdjuntos(),
-        });
+      next: () => {
+        // Recargamos las publicaciones desde el backend para obtener
+        // los datos reales de la publicación y de la encuesta.
+        this.feedService.loadPosts();
 
         this.finalizarPublicacion();
       },
@@ -205,7 +187,6 @@ export class FormularioPublicacion {
     });
   }
 
-
   private finalizarPublicacion(): void {
     this.limpiarFormulario();
     this.publicada.emit();
@@ -216,7 +197,6 @@ export class FormularioPublicacion {
     this.titulo = '';
     this.descripcion = '';
     this.opciones = ['', ''];
-    this.comentariosActivos = true;
     this.prioritaria = false;
     this.establecerVencimiento = false;
     this.fechaLimite = '';

@@ -8,6 +8,7 @@ import { EncuestaAdmin } from '../models/encuesta.model';
 
 interface EncuestaApiResponse {
   id: number;
+  idPublicacion: number;
   titulo: string;
   descripcion: string;
   opciones: string[];
@@ -119,6 +120,7 @@ export class EncuestasService {
   ): EncuestaAdmin {
     return {
       id: respuesta.id,
+      idPublicacion: respuesta.idPublicacion,
       titulo: respuesta.titulo,
       descripcion: respuesta.descripcion,
       opciones: respuesta.opciones,
