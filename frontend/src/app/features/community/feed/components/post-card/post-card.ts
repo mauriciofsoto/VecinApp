@@ -22,6 +22,7 @@ export class PostCard {
   readonly post = input.required<Post>();
 
   readonly postChange = output<Post>();
+  readonly reactionRequested = output<{ postId: number; emoji: string }>();
 
   readonly commentAdded = output<{
     postId: number;
@@ -63,39 +64,7 @@ export class PostCard {
   }
 
   protected onReactionToggled(emoji: string): void {
-    const post = this.post();
-
-    const existing = post.reactions.find(
-      reaction => reaction.emoji === emoji,
-    );
-
-    const reactions = [...post.reactions];
-
-    if (existing) {
-      const index = reactions.findIndex(
-        reaction => reaction.emoji === emoji,
-      );
-
-      const updated = { ...existing };
-
-      if (updated.reacted) {
-        updated.count = Math.max(0, updated.count - 1);
-        updated.reacted = false;
-      } else {
-        updated.count += 1;
-        updated.reacted = true;
-      }
-
-      reactions[index] = updated;
-    } else {
-      reactions.push({
-        emoji,
-        count: 1,
-        reacted: true,
-      });
-    }
-
-    this.postChange.emit({ ...post, reactions });
+    this.reactionRequested.emit({ postId: this.post().id, emoji });
   }
 
   protected onCommentAdded(content: string): void {

@@ -589,6 +589,13 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Refresh token inválido o expirado" });
         }
 
+        if (savedToken.User.Estado != EstadoUsuario.Activo)
+        {
+            savedToken.IsRevoked = true;
+            await _context.SaveChangesAsync();
+            return Unauthorized(new { message = "La cuenta no está habilitada" });
+        }
+
         // rotación de refresh tokens
         savedToken.IsRevoked = true;
 

@@ -1,6 +1,6 @@
 <main class="registro-container">
   <section class="registro-card contratacion-card" aria-labelledby="registro-title">
-    <a class="salir" routerLink="/landing#planes">← Volver a los planes</a>
+    <a class="salir" routerLink="/landing"> ← Volver a los planes </a>
     <p class="etapa">Etapa {{ etapa }} de 2</p>
     <div class="progreso" role="progressbar" [attr.aria-valuenow]="etapa" aria-valuemin="1" aria-valuemax="2" [attr.aria-label]="'Etapa ' + etapa + ' de 2'"><span [style.width.%]="etapa * 50"></span></div>
 

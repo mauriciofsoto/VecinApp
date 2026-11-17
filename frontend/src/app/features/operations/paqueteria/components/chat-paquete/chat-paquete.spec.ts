@@ -24,6 +24,10 @@ describe('ChatPaquete', () => {
   };
 
   beforeEach(async () => {
+    localStorage.setItem('accessToken', 'test-token');
+    localStorage.setItem('currentUser', JSON.stringify({
+      id: 'identity-abc', nombre: 'Ana', apellido: 'Pérez', email: 'ana@example.test', rol: 'Inquilino',
+    }));
     await TestBed.configureTestingModule({
       imports: [ChatPaquete],
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -36,7 +40,12 @@ describe('ChatPaquete', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authSessionRevision');
+  });
 
   it('carga el historial persistido y envía solo contenido, incorporando el DTO del servidor', () => {
     const get = http.expectOne(`${environment.apiUrl}/api/paqueteria/17/mensajes`);

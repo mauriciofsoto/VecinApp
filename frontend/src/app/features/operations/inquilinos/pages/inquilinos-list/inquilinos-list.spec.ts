@@ -18,6 +18,9 @@ describe('InquilinosList', () => {
 
   beforeEach(async () => {
     localStorage.setItem('accessToken', 'test-token');
+    localStorage.setItem('currentUser', JSON.stringify({
+      id: 'admin-test', nombre: 'Admin', apellido: 'Test', email: 'admin@example.test', rol: 'Administrador',
+    }));
     await TestBed.configureTestingModule({
       imports: [InquilinosList],
       providers: [provideHttpClient(withInterceptors([authInterceptor])), provideHttpClientTesting()],
@@ -32,6 +35,8 @@ describe('InquilinosList', () => {
   afterEach(() => {
     http.verify();
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authSessionRevision');
   });
 
   it('consulta el endpoint con el interceptor de autenticación y muestra carga', () => {

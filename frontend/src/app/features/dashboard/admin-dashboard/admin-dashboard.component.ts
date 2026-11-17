@@ -1,6 +1,6 @@
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeEsAr from '@angular/common/locales/es-AR';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { interval, map, startWith } from 'rxjs';
@@ -13,6 +13,9 @@ import {
 import { BentoItemDirective } from '../../../shared/components/layout/bento-grid/bento-item.directive';
 import { ReservaCalendarModal } from '../../operations/reservas/components/reserva-calendar-modal/reserva-calendar-modal';
 import { Incidencias, IncidenciaDashboardDto } from '../../operations/incidencias/services/incidencias';
+import { Reservas } from '../../operations/reservas/services/reservas';
+import { Reserva } from '../../operations/reservas/models/reserva';
+import { Feed } from '../../community/feed/services/feed';
 
 const DASHBOARD_WIDGETS: BentoWidget[] = [
   { id: 'calendar', title: 'Calendario', variant: 'glass', cols: 2, rows: 3, visible: true },
@@ -37,6 +40,8 @@ registerLocaleData(localeEsAr);
 export class AdminDashboardComponent {
   private readonly auth = inject(AuthService);
   private readonly incidentsService = inject(Incidencias);
+  private readonly reservationsService = inject(Reservas);
+  private readonly feedService = inject(Feed);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -47,18 +52,36 @@ export class AdminDashboardComponent {
   readonly incidents = signal<IncidenciaDashboardDto[] | null>(null);
   readonly incidentsLoading = signal(false);
   readonly incidentsError = signal(false);
+  readonly reservations = signal<Reserva[] | null>(null);
+  readonly reservationsLoading = signal(true);
+  readonly reservationsError = signal(false);
+  readonly publications = this.feedService.posts;
+  readonly publicationsLoading = this.feedService.loading;
+  readonly publicationsError = this.feedService.error;
+  readonly activeReservations = computed(() => (this.reservations() ?? []).filter(item =>
+    ['pendiente', 'confirmada', 'en-mediacion'].includes(item.estado),
+  ));
 
-  // El calendario comparte la presentación existente; el backend todavía no expone reservas.
-  readonly calendarReservations = [];
+  readonly calendarReservations = computed(() => this.reservations() ?? []);
 
   constructor() {
     interval(30_000)
       .pipe(startWith(0), map(() => new Date()), takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.now.set(value));
 
-    if (this.currentUser()?.rol === 'Administrador') {
-      this.loadIncidents();
-    }
+    effect(() => {
+      const session = this.auth.captureSession();
+      this.incidents.set(null);
+      this.incidentsLoading.set(true);
+      this.incidentsError.set(false);
+      this.reservations.set(null);
+      this.reservationsLoading.set(true);
+      this.reservationsError.set(false);
+      if (session.userId && this.currentUser()?.rol === 'Administrador') {
+        this.loadIncidents(session);
+        this.loadReservations(session);
+      }
+    });
   }
 
   get incidentCounts(): { total: number; pending: number; inProgress: number; resolved: number } {
@@ -84,18 +107,37 @@ export class AdminDashboardComponent {
     void this.router.navigate(['/admin/reservas']);
   }
 
-  private loadIncidents(): void {
+  private loadIncidents(session: { userId: string | null; version: number }): void {
     this.incidentsLoading.set(true);
     this.incidentsService.cargarParaDashboard()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: items => {
+          if (!this.auth.isCurrentSession(session)) return;
           this.incidents.set(items);
           this.incidentsLoading.set(false);
         },
         error: () => {
+          if (!this.auth.isCurrentSession(session)) return;
           this.incidentsError.set(true);
           this.incidentsLoading.set(false);
+        },
+      });
+  }
+
+  private loadReservations(session: { userId: string | null; version: number }): void {
+    this.reservationsService.cargarTodasLasReservas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: items => {
+          if (!this.auth.isCurrentSession(session)) return;
+          this.reservations.set(items);
+          this.reservationsLoading.set(false);
+        },
+        error: () => {
+          if (!this.auth.isCurrentSession(session)) return;
+          this.reservationsError.set(true);
+          this.reservationsLoading.set(false);
         },
       });
   }

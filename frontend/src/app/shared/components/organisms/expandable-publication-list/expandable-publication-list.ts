@@ -22,6 +22,7 @@ export class ExpandablePublicationList {
     postId: number;
     content: string;
   }>();
+  readonly reactionRequested = output<{ postId: number; emoji: string }>();
 
   protected readonly expandedIds = signal<Set<number>>(new Set());
 

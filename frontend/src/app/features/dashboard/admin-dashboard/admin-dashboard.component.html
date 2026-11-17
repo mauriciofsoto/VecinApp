@@ -7,7 +7,7 @@
     </div>
     <div class="dashboard-community" aria-label="Comunidad seleccionada">
       <span class="community-indicator" aria-hidden="true"></span>
-      <span>Edificio no disponible</span>
+      <span>{{ currentUser()?.rol === 'Administrador' ? 'Edificio de administración' : 'Comunidad' }}</span>
     </div>
   </header>
 
@@ -19,10 +19,16 @@
           <a class="widget-link" routerLink="/admin/reservas">Ver reservas <span aria-hidden="true">↗</span></a>
         </header>
         <app-reserva-calendar-modal
-          [reservas]="calendarReservations"
+          [reservas]="calendarReservations()"
           (fechaSeleccionada)="navigateToReservations($event)"
         />
-        <p class="widget-note">Las reservas aparecerán cuando el backend exponga su consulta.</p>
+        @if (reservationsLoading()) {
+          <p class="widget-note" role="status">Cargando reservas del edificio…</p>
+        } @else if (reservationsError()) {
+          <p class="widget-note" role="alert">No se pudieron cargar las reservas del edificio.</p>
+        } @else {
+          <p class="widget-note">{{ reservations()?.length ?? 0 }} reservas registradas en el edificio.</p>
+        }
       </section>
     </ng-template>
 
@@ -84,8 +90,14 @@
     <ng-template bentoItem="reservations">
       <section class="dashboard-widget" aria-labelledby="reservations-title">
         <header class="widget-heading"><div><span class="widget-kicker">AGENDA</span><h2 id="reservations-title">Reservas</h2></div><span class="widget-icon" aria-hidden="true">▦</span></header>
-        <p class="widget-unavailable">Datos no disponibles</p>
-        <p class="widget-note">El módulo aún no tiene endpoints de reservas.</p>
+        @if (reservationsLoading()) {
+          <p class="widget-note" role="status">Cargando…</p>
+        } @else if (reservationsError()) {
+          <p class="widget-note" role="alert">No se pudieron consultar.</p>
+        } @else {
+          <strong>{{ activeReservations().length }}</strong>
+          <p class="widget-note">reservas pendientes o confirmadas en tu edificio.</p>
+        }
         <a class="widget-link" routerLink="/admin/reservas">Abrir gestión <span aria-hidden="true">↗</span></a>
       </section>
     </ng-template>
@@ -101,8 +113,14 @@
     <ng-template bentoItem="publications">
       <section class="dashboard-widget" aria-labelledby="publications-title">
         <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="publications-title">Publicaciones</h2></div><a class="widget-link" routerLink="/admin/publicaciones">Gestionar <span aria-hidden="true">↗</span></a></header>
-        <p class="widget-unavailable">Publicaciones no disponibles</p>
-        <p class="widget-note">La API de publicaciones consumida por Angular no existe en el backend actual.</p>
+        @if (publicationsLoading()) {
+          <p class="widget-note" role="status">Cargando publicaciones del edificio…</p>
+        } @else if (publicationsError()) {
+          <p class="widget-note" role="alert">No se pudieron cargar las publicaciones.</p>
+        } @else {
+          <strong>{{ publications().length }}</strong>
+          <p class="widget-note">publicaciones, avisos y encuestas del edificio.</p>
+        }
       </section>
     </ng-template>
 
@@ -110,8 +128,8 @@
       <section class="dashboard-widget" aria-labelledby="activity-title">
         <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="activity-title">Actividad reciente</h2></div><span class="widget-icon" aria-hidden="true">◷</span></header>
         <div class="widget-empty">
-          <p>No hay una fuente de actividad consolidada.</p>
-          <span>Hace falta un endpoint que reúna incidencias, reservas, solicitudes y publicaciones.</span>
+          <p>La actividad consolidada no está disponible.</p>
+          <span>Se muestran las métricas disponibles de incidencias, reservas y publicaciones en sus widgets.</span>
         </div>
       </section>
     </ng-template>

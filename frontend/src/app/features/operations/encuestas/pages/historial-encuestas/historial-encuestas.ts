@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { Badge } from '../../../../../shared/components/atoms/badge/badge';
@@ -61,7 +61,12 @@ export class HistorialEncuestas {
   }>>({});
 
   constructor() {
-    this.encuestasService.cargar();
+    effect(() => {
+      const session = this.authService.captureSession();
+      this.panelesVotantes.set({});
+      this.isModalCrearOpen.set(false);
+      if (session.userId) this.encuestasService.cargar();
+    });
   }
 
   readonly filtros = signal<SearchBarFilters>({
@@ -163,6 +168,7 @@ export class HistorialEncuestas {
   }
 
   private cargarVotantes(id: number): void {
+    const session = this.authService.captureSession();
     this.actualizarPanel(id, {
       ...this.panelesVotantes()[id],
       abierto: true,
@@ -170,18 +176,19 @@ export class HistorialEncuestas {
       error: null,
     });
     this.encuestasService.obtenerVotantes(id).subscribe({
-      next: datos => this.actualizarPanel(id, {
-        abierto: true,
-        cargando: false,
-        error: null,
-        datos,
-      }),
-      error: () => this.actualizarPanel(id, {
-        ...this.panelesVotantes()[id],
-        abierto: true,
-        cargando: false,
-        error: 'No se pudo cargar el detalle de votantes.',
-      }),
+      next: datos => {
+        if (!this.authService.isCurrentSession(session)) return;
+        this.actualizarPanel(id, { abierto: true, cargando: false, error: null, datos });
+      },
+      error: () => {
+        if (!this.authService.isCurrentSession(session)) return;
+        this.actualizarPanel(id, {
+          ...this.panelesVotantes()[id],
+          abierto: true,
+          cargando: false,
+          error: 'No se pudo cargar el detalle de votantes.',
+        });
+      },
     });
   }
 

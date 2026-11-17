@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../../environments/environment';
 import { Paqueteria } from './paqueteria';
+import { AuthService } from '../../../../core/services/auth';
 
 const paquete = {
   id: 17,
@@ -28,6 +29,11 @@ describe('Paqueteria', () => {
     });
     service = TestBed.inject(Paqueteria);
     http = TestBed.inject(HttpTestingController);
+    TestBed.inject(AuthService).currentUser.set({
+      id: 'identity-abc', nombre: 'Ana', apellido: 'Pérez', email: 'ana@example.test',
+      rol: 'Portero', declaraUnidadesAlquiladas: false,
+    });
+    TestBed.flushEffects();
   });
 
   afterEach(() => http.verify());

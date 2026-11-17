@@ -200,7 +200,8 @@ public sealed class PublicacionesController : ControllerBase
             comentario.IdComentario,
             $"{usuario.Nombre} {usuario.Apellido}".Trim(),
             comentario.Contenido,
-            comentario.Fecha));
+            comentario.Fecha,
+            true));
     }
 
     [HttpPost("{id:int}/reacciones")]
@@ -330,7 +331,8 @@ public sealed class PublicacionesController : ControllerBase
                 comentario.IdComentario,
                 $"{comentario.Usuario.Nombre} {comentario.Usuario.Apellido}".Trim(),
                 comentario.Contenido,
-                comentario.Fecha))
+                comentario.Fecha,
+                comentario.IdUsuario == userId))
             .ToArray();
 
         return new PublicacionResponseDto(
@@ -426,7 +428,7 @@ public sealed class CrearReaccionRequest
     public string Emoji { get; set; } = string.Empty;
 }
 
-public sealed record ComentarioResponseDto(int Id, string UserName, string Content, DateTime CreatedAt);
+public sealed record ComentarioResponseDto(int Id, string UserName, string Content, DateTime CreatedAt, bool IsMine);
 public sealed record ReaccionResponseDto(string Emoji, int Count, bool Reacted);
 
 public sealed record PublicacionResponseDto(

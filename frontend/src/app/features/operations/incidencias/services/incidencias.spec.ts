@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../../../core/services/auth';
 
 import { Incidencias } from './incidencias';
 
@@ -16,6 +17,11 @@ describe('Incidencias', () => {
     });
     service = TestBed.inject(Incidencias);
     http = TestBed.inject(HttpTestingController);
+    TestBed.inject(AuthService).currentUser.set({
+      id: 'resident-1', nombre: 'Ana', apellido: 'Pérez', email: 'ana@example.test',
+      rol: 'Inquilino', declaraUnidadesAlquiladas: false,
+    });
+    TestBed.flushEffects();
   });
 
   afterEach(() => http.verify());

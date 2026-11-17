@@ -15,6 +15,7 @@ export interface PostComment {
   userAvatar?: string;
   content: string;
   createdAt: string;
+  isMine?: boolean;
 }
 
 export interface Post {

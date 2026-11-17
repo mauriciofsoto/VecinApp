@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, effect, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -12,6 +12,7 @@ import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia
 
 import { Modal } from '../../../../../shared/components/organisms/modal/modal';
 import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
+import { AuthService } from '../../../../../core/services/auth';
 
 @Component({
   selector: 'app-mis-incidencias',
@@ -28,6 +29,7 @@ import { ButtonComponent } from '../../../../../shared/components/atoms/button/b
 })
 export class MisIncidencias implements OnInit {
   private readonly incidenciasService = inject(Incidencias);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly incidencias = this.incidenciasService.misIncidencias;
@@ -43,8 +45,19 @@ export class MisIncidencias implements OnInit {
   protected readonly modalConversacionAbierto = signal(false);
   protected readonly mensaje = signal('');
 
+  constructor() {
+    effect(() => {
+      const session = this.authService.captureSession();
+      this.cargando.set(!!session.userId);
+      this.errorCarga.set('');
+      this.incidenciaSeleccionada.set(null);
+      this.modalConversacionAbierto.set(false);
+      this.mensaje.set('');
+      if (session.userId) this.cargarIncidencias(session);
+    });
+  }
+
   ngOnInit(): void {
-    this.cargarIncidencias();
     this.incidenciasService.cargarCategorias()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -59,14 +72,15 @@ export class MisIncidencias implements OnInit {
       });
   }
 
-  private cargarIncidencias(): void {
+  private cargarIncidencias(session = this.authService.captureSession()): void {
     this.cargando.set(true);
     this.errorCarga.set('');
     this.incidenciasService.cargarMisIncidencias()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => this.cargando.set(false),
+        next: () => { if (this.authService.isCurrentSession(session)) this.cargando.set(false); },
         error: error => {
+          if (!this.authService.isCurrentSession(session)) return;
           this.errorCarga.set(this.mensajeError(error, 'No se pudieron cargar tus incidencias.'));
           this.cargando.set(false);
         },

@@ -55,6 +55,7 @@
             [post]="post"
             (postChange)="postChange.emit($event)"
             (commentAdded)="commentAdded.emit($event)"
+            (reactionRequested)="reactionRequested.emit($event)"
           />
         </div>
       }

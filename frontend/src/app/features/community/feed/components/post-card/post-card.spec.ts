@@ -14,6 +14,19 @@ describe('PostCard', () => {
 
     fixture = TestBed.createComponent(PostCard);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('post', {
+      id: 1,
+      authorRole: 'vecino',
+      type: 'publicacion',
+      userId: 'user-1',
+      userName: 'Persona',
+      content: 'Publicación de prueba',
+      createdAt: '2026-11-16T12:00:00Z',
+      reactions: [],
+      comments: [],
+      commentsCount: 0,
+    });
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

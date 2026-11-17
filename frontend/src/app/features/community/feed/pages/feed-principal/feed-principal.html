@@ -1,4 +1,7 @@
 <section class="feed">
+  @if (interactionError()) {
+    <p role="alert" class="feed__interaction-error">{{ interactionError() }}</p>
+  }
   <header class="feed__header">
     <div>
       <h2>Comunidad</h2>
@@ -45,7 +48,7 @@
 
               <app-post-card
                 [post]="post"
-                (postChange)="updatePost($event)"
+                (reactionRequested)="toggleReaction($event)"
                 (commentAdded)="addComment($event)"
               />
             </div>
@@ -75,6 +78,7 @@
           emptyMessage="No hay avisos oficiales publicados."
           (postChange)="updatePost($event)"
           (commentAdded)="addComment($event)"
+          (reactionRequested)="toggleReaction($event)"
         />
       </app-card>
 
@@ -89,6 +93,7 @@
           emptyMessage="Todavía no hay encuestas publicadas."
           (postChange)="updatePost($event)"
           (commentAdded)="addComment($event)"
+          (reactionRequested)="toggleReaction($event)"
         />
       </app-card>
     </aside>

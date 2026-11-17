@@ -49,6 +49,9 @@ describe('RecepcionPaquetes', () => {
       HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
     }
     localStorage.setItem('accessToken', 'test-token');
+    localStorage.setItem('currentUser', JSON.stringify({
+      id: 'porter-test', nombre: 'Portero', apellido: 'Test', email: 'porter@example.test', rol: 'Portero',
+    }));
     await TestBed.configureTestingModule({
       imports: [RecepcionPaquetes],
       providers: [
@@ -66,6 +69,8 @@ describe('RecepcionPaquetes', () => {
   afterEach(() => {
     http.verify();
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authSessionRevision');
   });
 
   function expectDestinatariosRequest() {
