@@ -14,6 +14,8 @@ describe('CreatePostForm', () => {
 
     fixture = TestBed.createComponent(CreatePostForm);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('role', 'vecino');
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

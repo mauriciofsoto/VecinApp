@@ -14,6 +14,8 @@ describe('incidenciasDerivadasGuard', () => {
 
   afterEach(() => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authSessionRevision');
   });
 
   const userFor = (rol: string): User => ({
@@ -27,6 +29,7 @@ describe('incidenciasDerivadasGuard', () => {
 
   function execute(rol: string): boolean | ReturnType<Router['parseUrl']> {
     localStorage.setItem('accessToken', 'authenticated');
+    localStorage.setItem('currentUser', JSON.stringify(userFor(rol)));
     TestBed.inject(AuthService).currentUser.set(userFor(rol));
     return TestBed.runInInjectionContext(() =>
       incidenciasDerivadasGuard(

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { EncuestasService } from '../../services/encuestas';
 
 import { Feed } from '../../../../community/feed/services/feed';
+import { AuthService } from '../../../../../core/services/auth';
 
 import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
 import { InputComponent } from '../../../../../shared/components/atoms/input/input';
@@ -28,6 +29,7 @@ export type TipoPublicacion = 'aviso' | 'encuesta';
 export class FormularioPublicacion {
   private readonly encuestasService = inject(EncuestasService);
   private readonly feedService = inject(Feed);
+  private readonly authService = inject(AuthService);
 
   readonly publicada = output<void>();
 
@@ -120,6 +122,7 @@ export class FormularioPublicacion {
   }
 
   private publicarAviso(titulo: string, descripcion: string): void {
+    const session = this.authService.captureSession();
     this.feedService.createAdministrativePublication({
       titulo,
       tipo: 'aviso',
@@ -129,11 +132,14 @@ export class FormularioPublicacion {
       fechaLimite: this.establecerVencimiento ? this.fechaLimite : undefined,
     }).subscribe({
       next: () => {
+        if (!this.authService.isCurrentSession(session)) return;
         this.feedService.loadPosts();
         this.finalizarPublicacion();
       },
       error: () => {
-        this.errorFormulario = 'No se pudo publicar el aviso. Intentá nuevamente.';
+        if (this.authService.isCurrentSession(session)) {
+          this.errorFormulario = 'No se pudo publicar el aviso. Intentá nuevamente.';
+        }
       },
     });
   }
@@ -143,6 +149,7 @@ export class FormularioPublicacion {
     descripcion: string,
     opciones: string[],
   ): void {
+    const session = this.authService.captureSession();
     this.encuestasService.publicar({
       titulo,
       descripcion,
@@ -152,11 +159,14 @@ export class FormularioPublicacion {
       fechaLimite: this.establecerVencimiento ? this.fechaLimite : undefined,
     }).subscribe({
       next: () => {
+        if (!this.authService.isCurrentSession(session)) return;
         this.feedService.loadPosts();
         this.finalizarPublicacion();
       },
       error: () => {
-        this.errorFormulario = 'No se pudo publicar la encuesta. Intentá nuevamente.';
+        if (this.authService.isCurrentSession(session)) {
+          this.errorFormulario = 'No se pudo publicar la encuesta. Intentá nuevamente.';
+        }
       },
     });
   }

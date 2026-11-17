@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { DetalleIncidencia, EstadoIncidenciaDto, Incidencia } from '../models/incidencia';
 import { MensajeIncidencia, RolEmisorMensaje } from '../models/mensaje-incidencia';
+import { AuthService } from '../../../../core/services/auth';
 
 export type { DetalleIncidencia, EstadoIncidencia, EstadoIncidenciaDto } from '../models/incidencia';
 
@@ -93,33 +94,54 @@ interface CambiarEstadoResponse {
 @Injectable({ providedIn: 'root' })
 export class Incidencias {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   private readonly apiUrl = `${environment.apiUrl}/api/incidencias`;
 
   private readonly adminItems = signal<Incidencia[]>([]);
   private readonly residentItems = signal<Incidencia[]>([]);
-  readonly incidencias = this.adminItems.asReadonly();
-  readonly misIncidencias = this.residentItems.asReadonly();
+  private readonly adminOwner = signal<{ userId: string | null; version: number } | null>(null);
+  private readonly residentOwner = signal<{ userId: string | null; version: number } | null>(null);
+  private readonly isCurrentOwner = (owner: { userId: string | null; version: number } | null): boolean =>
+    owner !== null
+      && owner.userId !== null
+      && owner.userId === this.auth.currentUser()?.id
+      && owner.version === this.auth.sessionVersion();
+  readonly incidencias = computed(() => this.isCurrentOwner(this.adminOwner()) ? this.adminItems() : []);
+  readonly misIncidencias = computed(() => this.isCurrentOwner(this.residentOwner()) ? this.residentItems() : []);
 
-  readonly totalIncidencias = computed(() => this.adminItems().length);
+  readonly totalIncidencias = computed(() => this.incidencias().length);
   readonly totalPendientes = computed(() => this.countByState('pendiente'));
   readonly totalEnProceso = computed(() => this.countByState('en-proceso'));
   readonly totalResueltas = computed(() => this.countByState('resuelta'));
+
+  constructor() {
+    effect(() => {
+      this.auth.currentUser();
+      this.auth.sessionVersion();
+      this.adminItems.set([]);
+      this.residentItems.set([]);
+      this.adminOwner.set(null);
+      this.residentOwner.set(null);
+    });
+  }
 
   cargarParaDashboard(): Observable<IncidenciaDashboardDto[]> {
     return this.http.get<IncidenciaDashboardDto[]>(this.apiUrl);
   }
 
   cargarAdmin(): Observable<Incidencia[]> {
+    const session = this.auth.captureSession();
     return this.http.get<IncidenciaApiDto[]>(this.apiUrl).pipe(
       map(items => items.map(item => this.mapIncidencia(item))),
-      tap(items => this.adminItems.set(items)),
+      tap(items => { if (this.auth.isCurrentSession(session)) { this.adminOwner.set(session); this.adminItems.set(items); } }),
     );
   }
 
   cargarMisIncidencias(): Observable<Incidencia[]> {
+    const session = this.auth.captureSession();
     return this.http.get<IncidenciaApiDto[]>(`${this.apiUrl}/mis-incidencias`).pipe(
       map(items => items.map(item => this.mapIncidencia(item))),
-      tap(items => this.residentItems.set(items)),
+      tap(items => { if (this.auth.isCurrentSession(session)) { this.residentOwner.set(session); this.residentItems.set(items); } }),
     );
   }
 
@@ -154,22 +176,26 @@ export class Incidencias {
   }
 
   crear(request: CrearIncidenciaRequest): Observable<Incidencia> {
+    const session = this.auth.captureSession();
     return this.http.post<IncidenciaApiDto>(this.apiUrl, request).pipe(
       map(item => this.mapIncidencia(item)),
-      tap(item => this.residentItems.update(items => [item, ...items])),
+      tap(item => { if (this.auth.isCurrentSession(session)) { this.residentOwner.set(session); this.residentItems.update(items => [item, ...items]); } }),
     );
   }
 
   cambiarEstado(id: number, value: number | { idEstadoIncidencia: number }): Observable<CambiarEstadoResponse> {
+    const session = this.auth.captureSession();
     const idEstadoIncidencia = typeof value === 'number' ? value : value.idEstadoIncidencia;
     return this.http.put<CambiarEstadoResponse>(`${this.apiUrl}/${id}/estado`, {
       idEstadoIncidencia,
     }).pipe(
       tap(response => {
+        if (!this.auth.isCurrentSession(session)) return;
         const estado = this.normalizeState(response.estado);
         this.adminItems.update(items => items.map(item =>
           item.id === id ? { ...item, estado } : item,
         ));
+        this.adminOwner.set(session);
       }),
     );
   }
@@ -241,6 +267,6 @@ export class Incidencias {
   }
 
   private countByState(state: string): number {
-    return this.adminItems().filter(item => item.estado === state).length;
+    return this.incidencias().filter(item => item.estado === state).length;
   }
 }

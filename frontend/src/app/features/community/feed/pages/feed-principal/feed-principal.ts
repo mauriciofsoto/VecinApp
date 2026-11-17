@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -50,10 +51,17 @@ export class FeedPrincipal {
   private readonly authService = inject(AuthService);
   protected readonly isCreatePostOpen = signal(false);
   protected readonly isPollsOpen = signal(false);
+  protected readonly interactionError = signal<string | null>(null);
 
   constructor() {
-    this.feedService.loadPosts();
-    this.encuestasService.cargar();
+    effect(() => {
+      const userId = this.authService.currentUser()?.id;
+      this.authService.sessionVersion();
+      this.interactionError.set(null);
+      this.isCreatePostOpen.set(false);
+      this.isPollsOpen.set(false);
+      if (userId) this.encuestasService.cargar();
+    });
   }
 
   readonly posts = this.feedService.posts;
@@ -108,6 +116,7 @@ export class FeedPrincipal {
   protected readonly formularioPublicacion = viewChild(FormularioPublicacion);
 
   protected createPost(data: CreatePostData): void {
+    const session = this.authService.captureSession();
     const { attachments, ...postData } = data;
 
   
@@ -121,6 +130,7 @@ export class FeedPrincipal {
 
     this.feedService.createPost(postData).subscribe({
       next: post => {
+        if (!this.authService.isCurrentSession(session)) return;
         this.feedService.addPost({
           ...post,
           reactions: post.reactions ?? [],
@@ -142,15 +152,27 @@ export class FeedPrincipal {
     this.feedService.updatePost(post);
   }
 
+  protected toggleReaction(event: { postId: number; emoji: string }): void {
+    this.interactionError.set(null);
+    this.feedService.toggleReaction(event.postId, event.emoji).subscribe({
+      error: () => {
+        this.interactionError.set('No se pudo actualizar la reacción. Se volvió a consultar el estado guardado.');
+      },
+    });
+  }
+
   protected addComment(event: {
     postId: number;
     content: string;
   }): void {
-    this.feedService.addComment(event.postId, {
-      id: Date.now(),
-      userName: 'Vos',
-      content: event.content,
-      createdAt: new Date().toISOString(),
+    const session = this.authService.captureSession();
+    this.interactionError.set(null);
+    this.feedService.addComment(event.postId, event.content).subscribe({
+      error: () => {
+        if (this.authService.isCurrentSession(session)) {
+          this.interactionError.set('No se pudo guardar el comentario. Intentá nuevamente.');
+        }
+      },
     });
   }
 

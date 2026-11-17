@@ -24,6 +24,10 @@ describe('MisPaquetes', () => {
   };
 
   beforeEach(async () => {
+    localStorage.setItem('accessToken', 'test-token');
+    localStorage.setItem('currentUser', JSON.stringify({
+      id: 'identity-abc', nombre: 'Ana', apellido: 'Pérez', email: 'ana@example.test', rol: 'Inquilino',
+    }));
     await TestBed.configureTestingModule({
       imports: [MisPaquetes],
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -36,7 +40,12 @@ describe('MisPaquetes', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authSessionRevision');
+  });
 
   it('consulta mis-paquetes sin enviar ID de usuario y confirma solo después de entrega física', () => {
     const request = http.expectOne(`${environment.apiUrl}/api/paqueteria/mis-paquetes`);

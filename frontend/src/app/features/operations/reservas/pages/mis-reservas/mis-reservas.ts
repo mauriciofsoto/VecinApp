@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '../../../../../core/services/auth';
@@ -30,7 +30,7 @@ import { InputComponent } from '../../../../../shared/components/atoms/input/inp
   templateUrl: './mis-reservas.html',
   styleUrl: './mis-reservas.scss',
 })
-export class MisReservas implements OnInit {
+export class MisReservas {
   private readonly authService = inject(AuthService);
   private readonly unitsService = inject(UnitsService);
   readonly reservasService = inject(Reservas);
@@ -94,18 +94,31 @@ export class MisReservas implements OnInit {
 
   readonly fechaMinima = this.formatearFecha(new Date());
 
-  ngOnInit(): void {
-    this.cargarUnidades();
-    this.reservasService.cargarMisReservas().subscribe();
-    this.reservasService.cargarEspacios().subscribe();
+  constructor() {
+    effect(() => {
+      const session = this.authService.captureSession();
+      this.unidades.set([]);
+      this.unidadSeleccionadaId.set(null);
+      this.espacioSeleccionadoId.set(null);
+      this.reservaSeleccionada.set(null);
+      this.reservasService.limpiarMensajes();
+      this.cargandoUnidades.set(!!session.userId);
+      this.errorUnidades.set(null);
+      if (!session.userId) return;
+
+      this.cargarUnidades(session);
+      this.reservasService.cargarMisReservas().subscribe();
+      this.reservasService.cargarEspacios().subscribe();
+    });
   }
 
-  private cargarUnidades(): void {
+  private cargarUnidades(session: { userId: string | null; version: number }): void {
     this.cargandoUnidades.set(true);
     this.errorUnidades.set(null);
 
     this.unitsService.getMyUnits().subscribe({
       next: unidades => {
+        if (!this.authService.isCurrentSession(session)) return;
         this.unidades.set(unidades);
 
         if (unidades.length === 1) {
@@ -115,16 +128,17 @@ export class MisReservas implements OnInit {
         this.cargandoUnidades.set(false);
       },
       error: () => {
+        if (!this.authService.isCurrentSession(session)) return;
         this.errorUnidades.set('No se pudieron cargar tus unidades.');
         this.cargandoUnidades.set(false);
       },
     });
   }
 
-  seleccionarUnidad(id: number): void {
-    this.unidadSeleccionadaId.set(id);
-    this.espacioSeleccionadoId.set(null);
-  }
+  seleccionarUnidad(id: number | null): void {
+  this.unidadSeleccionadaId.set(id);
+  this.espacioSeleccionadoId.set(null);
+}
 
   seleccionarEspacio(id: number): void {
     this.espacioSeleccionadoId.set(id);

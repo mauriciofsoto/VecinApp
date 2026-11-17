@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using VecinApp.Controllers;
 using VecinApp.Data;
 using VecinApp.Models;
@@ -11,6 +12,87 @@ namespace VecinApp.Tests;
 
 public sealed class PublicacionesControllerTests
 {
+    [Fact]
+    public async Task Comentario_persistido_identifica_si_pertenece_al_usuario_del_claim()
+    {
+        await using var fixture = await Fixture.CrearAsync("Propietario", EstadoUsuario.Activo);
+        var controller = fixture.CrearController();
+        var publicacion = await controller.CrearPublicacion(
+            new CrearPublicacionRequest { Titulo = "Título", Tipo = "publicacion", Contenido = "Contenido" },
+            CancellationToken.None);
+        Assert.IsType<CreatedAtActionResult>(publicacion.Result);
+        var guardada = await fixture.Db.Publicaciones.SingleAsync();
+
+        var comentarioResult = await controller.CrearComentario(
+            guardada.IdPublicacion,
+            new CrearComentarioRequest { Contenido = "Comentario guardado" },
+            CancellationToken.None);
+        var comentario = Assert.IsType<ComentarioResponseDto>(Assert.IsType<OkObjectResult>(comentarioResult.Result).Value);
+        Assert.Equal("Usuario Prueba", comentario.UserName);
+        Assert.Equal("Comentario guardado", comentario.Content);
+        Assert.True(comentario.IsMine);
+        Assert.NotEqual(default, comentario.CreatedAt);
+        Assert.NotEmpty((await fixture.Db.Comentarios.SingleAsync()).IdUsuario);
+
+        var otroId = $"otro-{Guid.NewGuid():N}";
+        var otro = new Usuario
+        {
+            Id = otroId, UserName = otroId, Email = $"{otroId}@vecinapp.local", Nombre = "Otra",
+            Apellido = "Cuenta", Estado = EstadoUsuario.Activo, IdRol = 4,
+            Rol = await fixture.Db.RolesAplicacion.SingleAsync(r => r.Nombre == "Inquilino"),
+            IdEdificio = 1, Edificio = await fixture.Db.Edificios.SingleAsync()
+        };
+        fixture.Db.Users.Add(otro);
+        await fixture.Db.SaveChangesAsync();
+        Assert.Single(await fixture.Db.Publicaciones.ToListAsync());
+        var otroUsuario = await fixture.CrearController(otroId).GetPublicaciones(CancellationToken.None);
+        var publicacionesDeOtro = Assert.IsAssignableFrom<IEnumerable<PublicacionResponseDto>>(
+            Assert.IsType<OkObjectResult>(otroUsuario.Result).Value);
+        var publicacionDeOtro = Assert.Single(publicacionesDeOtro);
+        Assert.False(Assert.Single(publicacionDeOtro.Comments).IsMine);
+    }
+
+    [Fact]
+    public async Task Reaccion_persistida_devuelve_conteo_compartido_y_estado_individual()
+    {
+        await using var fixture = await Fixture.CrearAsync("Propietario", EstadoUsuario.Activo);
+        var controller = fixture.CrearController();
+        await controller.CrearPublicacion(
+            new CrearPublicacionRequest { Titulo = "Título", Tipo = "publicacion", Contenido = "Contenido" },
+            CancellationToken.None);
+        var publicacion = await fixture.Db.Publicaciones.SingleAsync();
+
+        var first = await controller.AlternarReaccion(publicacion.IdPublicacion,
+            new CrearReaccionRequest { Emoji = "👍" }, CancellationToken.None);
+        var reactionsA = Assert.IsType<OkObjectResult>(first.Result).Value as IReadOnlyList<ReaccionResponseDto>;
+        Assert.True(Assert.Single(reactionsA!).Reacted);
+        Assert.Equal(1, Assert.Single(reactionsA).Count);
+        Assert.Single(await fixture.Db.ReaccionesPublicacion.ToListAsync());
+
+        var otroId = $"otro-{Guid.NewGuid():N}";
+        fixture.Db.Users.Add(new Usuario
+        {
+            Id = otroId, UserName = otroId, Email = $"{otroId}@vecinapp.local", Nombre = "Otra",
+            Apellido = "Cuenta", Estado = EstadoUsuario.Activo, IdRol = 4,
+            Rol = await fixture.Db.RolesAplicacion.SingleAsync(r => r.Nombre == "Inquilino"),
+            IdEdificio = 1, Edificio = await fixture.Db.Edificios.SingleAsync()
+        });
+        await fixture.Db.SaveChangesAsync();
+
+        var controllerB = fixture.CrearController(otroId);
+        var feedB = await controllerB.GetPublicaciones(CancellationToken.None);
+        var publicationB = Assert.Single(Assert.IsAssignableFrom<IEnumerable<PublicacionResponseDto>>(
+            Assert.IsType<OkObjectResult>(feedB.Result).Value));
+        Assert.Equal(1, Assert.Single(publicationB.Reactions).Count);
+        Assert.False(Assert.Single(publicationB.Reactions).Reacted);
+
+        var second = await controllerB.AlternarReaccion(publicacion.IdPublicacion,
+            new CrearReaccionRequest { Emoji = "👍" }, CancellationToken.None);
+        var reactionsB = Assert.IsType<OkObjectResult>(second.Result).Value as IReadOnlyList<ReaccionResponseDto>;
+        Assert.Equal(2, Assert.Single(reactionsB!).Count);
+        Assert.True(Assert.Single(reactionsB).Reacted);
+    }
+
     [Theory]
     [InlineData("GET", "Propietario")]
     [InlineData("crear", "Inquilino")]
@@ -133,6 +215,7 @@ public sealed class PublicacionesControllerTests
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase($"Publicaciones-{Guid.NewGuid():N}")
+                .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
             var db = new AppDbContext(options);
             var fixture = new Fixture(db);
@@ -175,12 +258,12 @@ public sealed class PublicacionesControllerTests
             return fixture;
         }
 
-        public PublicacionesController CrearController()
+        public PublicacionesController CrearController(string? userId = null)
         {
             var httpContext = new DefaultHttpContext
             {
                 User = new ClaimsPrincipal(new ClaimsIdentity(
-                    new[] { new Claim(ClaimTypes.NameIdentifier, _userId) },
+                    new[] { new Claim(ClaimTypes.NameIdentifier, userId ?? _userId) },
                     authenticationType: "test"))
             };
 

@@ -43,10 +43,21 @@
           <div><span class="widget-kicker">ESPACIOS COMUNES</span><h2 id="reservations-title">Mis reservas</h2></div>
           <a class="widget-link" routerLink="/mis-reservas">Abrir módulo <span aria-hidden="true">↗</span></a>
         </header>
-        <div class="widget-empty">
-          <p>Las reservas todavía no están conectadas al backend.</p>
-          <span>El módulo actual guarda solicitudes localmente. Próximas reservas e historial necesitan endpoints persistentes.</span>
-        </div>
+        @if (reservationsLoading()) {
+          <p class="widget-state" role="status">Cargando tus reservas…</p>
+        } @else if (reservationsError()) {
+          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus reservas.</p>
+        } @else if (reservations(); as items) {
+          @if (items.length) {
+            <ul class="resident-list" aria-label="Mis reservas próximas">
+              @for (item of items.slice(0, 3); track item.id) {
+                <li><div class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.fecha | date:'dd/MM/yyyy' }} · {{ item.horaInicio }} · {{ item.estado }}</span></div></li>
+              }
+            </ul>
+          } @else {
+            <p class="widget-state">No tenés reservas registradas.</p>
+          }
+        }
         <a class="btn-action widget-action" routerLink="/mis-reservas">Ir a mis reservas</a>
       </section>
     </ng-template>
@@ -56,10 +67,22 @@
         <header class="widget-heading">
           <div><span class="widget-kicker">PORTERÍA</span><h2 id="packages-title">Paquetería</h2></div>
         </header>
-        <div class="widget-empty">
-          <p>Paquetes pendientes no disponibles</p>
-          <span>La pantalla actual usa datos locales; falta una consulta de paquetes para el residente.</span>
-        </div>
+        @if (packagesLoading()) {
+          <p class="widget-state" role="status">Cargando tus paquetes…</p>
+        } @else if (packagesError()) {
+          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus paquetes.</p>
+        } @else if (packages(); as items) {
+          <div class="incident-summary"><strong>{{ pendingPackageCount() }}</strong><span>pendientes</span></div>
+          @if (items.length) {
+            <ul class="resident-list" aria-label="Mis paquetes recientes">
+              @for (item of items.slice(0, 3); track item.id) {
+                <li><div class="list-copy"><strong>{{ item.remitente }}</strong><span>{{ item.identificacion }} · {{ item.estado }}</span></div></li>
+              }
+            </ul>
+          } @else {
+            <p class="widget-state">No tenés paquetes registrados.</p>
+          }
+        }
         <a class="widget-link" routerLink="/mis-paquetes">Abrir historial <span aria-hidden="true">↗</span></a>
       </section>
     </ng-template>
@@ -105,10 +128,29 @@
           <div><span class="widget-kicker">VIDA EN COMUNIDAD</span><h2 id="publications-title">Publicaciones</h2></div>
           <a class="widget-link" routerLink="/comunidad">Ver comunidad <span aria-hidden="true">↗</span></a>
         </header>
-        <div class="widget-empty">
-          <p>Avisos y encuestas viven en Publicaciones.</p>
-          <span>La API de publicaciones que consume Angular todavía no está disponible en el backend.</span>
-        </div>
+        @if (publicationsLoading()) {
+          <p class="widget-state" role="status">Cargando tus publicaciones e interacciones…</p>
+        } @else if (publicationsError()) {
+          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar las publicaciones de la comunidad.</p>
+        } @else {
+          <div class="incident-summary"><strong>{{ myPublications().length }}</strong><span>publicaciones propias · {{ myCommentCount() }} comentarios · {{ myReactionCount() }} reacciones</span></div>
+          @if (myPublications().length) {
+            <ul class="resident-list" aria-label="Mis publicaciones recientes">
+              @for (item of myPublications().slice(0, 3); track item.id) {
+                <li><div class="list-copy"><strong>{{ item.title || item.content }}</strong><span>{{ item.createdAt | date:'dd/MM/yyyy' }} · {{ item.type }}</span></div></li>
+              }
+            </ul>
+          } @else {
+            <p class="widget-state">Todavía no creaste publicaciones.</p>
+          }
+          @if (myRecentComments().length) {
+            <ul class="resident-list" aria-label="Mis comentarios recientes">
+              @for (comment of myRecentComments(); track comment.id) {
+                <li><div class="list-copy"><strong>{{ comment.publicationTitle }}</strong><span>{{ comment.content }} · {{ comment.createdAt | date:'dd/MM/yyyy' }}</span></div></li>
+              }
+            </ul>
+          }
+        }
         <a class="btn-action widget-action" routerLink="/comunidad">Abrir publicaciones</a>
       </section>
     </ng-template>
