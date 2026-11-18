@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { forkJoin } from 'rxjs';
+
 
 import { EstadoIncidencia, Incidencia as IncidenciaModel } from '../../models/incidencia';
 
@@ -12,11 +12,10 @@ import {
   DestinatarioDerivacionDto,
   EstadoIncidenciaDto,
   Incidencias,
-  UnidadDerivacionDto,
 } from '../../services/incidencias';
 import { AuthService } from '../../../../../core/services/auth';
-import { Inquilinos } from '../../../inquilinos/services/inquilinos';
-import { UsuarioComunidad } from '../../../inquilinos/models/usuario-comunidad';
+
+
 
 import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
 import { CardComponent } from '../../../../../shared/components/atoms/card/card.component';
@@ -43,8 +42,7 @@ import { EmptyState } from '../../../../../shared/components/molecules/empty-sta
   styleUrl: './incidencias-admin.scss',
 })
 export class IncidenciasAdmin implements OnInit {
-  private readonly incidenciasService = inject(Incidencias);
-  private readonly inquilinosService = inject(Inquilinos);
+  private readonly incidenciasService = inject(Incidencias)
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -54,6 +52,7 @@ export class IncidenciasAdmin implements OnInit {
   readonly pendientes = this.incidenciasService.totalPendientes;
   readonly enProceso = this.incidenciasService.totalEnProceso;
   readonly resueltas = this.incidenciasService.totalResueltas;
+  readonly cerradas = this.incidenciasService.totalCerradas;
 
   readonly busqueda = signal('');
   readonly estadoSeleccionado = signal('todos');
@@ -68,7 +67,6 @@ export class IncidenciasAdmin implements OnInit {
   readonly incidenciaSeleccionada = signal<IncidenciaModel | null>(null);
   readonly tipoDestinatario = signal<'Propietario' | 'Personal'>('Personal');
   readonly destinatarioSeleccionado = signal('');
-  readonly unidadRelacionada = signal<UnidadDerivacionDto | null>(null);
   readonly propietariosRelacionados = signal<DestinatarioDerivacionDto[]>([]);
   readonly personalDisponible = signal<DestinatarioDerivacionDto[]>([]);
   readonly cargandoDerivacion = signal(false);
@@ -76,8 +74,9 @@ export class IncidenciasAdmin implements OnInit {
   readonly errorDerivacion = signal('');
 
   readonly opcionesTipoDestinatario = computed<SelectOption[]>(() => [
-    ...(this.propietariosRelacionados().length
-      ? [{ label: 'Propietario relacionado', value: 'Propietario' }]
+    ...(this.incidenciaSeleccionada()?.idUnidad !== null &&
+      this.incidenciaSeleccionada()?.idUnidad !== undefined
+      ? [{ label: 'Propietario', value: 'Propietario' }]
       : []),
     { label: 'Personal del edificio', value: 'Personal' },
   ]);
@@ -223,50 +222,48 @@ export class IncidenciasAdmin implements OnInit {
     )?.nombre ?? estado;
   }
 
+
   abrirDerivacion(incidencia: IncidenciaModel): void {
     if (this.cargandoDerivacion() || this.guardandoDerivacion()) return;
 
+    const tipoInicial: 'Propietario' | 'Personal' =
+      incidencia.idUnidad != null ? 'Propietario' : 'Personal';
+
     this.incidenciaSeleccionada.set(incidencia);
     this.modalDerivacionAbierto.set(true);
-    this.tipoDestinatario.set('Personal');
+    this.tipoDestinatario.set(tipoInicial);
     this.destinatarioSeleccionado.set('');
-    this.unidadRelacionada.set(null);
     this.propietariosRelacionados.set([]);
     this.personalDisponible.set([]);
     this.errorDerivacion.set('');
     this.cargandoDerivacion.set(true);
 
-    forkJoin({
-      propietarios: this.incidenciasService.cargarDestinatarios('Propietario'),
-      personal: this.incidenciasService.cargarDestinatarios('Personal'),
-      unidades: this.incidenciasService.cargarUnidadesDerivacion(),
-      comunidad: this.inquilinosService.obtenerComunidad(),
-    })
+    this.incidenciasService.cargarDestinatarios(
+      incidencia.idIncidencia,
+      tipoInicial,
+    )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ propietarios, personal, unidades, comunidad }) => {
-          const unidadReportante = this.buscarUnidadReportante(incidencia, comunidad, unidades);
-          this.unidadRelacionada.set(unidadReportante);
-          this.personalDisponible.set(personal);
-
-          const propietariosRelacionados = unidadReportante
-            ? propietarios.filter(destinatario => destinatario.unidadesDeclaradas.some(declaracion =>
-                declaracion.tipo === 'Titularidad' &&
-                declaracion.alquilada === true &&
-                this.mismaUnidad(declaracion.piso, declaracion.unidad, unidadReportante.piso, unidadReportante.identificacion),
-              ))
-            : [];
-
-          this.propietariosRelacionados.set(propietariosRelacionados);
-          this.tipoDestinatario.set(propietariosRelacionados.length ? 'Propietario' : 'Personal');
+        next: destinatarios => {
+          if (tipoInicial === 'Propietario') {
+            this.propietariosRelacionados.set(destinatarios);
+          } else {
+            this.personalDisponible.set(destinatarios);
+          }
         },
         error: err => {
-          this.errorDerivacion.set(this.mensajeErrorBackend(err, 'No se pudieron cargar las unidades y destinatarios del edificio.'));
+          this.errorDerivacion.set(
+            this.mensajeErrorBackend(
+              err,
+              'No se pudieron cargar los destinatarios.',
+            ),
+          );
           this.cargandoDerivacion.set(false);
         },
         complete: () => this.cargandoDerivacion.set(false),
       });
   }
+
 
   cerrarModalDerivacion(): void {
     if (this.guardandoDerivacion()) return;
@@ -275,10 +272,50 @@ export class IncidenciasAdmin implements OnInit {
 
   cambiarTipoDestinatario(value: unknown): void {
     if (value !== 'Propietario' && value !== 'Personal') return;
+
+    const incidencia = this.incidenciaSeleccionada();
+    if (!incidencia) return;
+
+    if (
+      value === 'Propietario' &&
+      incidencia.idUnidad == null
+    ) {
+      this.errorDerivacion.set(
+        'Las incidencias de espacios comunes no se pueden derivar a propietarios.',
+      );
+      return;
+    }
+
     this.tipoDestinatario.set(value);
     this.destinatarioSeleccionado.set('');
-  }
+    this.errorDerivacion.set('');
+    this.cargandoDerivacion.set(true);
 
+    this.incidenciasService.cargarDestinatarios(
+      incidencia.idIncidencia,
+      value,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: destinatarios => {
+          if (value === 'Propietario') {
+            this.propietariosRelacionados.set(destinatarios);
+          } else {
+            this.personalDisponible.set(destinatarios);
+          }
+        },
+        error: err => {
+          this.errorDerivacion.set(
+            this.mensajeErrorBackend(
+              err,
+              'No se pudieron cargar los destinatarios.',
+            ),
+          );
+          this.cargandoDerivacion.set(false);
+        },
+        complete: () => this.cargandoDerivacion.set(false),
+      });
+  }
   seleccionarDestinatario(value: unknown): void {
     this.destinatarioSeleccionado.set(typeof value === 'string' ? value : '');
   }
@@ -287,59 +324,39 @@ export class IncidenciasAdmin implements OnInit {
     const incidencia = this.incidenciaSeleccionada();
     const tipoDestinatario = this.tipoDestinatario();
     const idUsuarioDestinatario = this.destinatarioSeleccionado();
-    const unidad = this.unidadRelacionada();
-    if (!incidencia || !idUsuarioDestinatario || this.guardandoDerivacion() ||
-        (tipoDestinatario === 'Propietario' && !unidad)) return;
+
+    if (
+      !incidencia ||
+      !idUsuarioDestinatario ||
+      this.guardandoDerivacion()
+    ) return;
 
     this.guardandoDerivacion.set(true);
     this.errorDerivacion.set('');
+
     this.incidenciasService.derivar(incidencia.idIncidencia, {
       idUsuarioDestinatario,
       tipoDestinatario,
-      ...(tipoDestinatario === 'Propietario' ? { idUnidad: unidad!.idUnidad } : {}),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.mensaje.set(`La incidencia #${incidencia.id} se derivó correctamente.`);
+          this.mensaje.set(
+            `La incidencia #${incidencia.id} se derivó correctamente.`,
+          );
           this.guardandoDerivacion.set(false);
           this.modalDerivacionAbierto.set(false);
         },
         error: err => {
-          this.errorDerivacion.set(this.mensajeErrorBackend(err, 'No se pudo registrar la derivación.'));
+          this.errorDerivacion.set(
+            this.mensajeErrorBackend(
+              err,
+              'No se pudo registrar la derivación.',
+            ),
+          );
           this.guardandoDerivacion.set(false);
         },
       });
-  }
-
-  private buscarUnidadReportante(
-    incidencia: IncidenciaModel,
-    comunidad: UsuarioComunidad[],
-    unidades: UnidadDerivacionDto[],
-  ): UnidadDerivacionDto | null {
-    const reportante = comunidad.find(usuario => usuario.id === incidencia.usuarioId);
-    if (!reportante) return null;
-
-    const unidadesDeclaradas = new Set<number>();
-    for (const declaracion of reportante.unidadesDeclaradas) {
-      const coincidencias = unidades.filter(unidad => this.mismaUnidad(
-        declaracion.pisoDeclarado,
-        declaracion.identificacionDeclarada,
-        unidad.piso,
-        unidad.identificacion,
-      ));
-      if (coincidencias.length === 1) unidadesDeclaradas.add(coincidencias[0].idUnidad);
-    }
-
-    if (unidadesDeclaradas.size !== 1) return null;
-    const idUnidad = [...unidadesDeclaradas][0];
-    return unidades.find(unidad => unidad.idUnidad === idUnidad) ?? null;
-  }
-
-  private mismaUnidad(pisoA: string | null, unidadA: string | null, pisoB: string | null, unidadB: string | null): boolean {
-    const normalizar = (value: string | null) => value?.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleUpperCase('es-AR') ?? '';
-    return !!normalizar(pisoA) && !!normalizar(unidadA) &&
-      normalizar(pisoA) === normalizar(pisoB) && normalizar(unidadA) === normalizar(unidadB);
   }
 
   private mensajeErrorBackend(error: unknown, fallback: string): string {

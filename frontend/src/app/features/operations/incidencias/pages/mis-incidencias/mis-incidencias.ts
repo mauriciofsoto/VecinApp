@@ -4,7 +4,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Incidencia } from '../../models/incidencia';
 import { Incidencias } from '../../services/incidencias';
-import { CategoriaIncidenciaDto } from '../../services/incidencias';
+import {
+  CategoriaIncidenciaDto,
+  UnidadDisponibleDto,
+} from '../../services/incidencias';
 
 import { CrearIncidencia, CrearIncidenciaPayload } from '../crear-incidencia/crear-incidencia';
 import { HistorialIncidencias } from '../../components/historial-incidencias/historial-incidencias';
@@ -39,6 +42,9 @@ export class MisIncidencias implements OnInit {
   readonly errorCarga = signal('');
   readonly categoriasError = signal('');
   readonly enviando = signal(false);
+  readonly unidadesDisponibles = signal<UnidadDisponibleDto[]>([]);
+  readonly cargandoUnidades = signal(true);
+  readonly unidadesError = signal('');
 
   protected readonly modalCrearAbierto = signal(false);
   protected readonly incidenciaSeleccionada = signal<Incidencia | null>(null);
@@ -48,12 +54,20 @@ export class MisIncidencias implements OnInit {
   constructor() {
     effect(() => {
       const session = this.authService.captureSession();
+
       this.cargando.set(!!session.userId);
       this.errorCarga.set('');
       this.incidenciaSeleccionada.set(null);
       this.modalConversacionAbierto.set(false);
       this.mensaje.set('');
-      if (session.userId) this.cargarIncidencias(session);
+
+      if (session.userId) {
+        this.cargarIncidencias(session);
+        this.cargarUnidades(session);
+      } else {
+        this.unidadesDisponibles.set([]);
+        this.cargandoUnidades.set(false);
+      }
     });
   }
 
@@ -86,7 +100,29 @@ export class MisIncidencias implements OnInit {
         },
       });
   }
+  private cargarUnidades(session = this.authService.captureSession()): void {
+    this.cargandoUnidades.set(true);
+    this.unidadesError.set('');
 
+    this.incidenciasService.cargarMisUnidades()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: unidades => {
+          if (!this.authService.isCurrentSession(session)) return;
+
+          this.unidadesDisponibles.set(unidades);
+          this.cargandoUnidades.set(false);
+        },
+        error: error => {
+          if (!this.authService.isCurrentSession(session)) return;
+
+          this.unidadesError.set(
+            this.mensajeError(error, 'No se pudieron cargar tus unidades.')
+          );
+          this.cargandoUnidades.set(false);
+        },
+      });
+  }
   reintentarCarga(): void {
     this.cargarIncidencias();
   }

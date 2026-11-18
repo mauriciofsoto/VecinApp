@@ -3,6 +3,9 @@ export type EstadoIncidencia = string;
 
 export interface Incidencia {
   id: number;
+  idUnidad: number | null;
+  piso?: string | null;
+  identificacion?: string | null;
   idIncidencia: number;
   idEstadoIncidencia: number;
   titulo: string;
@@ -20,6 +23,7 @@ export interface Incidencia {
   responsableNombre: string | null;
   responsable: string | null;
   reportante: string;
+  comentarioResolucion: string | null;
 }
 
 export interface DetalleIncidencia extends Incidencia {

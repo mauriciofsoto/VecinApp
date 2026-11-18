@@ -12,7 +12,7 @@ namespace VecinApp.Controllers;
 
 [ApiController]
 [Route("api/reservas")]
-[Authorize(Roles = "Administrador,Inquilino,Propietario")]
+[Authorize(Roles = "Administrador,Inquilino,Propietario,Portero")]
 public class ReservasController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -90,10 +90,10 @@ public class ReservasController : ControllerBase
     }
 
     // =========================================================================
-    // 1. GET /api/reservas (Administrador)
+    // 1. GET /api/reservas (Administrador y Portero)
     // =========================================================================
     [HttpGet]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Portero")]
     public async Task<IActionResult> ObtenerTodas(CancellationToken ct)
     {
         var (usuario, error) = await ObtenerUsuarioActualAsync();
@@ -654,6 +654,7 @@ public class ReservasController : ControllerBase
     // 9. POST /api/reservas/{id:int}/cancelar (Residente titular o Administrador)
     // =========================================================================
     [HttpPost("{id:int}/cancelar")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
     public async Task<IActionResult> CancelarReserva(int id, CancellationToken ct)
     {
         var (usuario, error) = await ObtenerUsuarioActualAsync();
@@ -706,6 +707,7 @@ public class ReservasController : ControllerBase
     // 10. GET /api/reservas/{id:int}/mensajes (Chat)
     // =========================================================================
     [HttpGet("{id:int}/mensajes")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
     public async Task<IActionResult> ObtenerMensajes(int id, CancellationToken ct)
     {
         var (usuario, error) = await ObtenerUsuarioActualAsync();
@@ -748,6 +750,7 @@ public class ReservasController : ControllerBase
     // 11. POST /api/reservas/{id:int}/mensajes (Chat)
     // =========================================================================
     [HttpPost("{id:int}/mensajes")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
     public async Task<IActionResult> EnviarMensaje(int id, [FromBody] CrearMensajeRequest request, CancellationToken ct)
     {
         var (usuario, error) = await ObtenerUsuarioActualAsync();

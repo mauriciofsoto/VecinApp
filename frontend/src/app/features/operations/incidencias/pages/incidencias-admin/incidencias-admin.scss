@@ -33,7 +33,7 @@
 
   &__resumen {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: $space-3;
 
     app-card {
@@ -230,6 +230,10 @@
     @include status-tint(var(--color-success), 0.12, 0.4);
   }
 
+  &[data-estado='cerrada'] {
+    @include status-tint(var(--color-success), 0.18, 0.5);
+  }
+
   &[data-estado='rechazada'] {
     @include status-tint(var(--color-danger), 0.12, 0.4);
   }
@@ -254,4 +258,23 @@
     }
   }
 
+}
+.incidencias-admin__contexto-derivacion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 8px;
+}
+
+.incidencias-admin__contexto-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #666);
+}
+
+.incidencias-admin__contexto-derivacion strong {
+  font-size: 1rem;
+  font-weight: 600;
 }

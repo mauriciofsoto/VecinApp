@@ -181,6 +181,12 @@ export class SidebarComponent {
           route: '/mis-reservas',
           roles: ['Inquilino', 'Propietario'],
         },
+        {
+          label: 'Reservas del edificio',
+          icon: '▦',
+          route: '/reservas-porteria',
+          roles: ['Portero'],
+        },
       ],
     },
     {

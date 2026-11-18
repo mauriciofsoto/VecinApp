@@ -10,7 +10,7 @@ namespace VecinApp.Controllers;
 
 [ApiController]
 [Route("api/espacios-comunes")]
-[Authorize(Roles = "Administrador,Inquilino,Propietario")]
+[Authorize(Roles = "Administrador,Inquilino,Propietario,Portero")]
 public class EspaciosComunesController : ControllerBase
 {
     private readonly AppDbContext _context;

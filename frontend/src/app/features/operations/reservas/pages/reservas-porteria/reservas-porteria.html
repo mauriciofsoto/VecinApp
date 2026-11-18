@@ -1,0 +1,97 @@
+<main class="operations-page reservas-module">
+  <header class="page-header">
+    <h1>Reservas del edificio</h1>
+    <p>
+      Consultá los espacios comunes reservados para coordinar su limpieza y
+      preparación.
+    </p>
+  </header>
+
+  @if (cargando()) {
+    <p class="form-feedback" role="status">Cargando reservas…</p>
+  } @else if (error()) {
+    <div class="item-card">
+      <p class="form-feedback form-feedback--error" role="alert">
+        {{ error() }}
+      </p>
+
+      <button type="button" class="secondary" (click)="cargar()">
+        Reintentar
+      </button>
+    </div>
+  } @else if (reservas().length === 0) {
+    <app-empty-state
+      title="No hay reservas registradas"
+      description="Cuando se reserve un espacio común, aparecerá acá."
+    />
+  } @else {
+    <section class="daily-reservations" aria-label="Reservas del edificio">
+      <header class="panel-header">
+        <div>
+          <h2>Reservas registradas</h2>
+          <p>Ordenadas por fecha y horario.</p>
+        </div>
+
+        <span class="reservation-count">
+          {{ reservas().length }}
+        </span>
+      </header>
+
+      @if (errorEspacios()) {
+        <p class="form-feedback">
+          No se pudieron cargar los nombres de los espacios.
+        </p>
+      }
+
+      @for (reserva of reservas(); track reserva.id) {
+        <article class="item-card">
+          <div class="reservation-information">
+            <div class="reservation-heading">
+              <h3>{{ reserva.titulo }}</h3>
+
+              <app-badge [variant]="varianteEstado(reserva.estado)">
+                {{ reserva.estado }}
+              </app-badge>
+            </div>
+
+            <div class="reservation-information__facts">
+              <p class="reservation-fact">
+                <span>Fecha</span>
+                <strong>{{ formatearFecha(reserva.fecha) }}</strong>
+              </p>
+
+              <p class="reservation-fact">
+                <span>Horario</span>
+                <strong>{{ reserva.horaInicio }} – {{ reserva.horaFin }}</strong>
+              </p>
+
+              <p class="reservation-fact">
+                <span>Espacio</span>
+                <strong>{{ nombreEspacio(reserva.espacioId) }}</strong>
+              </p>
+
+              <p class="reservation-fact">
+                <span>Solicitante</span>
+                <strong>{{ reserva.usuarioNombre }}</strong>
+              </p>
+
+              <p class="reservation-fact">
+                <span>Unidad</span>
+                <strong>{{ reserva.unidadNombre || 'Sin unidad asociada' }}</strong>
+              </p>
+
+              <p class="reservation-fact">
+                <span>Participantes</span>
+                <strong>{{ reserva.cantidadParticipantes }}</strong>
+              </p>
+            </div>
+
+            @if (reserva.descripcion) {
+              <p>{{ reserva.descripcion }}</p>
+            }
+          </div>
+        </article>
+      }
+    </section>
+  }
+</main>

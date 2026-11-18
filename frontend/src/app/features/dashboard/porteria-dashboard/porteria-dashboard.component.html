@@ -1,1 +1,209 @@
-<p>porteria-dashboard works!</p>
+<main class="porter-dashboard" aria-labelledby="dashboard-title">
+  <header class="dashboard-header">
+    <div>
+      <span class="dashboard-eyebrow">PORTERÍA</span>
+      <h1 id="dashboard-title">Hola, {{ userName() }}</h1>
+      <p>Turno de portería · {{ now() | date:'EEEE d MMMM y':'':'es-AR' }}</p>
+    </div>
+
+    <div class="dashboard-community" aria-label="Edificio asignado y hora local">
+      <span class="community-indicator" aria-hidden="true"></span>
+      <span>{{ edificioNombre() ?? 'Edificio asignado' }}</span>
+      <time [attr.datetime]="now().toISOString()">{{ now() | date:'HH:mm' }}</time>
+    </div>
+  </header>
+
+  <app-bento-grid [widgets]="widgets">
+    <ng-template bentoItem="summary">
+      <section class="dashboard-widget" aria-labelledby="summary-title">
+        <header class="widget-heading">
+          <div>
+            <span class="widget-kicker">TURNO DE HOY</span>
+            <h2 id="summary-title">Resumen del día</h2>
+          </div>
+          <span class="widget-icon" aria-hidden="true">◷</span>
+        </header>
+
+        @if (resumenLoading()) {
+          <p class="widget-state" role="status">Cargando datos del día…</p>
+        } @else {
+          <div class="porter-stats">
+            <div>
+              <strong>{{ paquetesPendientes().length }}</strong>
+              <span>Paquetes pendientes</span>
+            </div>
+            <div>
+              <strong>{{ entregasSinConfirmar().length }}</strong>
+              <span>Entregas sin confirmar</span>
+            </div>
+            <div>
+              <strong>{{ incidenciasActivas().length }}</strong>
+              <span>Incidencias activas</span>
+            </div>
+            <div>
+              <strong>{{ reservasHoy().length }}</strong>
+              <span>Reservas de hoy</span>
+            </div>
+          </div>
+
+          @if (resumenError()) {
+            <p class="widget-note widget-state--error" role="alert">
+              Algunos datos no se pudieron cargar.
+            </p>
+          }
+        }
+      </section>
+    </ng-template>
+
+    <ng-template bentoItem="quick-actions">
+      <section class="dashboard-widget" aria-labelledby="quick-actions-title">
+        <header class="widget-heading">
+          <div>
+            <span class="widget-kicker">ACCESOS</span>
+            <h2 id="quick-actions-title">Accesos rápidos</h2>
+          </div>
+        </header>
+
+        <nav class="quick-actions" aria-label="Accesos rápidos de portería">
+          <a class="btn-action quick-action primary" routerLink="/recepcion-paquetes">
+            Registrar paquete
+          </a>
+          <a class="btn-action quick-action" routerLink="/incidencias-derivadas">
+            Incidencias derivadas
+          </a>
+          <a class="btn-action quick-action" routerLink="/reservas-porteria">
+            Reservas del edificio
+          </a>
+        </nav>
+      </section>
+    </ng-template>
+
+    <ng-template bentoItem="packages">
+      <section class="dashboard-widget" aria-labelledby="packages-title">
+        <header class="widget-heading">
+          <div>
+            <span class="widget-kicker">PORTERÍA</span>
+            <h2 id="packages-title">Paquetes pendientes</h2>
+          </div>
+          <a class="widget-link" routerLink="/recepcion-paquetes">
+            Abrir recepción <span aria-hidden="true">↗</span>
+          </a>
+        </header>
+
+        @if (paquetesLoading()) {
+          <p class="widget-state" role="status">Cargando paquetes…</p>
+        } @else if (paquetesError()) {
+          <p class="widget-state widget-state--error" role="alert">
+            No se pudieron cargar los paquetes.
+          </p>
+        } @else if (paquetesPendientes().length === 0) {
+          <p class="widget-state">No hay paquetes pendientes de entrega.</p>
+        } @else {
+          <ul class="porter-list" aria-label="Paquetes pendientes de entrega">
+            @for (paquete of paquetesPendientesRecientes(); track paquete.id) {
+              <li>
+                <div class="list-copy">
+                  <strong>
+                    {{ paquete.nombreDestinatario }} {{ paquete.apellidoDestinatario }}
+                  </strong>
+                  <span>{{ paquete.remitente }} · {{ paquete.identificacion }}</span>
+                  <span>{{ paquete.fechaRecepcion | date:'dd/MM HH:mm' }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+
+        <a class="btn-action widget-action" routerLink="/recepcion-paquetes">
+          Registrar paquete
+        </a>
+      </section>
+    </ng-template>
+
+    <ng-template bentoItem="incidents">
+      <section class="dashboard-widget" aria-labelledby="incidents-title">
+        <header class="widget-heading">
+          <div>
+            <span class="widget-kicker">SERVICIOS</span>
+            <h2 id="incidents-title">Incidencias derivadas</h2>
+          </div>
+          <a class="widget-link" routerLink="/incidencias-derivadas">
+            Abrir bandeja <span aria-hidden="true">↗</span>
+          </a>
+        </header>
+
+        @if (incidenciasLoading()) {
+          <p class="widget-state" role="status">Cargando incidencias…</p>
+        } @else if (incidenciasError()) {
+          <p class="widget-state widget-state--error" role="alert">
+            No se pudieron cargar las incidencias derivadas.
+          </p>
+        } @else if (incidenciasActivas().length === 0) {
+          <p class="widget-state">No hay incidencias derivadas activas.</p>
+        } @else {
+          <ul class="porter-list" aria-label="Incidencias derivadas activas">
+            @for (item of incidenciasRecientes(); track item.idDerivacion) {
+              <li>
+                <div class="list-copy">
+                  <strong>{{ item.titulo }}</strong>
+                  <span>
+                    {{ item.ubicacion || item.unidad || 'Sin ubicación' }} · {{ item.prioridad }}
+                  </span>
+                  <span>{{ item.estado }} · {{ item.fechaCreacion | date:'dd/MM HH:mm' }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </ng-template>
+
+    <ng-template bentoItem="reservations">
+      <section class="dashboard-widget" aria-labelledby="reservations-title">
+        <header class="widget-heading">
+          <div>
+            <span class="widget-kicker">ESPACIOS COMUNES</span>
+            <h2 id="reservations-title">Reservas de hoy y próximas</h2>
+          </div>
+          <a class="widget-link" routerLink="/reservas-porteria">
+            Ver reservas <span aria-hidden="true">↗</span>
+          </a>
+        </header>
+
+        @if (reservasLoading()) {
+          <p class="widget-state" role="status">Cargando reservas…</p>
+        } @else if (reservasError()) {
+          <p class="widget-state widget-state--error" role="alert">
+            No se pudieron cargar las reservas.
+          </p>
+        } @else if (proximasReservas().length === 0) {
+          <p class="widget-state">No hay reservas próximas.</p>
+        } @else {
+          @if (espaciosError()) {
+            <p class="widget-note widget-state--error" role="alert">
+              No se pudieron cargar los nombres de los espacios.
+            </p>
+          }
+
+          <ul class="porter-list" aria-label="Reservas de hoy y próximas">
+            @for (reserva of proximasReservas(); track reserva.id) {
+              <li>
+                <div class="list-copy">
+                  <strong>{{ reserva.titulo }}</strong>
+                  <span>
+                    {{ nombreEspacio(reserva.espacioId) }} · {{ formatearFecha(reserva.fecha) }}
+                    · {{ reserva.horaInicio }}–{{ reserva.horaFin }}
+                  </span>
+                  <span>
+                    {{ reserva.usuarioNombre }} · {{ reserva.unidadNombre || 'Sin unidad' }}
+                    · {{ reserva.estado }}
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </ng-template>
+  </app-bento-grid>
+</main>

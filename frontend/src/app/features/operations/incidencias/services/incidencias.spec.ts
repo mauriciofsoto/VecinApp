@@ -49,6 +49,7 @@ describe('Incidencias', () => {
       categoria: 'Plomería',
       reportante: 'Ana Pérez',
       responsable: 'Luis Gómez',
+      comentarioResolucion: null,
     }]);
 
     expect(received?.[0]).toMatchObject({
@@ -85,6 +86,7 @@ describe('Incidencias', () => {
       categoria: 'Electricidad',
       reportante: 'Ana Pérez',
       responsable: null,
+      comentarioResolucion: null,
     }]);
 
     expect(received).toMatchObject([{ id: 21, estado: 'pendiente', ubicacion: 'Entrada' }]);

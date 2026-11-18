@@ -1,0 +1,149 @@
+@use '../../../../styles/abstracts' as *;
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.porter-dashboard {
+  @include flex-col($space-6);
+  min-width: 0;
+  padding-bottom: $space-6;
+}
+
+.dashboard-header {
+  @include flex-row($space-5);
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  h1 { @include text-title; margin: $space-2 0; color: var(--color-text-primary); }
+  p { @include text-body; margin: 0; color: var(--color-text-muted); text-transform: capitalize; }
+}
+
+.dashboard-eyebrow,
+.widget-kicker {
+  color: var(--color-accent);
+  font-size: var(--font-size-tiny);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.1em;
+}
+
+.dashboard-community {
+  @include flex-row($space-2);
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 $space-3;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-control;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+
+  time {
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+.community-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+
+.dashboard-widget {
+  @include flex-col($space-3);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: $space-5;
+
+  h2 { @include text-heading; margin: 0; color: var(--color-text-primary); }
+}
+
+.widget-heading {
+  @include flex-row($space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.widget-heading > div { @include flex-col($space-1); min-width: 0; }
+.widget-link {
+  color: var(--color-accent);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.widget-link:hover { color: var(--color-text-primary); }
+.widget-link:focus-visible,
+.quick-action:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: $radius-sm; }
+.widget-icon { color: var(--color-accent); font-size: var(--font-size-heading); }
+.widget-note,
+.widget-state { margin: 0; color: var(--color-text-muted); font-size: var(--font-size-small); line-height: 1.5; }
+.widget-state--error { color: var(--color-danger-text); }
+
+.porter-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: $space-2;
+}
+
+.porter-stats > div {
+  @include flex-col($space-1);
+  min-width: 0;
+  padding: $space-2 $space-3;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-sm;
+  background: var(--color-surface);
+}
+
+.porter-stats strong { color: var(--color-text-primary); font-size: var(--font-size-heading); }
+.porter-stats span { color: var(--color-text-muted); font-size: var(--font-size-caption); }
+
+.porter-list {
+  @include flex-col(0);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+
+  li { min-width: 0; padding: $space-3 0; border-top: 1px solid var(--color-border); }
+  li:first-child { padding-top: 0; border-top: 0; }
+}
+
+.list-copy { @include flex-col($space-1); min-width: 0; }
+.list-copy strong,
+.list-copy > span { overflow: hidden; text-overflow: ellipsis; }
+.list-copy strong { color: var(--color-text-primary); font-size: var(--font-size-small); }
+.list-copy > span { color: var(--color-text-muted); font-size: var(--font-size-caption); }
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+}
+
+.quick-action { min-height: 2.75rem; }
+.widget-action { align-self: flex-start; margin-top: auto; }
+.btn-action { text-decoration: none; }
+
+@include tablet {
+  .dashboard-widget { padding: $space-4; }
+}
+
+@include mobile {
+  .porter-dashboard { gap: $space-4; }
+  .dashboard-header { align-items: flex-start; }
+  .dashboard-header h1 { font-size: var(--font-size-title); }
+  .dashboard-community { width: 100%; }
+  .porter-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quick-actions { display: grid; grid-template-columns: 1fr; }
+  .quick-action { justify-content: flex-start; }
+}

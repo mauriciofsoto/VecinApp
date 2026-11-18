@@ -7,6 +7,8 @@ public class Incidencia
 
     public int IdEdificio { get; set; }
 
+    public int? IdUnidad { get; set; }
+
     public string IdUsuarioReportante { get; set; } = string.Empty;
 
     public string? IdUsuarioResponsable { get; set; }
@@ -23,10 +25,14 @@ public class Incidencia
 
     public string Prioridad { get; set; } = string.Empty;
 
+    public string? ComentarioResolucion { get; set; }
+
     public DateTime FechaCreacion { get; set; }
 
     // Relaciones
     public Edificio Edificio { get; set; } = null!;
+
+    public Unidad? Unidad { get; set; }
 
     public Usuario UsuarioReportante { get; set; } = null!;
 

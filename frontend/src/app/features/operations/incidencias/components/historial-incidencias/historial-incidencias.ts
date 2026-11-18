@@ -31,6 +31,7 @@ export class HistorialIncidencias {
     { label: 'Pendientes', value: 'pendiente' },
     { label: 'En proceso', value: 'en-proceso' },
     { label: 'Resueltas', value: 'resuelta' },
+    { label: 'Cerradas', value: 'cerrada' },
     { label: 'Rechazadas', value: 'rechazada' },
   ];
 
@@ -69,6 +70,7 @@ export class HistorialIncidencias {
       pendiente: 'Pendiente',
       'en-proceso': 'En proceso',
       resuelta: 'Resuelta',
+      cerrada: 'Cerrada',
       rechazada: 'Rechazada',
     };
 

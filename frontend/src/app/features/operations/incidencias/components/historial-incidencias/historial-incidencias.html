@@ -52,13 +52,29 @@
           <div class="incidencia-item__metadatos">
             <span>📁 {{ incidencia.categoria }}</span>
             <span>📍 {{ incidencia.ubicacion }}</span>
+            @if (incidencia.idUnidad !== null && incidencia.idUnidad !== undefined) {
+            <span>
+              🏢 Unidad: {{ incidencia.piso }}° {{ incidencia.identificacion }}
+            </span>
+            } @else {
+            <span>
+              🏢 Espacios comunes
+            </span>
+            }
             <span>📅 {{ incidencia.fechaCreacion | date:'dd/MM/yyyy' }}</span>
             <span>Prioridad: {{ incidencia.prioridad }}</span>
 
             @if (mostrarReportante()) {
-              <span>Reportado por: {{ incidencia.usuarioNombre }}</span>
+            <span>Reportado por: {{ incidencia.usuarioNombre }}</span>
             }
           </div>
+
+          @if (incidencia.comentarioResolucion) {
+            <div class="incidencia-item__resolucion">
+              <strong>Resolución informada</strong>
+              <p>{{ incidencia.comentarioResolucion }}</p>
+            </div>
+          }
 
           <div class="incidencia-item__acciones">
             <button

@@ -137,6 +137,34 @@
     }
   }
 
+  &__categoria {
+    display: block;
+    margin-top: $space-1;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+  }
+
+  &__acciones {
+    white-space: nowrap;
+  }
+
+  &__accion {
+    color: var(--color-accent);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 3px;
+      border-radius: $radius-sm;
+    }
+  }
+
   &__estado {
     display: inline-flex;
     align-items: center;
@@ -170,6 +198,14 @@
 
     &--gestion[data-estado='resuelta'] {
       @include status-tint(var(--color-success), 0.12, 0.4);
+    }
+
+    &--gestion[data-estado='cerrada'] {
+      @include status-tint(var(--color-success), 0.18, 0.5);
+    }
+
+    &--gestion[data-estado='rechazada'] {
+      @include status-tint(var(--color-danger), 0.12, 0.4);
     }
   }
 

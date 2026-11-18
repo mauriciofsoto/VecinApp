@@ -10,39 +10,39 @@
       </p>
     </div>
 
-    <app-button
-      variant="primary"
-      (buttonClick)="abrirFormulario()"
-      [disabled]="cargandoCategorias() || !categorias().length"
-    >
+    <app-button variant="primary"
+                (buttonClick)="abrirFormulario()"
+                [disabled]="cargandoCategorias() || cargandoUnidades() || !categorias().length">
       + Nueva incidencia
     </app-button>
   </header>
 
   @if (categoriasError()) {
-    <p class="mis-incidencias__mensaje" role="alert">{{ categoriasError() }}</p>
+  <p class="mis-incidencias__mensaje" role="alert">{{ categoriasError() }}</p>
   } @else if (!cargandoCategorias() && !categorias().length) {
-    <p class="mis-incidencias__mensaje" role="status">No hay categorías disponibles para crear incidencias.</p>
+  <p class="mis-incidencias__mensaje" role="status">No hay categorías disponibles para crear incidencias.</p>
   }
-
+  @if (unidadesError()) {
+  <p class="mis-incidencias__mensaje" role="alert">
+    {{ unidadesError() }}
+  </p>
+  }
   @if (mensaje()) {
-    <p class="mis-incidencias__mensaje" role="status">
-      {{ mensaje() }}
-    </p>
+  <p class="mis-incidencias__mensaje" role="status">
+    {{ mensaje() }}
+  </p>
   }
 
   @if (cargando()) {
-    <p class="mis-incidencias__mensaje" role="status">Cargando incidencias…</p>
+  <p class="mis-incidencias__mensaje" role="status">Cargando incidencias…</p>
   } @else if (errorCarga()) {
-    <div class="mis-incidencias__mensaje" role="alert">
-      <p>{{ errorCarga() }}</p>
-      <app-button variant="secondary" (buttonClick)="reintentarCarga()">Reintentar</app-button>
-    </div>
+  <div class="mis-incidencias__mensaje" role="alert">
+    <p>{{ errorCarga() }}</p>
+    <app-button variant="secondary" (buttonClick)="reintentarCarga()">Reintentar</app-button>
+  </div>
   } @else {
-    <app-historial-incidencias
-      [incidencias]="incidencias()"
-      (abrirConversacion)="abrirConversacion($event)"
-    />
+  <app-historial-incidencias [incidencias]="incidencias()"
+                             (abrirConversacion)="abrirConversacion($event)" />
   }
 
 </section>
@@ -53,11 +53,10 @@
   heading="Nueva incidencia"
   size="lg"
 >
-  <app-crear-incidencia
-    [categoriasDisponibles]="categorias()"
-    [enviando]="enviando()"
-    (guardar)="guardarIncidencia($event)"
-  />
+  <app-crear-incidencia [categoriasDisponibles]="categorias()"
+                        [unidadesDisponibles]="unidadesDisponibles()"
+                        [enviando]="enviando()"
+                        (guardar)="guardarIncidencia($event)" />
 </app-modal>
 
 <!-- Modal de conversación -->

@@ -680,6 +680,11 @@ namespace VecinApp.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdIncidencia"));
 
+                    b.Property<string>("ComentarioResolucion")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("comentario_resolucion");
+
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("text")
@@ -700,6 +705,10 @@ namespace VecinApp.Migrations
                     b.Property<int>("IdEstadoIncidencia")
                         .HasColumnType("integer")
                         .HasColumnName("id_estado_incidencia");
+
+                    b.Property<int?>("IdUnidad")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_unidad");
 
                     b.Property<string>("IdUsuarioReportante")
                         .IsRequired()
@@ -732,6 +741,8 @@ namespace VecinApp.Migrations
                     b.HasIndex("IdEdificio");
 
                     b.HasIndex("IdEstadoIncidencia");
+
+                    b.HasIndex("IdUnidad");
 
                     b.HasIndex("IdUsuarioReportante");
 
@@ -1693,18 +1704,21 @@ namespace VecinApp.Migrations
 
                     b.Property<string>("IdUsuario")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("IdUsuario");
 
                     b.Property<string>("TipoRelacion")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
                         .HasColumnName("tipo_relacion");
 
                     b.HasKey("IdUsuarioUnidad");
 
                     b.HasIndex("IdUnidad");
 
-                    b.HasIndex("IdUsuario");
+                    b.HasIndex("IdUsuario", "IdUnidad", "TipoRelacion")
+                        .IsUnique();
 
                     b.ToTable("usuario_unidad", (string)null);
                 });
@@ -1938,6 +1952,11 @@ namespace VecinApp.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("VecinApp.Models.Unidad", "Unidad")
+                        .WithMany()
+                        .HasForeignKey("IdUnidad")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("VecinApp.Models.Usuario", "UsuarioReportante")
                         .WithMany()
                         .HasForeignKey("IdUsuarioReportante")
@@ -1954,6 +1973,8 @@ namespace VecinApp.Migrations
                     b.Navigation("Edificio");
 
                     b.Navigation("EstadoIncidencia");
+
+                    b.Navigation("Unidad");
 
                     b.Navigation("UsuarioReportante");
 

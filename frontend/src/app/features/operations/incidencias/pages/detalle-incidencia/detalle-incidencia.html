@@ -1,6 +1,6 @@
 <div class="pagina-incidencia">
 
-  <a routerLink="/administrador/incidencias" class="volver">
+  <a [routerLink]="volverUrl" class="volver">
     ← Volver a incidencias
   </a>
 
@@ -25,7 +25,7 @@
         </p>
       </div>
 
-      <span class="estado">
+      <span class="estado" [attr.data-estado]="estadoActual">
         {{ incidencia.estado }}
       </span>
     </header>
@@ -67,111 +67,200 @@
       <section class="tarjeta gestion">
         <h2>Gestionar incidencia</h2>
 
-        <p>
-          Seleccioná el estado que corresponda y guardá el cambio.
-        </p>
+        @if (esAdministrador) {
+          <p>
+            Seleccioná el estado que corresponda y guardá el cambio.
+          </p>
 
-        <label for="estado">Estado de la incidencia</label>
+          <label for="estado">Estado de la incidencia</label>
 
-        <select id="estado"
-                name="estado"
-                [(ngModel)]="estadoSeleccionado"
-                [disabled]="guardando">
+          <select id="estado"
+                  name="estado"
+                  [(ngModel)]="estadoSeleccionado"
+                  [disabled]="guardando">
 
-          <option *ngFor="let estado of estados"
-                  [ngValue]="estado.idEstadoIncidencia">
-            {{ estado.nombre }}
-          </option>
-        </select>
+            <option *ngFor="let estado of estados"
+                    [ngValue]="estado.idEstadoIncidencia">
+              {{ estado.nombre }}
+            </option>
+          </select>
 
-        <button type="button"
-                (click)="guardarEstado()"
-                [disabled]="guardando || estadoSeleccionado === incidencia.idEstadoIncidencia">
+          <button type="button"
+                  (click)="guardarEstado()"
+                  [disabled]="guardando || estadoSeleccionado === incidencia.idEstadoIncidencia">
 
-          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
+            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
 
-        <div class="gestion__derivar">
-          <p>Derivá esta incidencia a un propietario o asignala a Personal.</p>
-          <button type="button" class="boton-derivar" (click)="abrirDerivacion()">Derivar incidencia</button>
-        </div>
+          @if (puedeAprobarCierre) {
+            <div class="aprobacion-cierre">
+              <p>El personal marcó esta incidencia como resuelta. Revisá el comentario de resolución antes de aprobar el cierre.</p>
+              <button type="button" (click)="aprobarCierre()" [disabled]="guardando">
+                {{ guardando ? 'Cerrando...' : 'Aprobar y cerrar incidencia' }}
+              </button>
+            </div>
+          }
 
-        <p *ngIf="mensaje" class="alerta exito">
-          {{ mensaje }}
-        </p>
+          @if (incidencia.comentarioResolucion) {
+            <div class="resolucion-informada">
+              <h3>Resolución informada por el personal</h3>
+              <p>{{ incidencia.comentarioResolucion }}</p>
+            </div>
+          }
 
-        <p *ngIf="error" class="alerta error">
-          {{ error }}
-        </p>
+          <div class="gestion__derivar">
+            <p>Derivá esta incidencia a un propietario o asignala a Personal.</p>
+            <button type="button" class="boton-derivar" (click)="abrirDerivacion()">Derivar incidencia</button>
+          </div>
+
+          <p *ngIf="mensaje" class="alerta exito">
+            {{ mensaje }}
+          </p>
+
+          <p *ngIf="error" class="alerta error">
+            {{ error }}
+          </p>
+        } @else if (esPortero) {
+          <p>
+            Actualizá el avance de la incidencia. El cierre final lo aprueba Administración.
+          </p>
+
+          @if (puedeIniciarGestion) {
+            <button type="button" (click)="iniciarGestion()" [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Iniciar gestión' }}
+            </button>
+          }
+
+          @if (puedeMarcarResuelta) {
+            <div class="comentario-resolucion">
+              <h3>Comentario de resolución</h3>
+              <p>
+                Obligatorio. Administración lo verá al revisar el cierre; el residente
+                lo verá recién cuando se apruebe la incidencia.
+              </p>
+
+              <textarea
+                id="comentario-resolucion"
+                [(ngModel)]="comentarioResolucion"
+                rows="4"
+                maxlength="2000"
+                placeholder="Detallá qué se hizo para resolver la incidencia."
+                [disabled]="guardando"
+              ></textarea>
+
+              <button
+                type="button"
+                (click)="marcarResuelta()"
+                [disabled]="guardando || !comentarioResolucion.trim()"
+              >
+                {{ guardando ? 'Guardando...' : 'Marcar como resuelta' }}
+              </button>
+            </div>
+          }
+
+          @if ((estadoActual === 'resuelta' || estadoActual === 'cerrada') && incidencia.comentarioResolucion) {
+            <div class="resolucion-informada">
+              <h3>Comentario de resolución</h3>
+              <p>{{ incidencia.comentarioResolucion }}</p>
+              @if (estadoActual === 'resuelta') {
+                <small>Visible para el residente cuando Administración apruebe el cierre.</small>
+              }
+            </div>
+          }
+
+          @if (estadoActual === 'resuelta') {
+            <p class="alerta info">La incidencia quedó pendiente de aprobación por Administración.</p>
+          }
+
+          @if (estadoActual === 'cerrada') {
+            <p class="alerta exito">Administración aprobó el cierre de esta incidencia.</p>
+          }
+
+          @if (estadoActual === 'rechazada') {
+            <p class="alerta error">Administración rechazó esta incidencia.</p>
+          }
+
+          <p *ngIf="mensaje" class="alerta exito">
+            {{ mensaje }}
+          </p>
+
+          <p *ngIf="error" class="alerta error">
+            {{ error }}
+          </p>
+
+        }
       </section>
 
     </div>
 
-    <section class="tarjeta conversacion" aria-label="Conversación de la incidencia">
-      <app-chat-incidencia
-        [incidencia]="incidencia"
-        rolVista="administrador"
-      />
-    </section>
+    @if (esAdministrador) {
+      <section class="tarjeta conversacion" aria-label="Conversación de la incidencia">
+        <app-chat-incidencia
+          [incidencia]="incidencia"
+          rolVista="administrador"
+        />
+      </section>
+    }
 
-    <dialog
-      #modalDerivacion
-      class="modal-derivacion"
-      data-size="lg"
-      aria-labelledby="titulo-derivacion"
-    >
-      <div class="modal-panel">
-        <header class="modal-header">
-          <h2 class="modal-title" id="titulo-derivacion">Derivar incidencia</h2>
-        </header>
+    @if (esAdministrador) {
+      <dialog
+        #modalDerivacion
+        class="modal-derivacion"
+        data-size="lg"
+        aria-labelledby="titulo-derivacion"
+      >
+        <div class="modal-panel">
+          <header class="modal-header">
+            <h2 class="modal-title" id="titulo-derivacion">Derivar incidencia</h2>
+          </header>
 
-        <div class="modal-body">
-          <p>Elegí el tipo y destinatario. La incidencia y su historial se conservan.</p>
-          <label for="tipo-destinatario">Tipo de destinatario</label>
-          <select id="tipo-destinatario" [ngModel]="tipoDestinatario" (ngModelChange)="cambiarTipoDestinatario($event)">
-            <option value="Propietario">Propietario</option>
-            <option value="Personal">Personal</option>
-          </select>
-          @if (tipoDestinatario === 'Propietario') {
-            <label for="unidad-destino">Unidad relacionada</label>
-            <select id="unidad-destino" [(ngModel)]="unidadId">
-              <option [ngValue]="null">Seleccioná piso y unidad</option>
-              @for (unidad of unidades; track unidad.idUnidad) {
-                <option [ngValue]="unidad.idUnidad">Piso {{ unidad.piso }}, unidad {{ unidad.identificacion }}</option>
-              }
-            </select>
-          }
-          <label for="destinatario">{{ tipoDestinatario === 'Personal' ? 'Personal destinatario' : 'Propietario destinatario' }}</label>
-          <select id="destinatario" [(ngModel)]="destinatarioId">
-            <option value="">Seleccioná un usuario activo del edificio</option>
-            @for (destinatario of destinatarios; track destinatario.id) {
-              <option [value]="destinatario.id">
-                {{ destinatario.nombre }} {{ destinatario.apellido }}
-                @if (tipoDestinatario === 'Propietario' && destinatario.unidadesDeclaradas.length) {
-                  — Unidades declaradas: {{ destinatario.unidadesDeclaradas.length }}
-                }
-              </option>
-            }
-          </select>
-          @if (tipoDestinatario === 'Propietario' && destinatarioId) {
-            @if (destinatarioSeleccionado?.perfilRegistro) { <p>Perfil comunitario declarado: {{ destinatarioSeleccionado?.perfilRegistro }}</p> }
-            @if (destinatarioSeleccionado?.declaraUnidadesAlquiladas) { <p>El perfil declaró tener unidades alquiladas.</p> }
-            <p>Las unidades declaradas son informativas y pueden estar pendientes de verificación. Confirmá manualmente la correspondencia con la unidad antes de derivar.</p>
-            @for (declaracion of destinatarioSeleccionado?.unidadesDeclaradas ?? []; track $index) {
-              <p>Declaración: piso {{ declaracion.piso || 'sin dato' }}, unidad {{ declaracion.unidad || 'sin dato' }} · {{ declaracion.estado }} ({{ declaracion.tipo }})</p>
-            }
-          }
-          @if (error) { <p class="alerta error" role="alert">{{ error }}</p> }
-        </div>
+<div class="modal-body">
+  <p>Elegí el tipo y destinatario. La incidencia y su historial se conservan.</p>
 
-        <footer class="modal-footer">
-          <button type="button" class="boton-secundario" (click)="cerrarDerivacion()">Cancelar</button>
-          <button type="button" class="boton-principal" (click)="confirmarDerivacion()" [disabled]="guardandoDerivacion || !destinatarioId || (tipoDestinatario === 'Propietario' && !unidadId)">
-            {{ guardandoDerivacion ? 'Registrando…' : 'Confirmar derivación' }}
-          </button>
-        </footer>
-      </div>
-    </dialog>
+  <label for="tipo-destinatario">Tipo de destinatario</label>
+  <select
+    id="tipo-destinatario"
+    [ngModel]="tipoDestinatario"
+    (ngModelChange)="cambiarTipoDestinatario($event)"
+  >
+    @if (incidencia.idUnidad != null) {
+      <option value="Propietario">Propietario</option>
+    }
+    <option value="Personal">Personal</option>
+  </select>
+
+  <label for="destinatario">
+    {{ tipoDestinatario === 'Personal' ? 'Personal destinatario' : 'Propietario destinatario' }}
+  </label>
+
+  <select id="destinatario" [(ngModel)]="destinatarioId">
+    <option value="">Seleccioná un usuario activo del edificio</option>
+    @for (destinatario of destinatarios; track destinatario.id) {
+      <option [value]="destinatario.id">
+        {{ destinatario.nombre }} {{ destinatario.apellido }}
+      </option>
+    }
+  </select>
+
+  @if (error) {
+    <p class="alerta error" role="alert">{{ error }}</p>
+  }
+</div>
+
+<footer class="modal-footer">
+  <button type="button" class="boton-secundario" (click)="cerrarDerivacion()">
+    Cancelar
+  </button>
+
+  <button
+    type="button"
+    class="boton-principal"
+    (click)="confirmarDerivacion()"
+    [disabled]="guardandoDerivacion || !destinatarioId"
+  >
+    {{ guardandoDerivacion ? 'Registrando…' : 'Confirmar derivación' }}
+  </button>
+</footer>
   </ng-container>
 
 </div>

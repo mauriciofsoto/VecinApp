@@ -216,6 +216,14 @@ export const routes: Routes = [
             .then(m => m.IncidenciasDerivadas),
       },
       {
+        path: 'incidencias-derivadas/:id',
+        canActivate: [roleGuard],
+        data: { roles: ['Portero'] },
+        loadComponent: () =>
+          import('./features/operations/incidencias/pages/detalle-incidencia/detalle-incidencia')
+            .then(m => m.DetalleIncidenciaComponent),
+      },
+      {
         path: 'incidencias/crear',
         canActivate: [roleGuard],
         data: { roles: RESIDENT_ROLES },
@@ -284,6 +292,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/operations/reservas/pages/mis-reservas/mis-reservas')
             .then(m => m.MisReservas),
+      },
+      {
+        path: 'reservas-porteria',
+        canActivate: [roleGuard],
+        data: { roles: ['Portero'] },
+        loadComponent: () =>
+          import('./features/operations/reservas/pages/reservas-porteria/reservas-porteria')
+            .then(m => m.ReservasPorteria),
       },
     ],
   },

@@ -13,15 +13,19 @@ export interface CategoriaIncidenciaDto {
   idCategoriaIncidencia: number;
   nombre: string;
 }
-
+export interface UnidadDisponibleDto {
+  idUnidad: number;
+  piso: string;
+  identificacion: string;
+}
 export interface CrearIncidenciaRequest {
   idCategoriaIncidencia: number;
+  idUnidad: number | null;
   titulo: string;
   descripcion: string;
   ubicacion: string;
   prioridad: 'baja' | 'media' | 'alta';
 }
-
 export interface IncidenciaDashboardDto {
   idIncidencia: number;
   titulo: string;
@@ -32,6 +36,7 @@ export interface IncidenciaDashboardDto {
 
 export interface DerivacionIncidenciaDto {
   idDerivacion: number;
+  idIncidencia: number;
   tipoDestinatario: 'Propietario' | 'Personal';
   fechaDerivacion: string;
   administrador: string;
@@ -39,6 +44,9 @@ export interface DerivacionIncidenciaDto {
   descripcion: string;
   fechaCreacion: string;
   estado: string;
+  prioridad: string;
+  categoria: string;
+  reportante: string;
   ubicacion: string | null;
   unidad: string | null;
 }
@@ -47,19 +55,14 @@ export interface DestinatarioDerivacionDto {
   id: string;
   nombre: string;
   apellido: string;
-  perfilRegistro: string | null;
-  declaraUnidadesAlquiladas: boolean | null;
-  unidadesDeclaradas: { piso: string | null; unidad: string | null; estado: string; tipo: string; alquilada: boolean | null }[];
 }
 
-export interface UnidadDerivacionDto {
-  idUnidad: number;
-  piso: string;
-  identificacion: string;
-}
 
 interface IncidenciaApiDto {
   idIncidencia: number;
+  idUnidad: number | null;
+  piso: string | null;
+  identificacion: string | null;
   idEstadoIncidencia: number;
   idCategoriaIncidencia: number;
   idUsuarioReportante: string;
@@ -73,6 +76,7 @@ interface IncidenciaApiDto {
   categoria: string;
   reportante: string;
   responsable: string | null;
+  comentarioResolucion: string | null;
 }
 
 interface MensajeIncidenciaApiDto {
@@ -113,6 +117,7 @@ export class Incidencias {
   readonly totalPendientes = computed(() => this.countByState('pendiente'));
   readonly totalEnProceso = computed(() => this.countByState('en-proceso'));
   readonly totalResueltas = computed(() => this.countByState('resuelta'));
+  readonly totalCerradas = computed(() => this.countByState('cerrada'));
 
   constructor() {
     effect(() => {
@@ -128,7 +133,9 @@ export class Incidencias {
   cargarParaDashboard(): Observable<IncidenciaDashboardDto[]> {
     return this.http.get<IncidenciaDashboardDto[]>(this.apiUrl);
   }
-
+  cargarMisUnidades(): Observable<UnidadDisponibleDto[]> {
+    return this.http.get<UnidadDisponibleDto[]>(`${this.apiUrl}/mis-unidades`);
+  }
   cargarAdmin(): Observable<Incidencia[]> {
     const session = this.auth.captureSession();
     return this.http.get<IncidenciaApiDto[]>(this.apiUrl).pipe(
@@ -157,15 +164,23 @@ export class Incidencias {
     return this.http.get<DerivacionIncidenciaDto[]>(`${this.apiUrl}/derivadas`);
   }
 
-  cargarDestinatarios(tipo: 'Propietario' | 'Personal'): Observable<DestinatarioDerivacionDto[]> {
-    return this.http.get<DestinatarioDerivacionDto[]>(`${this.apiUrl}/derivaciones/destinatarios`, { params: { tipo } });
+  cargarDestinatarios(
+    idIncidencia: number,
+    tipo: 'Propietario' | 'Personal',
+  ): Observable<DestinatarioDerivacionDto[]> {
+    return this.http.get<DestinatarioDerivacionDto[]>(
+      `${this.apiUrl}/${idIncidencia}/derivaciones/destinatarios`,
+      { params: { tipo } },
+    );
   }
 
-  cargarUnidadesDerivacion(): Observable<UnidadDerivacionDto[]> {
-    return this.http.get<UnidadDerivacionDto[]>(`${this.apiUrl}/derivaciones/unidades`);
-  }
-
-  derivar(id: number, request: { idUsuarioDestinatario: string; tipoDestinatario: 'Propietario' | 'Personal'; idUnidad?: number }): Observable<unknown> {
+  derivar(
+    id: number,
+    request: {
+      idUsuarioDestinatario: string;
+      tipoDestinatario: 'Propietario' | 'Personal';
+    },
+  ): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/${id}/derivaciones`, request);
   }
 
@@ -183,11 +198,13 @@ export class Incidencias {
     );
   }
 
-  cambiarEstado(id: number, value: number | { idEstadoIncidencia: number }): Observable<CambiarEstadoResponse> {
+  cambiarEstado(id: number, value: number | { idEstadoIncidencia: number; comentarioResolucion?: string }): Observable<CambiarEstadoResponse> {
     const session = this.auth.captureSession();
     const idEstadoIncidencia = typeof value === 'number' ? value : value.idEstadoIncidencia;
+    const comentarioResolucion = typeof value === 'number' ? undefined : value.comentarioResolucion;
     return this.http.put<CambiarEstadoResponse>(`${this.apiUrl}/${id}/estado`, {
       idEstadoIncidencia,
+      comentarioResolucion,
     }).pipe(
       tap(response => {
         if (!this.auth.isCurrentSession(session)) return;
@@ -226,6 +243,9 @@ export class Incidencias {
       id: item.idIncidencia,
       idIncidencia: item.idIncidencia,
       idEstadoIncidencia: item.idEstadoIncidencia,
+      idUnidad: item.idUnidad ?? null,
+      piso: item.piso ?? null,
+      identificacion: item.identificacion ?? null,
       titulo: item.titulo,
       descripcion: item.descripcion,
       categoria: item.categoria,
@@ -240,6 +260,7 @@ export class Incidencias {
       responsableNombre: item.responsable,
       responsable: item.responsable,
       reportante: item.reportante,
+      comentarioResolucion: item.comentarioResolucion,
       idCategoriaIncidencia: item.idCategoriaIncidencia,
     };
   }

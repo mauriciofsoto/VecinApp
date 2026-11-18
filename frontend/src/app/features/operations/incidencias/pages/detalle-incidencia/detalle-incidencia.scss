@@ -53,6 +53,16 @@ h2 {
   font-size: var(--font-size-caption);
   font-weight: 600;
   white-space: nowrap;
+
+  &[data-estado='cerrada'] {
+    background: var(--color-success-subtle);
+    color: var(--color-success-text);
+  }
+
+  &[data-estado='rechazada'] {
+    background: var(--color-danger-subtle);
+    color: var(--color-danger-text);
+  }
 }
 
 .contenido {
@@ -144,6 +154,66 @@ h2 {
   padding: 12px;
   border-radius: var(--radius-control);
   font-size: var(--font-size-small);
+}
+
+.aprobacion-cierre,
+.comentario-resolucion,
+.resolucion-informada {
+  margin-top: $space-5;
+  padding-top: $space-4;
+  border-top: 1px solid var(--color-border);
+}
+
+.aprobacion-cierre {
+  p {
+    margin: 0 0 $space-3;
+  }
+
+  button {
+    background: var(--color-success);
+  }
+}
+
+.comentario-resolucion,
+.resolucion-informada {
+  h3 {
+    margin: 0 0 $space-2;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-small);
+  }
+
+  p {
+    margin: 0 0 $space-3;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  small {
+    display: block;
+    margin-top: $space-2;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+  }
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background: var(--color-control-surface-solid);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: var(--font-size-small);
+    line-height: var(--line-height-normal);
+    resize: vertical;
+  }
+}
+
+.resolucion-informada {
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: $space-4;
 }
 
 .gestion__derivar {
@@ -264,6 +334,11 @@ h2 {
 .exito {
   background: var(--color-success-subtle);
   color: var(--color-success-text);
+}
+
+.info {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
 }
 
 .error {

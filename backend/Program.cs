@@ -136,7 +136,17 @@ builder.Services.AddSwaggerGen(options =>
 
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var conexion = context.Database.GetDbConnection();
 
+    Console.WriteLine("========== DIAGNÓSTICO BDD ==========");
+    Console.WriteLine($"Servidor: {conexion.DataSource}");
+    Console.WriteLine($"Base de datos: {conexion.Database}");
+    Console.WriteLine($"Estado: {conexion.State}");
+    Console.WriteLine("=====================================");
+}
 // Pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
@@ -253,6 +263,7 @@ if (!builder.Configuration.GetValue<bool>("VecinApp:SkipDevelopmentSeed")) using
         "Pendiente",
         "En proceso",
         "Resuelta",
+        "Cerrada",
         "Rechazada"
     };
     var estadosIncidenciaExistentes = await context.EstadosIncidencia
