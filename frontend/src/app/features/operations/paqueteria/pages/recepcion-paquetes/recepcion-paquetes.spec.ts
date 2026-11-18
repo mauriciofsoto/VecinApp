@@ -25,6 +25,15 @@ const destinatarios: DestinatarioPaquete[] = [
   },
 ];
 
+const unidades = [
+  {
+    id: 3,
+    piso: '3',
+    identificacion: 'B',
+    residentes: [{ id: 'identity-user-42', nombre: 'María', apellido: 'Gómez', rol: 'Inquilino' }],
+  },
+];
+
 describe('RecepcionPaquetes', () => {
   let fixture: ComponentFixture<RecepcionPaquetes>;
   let component: RecepcionPaquetes;
@@ -87,29 +96,30 @@ describe('RecepcionPaquetes', () => {
     return request;
   }
 
+  function expectUnidadesRequest() {
+    const request = http.expectOne(`${environment.apiUrl}/api/paqueteria/unidades-destinatarios`);
+    expect(request.request.method).toBe('GET');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
+    return request;
+  }
+
   function loadInitialData(paquetes = [paquete]) {
     expectDestinatariosRequest().flush(destinatarios);
+    expectUnidadesRequest().flush(unidades);
     expectListRequest().flush(paquetes);
     fixture.detectChanges();
   }
 
-  it('muestra carga y obtiene destinatarios reales mostrando solo nombre y referencias declaradas', () => {
+  it('mantiene vacía la lista inicial y carga opciones de unidades del edificio', () => {
     expect(fixture.nativeElement.textContent).toContain('Cargando destinatarios');
     loadInitialData([]);
 
     fixture.nativeElement.querySelector('.register-button')?.click();
     fixture.detectChanges();
     const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('María Gómez');
-    expect(text).toContain('Bruno Díaz');
-    expect(text).toContain('Piso 3 · Unidad B');
-    expect(text).toContain('Piso 4 · Unidad A');
-    expect(text).toContain('Sin unidad declarada');
-    expect(text).not.toContain('Inquilino');
-    expect(text).not.toContain('Propietario');
-    expect(text).not.toContain('Otra referencia interna');
-    expect(fixture.nativeElement.querySelectorAll('.recipient-card').length).toBe(2);
-    expect(fixture.nativeElement.querySelector('.recipient-card').textContent).not.toContain('identity-user');
+    expect(text).toContain('La lista está vacía. Buscá por nombre o elegí piso y departamento.');
+    expect(fixture.nativeElement.querySelectorAll('.recipient-card').length).toBe(0);
+    expect(fixture.nativeElement.querySelector('select[name="pisoDestinatario"] option[value="3"]')).not.toBeNull();
   });
 
   it('busca por nombre y apellido y conserva el ID Identity como string al seleccionar', () => {
@@ -118,7 +128,12 @@ describe('RecepcionPaquetes', () => {
     fixture.nativeElement.querySelector('.register-button')?.click();
     fixture.detectChanges();
     const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
-    input.value = 'Maria';
+    input.value = 'Ma';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.recipient-card').length).toBe(0);
+
+    input.value = 'Mar';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
@@ -146,8 +161,12 @@ describe('RecepcionPaquetes', () => {
     fixture.nativeElement.querySelector('.register-button')?.click();
     fixture.detectChanges();
 
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.value = 'Bruno';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
     const buttons = fixture.nativeElement.querySelectorAll('.recipient-card') as NodeListOf<HTMLButtonElement>;
-    buttons[1].click();
+    buttons[0].click();
     fixture.detectChanges();
     expect(component.destinatarioSeleccionadoId()).toBe('identity-user-57');
     expect(typeof component.destinatarioSeleccionadoId()).toBe('string');
@@ -159,6 +178,7 @@ describe('RecepcionPaquetes', () => {
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       idUsuarioDestinatario: 'identity-user-57',
+      idUnidad: null,
       remitente: 'Correo',
       identificacion: 'Caja',
       observaciones: null,
@@ -199,6 +219,7 @@ describe('RecepcionPaquetes', () => {
 
   it('muestra estado vacío y error sin conservar destinatarios ficticios', () => {
     expectDestinatariosRequest().flush([]);
+    expectUnidadesRequest().flush([]);
     expectListRequest().flush([]);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('No hay residentes activos');
@@ -210,6 +231,7 @@ describe('RecepcionPaquetes', () => {
       { message: 'Unavailable' },
       { status: 500, statusText: 'Server Error' },
     );
+    expectUnidadesRequest().flush(unidades);
     expectListRequest().flush([]);
     fixture.detectChanges();
 

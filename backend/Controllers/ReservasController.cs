@@ -707,7 +707,7 @@ public class ReservasController : ControllerBase
     // 10. GET /api/reservas/{id:int}/mensajes (Chat)
     // =========================================================================
     [HttpGet("{id:int}/mensajes")]
-    [Authorize(Roles = "Administrador,Inquilino,Propietario")]
+    [Authorize(Roles = "Administrador,Inquilino,Propietario,Portero")]
     public async Task<IActionResult> ObtenerMensajes(int id, CancellationToken ct)
     {
         var (usuario, error) = await ObtenerUsuarioActualAsync();
@@ -721,7 +721,8 @@ public class ReservasController : ControllerBase
             return NotFound(new { mensaje = "Reserva no encontrada." });
 
         var esAdmin = User.IsInRole("Administrador");
-        if (!esAdmin && reserva.IdUsuario != usuario.Id && reserva.TipoEvento != "publico")
+        var esPortero = User.IsInRole("Portero");
+        if (!esAdmin && !esPortero && reserva.IdUsuario != usuario.Id && reserva.TipoEvento != "publico")
             return Forbid();
 
         var mensajes = await _context.MensajesReserva

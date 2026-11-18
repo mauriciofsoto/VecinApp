@@ -3,7 +3,7 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { Paquete, CrearPaquete } from '../models/paquete';
-import { DestinatarioPaquete } from '../models/destinatario-paquete';
+import { DestinatarioPaquete, UnidadDestinatarioPaquete } from '../models/destinatario-paquete';
 import { MensajePaquete, CrearMensajePaquete } from '../models/mensaje-paquete';
 import { AuthService } from '../../../../core/services/auth';
 
@@ -40,6 +40,10 @@ export class Paqueteria {
 
   obtenerDestinatarios(): Observable<DestinatarioPaquete[]> {
     return this.http.get<DestinatarioPaquete[]>(`${this.apiUrl}/destinatarios`);
+  }
+
+  obtenerUnidadesDestinatarios(): Observable<UnidadDestinatarioPaquete[]> {
+    return this.http.get<UnidadDestinatarioPaquete[]>(`${this.apiUrl}/unidades-destinatarios`);
   }
 
   listar(): Observable<Paquete[]> {

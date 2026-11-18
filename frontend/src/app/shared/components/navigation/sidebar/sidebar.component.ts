@@ -149,7 +149,7 @@ export class SidebarComponent {
           roles: ['Inquilino', 'Propietario'],
         },
         {
-          label: 'Incidencias derivadas',
+          label: 'Incidencias',
           icon: '↗',
           route: '/incidencias-derivadas',
           roles: ['Propietario', 'Portero'],

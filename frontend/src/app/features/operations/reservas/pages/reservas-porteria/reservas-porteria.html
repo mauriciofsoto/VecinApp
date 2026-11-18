@@ -2,8 +2,8 @@
   <header class="page-header">
     <h1>Reservas del edificio</h1>
     <p>
-      Consultá los espacios comunes reservados para coordinar su limpieza y
-      preparación.
+      Consultá el calendario de espacios comunes y las conversaciones para
+      coordinar su limpieza y preparación.
     </p>
   </header>
 
@@ -19,79 +19,111 @@
         Reintentar
       </button>
     </div>
-  } @else if (reservas().length === 0) {
-    <app-empty-state
-      title="No hay reservas registradas"
-      description="Cuando se reserve un espacio común, aparecerá acá."
-    />
   } @else {
-    <section class="daily-reservations" aria-label="Reservas del edificio">
-      <header class="panel-header">
-        <div>
-          <h2>Reservas registradas</h2>
-          <p>Ordenadas por fecha y horario.</p>
-        </div>
+    <div class="reservations-layout">
+      <section class="calendar-section">
+        <app-reserva-calendar-modal
+          [reservas]="reservas()"
+          (fechaSeleccionada)="seleccionarFecha($event)"
+        />
+      </section>
 
-        <span class="reservation-count">
-          {{ reservas().length }}
-        </span>
-      </header>
+      <aside class="reservations-panel">
+        @if (errorEspacios()) {
+          <p class="form-feedback">
+            No se pudieron cargar los nombres de los espacios.
+          </p>
+        }
 
-      @if (errorEspacios()) {
-        <p class="form-feedback">
-          No se pudieron cargar los nombres de los espacios.
-        </p>
-      }
-
-      @for (reserva of reservas(); track reserva.id) {
-        <article class="item-card">
-          <div class="reservation-information">
-            <div class="reservation-heading">
-              <h3>{{ reserva.titulo }}</h3>
-
-              <app-badge [variant]="varianteEstado(reserva.estado)">
-                {{ reserva.estado }}
-              </app-badge>
+        <section class="daily-reservations">
+          <header class="panel-header">
+            <div>
+              <h2>Reservas del día</h2>
+              <p>{{ fechaSeleccionada() | date: 'fullDate' }}</p>
             </div>
 
-            <div class="reservation-information__facts">
-              <p class="reservation-fact">
-                <span>Fecha</span>
-                <strong>{{ formatearFecha(reserva.fecha) }}</strong>
-              </p>
+            <span class="reservation-count">{{ reservasDelDia().length }}</span>
+          </header>
 
-              <p class="reservation-fact">
-                <span>Horario</span>
-                <strong>{{ reserva.horaInicio }} – {{ reserva.horaFin }}</strong>
-              </p>
+          @for (reserva of reservasDelDia(); track reserva.id) {
+            <article
+              class="item-card"
+              [class.item-card--selected]="reservaSeleccionada()?.id === reserva.id"
+            >
+              <div class="reservation-information">
+                <div class="reservation-heading">
+                  <h3>{{ reserva.titulo }}</h3>
+                  <span class="status" [attr.data-status]="reserva.estado">
+                    {{ reserva.estado }}
+                  </span>
+                </div>
 
-              <p class="reservation-fact">
-                <span>Espacio</span>
-                <strong>{{ nombreEspacio(reserva.espacioId) }}</strong>
-              </p>
+                <div class="reservation-information__facts">
+                  <p class="reservation-fact">
+                    <span>Espacio</span>
+                    <strong>{{ nombreEspacio(reserva.espacioId) }}</strong>
+                  </p>
+                  <p class="reservation-fact">
+                    <span>Horario</span>
+                    <strong>{{ reserva.horaInicio }} – {{ reserva.horaFin }}</strong>
+                  </p>
+                  <p class="reservation-fact">
+                    <span>Solicitante</span>
+                    <strong>{{ reserva.usuarioNombre }}</strong>
+                  </p>
+                  <p class="reservation-fact">
+                    <span>Unidad</span>
+                    <strong>{{ reserva.unidadNombre || 'Sin unidad asociada' }}</strong>
+                  </p>
+                  <p class="reservation-fact">
+                    <span>Participantes</span>
+                    <strong>{{ reserva.cantidadParticipantes }}</strong>
+                  </p>
+                </div>
 
-              <p class="reservation-fact">
-                <span>Solicitante</span>
-                <strong>{{ reserva.usuarioNombre }}</strong>
-              </p>
+                @if (reserva.descripcion) {
+                  <p>{{ reserva.descripcion }}</p>
+                }
+              </div>
 
-              <p class="reservation-fact">
-                <span>Unidad</span>
-                <strong>{{ reserva.unidadNombre || 'Sin unidad asociada' }}</strong>
-              </p>
+              <button
+                type="button"
+                class="secondary"
+                (click)="seleccionarReserva(reserva)"
+              >
+                Ver conversación
+              </button>
+            </article>
+          } @empty {
+            <article class="item-card empty-state">
+              <p>No hay reservas registradas para esta fecha.</p>
+            </article>
+          }
+        </section>
+      </aside>
 
-              <p class="reservation-fact">
-                <span>Participantes</span>
-                <strong>{{ reserva.cantidadParticipantes }}</strong>
-              </p>
-            </div>
-
-            @if (reserva.descripcion) {
-              <p>{{ reserva.descripcion }}</p>
-            }
-          </div>
-        </article>
-      }
-    </section>
+      <section class="chat-section">
+        @if (reservaSeleccionada(); as reserva) {
+          @if (errorConversacion()) {
+            <p class="form-feedback form-feedback--error" role="alert">
+              {{ errorConversacion() }}
+            </p>
+          }
+          <app-reserva-chat
+            [reserva]="reserva"
+            [emisorId]="usuario()?.id ?? ''"
+            [emisorNombre]="usuario()?.nombre ?? 'Portería'"
+            [soloLectura]="true"
+          />
+        } @else {
+          <article class="item-card chat-placeholder">
+            <h2>Conversaciones</h2>
+            <p>
+              Seleccioná una reserva para consultar los mensajes del residente.
+            </p>
+          </article>
+        }
+      </section>
+    </div>
   }
 </main>

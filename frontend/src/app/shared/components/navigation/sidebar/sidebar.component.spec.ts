@@ -45,27 +45,27 @@ describe('SidebarComponent', () => {
     declaraUnidadesAlquiladas: false,
   });
 
-  function hasDerivedIncidentsOption(rol: User['rol']): boolean {
+  function hasPersonalIncidentsOption(rol: User['rol']): boolean {
     TestBed.inject(AuthService).currentUser.set(createUser(rol));
     fixture.detectChanges();
     return component.menuSections()
       .flatMap(section => section.items)
-      .some(item => item.label === 'Incidencias derivadas');
+      .some(item => item.label === 'Incidencias' && item.route === '/incidencias-derivadas');
   }
 
-  it('muestra Incidencias derivadas a Propietario y Portero (Personal)', () => {
-    expect(hasDerivedIncidentsOption('Propietario')).toBe(true);
-    expect(hasDerivedIncidentsOption('Portero')).toBe(true);
+  it('muestra Incidencias a Propietario y Portero (Personal)', () => {
+    expect(hasPersonalIncidentsOption('Propietario')).toBe(true);
+    expect(hasPersonalIncidentsOption('Portero')).toBe(true);
 
     TestBed.inject(AuthService).currentUser.set(createUser('Portero'));
     fixture.detectChanges();
     expect(component.userRoleLabel()).toBe('Personal');
   });
 
-  it('oculta Incidencias derivadas a Inquilino, Administrador y SuperAdministrador', () => {
-    expect(hasDerivedIncidentsOption('Inquilino')).toBe(false);
-    expect(hasDerivedIncidentsOption('Administrador')).toBe(false);
-    expect(hasDerivedIncidentsOption('SuperAdministrador')).toBe(false);
+  it('oculta las Incidencias personales a Inquilino, Administrador y SuperAdministrador', () => {
+    expect(hasPersonalIncidentsOption('Inquilino')).toBe(false);
+    expect(hasPersonalIncidentsOption('Administrador')).toBe(false);
+    expect(hasPersonalIncidentsOption('SuperAdministrador')).toBe(false);
   });
 
   it('navega a la ruta existente desde el RouterLink del Sidebar compartido', async () => {
@@ -74,7 +74,7 @@ describe('SidebarComponent', () => {
 
     const link = Array.from(
       fixture.nativeElement.querySelectorAll('a.nav-item'),
-    ).find((item) => (item as HTMLAnchorElement).textContent?.includes('Incidencias derivadas')) as HTMLAnchorElement | undefined;
+    ).find((item) => (item as HTMLAnchorElement).textContent?.trim() === 'Incidencias') as HTMLAnchorElement | undefined;
     expect(link).toBeDefined();
     expect(link?.getAttribute('href')).toBe('/incidencias-derivadas');
     link?.click();

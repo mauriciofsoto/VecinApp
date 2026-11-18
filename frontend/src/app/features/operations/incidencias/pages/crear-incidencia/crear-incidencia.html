@@ -57,17 +57,24 @@
       </div>
     </div>
 
-    <div class="form-field">
-      <label for="unidad">Unidad o espacio *</label>
+    @if (soloEspaciosComunes()) {
+      <div class="form-field">
+        <label>Ubicación *</label>
+        <p>Espacios comunes del edificio</p>
+      </div>
+    } @else {
+      <div class="form-field">
+        <label for="unidad">Unidad o espacio *</label>
 
-      <app-select id="unidad"
-                  name="unidad"
-                  [ngModel]="idUnidadSeleccionada()"
-                  (ngModelChange)="idUnidadSeleccionada.set($event)"
-                  [options]="unidades()"
-                  placeholder="Seleccioná una unidad o espacio"
-                  [required]="true" />
-    </div>
+        <app-select id="unidad"
+                    name="unidad"
+                    [ngModel]="idUnidadSeleccionada()"
+                    (ngModelChange)="idUnidadSeleccionada.set($event)"
+                    [options]="unidades()"
+                    placeholder="Seleccioná una unidad o espacio"
+                    [required]="true" />
+      </div>
+    }
 
     <div class="form-field">
       <label for="ubicacion">Ubicación específica *</label>

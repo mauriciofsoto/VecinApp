@@ -18,6 +18,7 @@ export interface Paquete {
 /** Contrato de RegistrarPaqueteRequest. */
 export interface CrearPaquete {
   idUsuarioDestinatario: string;
+  idUnidad?: number | null;
   remitente: string;
   identificacion: string;
   observaciones?: string | null;
