@@ -175,10 +175,18 @@ public sealed class VinculacionesController : ControllerBase
                 d.IdDeclaracionUnidad == request.IdDeclaracion && d.IdUsuario == usuario.Id && d.IdEdificio == usuario.IdEdificio, ct)
                 ?? null!;
             if (declaracion == null) return NotFound(new { message = "La declaración no pertenece a tu cuenta." });
-            var confirmada = await _db.SolicitudesVinculacion.AnyAsync(s => s.Estado == "Confirmada" &&
-                (s.IdDeclaracionPropietario == declaracion.IdDeclaracionUnidad || s.IdDeclaracionInquilino == declaracion.IdDeclaracionUnidad), ct);
-            if (confirmada && (declaracion.Tipo != request.Tipo || declaracion.IdUnidad != unidad.IdUnidad))
-                return Conflict(new { message = "No se puede cambiar la unidad o el tipo de una relación ya confirmada." });
+            var confirmada = await _db.SolicitudesVinculacion.AnyAsync(s =>
+     s.Estado == "Confirmada" &&
+     (s.IdDeclaracionPropietario == declaracion.IdDeclaracionUnidad ||
+      s.IdDeclaracionInquilino == declaracion.IdDeclaracionUnidad), ct);
+
+            if (confirmada)
+            {
+                return Conflict(new
+                {
+                    message = "No se puede modificar una declaración que ya tiene una vinculación confirmada."
+                });
+            }
         }
 
         else
@@ -221,7 +229,17 @@ public sealed class VinculacionesController : ControllerBase
         var rolGuardado = usuario.IdRol.HasValue
             ? await _db.RolesAplicacion.Where(r => r.IdRol == usuario.IdRol.Value).Select(r => r.Nombre).FirstOrDefaultAsync(ct)
             : null;
-        if (rolGuardado != esperado) return (null, Forbid());
+        if (rolGuardado != esperado)
+            return (null, Forbid());
+
+        // Verificar que el edificio del usuario esté activo.
+        var edificioActivo = await _db.Edificios
+            .AnyAsync(e => e.IdEdificio == usuario.IdEdificio.Value &&
+                           e.Estado == "Activo", ct);
+
+        if (!edificioActivo)
+            return (null, Forbid());
+
         return (usuario, null);
     }
 

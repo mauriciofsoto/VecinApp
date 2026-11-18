@@ -171,6 +171,14 @@ export const routes: Routes = [
               import('./features/operations/inquilinos/pages/generar-qr/generar-qr')
                 .then(m => m.GenerarQr),
           },
+          {
+            path: 'unidades',
+            canActivate: [roleGuard],
+            data: { roles: ADMIN_ROLES },
+            loadComponent: () =>
+              import('./features/operations/unidades/pages/administrar-unidades/administrar-unidades')
+                .then(m => m.AdministrarUnidades),
+          }
         ],
       },
 
@@ -178,17 +186,22 @@ export const routes: Routes = [
       {
         path: 'comunidad',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, ...RESIDENT_ROLES], ownerAccess: 'community' },
+        data: {
+          roles: [...ADMIN_ROLES, ...RESIDENT_ROLES, 'Portero'],
+          ownerAccess: 'community',
+        },
         loadComponent: () =>
           import('./features/community/feed/pages/feed-principal/feed-principal')
             .then(m => m.FeedPrincipal),
       },
-
       // ENCUESTAS
       {
         path: 'encuestas',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, ...RESIDENT_ROLES], ownerAccess: 'community' },
+        data: {
+          roles: [...ADMIN_ROLES, ...RESIDENT_ROLES, 'Portero'],
+          ownerAccess: 'community',
+        },
         loadComponent: () =>
           import('./features/operations/encuestas/pages/historial-encuestas/historial-encuestas')
             .then(m => m.HistorialEncuestas),
@@ -226,7 +239,7 @@ export const routes: Routes = [
       {
         path: 'incidencias-derivadas/:id',
         canActivate: [roleGuard],
-        data: { roles: ['Portero'] },
+        data: { roles: ['Portero', 'Propietario'] },
         loadComponent: () =>
           import('./features/operations/incidencias/pages/detalle-incidencia/detalle-incidencia')
             .then(m => m.DetalleIncidenciaComponent),

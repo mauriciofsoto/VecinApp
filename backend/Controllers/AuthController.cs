@@ -8,7 +8,7 @@ using VecinApp.Data;
 using VecinApp.DTOs;
 using VecinApp.Models;
 using VecinApp.Services;
-
+using Microsoft.EntityFrameworkCore.Storage;
 namespace VecinApp.Controllers;
 
 [ApiController]
@@ -122,7 +122,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RegistroComunidad(
         [FromBody] RegistroAccesoComunidadRequest request)
     {
-        var email = request.Email.Trim();
+        if (request == null)
+            return BadRequest(new { message = "La solicitud no es válida." });
+
+        var email = request.Email?.Trim() ?? string.Empty;
+
         var errorValidacion = ValidarRegistroComunidad(request);
         if (errorValidacion != null)
             return BadRequest(new { message = errorValidacion });
@@ -131,26 +135,34 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "Ya existe una cuenta registrada con ese email." });
 
         await using var transaction = await _context.Database.BeginTransactionAsync();
+
         try
         {
             var idEdificio = await _accesoEdificioService.ValidarAsync(
                 request.TokenAcceso, HttpContext.RequestAborted);
+
             if (!idEdificio.HasValue)
             {
                 await transaction.RollbackAsync();
-                return BadRequest(new { message = "El acceso al edificio es inválido o venció. Volvé a abrir el QR." });
+                return BadRequest(new
+                {
+                    message = "El acceso al edificio es inválido o venció. Volvé a abrir el QR."
+                });
             }
 
-            // Resolver todas las declaraciones antes de crear el usuario. Una coincidencia
-            // normalizada ambigua rechaza el registro sin dejar datos parciales.
+            // Buscar unidades existentes del edificio.
             var unidadesEdificio = await _context.Unidades
                 .Where(unidad => unidad.IdEdificio == idEdificio.Value)
                 .ToListAsync(HttpContext.RequestAborted);
-            var unidadesResueltas = new List<Unidad?>();
+
+            var unidadesResueltas = new List<Unidad>();
+
+            // Crear las unidades que no existan y reutilizar las existentes.
             foreach (var declaracion in request.Unidades)
             {
                 var piso = NormalizarDireccionUnidad(declaracion.Piso)!;
                 var identificacion = NormalizarDireccionUnidad(declaracion.Identificacion)!;
+
                 var coincidencias = unidadesEdificio
                     .Where(actual =>
                         NormalizarDireccionUnidad(actual.Piso) == piso &&
@@ -160,21 +172,42 @@ public class AuthController : ControllerBase
                 if (coincidencias.Count > 1)
                 {
                     await transaction.RollbackAsync();
-                    return BadRequest(new { message = "La unidad declarada coincide con más de una unidad del edificio. Contactá a la administración." });
+
+                    return BadRequest(new
+                    {
+                        message = "La unidad declarada coincide con más de una unidad del edificio. Contactá a la administración."
+                    });
                 }
 
-                unidadesResueltas.Add(coincidencias.SingleOrDefault());
+                var unidad = coincidencias.SingleOrDefault();
+
+                if (unidad == null)
+                {
+                    unidad = new Unidad
+                    {
+                        IdEdificio = idEdificio.Value,
+                        Piso = declaracion.Piso.Trim(),
+                        Identificacion = declaracion.Identificacion.Trim()
+                    };
+
+                    _context.Unidades.Add(unidad);
+                    unidadesEdificio.Add(unidad);
+                }
+
+                unidadesResueltas.Add(unidad);
             }
 
+            // Determinar el perfil y el rol correspondiente.
             var perfilDerivado = DerivarPerfilComunidad(request);
+
             var nombreRol = perfilDerivado switch
             {
                 "Propietario" => "Propietario",
                 "Inquilino" => "Inquilino",
+                "Personal" => "Portero",
                 _ => null
             };
-            if (perfilDerivado == "Personal")
-                nombreRol = "Portero";
+
             if (nombreRol == null)
             {
                 await transaction.RollbackAsync();
@@ -185,12 +218,17 @@ public class AuthController : ControllerBase
                 .Where(rol => rol.Nombre == nombreRol)
                 .Select(rol => (int?)rol.IdRol)
                 .SingleOrDefaultAsync();
+
             if (!idRol.HasValue)
             {
                 await transaction.RollbackAsync();
-                return StatusCode(500, new { message = $"El rol {nombreRol} no está configurado." });
+                return StatusCode(500, new
+                {
+                    message = $"El rol {nombreRol} no está configurado."
+                });
             }
 
+            // Crear el usuario.
             var usuario = new Usuario
             {
                 UserName = email,
@@ -204,51 +242,109 @@ public class AuthController : ControllerBase
             };
 
             var resultado = await _userManager.CreateAsync(usuario, request.Password);
+
             if (!resultado.Succeeded)
             {
                 await transaction.RollbackAsync();
-                var errores = string.Join(", ", resultado.Errors.Select(error => error.Description));
-                return BadRequest(new { message = $"No se pudo crear la cuenta: {errores}" });
-            }
 
-            var registro = CrearRegistroComunitario(usuario.Id, request, perfilDerivado);
-            _context.RegistrosComunitarios.Add(registro);
+                var errores = string.Join(
+                    ", ",
+                    resultado.Errors.Select(error => error.Description));
 
-            for (var indice = 0; indice < request.Unidades.Count; indice++)
-            {
-                var declaracion = request.Unidades[indice];
-
-                _context.DeclaracionesUnidadesComunitarias.Add(new DeclaracionUnidadComunitaria
+                return BadRequest(new
                 {
-                    IdUsuario = usuario.Id,
-                    IdEdificio = idEdificio.Value,
-                    Unidad = unidadesResueltas[indice],
-                    Tipo = declaracion.Tipo,
-                    PisoDeclarado = declaracion.Piso?.Trim(),
-                    IdentificacionDeclarada = declaracion.Identificacion?.Trim(),
-                    EsPrincipal = declaracion.EsPrincipal,
-                    EstaAlquilada = declaracion.Tipo == "Titularidad" ? declaracion.EstaAlquilada : null,
-                    PersonaRelacionNombre = declaracion.PersonaRelacionNombre?.Trim(),
-                    PersonaRelacionApellido = declaracion.PersonaRelacionApellido?.Trim(),
-                    PisoRelacion = declaracion.PisoRelacion?.Trim(),
-                    IdentificacionRelacion = declaracion.IdentificacionRelacion?.Trim(),
-                    EstadoConfirmacion = "Declarada",
-                    FechaDeclaracion = DateTime.UtcNow
+                    message = $"No se pudo crear la cuenta: {errores}"
                 });
             }
 
+            // Guardar las respuestas comunitarias.
+            var registro = CrearRegistroComunitario(
+                usuario.Id, request, perfilDerivado);
+
+            _context.RegistrosComunitarios.Add(registro);
+
+            // Guardar declaraciones y relaciones usuario-unidad.
+            for (var indice = 0; indice < request.Unidades.Count; indice++)
+            {
+                var declaracion = request.Unidades[indice];
+                var unidad = unidadesResueltas[indice];
+
+                _context.DeclaracionesUnidadesComunitarias.Add(
+                    new DeclaracionUnidadComunitaria
+                    {
+                        IdUsuario = usuario.Id,
+                        IdEdificio = idEdificio.Value,
+                        Unidad = unidad,
+                        Tipo = declaracion.Tipo,
+                        PisoDeclarado = declaracion.Piso?.Trim(),
+                        IdentificacionDeclarada = declaracion.Identificacion?.Trim(),
+                        EsPrincipal = declaracion.EsPrincipal,
+                        EstaAlquilada = declaracion.Tipo == "Titularidad"
+                            ? declaracion.EstaAlquilada
+                            : null,
+                        PersonaRelacionNombre = declaracion.PersonaRelacionNombre?.Trim(),
+                        PersonaRelacionApellido = declaracion.PersonaRelacionApellido?.Trim(),
+                        PisoRelacion = declaracion.PisoRelacion?.Trim(),
+                        IdentificacionRelacion = declaracion.IdentificacionRelacion?.Trim(),
+                        EstadoConfirmacion = "Declarada",
+                        FechaDeclaracion = DateTime.UtcNow
+                    });
+
+                var tipoRelacion = perfilDerivado switch
+                {
+                    "Propietario" => "Propietario",
+                    "Inquilino" => "Inquilino",
+                    _ => null
+                };
+
+                if (tipoRelacion != null)
+                {
+                    _context.UsuariosUnidades.Add(new UsuarioUnidad
+                    {
+                        IdUsuario = usuario.Id,
+                        Unidad = unidad,
+                        TipoRelacion = tipoRelacion
+                    });
+                }
+            }
+
+            // Persistir todos los cambios dentro de la transacción.
             await _context.SaveChangesAsync(HttpContext.RequestAborted);
 
             await transaction.CommitAsync();
-            await _vinculacionesService.EvaluarAsync(usuario.Id, HttpContext.RequestAborted);
-            return Ok(new { message = "Cuenta y respuestas comunitarias guardadas correctamente. Ya podés iniciar sesión." });
+
+            // Evaluar posibles coincidencias entre propietarios e inquilinos.
+            await _vinculacionesService.EvaluarAsync(
+                usuario.Id, HttpContext.RequestAborted);
+
+            return Ok(new
+            {
+                message = "Cuenta y respuestas comunitarias guardadas correctamente. Ya podés iniciar sesión."
+            });
         }
-        catch
+        catch (Exception ex)
         {
-            await transaction.RollbackAsync();
-            return StatusCode(500, new { message = "Ocurrió un error al registrar la cuenta." });
+            Console.WriteLine($"ERROR EN REGISTRO DE COMUNIDAD: {ex}");
+
+            if (transaction.GetDbTransaction().Connection != null)
+            {
+                try
+                {
+                    await transaction.RollbackAsync();
+                }
+                catch (Exception rollbackEx)
+                {
+                    Console.WriteLine($"ERROR AL REVERTIR TRANSACCIÓN: {rollbackEx.Message}");
+                }
+            }
+
+            return StatusCode(500, new
+            {
+                message = "Ocurrió un error al registrar la cuenta."
+            });
         }
     }
+    
 
     private static string? ValidarRegistroComunidad(RegistroAccesoComunidadRequest request)
     {
@@ -408,17 +504,6 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Registro([FromBody] RegistroRequest request)
     {
-        if (request.SoloValidar)
-        {
-            if (string.IsNullOrWhiteSpace(request.CodigoInvitacion))
-                return BadRequest(new { message = "Ingresá un código de invitación." });
-
-            var errorValidacion = await ValidarInvitacionAdministradorAsync(request.CodigoInvitacion, request.RolEsperado);
-            return errorValidacion == null
-                ? Ok(new { message = "La invitación es válida." })
-                : BadRequest(new { message = errorValidacion });
-        }
-
         if (string.IsNullOrWhiteSpace(request.Nombre) ||
             string.IsNullOrWhiteSpace(request.Apellido) ||
             string.IsNullOrWhiteSpace(request.Email) ||
@@ -440,24 +525,15 @@ public class AuthController : ControllerBase
             .Include(c => c.Rol)
             .FirstOrDefaultAsync(c => c.Codigo == codigo);
 
-        if (invitacion == null)
+        if (invitacion == null ||
+            !invitacion.Activo ||
+            invitacion.FechaExpiracion <= DateTime.UtcNow ||
+            invitacion.UsosRealizados >= invitacion.UsosMaximos)
         {
             return BadRequest(new { message = "El código de invitación es inválido, está vencido o ya no tiene usos disponibles." });
         }
 
         var rolNombre = invitacion.Rol?.Nombre;
-        var esRegistroAdministradorInvitado = string.Equals(rolNombre, "Administrador", StringComparison.Ordinal);
-
-        if (!invitacion.Activo || invitacion.FechaExpiracion <= DateTime.UtcNow || invitacion.UsosRealizados >= invitacion.UsosMaximos)
-        {
-            if (!esRegistroAdministradorInvitado)
-                return BadRequest(new { message = "El código de invitación es inválido, está vencido o ya no tiene usos disponibles." });
-            if (!invitacion.Activo)
-                return BadRequest(new { message = "La invitación fue desactivada." });
-            if (invitacion.FechaExpiracion <= DateTime.UtcNow)
-                return BadRequest(new { message = "La invitación venció." });
-            return BadRequest(new { message = "La invitación ya no tiene usos disponibles." });
-        }
 
         if (rolNombre != "Inquilino" &&
     rolNombre != "Propietario" &&
@@ -466,34 +542,13 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "El código no permite registrar este tipo de usuario." });
         }
 
-        if (!string.IsNullOrWhiteSpace(request.RolEsperado) &&
-            !string.Equals(rolNombre, request.RolEsperado.Trim(), StringComparison.Ordinal))
-            return BadRequest(new { message = "El código no corresponde al rol Administrador." });
-
-        if (esRegistroAdministradorInvitado)
-        {
-            var edificioActivo = await _context.Edificios
-                .AnyAsync(edificio => edificio.IdEdificio == invitacion.IdEdificio && edificio.Estado == "Activo");
-            if (!edificioActivo)
-                return BadRequest(new { message = "El edificio asociado a la invitación no está disponible." });
-        }
-
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
             // Reservar un uso del código de forma atómica.
-            int usosActualizados;
-            if (esRegistroAdministradorInvitado)
-            {
-                usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
-                    $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND id_rol = {invitacion.IdRol} AND id_edificio = {invitacion.IdEdificio} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos AND EXISTS (SELECT 1 FROM edificio WHERE id_edificio = {invitacion.IdEdificio} AND estado = 'Activo')");
-            }
-            else
-            {
-                usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
-                    $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos");
-            }
+            var usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos");
 
             if (usosActualizados != 1)
             {
@@ -505,7 +560,6 @@ public class AuthController : ControllerBase
             {
                 UserName = email,
                 Email = email,
-                PhoneNumber = request.Telefono?.Trim(),
                 Nombre = request.Nombre.Trim(),
                 Apellido = request.Apellido.Trim(),
                 IdRol = invitacion.IdRol,
@@ -548,26 +602,6 @@ public class AuthController : ControllerBase
         }
     }
 
-
-    private async Task<string?> ValidarInvitacionAdministradorAsync(string codigoInvitacion, string? rolEsperado)
-    {
-        var codigo = codigoInvitacion.Trim().ToUpperInvariant();
-        var invitacion = await _context.CodigosInvitacion
-            .Include(item => item.Rol)
-            .FirstOrDefaultAsync(item => item.Codigo == codigo);
-
-        if (invitacion == null) return "El código de invitación no existe.";
-        if (!invitacion.Activo) return "La invitación fue desactivada.";
-        if (invitacion.FechaExpiracion <= DateTime.UtcNow) return "La invitación venció.";
-        if (invitacion.UsosRealizados >= invitacion.UsosMaximos) return "La invitación ya no tiene usos disponibles.";
-        if (invitacion.Rol?.Nombre != "Administrador") return "El código no corresponde al rol Administrador.";
-        if (!string.IsNullOrWhiteSpace(rolEsperado) && !string.Equals(invitacion.Rol!.Nombre, rolEsperado.Trim(), StringComparison.Ordinal))
-            return "El código no corresponde al rol solicitado.";
-
-        var edificioActivo = await _context.Edificios
-                .AnyAsync(edificio => edificio.IdEdificio == invitacion.IdEdificio && edificio.Estado == "Activo");
-        return edificioActivo ? null : "El edificio asociado a la invitación no está disponible.";
-    }
 
     // POST /auth/login
     [HttpPost("login")]

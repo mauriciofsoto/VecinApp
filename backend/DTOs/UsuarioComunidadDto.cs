@@ -12,6 +12,7 @@ public sealed record UsuarioComunidadDto(
     IReadOnlyList<UnidadDeclaradaDto> UnidadesDeclaradas);
 
 public sealed record UnidadDeclaradaDto(
+    int IdDeclaracionUnidad,
     string Tipo,
     string? PisoDeclarado,
     string? IdentificacionDeclarada,

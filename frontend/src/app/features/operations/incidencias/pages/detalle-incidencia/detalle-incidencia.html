@@ -50,6 +50,20 @@
             </div>
 
             <div>
+              <span class="etiqueta">Ubicación</span>
+              <strong>
+                @if (incidencia.idUnidad != null) {
+                {{ incidencia.unidad || ('Unidad ' + incidencia.piso + '° ' + incidencia.identificacion) }}
+                @if (incidencia.ubicacion) {
+                — {{ incidencia.ubicacion }}
+                }
+                } @else {
+                {{ incidencia.ubicacion || 'Espacios comunes' }}
+                }
+              </strong>
+            </div>
+
+            <div>
               <span class="etiqueta">Reportada por</span>
               <strong>{{ incidencia.reportante }}</strong>
             </div>
@@ -67,159 +81,240 @@
           <h2>Gestionar incidencia</h2>
 
           @if (esAdministrador) {
+          <p>
+            Seleccioná el estado que corresponda y guardá el cambio.
+          </p>
+
+          <label for="estado">Estado de la incidencia</label>
+
+          <select id="estado"
+                  name="estado"
+                  [(ngModel)]="estadoSeleccionado"
+                  [disabled]="guardando">
+
+            <option *ngFor="let estado of estados"
+                    [ngValue]="estado.idEstadoIncidencia">
+              {{ estado.nombre }}
+            </option>
+          </select>
+
+          <button type="button"
+                  (click)="guardarEstado()"
+                  [disabled]="guardando || estadoSeleccionado === incidencia.idEstadoIncidencia">
+            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+
+          @if (puedeAprobarCierre) {
+          <div class="aprobacion-cierre">
             <p>
-              Seleccioná el estado que corresponda y guardá el cambio.
+              El personal marcó esta incidencia como resuelta.
+              Revisá el comentario de resolución antes de aprobar el cierre.
             </p>
 
-            <label for="estado">Estado de la incidencia</label>
-
-            <select
-              id="estado"
-              name="estado"
-              [(ngModel)]="estadoSeleccionado"
-              [disabled]="guardando">
-
-              <option
-                *ngFor="let estado of estados"
-                [ngValue]="estado.idEstadoIncidencia">
-                {{ estado.nombre }}
-              </option>
-            </select>
-
-            <button
-              type="button"
-              (click)="guardarEstado()"
-              [disabled]="guardando || estadoSeleccionado === incidencia.idEstadoIncidencia">
-              {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+            <button type="button"
+                    (click)="aprobarCierre()"
+                    [disabled]="guardando">
+              {{ guardando ? 'Cerrando...' : 'Aprobar y cerrar incidencia' }}
             </button>
+          </div>
+          }
 
-            @if (puedeAprobarCierre) {
-              <div class="aprobacion-cierre">
-                <p>
-                  El personal marcó esta incidencia como resuelta.
-                  Revisá el comentario de resolución antes de aprobar el cierre.
-                </p>
+          @if (incidencia.comentarioResolucion) {
+          <div class="resolucion-informada">
+            <h3>Resolución informada por el personal</h3>
+            <p>{{ incidencia.comentarioResolucion }}</p>
+          </div>
+          }
 
-                <button
-                  type="button"
-                  (click)="aprobarCierre()"
-                  [disabled]="guardando">
-                  {{ guardando ? 'Cerrando...' : 'Aprobar y cerrar incidencia' }}
-                </button>
-              </div>
-            }
-
-            @if (incidencia.comentarioResolucion) {
-              <div class="resolucion-informada">
-                <h3>Resolución informada por el personal</h3>
-                <p>{{ incidencia.comentarioResolucion }}</p>
-              </div>
-            }
-
-            <p *ngIf="mensaje" class="alerta exito">
-              {{ mensaje }}
-            </p>
-
-            <p *ngIf="error" class="alerta error">
-              {{ error }}
-            </p>
-
-          } @else if (esPortero) {
+          @if (estadoActual !== 'cerrada') {
+          <div class="gestion__derivar">
             <p>
-              Actualizá el avance de la incidencia.
-              El cierre final lo aprueba Administración.
+              Derivá esta incidencia a un propietario o asignala a Personal.
             </p>
 
-            @if (puedeIniciarGestion) {
-              <button
-                type="button"
-                (click)="iniciarGestion()"
-                [disabled]="guardando">
-                {{ guardando ? 'Guardando...' : 'Iniciar gestión' }}
-              </button>
-            }
+            <button type="button"
+                    class="boton-derivar"
+                    (click)="abrirDerivacion()">
+              Derivar incidencia
+            </button>
+          </div>
+          }
 
-            @if (puedeMarcarResuelta) {
-              <div class="comentario-resolucion">
-                <h3>Comentario de resolución</h3>
+          } @else if (esPersonal) {
+          <p>
+            Actualizá el avance de la incidencia.
+            El cierre final lo aprueba Administración.
+          </p>
 
-                <p>
-                  Obligatorio. Administración lo verá al revisar el cierre;
-                  el residente lo verá recién cuando se apruebe la incidencia.
-                </p>
-
-                <textarea
-                  id="comentario-resolucion"
-                  [(ngModel)]="comentarioResolucion"
-                  rows="4"
-                  maxlength="2000"
-                  placeholder="Detallá qué se hizo para resolver la incidencia."
+          @if (puedeIniciarGestion) {
+          <button type="button"
+                  (click)="iniciarGestion()"
                   [disabled]="guardando">
+            {{ guardando ? 'Guardando...' : 'Iniciar gestión' }}
+          </button>
+          }
+
+          @if (puedeMarcarResuelta) {
+          <div class="comentario-resolucion">
+            <h3>Comentario de resolución</h3>
+
+            <p>
+              Obligatorio. Administración lo verá al revisar el cierre;
+              el residente lo verá recién cuando se apruebe la incidencia.
+            </p>
+
+            <textarea id="comentario-resolucion"
+                      [(ngModel)]="comentarioResolucion"
+                      rows="4"
+                      maxlength="2000"
+                      placeholder="Detallá qué se hizo para resolver la incidencia."
+                      [disabled]="guardando">
                 </textarea>
 
-                <button
-                  type="button"
-                  (click)="marcarResuelta()"
-                  [disabled]="guardando || !comentarioResolucion.trim()">
-                  {{ guardando ? 'Guardando...' : 'Marcar como resuelta' }}
-                </button>
-              </div>
-            }
+            <button type="button"
+                    (click)="marcarResuelta()"
+                    [disabled]="guardando || !comentarioResolucion.trim()">
+              {{ guardando ? 'Guardando...' : 'Marcar como resuelta' }}
+            </button>
+          </div>
+          }
 
-            @if ((estadoActual === 'resuelta' || estadoActual === 'cerrada') && incidencia.comentarioResolucion) {
-              <div class="resolucion-informada">
-                <h3>Comentario de resolución</h3>
-                <p>{{ incidencia.comentarioResolucion }}</p>
-
-                @if (estadoActual === 'resuelta') {
-                  <small>
-                    Visible para el residente cuando Administración apruebe el cierre.
-                  </small>
-                }
-              </div>
-            }
+          @if (
+          (estadoActual === 'resuelta' || estadoActual === 'cerrada') &&
+          incidencia.comentarioResolucion
+          ) {
+          <div class="resolucion-informada">
+            <h3>Comentario de resolución</h3>
+            <p>{{ incidencia.comentarioResolucion }}</p>
 
             @if (estadoActual === 'resuelta') {
-              <p class="alerta info">
-                La incidencia quedó pendiente de aprobación por Administración.
-              </p>
+            <small>
+              Visible para el residente cuando Administración apruebe el cierre.
+            </small>
             }
-
-            @if (estadoActual === 'cerrada') {
-              <p class="alerta exito">
-                Administración aprobó el cierre de esta incidencia.
-              </p>
-            }
-
-            @if (estadoActual === 'rechazada') {
-              <p class="alerta error">
-                Administración rechazó esta incidencia.
-              </p>
-            }
-
-            <p *ngIf="mensaje" class="alerta exito">
-              {{ mensaje }}
-            </p>
-
-            <p *ngIf="error" class="alerta error">
-              {{ error }}
-            </p>
+          </div>
           }
+
+          @if (estadoActual === 'resuelta') {
+          <p class="alerta info">
+            La incidencia quedó pendiente de aprobación por Administración.
+          </p>
+          }
+
+          @if (estadoActual === 'cerrada') {
+          <p class="alerta exito">
+            Administración aprobó el cierre de esta incidencia.
+          </p>
+          }
+
+          @if (estadoActual === 'rechazada') {
+          <p class="alerta error">
+            Administración rechazó esta incidencia.
+          </p>
+          }
+          }
+
+          <p *ngIf="mensaje" class="alerta exito">
+            {{ mensaje }}
+          </p>
         </section>
       </div>
 
       @if (esAdministrador) {
-        <section
-          class="tarjeta conversacion"
-          aria-label="Conversación de la incidencia">
+      <section class="tarjeta conversacion"
+               aria-label="Conversación de la incidencia">
 
-          <app-chat-incidencia
-            [incidencia]="incidencia"
-            rolVista="administrador">
-          </app-chat-incidencia>
-
-        </section>
+        <app-chat-incidencia [incidencia]="incidencia"
+                             rolVista="administrador">
+        </app-chat-incidencia>
+      </section>
       }
     </div>
+
+    @if (esAdministrador) {
+    <app-modal [open]="modalDerivacionAbierto()"
+               (openChange)="modalDerivacionAbierto.set($event)"
+               heading="Derivar incidencia"
+               size="md"
+               [preventClose]="guardandoDerivacion()">
+
+      <div class="incidencias-admin__contexto-derivacion">
+        <span class="incidencias-admin__contexto-label">
+          Ubicación de la incidencia
+        </span>
+
+        <strong>
+          @if (incidencia.idUnidad != null) {
+          {{ incidencia.unidad || ('Unidad ' + incidencia.piso + '° ' + incidencia.identificacion) }}
+          } @else {
+          Espacios comunes
+          }
+        </strong>
+      </div>
+
+      <p class="incidencias-admin__tipo-destinatario">
+        @if (tipoDestinatario() === 'Propietario') {
+        La incidencia se derivará a un propietario de la unidad.
+        } @else {
+        La incidencia se derivará a personal de portería.
+        }
+      </p>
+
+      <div class="incidencias-admin__campo-derivacion">
+        <label>Tipo de destinatario</label>
+
+        <app-select [options]="opcionesTipoDestinatario()"
+                    [value]="tipoDestinatario()"
+                    (valueChange)="cambiarTipoDestinatario($event)">
+        </app-select>
+      </div>
+
+      <div class="incidencias-admin__campo-derivacion">
+        <label>
+          {{ tipoDestinatario() === 'Personal' ? 'Personal destinatario' : 'Propietario destinatario' }}
+        </label>
+
+        <app-select [options]="opcionesDestinatario()"
+                    [value]="destinatarioSeleccionado()"
+                    (valueChange)="seleccionarDestinatario($event)">
+        </app-select>
+      </div>
+
+      @if (cargandoDerivacion()) {
+      <p role="status">
+        Consultando destinatarios disponibles...
+      </p>
+      } @else if (errorDerivacion()) {
+      <p class="incidencias-admin__feedback incidencias-admin__feedback--error"
+         role="alert">
+        {{ errorDerivacion() }}
+      </p>
+      } @else if (opcionesDestinatario().length === 0) {
+      <app-empty-state title="No hay destinatarios disponibles"
+                       description="No se encontraron destinatarios para este tipo de derivación.">
+      </app-empty-state>
+      }
+
+      <div modal-footer class="incidencias-admin__modal-footer">
+        <app-button variant="secondary"
+                    type="button"
+                    (buttonClick)="cerrarDerivacion()"
+                    [disabled]="guardandoDerivacion()">
+          Cancelar
+        </app-button>
+
+        <app-button variant="primary"
+                    type="button"
+                    (buttonClick)="confirmarDerivacion()"
+                    [disabled]="
+              cargandoDerivacion() ||
+              guardandoDerivacion() ||
+              !destinatarioSeleccionado()
+            ">
+          {{ guardandoDerivacion() ? 'Derivando...' : 'Confirmar derivación' }}
+        </app-button>
+      </div>
+    </app-modal>
+    }
   </ng-container>
 </div>

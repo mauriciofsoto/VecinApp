@@ -1,0 +1,103 @@
+
+<main class="operations-page">
+  <header class="page-header">
+    <div>
+      <h1>Unidades</h1>
+      <p>Administrá las unidades de tu edificio.</p>
+    </div>
+
+    <button type="button" (click)="abrirFormulario()">
+      Nueva unidad
+    </button>
+  </header>
+
+  @if (mostrarFormulario) {
+  <section class="panel" aria-labelledby="form-title">
+    <h2 id="form-title">Registrar unidad</h2>
+
+    <form (ngSubmit)="guardarUnidad()" class="form-grid">
+      <label>
+        Piso
+        <input type="text"
+               name="piso"
+               [(ngModel)]="piso"
+               maxlength="30"
+               placeholder="Ej. 1, 2, PB"
+               required />
+      </label>
+
+      <label>
+        Identificación
+        <input type="text"
+               name="identificacion"
+               [(ngModel)]="identificacion"
+               maxlength="30"
+               placeholder="Ej. A, B, 1"
+               required />
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : 'Registrar unidad' }}
+        </button>
+
+        <button type="button"
+                class="button-secondary"
+                (click)="cancelarFormulario()"
+                [disabled]="guardando()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </section>
+  }
+
+  <section class="panel" aria-label="Listado de unidades">
+    <div class="toolbar">
+      <label>
+        Buscar unidad
+        <input type="search"
+               name="busqueda"
+               [ngModel]="busqueda()"
+               (ngModelChange)="busqueda.set($event)"
+               placeholder="Piso o identificación" />
+      </label>
+    </div>
+
+    <p class="total">
+      Total de resultados: <strong>{{ filtradas().length }}</strong>
+    </p>
+
+    @if (mensaje()) {
+    <p class="feedback"
+       [class.feedback--error]="esError()"
+       [attr.role]="esError() ? 'alert' : 'status'">
+      {{ mensaje() }}
+    </p>
+    }
+
+    @if (cargando()) {
+    <p role="status">Cargando unidades…</p>
+    } @else if (unidades().length === 0) {
+    <p class="empty-state">
+      Todavía no hay unidades registradas en este edificio.
+    </p>
+    } @else {
+    <div class="item-list">
+      @for (unidad of filtradas(); track unidad.idUnidad) {
+      <article class="item-card">
+        <div class="item-info">
+          <h2>Unidad {{ unidad.identificacion }}</h2>
+          <p>Piso: {{ unidad.piso }}</p>
+          <p class="public-id">ID: {{ unidad.idUnidad }}</p>
+        </div>
+      </article>
+      } @empty {
+      <p class="empty-state">
+        No hay unidades que coincidan con la búsqueda.
+      </p>
+      }
+    </div>
+    }
+  </section>
+</main>

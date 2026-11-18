@@ -4,6 +4,8 @@ export type EstadoIncidencia = string;
 export interface Incidencia {
   id: number;
   idUnidad: number | null;
+  unidad?: string | null;
+
   piso?: string | null;
   identificacion?: string | null;
   idIncidencia: number;

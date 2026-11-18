@@ -134,6 +134,19 @@ public sealed class DerivacionesIncidenciasController : ControllerBase
         if (incidencia == null)
             return NotFound(new { mensaje = "No se encontró la incidencia en tu edificio." });
 
+        var estadoIncidencia = await _db.EstadosIncidencia
+            .Where(e => e.IdEstadoIncidencia == incidencia.IdEstadoIncidencia)
+            .Select(e => e.Nombre)
+            .FirstOrDefaultAsync(ct);
+
+        if (string.Equals(estadoIncidencia, "Cerrada", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new
+            {
+                mensaje = "No se puede derivar una incidencia que ya está cerrada."
+            });
+        }
+
         var usuario = await _db.Users
             .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.Id == request.IdUsuarioDestinatario, ct);
@@ -141,8 +154,9 @@ public sealed class DerivacionesIncidenciasController : ControllerBase
         var rolEsperado = request.TipoDestinatario == "Personal"
             ? "Portero"
             : "Propietario";
+
         if (request.TipoDestinatario == "Personal" &&
-    usuario?.IdEdificio != edificioId)
+            usuario?.IdEdificio != edificioId)
         {
             return BadRequest(new
             {
@@ -190,12 +204,12 @@ public sealed class DerivacionesIncidenciasController : ControllerBase
             }
 
             var esPropietarioDeLaUnidad = await _db.UsuariosUnidades
-       .AnyAsync(propiedad =>
-           propiedad.IdUsuario == usuario.Id &&
-           propiedad.IdUnidad == idUnidad &&
-           propiedad.Unidad.IdEdificio == edificioId &&
-           propiedad.TipoRelacion == "Propietario",
-           ct);
+                .AnyAsync(propiedad =>
+                    propiedad.IdUsuario == usuario.Id &&
+                    propiedad.IdUnidad == idUnidad &&
+                    propiedad.Unidad.IdEdificio == edificioId &&
+                    propiedad.TipoRelacion == "Propietario",
+                    ct);
 
             if (!esPropietarioDeLaUnidad)
             {
@@ -205,7 +219,6 @@ public sealed class DerivacionesIncidenciasController : ControllerBase
                 });
             }
         }
-       
 
         var exists = await _db.DerivacionesIncidencia
             .AnyAsync(d =>

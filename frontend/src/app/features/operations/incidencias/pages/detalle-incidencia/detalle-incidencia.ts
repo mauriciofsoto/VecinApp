@@ -1,10 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+
 import { AuthService } from '../../../../../core/services/auth';
 import { ChatIncidencia } from '../../components/chat-incidencia/chat-incidencia';
+import { Modal } from '../../../../../shared/components/organisms/modal/modal';
+import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
+import { SelectComponent, SelectOption } from '../../../../../shared/components/atoms/select/select';
+import { EmptyState } from '../../../../../shared/components/molecules/empty-state/empty-state';
+
+
+
 import {
   Incidencias,
   DetalleIncidencia,
@@ -14,7 +22,16 @@ import {
 @Component({
   selector: 'app-detalle-incidencia',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ChatIncidencia],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    ChatIncidencia,
+    Modal,
+    ButtonComponent,
+    SelectComponent,
+    EmptyState
+  ],
   templateUrl: './detalle-incidencia.html',
   styleUrl: './detalle-incidencia.scss'
 })
@@ -25,7 +42,12 @@ export class DetalleIncidenciaComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   readonly esAdministrador = this.auth.currentUser()?.rol === 'Administrador';
   readonly esPortero = this.auth.currentUser()?.rol === 'Portero';
-  readonly volverUrl = this.esAdministrador ? '/administrador/incidencias' : '/incidencias-derivadas';
+  readonly esPropietario = this.auth.currentUser()?.rol === 'Propietario';
+  readonly esPersonal = this.esPortero || this.esPropietario;
+
+  readonly volverUrl = this.esAdministrador
+    ? '/administrador/incidencias'
+    : '/incidencias-derivadas';
   incidencia: DetalleIncidencia | null = null;
   estados: EstadoIncidenciaDto[] = [];
   estadoSeleccionado: number | null = null;
@@ -35,23 +57,44 @@ export class DetalleIncidenciaComponent implements OnInit {
   error = '';
   mensaje = '';
   comentarioResolucion = '';
-  @ViewChild('modalDerivacion') modalDerivacion?: ElementRef<HTMLDialogElement>;
-  tipoDestinatario: 'Propietario' | 'Personal' = 'Propietario';
-  destinatarioId = '';
-  destinatarios: DestinatarioDerivacionDto[] = [];
-  guardandoDerivacion = false;
-  
+  readonly modalDerivacionAbierto = signal(false);
+  readonly tipoDestinatario = signal<'Propietario' | 'Personal'>('Personal');
+  readonly destinatarioSeleccionado = signal('');
+  readonly propietariosRelacionados = signal<DestinatarioDerivacionDto[]>([]);
+  readonly personalDisponible = signal<DestinatarioDerivacionDto[]>([]);
+  readonly cargandoDerivacion = signal(false);
+  readonly guardandoDerivacion = signal(false);
+  readonly errorDerivacion = signal('');
+  readonly opcionesDestinatario = computed<SelectOption[]>(() => {
+    const items = this.tipoDestinatario() === 'Propietario'
+      ? this.propietariosRelacionados()
+      : this.personalDisponible();
 
+    return items.map(item => ({
+      label: `${item.nombre} ${item.apellido}`.trim(),
+      value: item.id,
+    }));
+  });
+  readonly opcionesTipoDestinatario = computed<SelectOption[]>(() => {
+    const opciones: SelectOption[] = [];
+
+    if (this.incidencia?.idUnidad != null) {
+      opciones.push({ label: 'Propietario', value: 'Propietario' });
+    }
+
+    opciones.push({ label: 'Personal', value: 'Personal' });
+    return opciones;
+  });
   get estadoActual(): string {
     return this.normalizarEstado(this.incidencia?.estado ?? '');
   }
 
   get puedeIniciarGestion(): boolean {
-    return this.esPortero && this.estadoActual === 'pendiente';
+    return this.esPersonal && this.estadoActual === 'pendiente';
   }
 
   get puedeMarcarResuelta(): boolean {
-    return this.esPortero && this.estadoActual === 'en-proceso';
+    return this.esPersonal && this.estadoActual === 'en-proceso';
   }
 
   get puedeAprobarCierre(): boolean {
@@ -91,83 +134,127 @@ export class DetalleIncidenciaComponent implements OnInit {
         }
       });
   }
-
   abrirDerivacion(): void {
-    this.error = '';
-    this.destinatarioId = '';
-    this.tipoDestinatario = 'Personal';
-    this.modalDerivacion?.nativeElement.showModal();
+    if (
+      !this.incidencia ||
+      this.estadoActual === 'cerrada' ||
+      this.cargandoDerivacion() ||
+      this.guardandoDerivacion()
+    ) {
+      return;
+    }
+
+    this.errorDerivacion.set('');
+    this.destinatarioSeleccionado.set('');
+    this.tipoDestinatario.set(
+      this.incidencia.idUnidad != null ? 'Propietario' : 'Personal'
+    );
+
+    this.modalDerivacionAbierto.set(true);
     this.cargarDestinatarios();
   }
 
   cerrarDerivacion(): void {
-    this.modalDerivacion?.nativeElement.close();
+    if (this.guardandoDerivacion()) return;
+
+    this.modalDerivacionAbierto.set(false);
+    this.errorDerivacion.set('');
   }
 
-  cambiarTipoDestinatario(tipo: 'Propietario' | 'Personal'): void {
+  cambiarTipoDestinatario(value: unknown): void {
+    if (value !== 'Propietario' && value !== 'Personal') return;
+
+    const tipo = value as 'Propietario' | 'Personal';
+
     if (
       tipo === 'Propietario' &&
       this.incidencia?.idUnidad == null
     ) {
-      this.error = 'Las incidencias de espacios comunes no se pueden derivar a propietarios.';
+      this.errorDerivacion.set(
+        'Las incidencias de espacios comunes no se pueden derivar a propietarios.'
+      );
       return;
     }
 
-    this.tipoDestinatario = tipo;
-    this.destinatarioId = '';
+    this.tipoDestinatario.set(tipo);
+    this.destinatarioSeleccionado.set('');
+    this.errorDerivacion.set('');
     this.cargarDestinatarios();
   }
+  seleccionarDestinatario(value: unknown): void {
+    this.destinatarioSeleccionado.set(
+      typeof value === 'string' ? value : ''
+    );
+  }
+
   private cargarDestinatarios(): void {
     if (!this.incidencia) return;
 
+    this.cargandoDerivacion.set(true);
+    this.errorDerivacion.set('');
+
     this.incidenciasService.cargarDestinatarios(
       this.incidencia.idIncidencia,
-      this.tipoDestinatario,
-    ).subscribe({
-      next: rows => {
-        this.destinatarios = rows;
+      this.tipoDestinatario()
+    )
+      .pipe(finalize(() => this.cargandoDerivacion.set(false)))
+      .subscribe({
+        next: rows => {
+          if (this.tipoDestinatario() === 'Propietario') {
+            this.propietariosRelacionados.set(rows);
+          } else {
+            this.personalDisponible.set(rows);
+          }
 
-        if (rows.length === 0) {
-          this.error = this.tipoDestinatario === 'Propietario'
-            ? 'No hay propietarios autorizados para esta unidad.'
-            : 'No hay personal disponible para este edificio.';
+          if (rows.length === 0) {
+            this.errorDerivacion.set(
+              this.tipoDestinatario() === 'Propietario'
+                ? 'No hay propietarios autorizados para esta unidad.'
+                : 'No hay personal disponible para este edificio.'
+            );
+          }
+        },
+        error: err => {
+          this.errorDerivacion.set(
+            err.error?.mensaje ??
+            'No se pudieron cargar los destinatarios autorizados.'
+          );
         }
-      },
-      error: err => {
-        this.error = err.error?.mensaje
-          ?? 'No se pudieron cargar los destinatarios autorizados.';
-      },
-    });
+      });
   }
 
   confirmarDerivacion(): void {
     if (
       !this.incidencia ||
-      !this.destinatarioId ||
-      this.guardandoDerivacion
-    ) return;
+      !this.destinatarioSeleccionado() ||
+      this.estadoActual === 'cerrada' ||
+      this.guardandoDerivacion()
+    ) {
+      return;
+    }
 
-    this.guardandoDerivacion = true;
-    this.error = '';
+    this.guardandoDerivacion.set(true);
+    this.errorDerivacion.set('');
 
     this.incidenciasService.derivar(this.incidencia.idIncidencia, {
-      idUsuarioDestinatario: this.destinatarioId,
-      tipoDestinatario: this.tipoDestinatario,
-    }).subscribe({
-      next: () => {
-        this.mensaje = 'La incidencia se derivó correctamente.';
-        this.guardandoDerivacion = false;
-        this.modalDerivacion?.nativeElement.close();
-      },
-      error: err => {
-        this.error = err.error?.mensaje
-          ?? (err.status === 409
-            ? 'Esta incidencia ya fue derivada a ese destinatario.'
-            : 'No se pudo registrar la derivación.');
-
-        this.guardandoDerivacion = false;
-      },
-    });
+      idUsuarioDestinatario: this.destinatarioSeleccionado(),
+      tipoDestinatario: this.tipoDestinatario()
+    })
+      .pipe(finalize(() => this.guardandoDerivacion.set(false)))
+      .subscribe({
+        next: () => {
+          this.mensaje = 'La incidencia se derivó correctamente.';
+          this.modalDerivacionAbierto.set(false);
+        },
+        error: err => {
+          this.errorDerivacion.set(
+            err.error?.mensaje ??
+            (err.status === 409
+              ? 'Esta incidencia ya fue derivada a ese destinatario.'
+              : 'No se pudo registrar la derivación.')
+          );
+        }
+      });
   }
 
   guardarEstado(): void {
@@ -259,7 +346,7 @@ export class DetalleIncidenciaComponent implements OnInit {
       case 'en proceso':
         return 'Gestión iniciada.';
       case 'resuelta':
-        return this.esPortero
+        return this.esPersonal
           ? 'Incidencia marcada como resuelta. Queda pendiente de aprobación de Administración.'
           : 'El estado se actualizó correctamente.';
       case 'cerrada':

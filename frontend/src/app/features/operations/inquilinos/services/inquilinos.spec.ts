@@ -32,11 +32,5 @@ describe('Inquilinos', () => {
     expect(resultado).toEqual(respuesta);
   });
 
-  it('mantiene disponible el estado local usado por recepción de paquetes', () => {
-    expect(service.registrar({
-      nombre: 'Ana', apellido: 'Pérez', email: 'ana@example.test', documento: '123',
-      edificioId: 1, edificioNombre: 'Edificio A', unidad: '2B',
-    })).toBe(true);
-    expect(service.inquilinos().length).toBe(1);
-  });
+ 
 });

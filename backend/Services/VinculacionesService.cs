@@ -47,9 +47,8 @@ public sealed class VinculacionesService
                           where propiedad.IdUsuario != ocupacion.IdUsuario &&
                               propiedad.Unidad?.IdEdificio == usuario.Edificio && ocupacion.Unidad?.IdEdificio == usuario.Edificio &&
                               propiedad.Usuario.IdEdificio == usuario.Edificio && ocupacion.Usuario.IdEdificio == usuario.Edificio &&
-                              CoincideReferencia(propiedad, ocupacion.Usuario, registros) &&
-                              CoincideReferencia(ocupacion, propiedad.Usuario, registros) &&
-                              (TieneNombreReferencia(propiedad, registros) || TieneNombreReferencia(ocupacion, registros))
+                             CoincideReferencia(propiedad, ocupacion.Usuario, registros) &&
+CoincideReferencia(ocupacion, propiedad.Usuario, registros)
                           select new Par(propiedad, ocupacion)).ToList();
 
         // Una solicitud solo nace si los datos disponibles dejan un único par para esa unidad.
@@ -131,13 +130,6 @@ public sealed class VinculacionesService
                 return false;
         }
         return true;
-    }
-
-    private static bool TieneNombreReferencia(DeclaracionUnidadComunitaria d, IReadOnlyDictionary<string, RegistroComunitario> registros)
-    {
-        registros.TryGetValue(d.IdUsuario, out var registro);
-        return !string.IsNullOrWhiteSpace(d.PersonaRelacionNombre ?? (d.Tipo == "Ocupacion" ? registro?.PropietarioDeclaradoNombre : null)) ||
-            !string.IsNullOrWhiteSpace(d.PersonaRelacionApellido ?? (d.Tipo == "Ocupacion" ? registro?.PropietarioDeclaradoApellido : null));
     }
 
     private static bool CoincideParte(string? declarado, string real)

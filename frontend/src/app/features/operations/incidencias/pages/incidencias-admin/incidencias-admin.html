@@ -162,12 +162,14 @@
             </td>
 
             <td class="incidencias-admin__acciones">
+              @if (incidencia.estado !== 'cerrada') {
               <app-button variant="outline"
                           size="sm"
                           (buttonClick)="abrirDerivacion(incidencia)"
                           [disabled]="cargandoDerivacion() || guardandoDerivacion()">
                 Derivar
               </app-button>
+              }
               <app-button variant="outline"
                           [routerLink]="['/administrador/incidencias', incidencia.id]">
                 Detalle completo
@@ -207,11 +209,9 @@
       <span class="incidencias-admin__contexto-label">
         Ubicación de la incidencia
       </span>
-
       <strong>
         @if (incidenciaSeleccionada()?.idUnidad != null) {
-        Unidad {{ incidenciaSeleccionada()?.piso }}°
-        {{ incidenciaSeleccionada()?.identificacion }}
+        {{ incidenciaSeleccionada()?.unidad || ('Unidad ' + incidenciaSeleccionada()?.piso + '° ' + incidenciaSeleccionada()?.identificacion) }}
         } @else {
         Espacios comunes
         }

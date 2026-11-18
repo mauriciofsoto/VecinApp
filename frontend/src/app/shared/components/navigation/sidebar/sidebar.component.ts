@@ -223,6 +223,12 @@ export class SidebarComponent {
           roles: ['Administrador'],
         },
         {
+          label: 'Unidades',
+          icon: '▦',
+          route: '/admin/unidades',
+          roles: ['Administrador'],
+        },
+        {
           label: 'Inquilinos',
           icon: '♙',
           route: '/inquilinos',

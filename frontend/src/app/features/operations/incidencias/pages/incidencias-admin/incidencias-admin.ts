@@ -73,14 +73,17 @@ export class IncidenciasAdmin implements OnInit {
   readonly guardandoDerivacion = signal(false);
   readonly errorDerivacion = signal('');
 
-  readonly opcionesTipoDestinatario = computed<SelectOption[]>(() => [
-    ...(this.incidenciaSeleccionada()?.idUnidad !== null &&
-      this.incidenciaSeleccionada()?.idUnidad !== undefined
-      ? [{ label: 'Propietario', value: 'Propietario' }]
-      : []),
-    { label: 'Personal del edificio', value: 'Personal' },
-  ]);
+  readonly opcionesTipoDestinatario = computed<SelectOption[]>(() => {
+    const opciones: SelectOption[] = [];
+    const incidencia = this.incidenciaSeleccionada();
 
+    if (incidencia?.idUnidad != null) {
+      opciones.push({ label: 'Propietario', value: 'Propietario' });
+    }
+
+    opciones.push({ label: 'Personal', value: 'Personal' });
+    return opciones;
+  });
   readonly opcionesDestinatario = computed<SelectOption[]>(() => {
     const items = this.tipoDestinatario() === 'Propietario'
       ? this.propietariosRelacionados()
@@ -224,7 +227,11 @@ export class IncidenciasAdmin implements OnInit {
 
 
   abrirDerivacion(incidencia: IncidenciaModel): void {
-    if (this.cargandoDerivacion() || this.guardandoDerivacion()) return;
+    if (
+      incidencia.estado === 'cerrada' ||
+      this.cargandoDerivacion() ||
+      this.guardandoDerivacion()
+    ) return;
 
     const tipoInicial: 'Propietario' | 'Personal' =
       incidencia.idUnidad != null ? 'Propietario' : 'Personal';

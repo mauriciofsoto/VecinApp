@@ -1,0 +1,181 @@
+
+@use '../../../../../../styles/abstracts' as *;
+@use '../../../../../../styles/abstracts/operations/mixins-operations' as ops;
+
+:host {
+  display: block;
+}
+
+.operations-page {
+  @include ops.operation-page;
+  display: grid;
+  gap: $space-5;
+  padding: $space-6;
+  color: var(--color-text-primary);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+}
+
+  .page-header p,
+  .item-card p {
+    @include ops.operation-muted-text($text-body);
+  }
+
+.panel,
+.item-card {
+  @include ops.operation-panel;
+}
+
+.panel {
+  padding: $space-5;
+}
+
+.form-grid {
+  @include ops.operation-form-grid;
+}
+
+label {
+  @include ops.operation-form-label;
+}
+
+input {
+  width: 100%;
+  padding: $space-3;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: $radius-control;
+  background: var(--color-control-surface);
+  font: inherit;
+  transition: var(--effect-transition);
+}
+
+  input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.75;
+  }
+
+  input:hover:not(:disabled) {
+    border-color: var(--color-border-hover);
+  }
+
+  input:focus-visible {
+    outline: 2px solid var(--color-primary-focus-border);
+    outline-offset: 1px;
+    box-shadow: var(--shadow-focus);
+  }
+
+button {
+  padding: $space-3 $space-4;
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-primary);
+  border-radius: $radius-control;
+  background: var(--color-primary);
+  cursor: pointer;
+  transition: var(--effect-transition);
+}
+
+  button:hover:not(:disabled) {
+    border-color: var(--color-primary-hover);
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-primary);
+  }
+
+  button:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: var(--state-disabled-opacity);
+  }
+
+.button-secondary {
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-muted);
+}
+
+  .button-secondary:hover:not(:disabled) {
+    border-color: var(--color-primary-focus-border);
+    background: var(--color-surface-highlight);
+    box-shadow: none;
+  }
+
+.form-actions,
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $space-4;
+}
+
+.total {
+  margin-top: $space-4;
+}
+
+.item-list {
+  display: grid;
+  gap: $space-4;
+  margin-top: $space-4;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+}
+
+  .item-card h2 {
+    margin-top: 0;
+  }
+
+.public-id code {
+  overflow-wrap: anywhere;
+}
+
+.feedback {
+  color: var(--color-info-text);
+}
+
+.feedback--error {
+  color: var(--color-danger-text);
+}
+
+.empty-state {
+  padding: $space-4 0;
+  color: var(--color-text-muted);
+}
+
+@include mobile {
+  .operations-page {
+    padding: $space-4;
+  }
+
+  .page-header,
+  .item-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-grid,
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .item-actions,
+  .form-actions {
+    flex-wrap: wrap;
+  }
+}

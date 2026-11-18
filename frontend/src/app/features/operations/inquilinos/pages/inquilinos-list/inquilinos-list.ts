@@ -26,16 +26,57 @@ export class InquilinosList implements OnInit {
   readonly errorCarga = signal('');
   readonly filtroPerfil = signal<FiltroPerfil>('todos');
   readonly busqueda = signal('');
-  mostrarFormulario = false;
+  readonly declaracionesProcesando = signal<Set<number>>(new Set());
+  readonly errorDeclaracion = signal('');
 
-  nombre = '';
-  apellido = '';
-  email = '';
-  documento = '';
-  edificioId = 1;
-  edificioNombre = 'Edificio A';
-  unidad = '';
-  readonly mensaje = signal('');
+  cambiarConfirmacion(
+    personaId: string,
+    declaracionId: number,
+    estado: 'Verificada' | 'Rechazada'
+  ): void {
+    if (this.declaracionesProcesando().has(declaracionId)) return;
+
+    this.errorDeclaracion.set('');
+
+    this.declaracionesProcesando.update(actuales => {
+      const nuevos = new Set(actuales);
+      nuevos.add(declaracionId);
+      return nuevos;
+    });
+
+    this.servicio.cambiarConfirmacion(declaracionId, estado)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: respuesta => {
+          this.personas.update(personas =>
+            personas.map(persona =>
+              persona.id !== personaId
+                ? persona
+                : {
+                  ...persona,
+                  unidadesDeclaradas: persona.unidadesDeclaradas.map(unidad =>
+                    unidad.idDeclaracionUnidad === declaracionId
+                      ? { ...unidad, estadoConfirmacion: respuesta.estadoConfirmacion }
+                      : unidad
+                  )
+                }
+            )
+          );
+        },
+        error: error => {
+          this.errorDeclaracion.set(
+            error?.error?.message || 'No se pudo actualizar la declaración.'
+          );
+        },
+        complete: () => {
+          this.declaracionesProcesando.update(actuales => {
+            const nuevos = new Set(actuales);
+            nuevos.delete(declaracionId);
+            return nuevos;
+          });
+        }
+      });
+  }
 
   readonly opcionesPerfil: SelectOption<FiltroPerfil>[] = [
     { label: 'Todos los perfiles', value: 'todos' },
@@ -83,39 +124,6 @@ export class InquilinosList implements OnInit {
     return rol === 'Portero' ? 'Personal' : rol;
   }
 
-  registrar(): void {
-    if (
-      !this.nombre.trim() || !this.apellido.trim() || !this.email.trim() ||
-      !this.documento.trim() || !this.edificioNombre.trim() || !this.unidad.trim() ||
-      this.edificioId <= 0
-    ) {
-      this.mensaje.set('Completá todos los campos.');
-      return;
-    }
-
-    const creado = this.servicio.registrar({
-      nombre: this.nombre.trim(),
-      apellido: this.apellido.trim(),
-      email: this.email.trim(),
-      documento: this.documento.trim(),
-      edificioId: Number(this.edificioId),
-      edificioNombre: this.edificioNombre.trim(),
-      unidad: this.unidad.trim(),
-    });
-
-    if (!creado) {
-      this.mensaje.set('Ya existe un residente local con ese email o documento.');
-      return;
-    }
-
-    this.nombre = '';
-    this.apellido = '';
-    this.email = '';
-    this.documento = '';
-    this.unidad = '';
-    this.mensaje.set('Registro local guardado solo en memoria; no fue enviado al backend ni aparecerá en este listado.');
-    this.mostrarFormulario = false;
-  }
 
   private normalizar(valor: string): string {
     return valor.trim().toLocaleLowerCase();

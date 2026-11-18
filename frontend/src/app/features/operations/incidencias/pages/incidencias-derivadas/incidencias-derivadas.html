@@ -1,105 +1,123 @@
+
 <section class="incidencias-derivadas">
   <header class="incidencias-derivadas__header">
     <div>
       <span class="incidencias-derivadas__eyebrow">{{ perfil.toLocaleUpperCase('es-AR') }}</span>
-      <h1>Incidencias</h1>
-      <p>@if (perfil === 'Personal') { Consultá las incidencias asignadas por Administración y reportá problemas en espacios comunes. } @else { Incidencias derivadas por Administración para las unidades vinculadas. }</p>
+      <h1>Incidencias derivadas</h1>
+      <p>
+        @if (perfil === 'Personal') {
+        Incidencias asignadas a tu usuario por Administración. También podés reportar problemas en espacios comunes.
+        } @else {
+        Incidencias derivadas por Administración para tus unidades vinculadas.
+        }
+      </p>
     </div>
+
     @if (puedeCrear) {
-      <app-button
-        variant="primary"
-        [disabled]="cargandoCategorias() || !categorias().length"
-        (buttonClick)="abrirFormulario()"
-      >
-        + Nueva incidencia
-      </app-button>
+    <app-button variant="primary"
+                [disabled]="cargandoCategorias() || !categorias().length"
+                (buttonClick)="abrirFormulario()">
+      + Nueva incidencia
+    </app-button>
     }
   </header>
 
   @if (mensajeCreacion()) {
-    <p class="incidencias-derivadas__feedback" role="status">{{ mensajeCreacion() }}</p>
-  }
-  @if (errorCategorias()) {
-    <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ errorCategorias() }}</p>
-  }
-  @if (errorCreacion()) {
-    <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ errorCreacion() }}</p>
+  <p class="incidencias-derivadas__feedback" role="status">{{ mensajeCreacion() }}</p>
   }
 
-  <section class="incidencias-derivadas__contenido" aria-label="Incidencias">
+  @if (errorCategorias()) {
+  <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ errorCategorias() }}</p>
+  }
+
+  @if (errorCreacion()) {
+  <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ errorCreacion() }}</p>
+  }
+
+  <section class="incidencias-derivadas__contenido" aria-label="Incidencias derivadas">
     @if (cargando()) {
-      <p class="incidencias-derivadas__feedback" role="status">Cargando incidencias…</p>
+    <p class="incidencias-derivadas__feedback" role="status">Cargando incidencias derivadas…</p>
     } @else if (error()) {
-      <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ error() }}</p>
+    <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ error() }}</p>
     } @else if (items().length === 0) {
-      <p class="incidencias-derivadas__feedback" role="status">No hay incidencias asignadas para mostrar.</p>
+    <p class="incidencias-derivadas__feedback" role="status">Todavía no tenés incidencias derivadas.</p>
     } @else {
-      <div class="incidencias-derivadas__tabla-wrapper">
-        <table class="incidencias-derivadas__tabla">
-          <thead>
-            <tr>
-              <th>Incidencia</th>
-              <th>Descripción</th>
-              <th>Unidad / asignación</th>
-              <th>Ubicación</th>
-              <th>Fecha</th>
-              <th>Estado</th>
-              <th>Derivada por</th>
-              @if (puedeGestionar) { <th>Acción</th> }
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of items(); track item.idDerivacion) {
-              <tr>
-                <td>
-                  {{ item.titulo }}
-                  <small class="incidencias-derivadas__categoria">{{ item.categoria }}</small>
-                </td>
-                <td>
-                  {{ item.descripcion }}
-                  <small class="incidencias-derivadas__categoria">Reportada por {{ item.reportante }}</small>
-                </td>
-                <td>
-                  @if (item.tipoDestinatario === 'Personal') {
-                    Asignada a vos@if (item.unidad) { · {{ item.unidad }} }
-                  } @else {
-                    {{ item.unidad || 'Sin unidad relacionada' }}
-                  }
-                </td>
-                <td>{{ item.ubicacion || 'Sin ubicación indicada' }}</td>
-                <td>{{ item.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</td>
-                <td>
-                  <span
-                    class="incidencias-derivadas__estado incidencias-derivadas__estado--gestion"
-                    [attr.data-estado]="normalizarEstado(item.estado)"
-                  >
-                    {{ item.estado }}
-                  </span>
-                </td>
-                <td>{{ item.fechaDerivacion | date: 'dd/MM/yyyy HH:mm' }}<br><small>{{ item.administrador }}</small></td>
-                @if (puedeGestionar) {
-                  <td class="incidencias-derivadas__acciones">
-                    <a class="incidencias-derivadas__accion" [routerLink]="['/incidencias-derivadas', item.idIncidencia]">
-                      {{ etiquetaAccion(item.estado) }}
-                    </a>
-                  </td>
-                }
-              </tr>
+    <div class="incidencias-derivadas__tabla-wrapper">
+      <table class="incidencias-derivadas__tabla">
+        <thead>
+          <tr>
+            <th>Incidencia</th>
+            <th>Descripción</th>
+            <th>Unidad / asignación</th>
+            <th>Ubicación</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Derivada por</th>
+            @if (puedeGestionar) {
+            <th>Acción</th>
             }
-          </tbody>
-        </table>
-      </div>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (item of items(); track item.idDerivacion) {
+          <tr>
+            <td>
+              {{ item.titulo }}
+              <small class="incidencias-derivadas__categoria">{{ item.categoria }}</small>
+            </td>
+
+            <td>
+              {{ item.descripcion }}
+              <small class="incidencias-derivadas__categoria">Reportada por {{ item.reportante }}</small>
+            </td>
+
+            <td>
+              @if (item.tipoDestinatario === 'Personal') {
+              Asignada a vos@if (item.unidad) { · {{ item.unidad }} }
+              } @else {
+              {{ item.unidad || 'Sin unidad relacionada' }}
+              }
+            </td>
+
+            <td>{{ item.ubicacion || 'Sin ubicación indicada' }}</td>
+            <td>{{ item.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</td>
+
+            <td>
+              <span class="incidencias-derivadas__estado incidencias-derivadas__estado--gestion"
+                    [attr.data-estado]="normalizarEstado(item.estado)">
+                {{ item.estado }}
+              </span>
+            </td>
+
+            <td>
+              {{ item.fechaDerivacion | date: 'dd/MM/yyyy HH:mm' }}
+              <br>
+              <small>{{ item.administrador }}</small>
+            </td>
+
+            @if (puedeGestionar) {
+            <td class="incidencias-derivadas__acciones">
+              <a class="incidencias-derivadas__accion"
+                 [routerLink]="['/incidencias-derivadas', item.idIncidencia]">
+                {{ etiquetaAccion(item.estado) }}
+              </a>
+            </td>
+            }
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
     }
   </section>
 </section>
 
 @if (puedeCrear) {
-  <app-modal [(open)]="modalCrearAbierto" heading="Nueva incidencia comunitaria" size="lg">
-    <app-crear-incidencia
-      [categoriasDisponibles]="categorias()"
-      [soloEspaciosComunes]="true"
-      [enviando]="enviando()"
-      (guardar)="guardarIncidencia($event)"
-    />
-  </app-modal>
+<app-modal [(open)]="modalCrearAbierto" heading="Nueva incidencia comunitaria" size="lg">
+  <app-crear-incidencia [categoriasDisponibles]="categorias()"
+                        [soloEspaciosComunes]="true"
+                        [enviando]="enviando()"
+                        (guardar)="guardarIncidencia($event)" />
+</app-modal>
 }

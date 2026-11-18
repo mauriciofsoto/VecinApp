@@ -1,4 +1,5 @@
 export interface UnidadDeclarada {
+  idDeclaracionUnidad: number;
   tipo: string;
   pisoDeclarado: string | null;
   identificacionDeclarada: string | null;

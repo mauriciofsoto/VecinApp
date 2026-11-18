@@ -6,7 +6,63 @@
       <p>{{ communityName }} · {{ now() | date:'EEEE d MMMM y':'':'es-AR' }}</p>
     </div>
   </header>
+  @if (solicitudesVinculacionLoading()) {
+  <section class="dashboard-widget">
+    <p class="widget-state" role="status">
+      Consultando solicitudes de vinculación…
+    </p>
+  </section>
+  } @else if (solicitudesVinculacionError()) {
+  <section class="dashboard-widget">
+    <p class="widget-state widget-state--error" role="alert">
+      No se pudieron cargar las solicitudes de vinculación.
+    </p>
+  </section>
+  } @else if (solicitudesPendientes().length) {
+  <section class="dashboard-widget" aria-labelledby="vinculaciones-title">
+    <header class="widget-heading">
+      <div>
+        <span class="widget-kicker">RELACIONES DE ALQUILER</span>
+        <h2 id="vinculaciones-title">Solicitudes de vinculación</h2>
+      </div>
 
+      <span class="notification-badge">
+        {{ solicitudesPendientes().length }} pendientes
+      </span>
+    </header>
+
+    <ul class="resident-list">
+      @for (solicitud of solicitudesPendientes(); track solicitud.id) {
+      <li>
+        <div class="list-copy">
+          <strong>
+            {{ solicitud.nombreOtraParte }} · Piso {{ solicitud.pisoUnidad }},
+            unidad {{ solicitud.identificacionUnidad }}
+          </strong>
+
+          <span>
+            @if (solicitud.miParteAcepto) {
+            Ya aceptaste. Falta la respuesta de la otra parte.
+            } @else {
+            {{
+ solicitud.otraParteAcepto
+                    ? 'La otra parte ya aceptó. Falta tu respuesta.'
+                    : 'Está pendiente la respuesta de ambas partes.'
+            }}
+            }
+          </span>
+        </div>
+
+        <a class="widget-link"
+           routerLink="/perfil"
+           [queryParams]="{ solicitudVinculacionId: solicitud.id }">
+          Ver solicitud ↗
+        </a>
+      </li>
+      }
+    </ul>
+  </section>
+  }
   <app-bento-grid [widgets]="widgets">
     <ng-template bentoItem="quick-actions">
       <section class="dashboard-widget" aria-labelledby="quick-actions-title">
@@ -44,19 +100,19 @@
           <a class="widget-link" routerLink="/mis-reservas">Abrir módulo <span aria-hidden="true">↗</span></a>
         </header>
         @if (reservationsLoading()) {
-          <p class="widget-state" role="status">Cargando tus reservas…</p>
+        <p class="widget-state" role="status">Cargando tus reservas…</p>
         } @else if (reservationsError()) {
-          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus reservas.</p>
+        <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus reservas.</p>
         } @else if (reservations(); as items) {
-          @if (items.length) {
-            <ul class="resident-list" aria-label="Mis reservas próximas">
-              @for (item of items.slice(0, 3); track item.id) {
-                <li><div class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.fecha | date:'dd/MM/yyyy' }} · {{ item.horaInicio }} · {{ item.estado }}</span></div></li>
-              }
-            </ul>
-          } @else {
-            <p class="widget-state">No tenés reservas registradas.</p>
+        @if (items.length) {
+        <ul class="resident-list" aria-label="Mis reservas próximas">
+          @for (item of items.slice(0, 3); track item.id) {
+          <li><div class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.fecha | date:'dd/MM/yyyy' }} · {{ item.horaInicio }} · {{ item.estado }}</span></div></li>
           }
+        </ul>
+        } @else {
+        <p class="widget-state">No tenés reservas registradas.</p>
+        }
         }
         <a class="btn-action widget-action" routerLink="/mis-reservas">Ir a mis reservas</a>
       </section>
@@ -68,20 +124,20 @@
           <div><span class="widget-kicker">PORTERÍA</span><h2 id="packages-title">Paquetería</h2></div>
         </header>
         @if (packagesLoading()) {
-          <p class="widget-state" role="status">Cargando tus paquetes…</p>
+        <p class="widget-state" role="status">Cargando tus paquetes…</p>
         } @else if (packagesError()) {
-          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus paquetes.</p>
+        <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus paquetes.</p>
         } @else if (packages(); as items) {
-          <div class="incident-summary"><strong>{{ pendingPackageCount() }}</strong><span>pendientes</span></div>
-          @if (items.length) {
-            <ul class="resident-list" aria-label="Mis paquetes recientes">
-              @for (item of items.slice(0, 3); track item.id) {
-                <li><div class="list-copy"><strong>{{ item.remitente }}</strong><span>{{ item.identificacion }} · {{ item.estado }}</span></div></li>
-              }
-            </ul>
-          } @else {
-            <p class="widget-state">No tenés paquetes registrados.</p>
+        <div class="incident-summary"><strong>{{ pendingPackageCount() }}</strong><span>pendientes</span></div>
+        @if (items.length) {
+        <ul class="resident-list" aria-label="Mis paquetes recientes">
+          @for (item of items.slice(0, 3); track item.id) {
+          <li><div class="list-copy"><strong>{{ item.remitente }}</strong><span>{{ item.identificacion }} · {{ item.estado }}</span></div></li>
           }
+        </ul>
+        } @else {
+        <p class="widget-state">No tenés paquetes registrados.</p>
+        }
         }
         <a class="widget-link" routerLink="/mis-paquetes">Abrir historial <span aria-hidden="true">↗</span></a>
       </section>
@@ -94,29 +150,29 @@
           <a class="widget-link" routerLink="/mis-incidencias">Ver todas <span aria-hidden="true">↗</span></a>
         </header>
         @if (incidentsLoading()) {
-          <p class="widget-state" role="status">Cargando tus incidencias…</p>
+        <p class="widget-state" role="status">Cargando tus incidencias…</p>
         } @else if (incidentsError()) {
-          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus incidencias.</p>
-          <a class="widget-link" routerLink="/mis-incidencias">Abrir mis incidencias <span aria-hidden="true">↗</span></a>
+        <p class="widget-state widget-state--error" role="alert">No se pudieron cargar tus incidencias.</p>
+        <a class="widget-link" routerLink="/mis-incidencias">Abrir mis incidencias <span aria-hidden="true">↗</span></a>
         } @else if (incidents(); as items) {
-          <div class="incident-summary">
-            <strong>{{ activeIncidents.length }}</strong>
-            <span>activas</span>
-          </div>
-          @if (activeIncidents.length) {
-            <ul class="resident-list" aria-label="Incidencias activas recientes">
-              @for (item of activeIncidents.slice(0, 3); track item.id) {
-                <li>
-                  <div class="list-copy">
-                    <strong>{{ item.titulo }}</strong>
-                    <span>{{ item.estado }} · {{ item.fechaCreacion | date:'dd/MM/yyyy' }}</span>
-                  </div>
-                </li>
-              }
-            </ul>
-          } @else {
-            <p class="widget-state">No tenés incidencias activas.</p>
+        <div class="incident-summary">
+          <strong>{{ activeIncidents.length }}</strong>
+          <span>activas</span>
+        </div>
+        @if (activeIncidents.length) {
+        <ul class="resident-list" aria-label="Incidencias activas recientes">
+          @for (item of activeIncidents.slice(0, 3); track item.id) {
+          <li>
+            <div class="list-copy">
+              <strong>{{ item.titulo }}</strong>
+              <span>{{ item.estado }} · {{ item.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </li>
           }
+        </ul>
+        } @else {
+        <p class="widget-state">No tenés incidencias activas.</p>
+        }
         }
         <a class="btn-action widget-action" routerLink="/mis-incidencias">＋ Crear incidencia</a>
       </section>
@@ -129,27 +185,27 @@
           <a class="widget-link" routerLink="/comunidad">Ver comunidad <span aria-hidden="true">↗</span></a>
         </header>
         @if (publicationsLoading()) {
-          <p class="widget-state" role="status">Cargando tus publicaciones e interacciones…</p>
+        <p class="widget-state" role="status">Cargando tus publicaciones e interacciones…</p>
         } @else if (publicationsError()) {
-          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar las publicaciones de la comunidad.</p>
+        <p class="widget-state widget-state--error" role="alert">No se pudieron cargar las publicaciones de la comunidad.</p>
         } @else {
-          <div class="incident-summary"><strong>{{ myPublications().length }}</strong><span>publicaciones propias · {{ myCommentCount() }} comentarios · {{ myReactionCount() }} reacciones</span></div>
-          @if (myPublications().length) {
-            <ul class="resident-list" aria-label="Mis publicaciones recientes">
-              @for (item of myPublications().slice(0, 3); track item.id) {
-                <li><div class="list-copy"><strong>{{ item.title || item.content }}</strong><span>{{ item.createdAt | date:'dd/MM/yyyy' }} · {{ item.type }}</span></div></li>
-              }
-            </ul>
-          } @else {
-            <p class="widget-state">Todavía no creaste publicaciones.</p>
+        <div class="incident-summary"><strong>{{ myPublications().length }}</strong><span>publicaciones propias · {{ myCommentCount() }} comentarios · {{ myReactionCount() }} reacciones</span></div>
+        @if (myPublications().length) {
+        <ul class="resident-list" aria-label="Mis publicaciones recientes">
+          @for (item of myPublications().slice(0, 3); track item.id) {
+          <li><div class="list-copy"><strong>{{ item.title || item.content }}</strong><span>{{ item.createdAt | date:'dd/MM/yyyy' }} · {{ item.type }}</span></div></li>
           }
-          @if (myRecentComments().length) {
-            <ul class="resident-list" aria-label="Mis comentarios recientes">
-              @for (comment of myRecentComments(); track comment.id) {
-                <li><div class="list-copy"><strong>{{ comment.publicationTitle }}</strong><span>{{ comment.content }} · {{ comment.createdAt | date:'dd/MM/yyyy' }}</span></div></li>
-              }
-            </ul>
+        </ul>
+        } @else {
+        <p class="widget-state">Todavía no creaste publicaciones.</p>
+        }
+        @if (myRecentComments().length) {
+        <ul class="resident-list" aria-label="Mis comentarios recientes">
+          @for (comment of myRecentComments(); track comment.id) {
+          <li><div class="list-copy"><strong>{{ comment.publicationTitle }}</strong><span>{{ comment.content }} · {{ comment.createdAt | date:'dd/MM/yyyy' }}</span></div></li>
           }
+        </ul>
+        }
         }
         <a class="btn-action widget-action" routerLink="/comunidad">Abrir publicaciones</a>
       </section>
@@ -160,38 +216,38 @@
         <header class="widget-heading">
           <div><span class="widget-kicker">AVISOS PARA VOS</span><h2 id="notifications-title">Notificaciones</h2></div>
           @if (!notificationsLoading() && !notificationsError()) {
-            <span class="notification-badge" aria-label="Notificaciones no leídas">{{ unreadCount }} sin leer</span>
+          <span class="notification-badge" aria-label="Notificaciones no leídas">{{ unreadCount }} sin leer</span>
           }
         </header>
         @if (notificationsLoading()) {
-          <p class="widget-state" role="status">Cargando notificaciones…</p>
+        <p class="widget-state" role="status">Cargando notificaciones…</p>
         } @else if (notificationsError()) {
-          <p class="widget-state widget-state--error" role="alert">No se pudieron cargar las notificaciones.</p>
+        <p class="widget-state widget-state--error" role="alert">No se pudieron cargar las notificaciones.</p>
         } @else if (notifications(); as items) {
-          @if (notificationActionError()) {
-            <p class="widget-state widget-state--error" role="alert">No se pudo actualizar la notificación.</p>
+        @if (notificationActionError()) {
+        <p class="widget-state widget-state--error" role="alert">No se pudo actualizar la notificación.</p>
+        }
+        @if (items.length) {
+        <ul class="resident-list notification-list" aria-label="Notificaciones recientes">
+          @for (item of recentNotifications; track item.idNotificacion) {
+          <li [class.notification-list__item--unread]="!item.leida">
+            @if (item.ruta) {
+            <button type="button" class="notification-link" (click)="openNotification(item)">
+              <span class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.mensaje }}</span></span>
+              <time [attr.datetime]="item.fecha">{{ item.fecha | date:'dd/MM HH:mm' }}</time>
+            </button>
+            } @else {
+            <div class="notification-link">
+              <span class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.mensaje }}</span></span>
+              <time [attr.datetime]="item.fecha">{{ item.fecha | date:'dd/MM HH:mm' }}</time>
+            </div>
+            }
+          </li>
           }
-          @if (items.length) {
-            <ul class="resident-list notification-list" aria-label="Notificaciones recientes">
-              @for (item of recentNotifications; track item.idNotificacion) {
-                <li [class.notification-list__item--unread]="!item.leida">
-                  @if (item.ruta) {
-                    <button type="button" class="notification-link" (click)="openNotification(item)">
-                      <span class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.mensaje }}</span></span>
-                      <time [attr.datetime]="item.fecha">{{ item.fecha | date:'dd/MM HH:mm' }}</time>
-                    </button>
-                  } @else {
-                    <div class="notification-link">
-                      <span class="list-copy"><strong>{{ item.titulo }}</strong><span>{{ item.mensaje }}</span></span>
-                      <time [attr.datetime]="item.fecha">{{ item.fecha | date:'dd/MM HH:mm' }}</time>
-                    </div>
-                  }
-                </li>
-              }
-            </ul>
-          } @else {
-            <div class="widget-empty"><p>No tenés notificaciones.</p><span>Los avisos de paquetes, incidencias y reservas aparecerán acá cuando el backend los genere.</span></div>
-          }
+        </ul>
+        } @else {
+        <div class="widget-empty"><p>No tenés notificaciones.</p><span>Los avisos de paquetes, incidencias y reservas aparecerán acá cuando el backend los genere.</span></div>
+        }
         }
         <p class="widget-note">También podés abrir el detalle desde la campana de notificaciones.</p>
       </section>

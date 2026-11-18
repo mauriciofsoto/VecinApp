@@ -75,19 +75,68 @@ public class UsuariosController : ControllerBase
                         declaracion.IdEdificio == idEdificio)
                     .OrderBy(declaracion => declaracion.FechaDeclaracion)
                     .Select(declaracion => new UnidadDeclaradaDto(
-                        declaracion.Tipo,
-                        declaracion.PisoDeclarado,
-                        declaracion.IdentificacionDeclarada,
-                        declaracion.EsPrincipal,
-                        declaracion.EstaAlquilada,
-                        declaracion.EstadoConfirmacion,
-                        declaracion.FechaDeclaracion))
+    declaracion.IdDeclaracionUnidad,
+    declaracion.Tipo,
+    declaracion.PisoDeclarado,
+    declaracion.IdentificacionDeclarada,
+    declaracion.EsPrincipal,
+    declaracion.EstaAlquilada,
+    declaracion.EstadoConfirmacion,
+    declaracion.FechaDeclaracion))
                     .ToList()))
             .ToListAsync();
 
         return Ok(personas);
     }
+    // PUT /api/usuarios/declaraciones/{id}/confirmacion
+    [HttpPut("declaraciones/{id:int}/confirmacion")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> CambiarConfirmacionDeclaracion(
+        int id,
+        [FromBody] CambiarEstadoDeclaracionRequest request,
+        CancellationToken ct)
+    {
+        var administrador = await _userManager.GetUserAsync(User);
 
+        if (administrador == null)
+            return Unauthorized();
+
+        if (administrador.Estado != EstadoUsuario.Activo)
+            return Forbid();
+
+        if (!administrador.IdEdificio.HasValue)
+            return BadRequest(new { message = "El administrador no tiene un edificio asignado." });
+
+        var nuevoEstado = request.Estado?.Trim();
+
+        if (nuevoEstado != "Verificada" && nuevoEstado != "Rechazada")
+            return BadRequest(new { message = "El estado debe ser Verificada o Rechazada." });
+
+        var declaracion = await _context.DeclaracionesUnidadesComunitarias
+            .FirstOrDefaultAsync(d =>
+                d.IdDeclaracionUnidad == id &&
+                d.IdEdificio == administrador.IdEdificio.Value,
+                ct);
+
+        if (declaracion == null)
+            return NotFound(new { message = "No se encontró la declaración en tu edificio." });
+
+        if (declaracion.EstadoConfirmacion != "Declarada")
+            return Conflict(new { message = "Esta declaración ya fue revisada." });
+
+        declaracion.EstadoConfirmacion = nuevoEstado;
+
+        await _context.SaveChangesAsync(ct);
+
+        return Ok(new
+        {
+            idDeclaracionUnidad = declaracion.IdDeclaracionUnidad,
+            estadoConfirmacion = declaracion.EstadoConfirmacion
+        });
+    }
+
+    // Agregar al final del archivo, fuera de la clase UsuariosController.
+    public sealed record CambiarEstadoDeclaracionRequest(string Estado);
     // GET /api/usuarios/me/unidades
     [HttpGet("me/unidades")]
     [Authorize(Roles = "Inquilino,Propietario")]

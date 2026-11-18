@@ -22,6 +22,8 @@ import { Reserva } from '../../operations/reservas/models/reserva';
 import { Paqueteria } from '../../operations/paqueteria/services/paqueteria';
 import { Paquete } from '../../operations/paqueteria/models/paquete';
 import { Feed } from '../../community/feed/services/feed';
+import { SolicitudVinculacion } from '../../profile/models/perfil-usuario';
+import { VinculacionesPerfilService } from '../../profile/services/vinculaciones.service';
 
 const RESIDENT_WIDGETS: BentoWidget[] = [
   { id: 'quick-actions', title: 'Accesos rápidos', variant: 'solid', cols: 2, rows: 1, visible: true },
@@ -53,7 +55,7 @@ export class UserDashboardComponent {
   private readonly feedService = inject(Feed);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-
+  private readonly vinculacionesService = inject(VinculacionesPerfilService);
   readonly widgets = RESIDENT_WIDGETS;
   readonly currentUser = this.auth.currentUser;
   readonly now = signal(new Date());
@@ -65,6 +67,9 @@ export class UserDashboardComponent {
   readonly notificationsLoading = signal(true);
   readonly notificationsError = signal(false);
   readonly notificationActionError = signal(false);
+  readonly solicitudesVinculacion = signal<SolicitudVinculacion[]>([]);
+  readonly solicitudesVinculacionLoading = signal(true);
+  readonly solicitudesVinculacionError = signal(false);
   readonly reservations = signal<Reserva[] | null>(null);
   readonly reservationsLoading = signal(true);
   readonly reservationsError = signal(false);
@@ -72,6 +77,9 @@ export class UserDashboardComponent {
   readonly packagesLoading = signal(true);
   readonly packagesError = signal(false);
   readonly pendingPackageCount = computed(() => (this.packages() ?? []).filter(item => item.estado === 'Pendiente').length);
+  readonly solicitudesPendientes = computed(() =>
+    this.solicitudesVinculacion().filter(solicitud => solicitud.estado === 'Pendiente')
+  );
   readonly publications = this.feedService.posts;
   readonly publicationsLoading = this.feedService.loading;
   readonly publicationsError = this.feedService.error;
@@ -103,6 +111,7 @@ export class UserDashboardComponent {
       this.loadUnits(session);
       this.loadIncidents(session);
       this.loadNotifications(session);
+      this.loadSolicitudesVinculacion(session);
       this.loadReservations(session);
       this.loadPackages(session);
     });
@@ -159,6 +168,9 @@ export class UserDashboardComponent {
   }
 
   private resetPersonalState(): void {
+    this.solicitudesVinculacion.set([]);
+    this.solicitudesVinculacionLoading.set(true);
+    this.solicitudesVinculacionError.set(false);
     this.units.set(null);
     this.incidents.set(null);
     this.incidentsLoading.set(true);
@@ -219,7 +231,24 @@ export class UserDashboardComponent {
         },
       });
   }
+  private loadSolicitudesVinculacion(session: { userId: string | null; version: number }): void {
+    this.vinculacionesService.solicitudes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: items => {
+          if (!this.auth.isCurrentSession(session)) return;
 
+          this.solicitudesVinculacion.set(items);
+          this.solicitudesVinculacionLoading.set(false);
+        },
+        error: () => {
+          if (!this.auth.isCurrentSession(session)) return;
+
+          this.solicitudesVinculacionError.set(true);
+          this.solicitudesVinculacionLoading.set(false);
+        },
+      });
+  }
   private loadReservations(session: { userId: string | null; version: number }): void {
     this.reservationsService.cargarMisReservas()
       .pipe(takeUntilDestroyed(this.destroyRef))

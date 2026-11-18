@@ -61,6 +61,7 @@ export interface DestinatarioDerivacionDto {
 interface IncidenciaApiDto {
   idIncidencia: number;
   idUnidad: number | null;
+  unidad: string | null;
   piso: string | null;
   identificacion: string | null;
   idEstadoIncidencia: number;
@@ -244,6 +245,7 @@ export class Incidencias {
       idIncidencia: item.idIncidencia,
       idEstadoIncidencia: item.idEstadoIncidencia,
       idUnidad: item.idUnidad ?? null,
+      unidad: item.unidad ?? null,
       piso: item.piso ?? null,
       identificacion: item.identificacion ?? null,
       titulo: item.titulo,
