@@ -1,77 +1,72 @@
 
 // ========================================
-// 1. COLORES & GRADIENTES — MIDNIGHT LAVENDER
+// 1. COLORES & GRADIENTES — VECINAPP NAVY
 // ========================================
 
 // Fondos
-$bg-dark: #171923;
+$bg-dark: #06142E;
 $bg-dark-alpha: rgba($bg-dark, 0.72);
 
-$glass-bg: rgba(4, 17, 51, 0.341);
-$glass-border: rgba(226, 220, 255, 0.10);
-$glass-hover: rgba(52, 51, 70, 0.82);
+$glass-bg: rgba(10, 37, 64, 0.88);
+$glass-border: rgba(190, 215, 240, 0.14);
+$glass-hover: rgba(19, 59, 102, 0.72);
 
 // Identidad principal
-$primary: #A78BFA;
-$primary-hover: #9275E8;
-$primary-light: #C4B5FD;
-$primary-glow: rgba(167, 139, 250, 0.24);
+$primary: #1D5FA7;
+$primary-hover: #2874C4;
+$primary-light: #5EB8F2;
+$primary-glow: rgba(94, 184, 242, 0.2);
 
 // Acento secundario
-$accent: #78B8A5;
+$accent: #F37021;
 
 // Botones
 $button-padding-compact: 0.7rem 1rem;
 
 // Textos
 $white: #FFFFFF;
-$text-main: #F4F1FA;
-$text-muted: #AAA8B9;
+$text-main: #181819;
+$text-muted: #B4C2D3;
 $text-form-label: 0.9rem;
-$text-page: #E5E1EE;
+$text-page: #F4F7FB;
 
 // Estados suaves
-$text-success-soft: #91CDB5;
-$text-warning-soft: #E7B878;
-$text-danger-soft: #D98C91;
-$text-info-soft: #A6B9DB;
+$text-success-soft: #85D6B0;
+$text-warning-soft: #F5C36B;
+$text-danger-soft: #FF9A9F;
+$text-info-soft: #8ECDF5;
 
 // Superficies translúcidas
-$surface-1: rgba(255, 255, 255, 0.035);
-$surface-2: rgba(255, 255, 255, 0.065);
-$surface-3: rgba(255, 255, 255, 0.11);
+$surface-1: rgba(19, 59, 102, 0.28);
+$surface-2: rgba(19, 59, 102, 0.42);
+$surface-3: rgba(94, 184, 242, 0.12);
 
 $surface-dashboard-table: rgba(255, 255, 255, 0.025);
 $surface-dashboard-progress: rgba(255, 255, 255, 0.045);
 
-$border-subtle: rgba(226, 220, 255, 0.055);
-$border-control: rgba(226, 220, 255, 0.14);
+$border-subtle: rgba(190, 215, 240, 0.1);
+$border-control: rgba(190, 215, 240, 0.2);
 
 $surface-control-dark: rgba($bg-dark, 0.8);
-$surface-control-solid: #3a2b3c;
+$surface-control-solid: #0A2540;
 
-// Gradientes
-$bg-gradient: radial-gradient(
-  circle at 12% 8%,
-  #302943 0%,
-  #1B1C29 48%,
-  #12131B 100%
-);
+// Fondo liso para la aplicación; los gradientes quedan reservados a detalles decorativos.
+$bg-gradient: $bg-dark;
 
 $avatar-gradient: linear-gradient(
   135deg,
-  #A78BFA,
-  #78B8A5
+  #1D5FA7,
+  #F37021
 );
 
 // ========================================
 // 2. ESTADOS DE COLOR
 // ========================================
 
-$danger: #D98C91;
-$success: #78B8A5;
-$warning: #E7B878;
-$info: #91A9CE;
+$danger: #D84A55;
+$success: #287A5A;
+$warning: #A65B00;
+$info: #1D5FA7;
 
 // ========================================
 // 3. TIPOGRAFIA (Jerarquia Visual)
@@ -175,17 +170,17 @@ $badge-sizes: (
 // ========================================
 // 10. EXTRAS (colores de variantes, easing, cards)
 // ========================================
-$purple: #c084fc;
+$purple: #5B6FA8;
 $ease-out: cubic-bezier(0, 0, 0.2, 1);
 $transition-drag: transform 250ms $ease-out;
 
 // Variantes de badge: bg = color base, text = color del texto, border = opacidad del borde (opcional)
 $badge-variants: (
-  'success': (bg: $success, text: #A9DCC6),
-  'warning': (bg: $warning, text: #F2D09B),
-  'danger':  (bg: $danger,  text: #E8A9AD),
-  'info':    (bg: $info,    text: #B8C9E5),
-  'accent':  (bg: $primary, text: $primary-light, border: 0.4),
+  'success': (bg: $success, text: #B8F0D5),
+  'warning': (bg: $warning, text: #FFE0A8),
+  'danger':  (bg: $danger,  text: #FFC0C4),
+  'info':    (bg: $info,    text: #B9DDF5),
+  'accent':  (bg: $accent, text: #FFD0B3, border: 0.4),
   'purple':  (bg: $purple,  text: $purple),
   'neutral': (bg: $white,   text: $text-muted, border: 0.12),
 );

@@ -138,4 +138,31 @@ describe('AuthService session identity', () => {
     expect(loginActualEmitio).toBe(true);
     expect(auth.currentUser()?.id).toBe('usuario-b');
   });
+
+  it('validates administrator codes using the existing endpoint without building data', () => {
+    auth.validarInvitacionAdministrador('INV-ADMIN-7').subscribe();
+    const request = http.expectOne(`${environment.apiUrl}/auth/registro`);
+
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      codigoInvitacion: 'INV-ADMIN-7', rolEsperado: 'Administrador', soloValidar: true,
+    });
+    request.flush({ message: 'La invitación es válida.' });
+  });
+
+  it('registers an invited administrator without IdEdificio or building fields', () => {
+    auth.registrarAdministradorInvitado({
+      nombre: 'Ana', apellido: 'Perez', email: 'ana@example.test', telefono: '1122334455',
+      password: 'Clave123', codigoInvitacion: 'INV-ADMIN-7', rolEsperado: 'Administrador',
+    }).subscribe();
+    const request = http.expectOne(`${environment.apiUrl}/auth/registro`);
+
+    expect(request.request.body).toEqual({
+      nombre: 'Ana', apellido: 'Perez', email: 'ana@example.test', telefono: '1122334455',
+      password: 'Clave123', codigoInvitacion: 'INV-ADMIN-7', rolEsperado: 'Administrador',
+    });
+    expect(request.request.body.idEdificio).toBeUndefined();
+    expect(request.request.body.nombreEdificio).toBeUndefined();
+    request.flush({ message: 'Cuenta creada correctamente.' });
+  });
 });

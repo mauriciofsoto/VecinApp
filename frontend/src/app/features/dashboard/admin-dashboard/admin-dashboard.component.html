@@ -15,7 +15,7 @@
     <ng-template bentoItem="calendar">
       <section class="dashboard-widget dashboard-widget--calendar" aria-labelledby="calendar-title">
         <header class="widget-heading">
-          <div><span class="widget-kicker">AGENDA</span><h2 id="calendar-title">Calendario</h2></div>
+          <div><span class="widget-kicker">AGENDA</span><h2 id="calendar-title">Calendario</h2> <p>Consultá tus reservas por fecha.</p></div>
           <a class="widget-link" routerLink="/admin/reservas">Ver reservas <span aria-hidden="true">↗</span></a>
         </header>
         <app-reserva-calendar-modal
@@ -36,7 +36,6 @@
       <section class="dashboard-widget" aria-labelledby="users-title">
         <header class="widget-heading"><div><span class="widget-kicker">COMUNIDAD</span><h2 id="users-title">Usuarios</h2></div><span class="widget-icon" aria-hidden="true">♙</span></header>
         <p class="widget-unavailable">Métricas no disponibles</p>
-        <p class="widget-note">El backend no ofrece totales ni solicitudes de asociación.</p>
         <a class="widget-link" routerLink="/inquilinos">Ir a gestión de usuarios <span aria-hidden="true">↗</span></a>
       </section>
     </ng-template>
@@ -96,17 +95,9 @@
           <p class="widget-note" role="alert">No se pudieron consultar.</p>
         } @else {
           <strong>{{ activeReservations().length }}</strong>
-          <p class="widget-note">reservas pendientes o confirmadas en tu edificio.</p>
+        
         }
         <a class="widget-link" routerLink="/admin/reservas">Abrir gestión <span aria-hidden="true">↗</span></a>
-      </section>
-    </ng-template>
-
-    <ng-template bentoItem="weather">
-      <section class="dashboard-widget dashboard-widget--weather" aria-labelledby="weather-title">
-        <span class="widget-kicker">CLIMA</span>
-        <h2 id="weather-title">Sin datos</h2>
-        <p class="widget-note">No hay ubicación ni proveedor configurados.</p>
       </section>
     </ng-template>
 

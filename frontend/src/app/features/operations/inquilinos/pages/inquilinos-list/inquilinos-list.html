@@ -58,17 +58,27 @@
               <p>Fecha de registro: {{ persona.fechaRegistro | date:'shortDate' }}</p>
 
               @if (persona.unidadesDeclaradas.length) {
-                <div class="declarations">
-                  <h3>Unidades declaradas (sin verificación)</h3>
-                  @for (unidad of persona.unidadesDeclaradas; track $index) {
-                    <div class="declaration">
-                      <p>Tipo declarado: {{ unidad.tipo }}</p>
-                      @if (unidad.pisoDeclarado) { <p>Piso declarado: {{ unidad.pisoDeclarado }}</p> }
-                      @if (unidad.identificacionDeclarada) { <p>Identificación declarada: {{ unidad.identificacionDeclarada }}</p> }
-                      <p>Unidad principal declarada: {{ unidad.esPrincipalDeclarada ? 'Sí' : 'No' }}</p>
-                      @if (unidad.estaAlquiladaDeclarada !== null) { <p>Alquiler declarado: {{ unidad.estaAlquiladaDeclarada ? 'Sí' : 'No' }}</p> }
-                      <p>Confirmación: {{ unidad.estadoConfirmacion }}</p>
-                      <p>Fecha de declaración: {{ unidad.fechaDeclaracion | date:'shortDate' }}</p>
+                <div class="declarations-section">
+                  <div class="declarations-header">
+                    <h3>Unidades declaradas (sin verificación)</h3>
+                    <button type="button" class="btn-toggle-unidades" (click)="toggleUnidades(persona.id)">
+                      {{ unidadesExpandidas.has(persona.id) ? '-' : '+' }}
+                    </button>
+                  </div>
+
+                  @if (unidadesExpandidas.has(persona.id)) {
+                    <div class="declarations">
+                      @for (unidad of persona.unidadesDeclaradas; track $index) {
+                        <div class="declaration">
+                          <p>Tipo declarado: {{ unidad.tipo }}</p>
+                          @if (unidad.pisoDeclarado) { <p>Piso declarado: {{ unidad.pisoDeclarado }}</p> }
+                          @if (unidad.identificacionDeclarada) { <p>Identificación declarada: {{ unidad.identificacionDeclarada }}</p> }
+                          <p>Unidad principal declarada: {{ unidad.esPrincipalDeclarada ? 'Sí' : 'No' }}</p>
+                          @if (unidad.estaAlquiladaDeclarada !== null) { <p>Alquiler declarado: {{ unidad.estaAlquiladaDeclarada ? 'Sí' : 'No' }}</p> }
+                          <p>Confirmación: {{ unidad.estadoConfirmacion }}</p>
+                          <p>Fecha de declaración: {{ unidad.fechaDeclaracion | date:'shortDate' }}</p>
+                        </div>
+                      }
                     </div>
                   }
                 </div>

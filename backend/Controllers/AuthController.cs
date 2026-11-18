@@ -408,6 +408,17 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> Registro([FromBody] RegistroRequest request)
     {
+        if (request.SoloValidar)
+        {
+            if (string.IsNullOrWhiteSpace(request.CodigoInvitacion))
+                return BadRequest(new { message = "Ingresá un código de invitación." });
+
+            var errorValidacion = await ValidarInvitacionAdministradorAsync(request.CodigoInvitacion, request.RolEsperado);
+            return errorValidacion == null
+                ? Ok(new { message = "La invitación es válida." })
+                : BadRequest(new { message = errorValidacion });
+        }
+
         if (string.IsNullOrWhiteSpace(request.Nombre) ||
             string.IsNullOrWhiteSpace(request.Apellido) ||
             string.IsNullOrWhiteSpace(request.Email) ||
@@ -429,15 +440,24 @@ public class AuthController : ControllerBase
             .Include(c => c.Rol)
             .FirstOrDefaultAsync(c => c.Codigo == codigo);
 
-        if (invitacion == null ||
-            !invitacion.Activo ||
-            invitacion.FechaExpiracion <= DateTime.UtcNow ||
-            invitacion.UsosRealizados >= invitacion.UsosMaximos)
+        if (invitacion == null)
         {
             return BadRequest(new { message = "El código de invitación es inválido, está vencido o ya no tiene usos disponibles." });
         }
 
         var rolNombre = invitacion.Rol?.Nombre;
+        var esRegistroAdministradorInvitado = string.Equals(rolNombre, "Administrador", StringComparison.Ordinal);
+
+        if (!invitacion.Activo || invitacion.FechaExpiracion <= DateTime.UtcNow || invitacion.UsosRealizados >= invitacion.UsosMaximos)
+        {
+            if (!esRegistroAdministradorInvitado)
+                return BadRequest(new { message = "El código de invitación es inválido, está vencido o ya no tiene usos disponibles." });
+            if (!invitacion.Activo)
+                return BadRequest(new { message = "La invitación fue desactivada." });
+            if (invitacion.FechaExpiracion <= DateTime.UtcNow)
+                return BadRequest(new { message = "La invitación venció." });
+            return BadRequest(new { message = "La invitación ya no tiene usos disponibles." });
+        }
 
         if (rolNombre != "Inquilino" &&
     rolNombre != "Propietario" &&
@@ -446,13 +466,34 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = "El código no permite registrar este tipo de usuario." });
         }
 
+        if (!string.IsNullOrWhiteSpace(request.RolEsperado) &&
+            !string.Equals(rolNombre, request.RolEsperado.Trim(), StringComparison.Ordinal))
+            return BadRequest(new { message = "El código no corresponde al rol Administrador." });
+
+        if (esRegistroAdministradorInvitado)
+        {
+            var edificioActivo = await _context.Edificios
+                .AnyAsync(edificio => edificio.IdEdificio == invitacion.IdEdificio && edificio.Estado == "Activo");
+            if (!edificioActivo)
+                return BadRequest(new { message = "El edificio asociado a la invitación no está disponible." });
+        }
+
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
             // Reservar un uso del código de forma atómica.
-            var usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos");
+            int usosActualizados;
+            if (esRegistroAdministradorInvitado)
+            {
+                usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND id_rol = {invitacion.IdRol} AND id_edificio = {invitacion.IdEdificio} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos AND EXISTS (SELECT 1 FROM edificio WHERE id_edificio = {invitacion.IdEdificio} AND estado = 'Activo')");
+            }
+            else
+            {
+                usosActualizados = await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $"UPDATE codigo_invitacion SET usos_realizados = usos_realizados + 1 WHERE id_codigo_invitacion = {invitacion.IdCodigoInvitacion} AND activo = TRUE AND fecha_expiracion > {DateTime.UtcNow} AND usos_realizados < usos_maximos");
+            }
 
             if (usosActualizados != 1)
             {
@@ -464,6 +505,7 @@ public class AuthController : ControllerBase
             {
                 UserName = email,
                 Email = email,
+                PhoneNumber = request.Telefono?.Trim(),
                 Nombre = request.Nombre.Trim(),
                 Apellido = request.Apellido.Trim(),
                 IdRol = invitacion.IdRol,
@@ -506,6 +548,26 @@ public class AuthController : ControllerBase
         }
     }
 
+
+    private async Task<string?> ValidarInvitacionAdministradorAsync(string codigoInvitacion, string? rolEsperado)
+    {
+        var codigo = codigoInvitacion.Trim().ToUpperInvariant();
+        var invitacion = await _context.CodigosInvitacion
+            .Include(item => item.Rol)
+            .FirstOrDefaultAsync(item => item.Codigo == codigo);
+
+        if (invitacion == null) return "El código de invitación no existe.";
+        if (!invitacion.Activo) return "La invitación fue desactivada.";
+        if (invitacion.FechaExpiracion <= DateTime.UtcNow) return "La invitación venció.";
+        if (invitacion.UsosRealizados >= invitacion.UsosMaximos) return "La invitación ya no tiene usos disponibles.";
+        if (invitacion.Rol?.Nombre != "Administrador") return "El código no corresponde al rol Administrador.";
+        if (!string.IsNullOrWhiteSpace(rolEsperado) && !string.Equals(invitacion.Rol!.Nombre, rolEsperado.Trim(), StringComparison.Ordinal))
+            return "El código no corresponde al rol solicitado.";
+
+        var edificioActivo = await _context.Edificios
+                .AnyAsync(edificio => edificio.IdEdificio == invitacion.IdEdificio && edificio.Estado == "Activo");
+        return edificioActivo ? null : "El edificio asociado a la invitación no está disponible.";
+    }
 
     // POST /auth/login
     [HttpPost("login")]

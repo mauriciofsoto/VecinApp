@@ -4,7 +4,10 @@
   <app-sidebar></app-sidebar>
 
   <div class="app-layout-content">
-    <div class="app-layout-notifications"><app-notification-bell /></div>
-    <router-outlet></router-outlet>
+    <app-navbar></app-navbar>
+
+    <main class="app-layout-main">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>

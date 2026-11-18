@@ -19,6 +19,14 @@
   color: var(--color-text-primary);
   overflow: hidden;
 
+  .brand-name {
+  // Conservá acá los estilos actuales.
+
+  &__accent {
+    color: #f59e0b;
+  }
+}
+
   .sidebar-brand {
     display: flex;
     align-items: center;
@@ -26,19 +34,24 @@
     padding: 0 $space-2;
     color: inherit;
     text-decoration: none;
+}
 
-    .brand-icon {
-      display: grid;
-      place-items: center;
-      width: 2.625rem;
-      height: 2.625rem;
-      flex: 0 0 2.625rem;
-      border-radius: $radius-control;
-      background: var(--effect-avatar-gradient);
-      color: var(--color-background);
-      font-size: var(--font-size-heading);
-      font-weight: var(--font-weight-bold);
-    }
+.brand-icon {
+  display: grid;
+  place-items: center;
+  width: 2.625rem;
+  height: 2.625rem;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
 
     .brand-name {
       font-size: var(--font-size-dashboard-brand);
@@ -75,9 +88,26 @@
 
     .nav-item {
       @include sidebar-nav-item;
-      min-height: 2.875rem;
+      min-height:  2.625rem;
     }
   }
+  
+.sidebar-building-card {
+  width: 100%;
+  margin-top: $space-2;
+  overflow: hidden;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+
+  &__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+}
+
+
 
   .sidebar-footer {
     padding-top: $space-4;
@@ -121,7 +151,6 @@
       .logout-icon { font-size: var(--font-size-heading); }
     }
   }
-}
 
 .mobile-toggle-btn,
 .sidebar-backdrop { display: none; }
@@ -192,3 +221,4 @@
 @media (prefers-reduced-motion: reduce) {
   .app-sidebar, .sidebar-backdrop { transition-duration: 0.01ms; animation-duration: 0.01ms; }
 }
+

@@ -58,7 +58,7 @@
 .dashboard-widget--calendar app-reserva-calendar-modal { display: block; min-height: 0; flex: 1 1 auto; overflow: auto; }
 .dashboard-widget--clock,
 .dashboard-widget--weather { justify-content: center; }
-.dashboard-widget--clock { background: radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 15%, transparent), transparent 68%); }
+
 
 .widget-heading {
   @include flex-row($space-3);

@@ -13,6 +13,13 @@ export interface TokenAccesoComunidadResponse {
   fechaExpiracion: string;
 }
 
+export interface CodigoInvitacionAdministradorResponse {
+  codigo: string;
+  idEdificio: number;
+  fechaExpiracion: string;
+  usosMaximos: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CodigosInvitacionService {
   private http = inject(HttpClient);
@@ -26,6 +33,13 @@ export class CodigosInvitacionService {
     return this.http.post<TokenAccesoComunidadResponse>(
       `${this.apiUrl}/comunidad/${encodeURIComponent(identificadorPublico)}/token`,
       {},
+    );
+  }
+
+  crearCodigoAdministrador(idEdificio: number, diasValidez = 7): Observable<CodigoInvitacionAdministradorResponse> {
+    return this.http.post<CodigoInvitacionAdministradorResponse>(
+      `${this.apiUrl}/administrador`,
+      { idEdificio, diasValidez },
     );
   }
 

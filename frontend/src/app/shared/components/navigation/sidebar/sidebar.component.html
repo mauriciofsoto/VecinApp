@@ -1,4 +1,5 @@
 
+<!-- BOTÓN MENÚ MOBILE -->
 <button
   class="mobile-toggle-btn"
   type="button"
@@ -9,6 +10,7 @@
   <span aria-hidden="true">{{ isOpen() ? '×' : '☰' }}</span>
 </button>
 
+<!-- FONDO PARA CERRAR EL MENÚ MOBILE -->
 @if (isOpen()) {
   <button
     class="sidebar-backdrop"
@@ -23,11 +25,21 @@
   [class.is-open]="isOpen()"
   aria-label="Navegación principal"
 >
+
   <!-- BRAND -->
-  <a class="sidebar-brand" [routerLink]="dashboardRoute()">
-    <span class="brand-icon">V</span>
-    <span class="brand-name">VecinApp</span>
-  </a>
+  <a
+  class="sidebar-brand"
+  [routerLink]="dashboardRoute()"
+  aria-label="VecinApp - Inicio"
+>
+  <span class="brand-icon">
+    <img src="/assets/faviconV.ico" alt="" />
+  </span>
+
+  <span class="brand-name">
+    Vecin<span class="brand-name__accent">App</span>
+  </span>
+</a>
 
   <!-- CERRAR SIDEBAR MOBILE -->
   <button
@@ -39,22 +51,12 @@
     <span aria-hidden="true">×</span>
   </button>
 
-  <!-- PERFIL -->
-  <div class="sidebar-user">
-    <div class="user-avatar">
-      {{ userDisplayName().charAt(0).toUpperCase() }}
-    </div>
-
-    <div class="user-info">
-      <a class="user-name" routerLink="/perfil">{{ userDisplayName() }}</a>
-      <span class="user-role">{{ userRoleLabel() }}</span>
-    </div>
-  </div>
-
   <!-- NAVEGACIÓN -->
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" aria-label="Secciones">
+
     @for (section of menuSections(); track section.title) {
       <div class="nav-section">
+
         <span class="nav-section-title">
           {{ section.title }}
         </span>
@@ -70,21 +72,38 @@
             [title]="item.label"
             (click)="closeSidebar()"
           >
-            <span class="nav-icon" aria-hidden="true">
-              {{ item.icon }}
+
+            <span class="nav-icon-wrapper" aria-hidden="true">
+              <span class="nav-icon">
+                {{ item.icon }}
+              </span>
             </span>
 
             <span class="nav-label">
               {{ item.label }}
             </span>
+
           </a>
         }
+
       </div>
     }
+
   </nav>
+
+  <!-- TARJETA PROMOCIONAL DEL EDIFICIO -->
+  <div class="sidebar-building-card">
+  <img
+    class="sidebar-building-card__image"
+    src="/assets/Edificiofeed.png"
+    alt="Tu edificio, más conectado"
+  />
+</div>
 
   <!-- FOOTER -->
   <div class="sidebar-footer">
+
+    <!-- CAMBIAR TEMA -->
     <button
       class="theme-toggle-button"
       type="button"
@@ -92,9 +111,16 @@
       [attr.aria-label]="themeService.toggleLabel()"
       [attr.aria-pressed]="themeService.isLight()"
     >
-      <span aria-hidden="true">{{ themeService.isLight() ? '☀' : '☾' }}</span>
-      <span>{{ themeService.isLight() ? 'Tema claro' : 'Tema oscuro' }}</span>
+      <span aria-hidden="true">
+        {{ themeService.isLight() ? '☀' : '☾' }}
+      </span>
+
+      <span>
+        {{ themeService.isLight() ? 'Tema claro' : 'Tema oscuro' }}
+      </span>
     </button>
+
+    <!-- CERRAR SESIÓN -->
     <button
       class="logout-button"
       type="button"
@@ -108,5 +134,7 @@
         {{ loggingOut() ? 'Cerrando sesión...' : 'Cerrar sesión' }}
       </span>
     </button>
+
   </div>
+
 </aside>

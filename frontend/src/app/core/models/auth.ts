@@ -28,6 +28,16 @@ export interface RegistroAdministradorRequest {
   provincia: string;
 }
 
+export interface RegistroAdministradorInvitacionRequest {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  password: string;
+  codigoInvitacion: string;
+  rolEsperado: 'Administrador';
+}
+
 export interface MessageResponse {
   message: string;
 }
