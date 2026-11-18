@@ -11,8 +11,7 @@
 // NAVEGACIÓN LATERAL (SIDEBAR)
 // ========================================
 @mixin sidebar-container($width: 260px) {
-  @include glass-panel-effect;
-  background: var(--color-nav-background);
+  @include glass-panel-effect;;
   display: flex;
   flex-direction: column;
   width: $width;

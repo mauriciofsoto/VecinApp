@@ -1,30 +1,33 @@
+
 <header class="app-navbar">
-  <!-- Izquierda: Título de la sección o contexto -->
   <div class="navbar-left">
-    <h2 class="navbar-title text-heading">Dashboard</h2>
+    <div class="navbar-heading">
+      <h2 class="navbar-title">{{ pageTitle() }}</h2>
+    </div>
   </div>
 
-  <!-- Centro / Derecha: Barra de búsqueda rápida y acciones -->
   <div class="navbar-actions">
-    <!-- Buscador rápido -->
-    <div class="search-wrapper">
-      <span class="search-icon">🔍</span>
-      <input 
-        type="text" 
-        placeholder="Buscar incidencias, vecinos..." 
-        class="search-input text-body" 
-      />
+    <div class="navbar-notifications">
+      <app-notification-bell />
     </div>
 
-    <!-- Notificaciones -->
-    <button class="icon-btn" aria-label="Notificaciones">
-      <span>🔔</span>
-      <span class="badge-dot"></span>
-    </button>
+    <span class="navbar-divider" aria-hidden="true"></span>
 
-    <!-- Perfil / Acceso Rápido -->
-    <div class="navbar-profile">
-      <img src="assets/avatar-placeholder.png" alt="Zoe Vivas" class="avatar-sm" />
-    </div>
+    <a
+      routerLink="/perfil"
+      class="navbar-profile"
+      aria-label="Abrir perfil de usuario"
+    >
+      <span class="navbar-profile__avatar" aria-hidden="true">
+        {{ userInitials() }}
+      </span>
+
+      <span class="navbar-profile__info">
+        <span class="navbar-profile__name">{{ userDisplayName() }}</span>
+        <span class="navbar-profile__role">{{ userRoleLabel() }}</span>
+      </span>
+
+      <span class="navbar-profile__arrow" aria-hidden="true">⌄</span>
+    </a>
   </div>
 </header>

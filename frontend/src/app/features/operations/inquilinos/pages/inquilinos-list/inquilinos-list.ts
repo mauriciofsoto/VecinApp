@@ -128,4 +128,15 @@ export class InquilinosList implements OnInit {
     }
     return 'No se pudo cargar la comunidad. Revisá la conexión e intentá nuevamente.';
   }
+  // Define el Set para llevar registro de qué IDs tienen las unidades expandidas
+unidadesExpandidas = new Set<number | string>();
+
+toggleUnidades(id: number | string) {
+  if (this.unidadesExpandidas.has(id)) {
+    this.unidadesExpandidas.delete(id);
+  } else {
+    this.unidadesExpandidas.add(id);
+  }
+}
+
 }

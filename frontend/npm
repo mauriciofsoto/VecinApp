@@ -1,0 +1,5 @@
+      PID    PPID    PGID     WINPID   TTY         UID    STIME COMMAND
+     3111    2193    3111      16580  cons1     197609 07:10:37 /usr/bin/PS
+     2053       1    2053       9004  cons0     197609 04:44:35 /usr/bin/bash
+     2176    2053    2176       6440  cons0     197609 06:04:34 /c/Program Files/nodejs/node
+     2193       1    2193      11968  cons1     197609 06:15:48 /usr/bin/bash

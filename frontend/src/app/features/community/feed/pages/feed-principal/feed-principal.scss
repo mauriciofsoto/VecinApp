@@ -21,15 +21,15 @@
 
   &__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 32rem;
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
-    gap: $space-5;
     min-width: 0;
   }
 
   &__main {
     @include flex-col($space-4);
     min-width: 0;
+    width: 100%;
   }
 
   &__create-trigger {
@@ -47,12 +47,20 @@
     transition: var(--effect-transition);
 
     &:hover {
-      border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+      border-color: color-mix(
+        in srgb,
+        var(--color-primary) 50%,
+        transparent
+      );
       background: var(--color-surface-muted);
     }
 
     &:focus-visible {
-      outline: 2px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
+      outline: 2px solid color-mix(
+        in srgb,
+        var(--color-primary) 70%,
+        transparent
+      );
       outline-offset: 2px;
     }
   }
@@ -76,6 +84,68 @@
     font-size: var(--font-size-small);
   }
 
+  // PESTAÑAS TIPO CARPETAS
+  &__tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: $space-2;
+    width: 100%;
+    min-width: 0;
+    padding: 0 $space-2;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $space-2;
+    min-width: 0;
+    padding: $space-3 $space-4;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: $radius-md $radius-md 0 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition:
+      color var(--effect-transition),
+      background var(--effect-transition),
+      border-color var(--effect-transition);
+
+    &:hover {
+      color: var(--color-text-primary);
+      background: var(--color-surface-muted);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    &--active {
+      z-index: 1;
+      margin-bottom: -1px;
+      border-color: var(--color-border);
+      border-bottom: 1px solid var(--color-surface);
+      background: var(--color-surface);
+      color: var(--color-primary);
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+
+  &__tab-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
   &__scroll-container {
     max-height: calc(100dvh - 12rem);
     min-height: 0;
@@ -96,19 +166,9 @@
     position: relative;
     min-width: 0;
   }
-
-  &__sidebar {
-    position: sticky;
-    top: $space-4;
-    display: flex;
-    flex-direction: column;
-    gap: $space-4;
-    max-height: calc(100dvh - #{$space-7});
-    min-width: 0;
-    overflow-y: auto;
-  }
 }
 
+// WIDGETS Y RESULTADOS DE ENCUESTAS
 .feed-widget {
   @include flex-col($space-3);
   width: 100%;
@@ -194,19 +254,28 @@
 
 @media (max-width: $tablet) {
   .feed {
-    &__layout {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    &__sidebar {
-      position: static;
-      max-height: none;
-      overflow: visible;
-    }
-
     &__scroll-container {
       max-height: none;
       overflow: visible;
+    }
+
+    &__tabs {
+      gap: $space-1;
+      padding-inline: 0;
+    }
+
+    &__tab {
+      flex: 1;
+      padding-inline: $space-2;
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .feed {
+    &__tab {
+      gap: $space-1;
+      font-size: var(--font-size-tiny);
     }
   }
 }

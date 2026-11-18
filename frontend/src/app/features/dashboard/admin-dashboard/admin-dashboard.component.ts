@@ -23,7 +23,6 @@ const DASHBOARD_WIDGETS: BentoWidget[] = [
   { id: 'clock', title: 'Hora local', variant: 'solid', cols: 1, rows: 1, visible: true },
   { id: 'incidents', title: 'Incidencias', variant: 'glass', cols: 2, rows: 2, visible: true },
   { id: 'reservations', title: 'Reservas', variant: 'glass', cols: 1, rows: 1, visible: true },
-  { id: 'weather', title: 'Clima', variant: 'solid', cols: 1, rows: 1, visible: true },
   { id: 'publications', title: 'Publicaciones', variant: 'glass', cols: 2, rows: 1, visible: true },
   { id: 'activity', title: 'Actividad reciente', variant: 'glass', cols: 2, rows: 1, visible: true },
 ];

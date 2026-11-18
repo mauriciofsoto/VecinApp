@@ -1,17 +1,29 @@
 <main class="registro-container">
   <section class="registro-card contratacion-card" aria-labelledby="registro-title">
     <a class="salir" routerLink="/landing"> ← Volver a los planes </a>
-    <p class="etapa">Etapa {{ etapa }} de 2</p>
-    <div class="progreso" role="progressbar" [attr.aria-valuenow]="etapa" aria-valuemin="1" aria-valuemax="2" [attr.aria-label]="'Etapa ' + etapa + ' de 2'"><span [style.width.%]="etapa * 50"></span></div>
+    @if (!modoInvitacion()) {
+      <p class="etapa">Etapa {{ etapa }} de 2</p>
+      <div class="progreso" role="progressbar" [attr.aria-valuenow]="etapa" aria-valuemin="1" aria-valuemax="2" [attr.aria-label]="'Etapa ' + etapa + ' de 2'"><span [style.width.%]="etapa * 50"></span></div>
+    }
 
     @if (success()) {
       <h1 id="registro-title">Cuenta creada</h1>
       <p class="mensaje exito" role="status">{{ success() }}</p>
       <p>Ya podés iniciar sesión con el correo y la contraseña que registraste.</p>
       <a class="continuar-login" routerLink="/login">Ir a iniciar sesión</a>
+    } @else if (modoInvitacion() && !invitacionValidada()) {
+      <h1 id="registro-title">Verificar invitación</h1>
+      @if (validandoInvitacion()) {
+        <p role="status">Verificando el código de invitación…</p>
+      } @else if (error()) {
+        <p class="mensaje error" role="alert">{{ error() }}</p>
+        @if (codigoInvitacion()) {
+          <button type="button" (click)="validarInvitacion()" [disabled]="validandoInvitacion()">Volver a verificar</button>
+        }
+      }
     } @else if (etapa === 1) {
-      <h1 id="registro-title">Datos de la cuenta</h1>
-      <p>Creá la cuenta que administrará tu edificio.</p>
+      <h1 id="registro-title">{{ modoInvitacion() ? 'Datos del Administrador' : 'Datos de la cuenta' }}</h1>
+      <p>{{ modoInvitacion() ? 'Completá tus datos para incorporarte al edificio.' : 'Creá la cuenta que administrará tu edificio.' }}</p>
       <form (ngSubmit)="continuar()" novalidate>
         <label for="nombre">Nombre</label><input id="nombre" name="nombre" [(ngModel)]="nombre" required autocomplete="given-name" />
         <label for="apellido">Apellido</label><input id="apellido" name="apellido" [(ngModel)]="apellido" required autocomplete="family-name" />
@@ -23,7 +35,9 @@
         <label for="confirmPassword">Confirmar contraseña</label><input id="confirmPassword" name="confirmPassword" type="password" [(ngModel)]="confirmPassword" required autocomplete="new-password" />
         @if (confirmPassword && !contrasenasCoinciden) { <small class="mensaje error">Las contraseñas no coinciden.</small> }
         @if (error()) { <p class="mensaje error" role="alert">{{ error() }}</p> }
-        <button type="submit" [disabled]="!administradorValido">Continuar</button>
+        <button type="submit" [disabled]="!administradorValido || loading()">
+          {{ modoInvitacion() ? (loading() ? 'Creando cuenta…' : 'Crear cuenta') : 'Continuar' }}
+        </button>
       </form>
     } @else {
       <h1 id="registro-title">Datos del edificio</h1>

@@ -1,16 +1,18 @@
+
 <section class="feed">
   @if (interactionError()) {
-    <p role="alert" class="feed__interaction-error">{{ interactionError() }}</p>
+    <p role="alert" class="feed__interaction-error">
+      {{ interactionError() }}
+    </p>
   }
+
   <header class="feed__header">
     <div>
-      <h2>Comunidad</h2>
       <p>Enterate de las novedades de tu edificio.</p>
     </div>
   </header>
 
   <div class="feed__layout">
-    <!-- FEED PRINCIPAL -->
     <main class="feed__main" aria-label="Publicaciones de la comunidad">
 
       <!-- BOTÓN PARA CREAR PUBLICACIONES -->
@@ -36,10 +38,60 @@
         </app-button>
       </app-card>
 
-      <!-- PUBLICACIONES -->
-      <div class="feed__scroll-container">
+      <!-- PESTAÑAS DEL FEED -->
+      <nav class="feed__tabs" role="tablist" aria-label="Secciones de publicaciones">
+        <button
+          type="button"
+          role="tab"
+          id="tab-inicio"
+          aria-controls="panel-publicaciones"
+          [attr.aria-selected]="activeTab() === 'inicio'"
+          [class.feed__tab--active]="activeTab() === 'inicio'"
+          class="feed__tab"
+          (click)="setActiveTab('inicio')"
+        >
+          <span class="feed__tab-icon" aria-hidden="true">⌂</span>
+          Inicio
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          id="tab-avisos"
+          aria-controls="panel-publicaciones"
+          [attr.aria-selected]="activeTab() === 'avisos'"
+          [class.feed__tab--active]="activeTab() === 'avisos'"
+          class="feed__tab"
+          (click)="setActiveTab('avisos')"
+        >
+          <span class="feed__tab-icon" aria-hidden="true">♢</span>
+          Avisos
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          id="tab-encuestas"
+          aria-controls="panel-publicaciones"
+          [attr.aria-selected]="activeTab() === 'encuestas'"
+          [class.feed__tab--active]="activeTab() === 'encuestas'"
+          class="feed__tab"
+          (click)="setActiveTab('encuestas')"
+        >
+          <span class="feed__tab-icon" aria-hidden="true">▤</span>
+          Encuestas
+        </button>
+      </nav>
+
+      <!-- PUBLICACIONES SEGÚN LA PESTAÑA -->
+      <div
+        class="feed__scroll-container"
+        id="panel-publicaciones"
+        role="tabpanel"
+        aria-labelledby="tab-inicio"
+      >
         <div class="feed__timeline">
-          @for (post of postsVisibles(); track post.id) {
+          @for (post of publicacionesFiltradas(); track post.id) {
             <div class="feed__item">
               <span
                 class="feed__timeline-dot"
@@ -54,49 +106,19 @@
             </div>
           } @empty {
             <app-empty-state
-              title="Todavía no hay publicaciones"
-              description="Sé el primero en compartir algo con la comunidad o volvé más tarde."
+              [title]="
+                activeTab() === 'avisos'
+                  ? 'Todavía no hay avisos'
+                  : activeTab() === 'encuestas'
+                    ? 'Todavía no hay encuestas'
+                    : 'Todavía no hay publicaciones'
+              "
+              description="Volvé más tarde para consultar las novedades de tu comunidad."
             />
           }
         </div>
       </div>
     </main>
-
-    <!-- BARRA LATERAL -->
-    <aside
-      class="feed__sidebar"
-      aria-label="Información de la comunidad"
-    >
-      <!-- AVISOS -->
-      <app-card
-        variant="glass"
-        size="full"
-        align="left"
-      >
-        <app-expandable-publication-list
-          [posts]="avisosOficiales()"
-          emptyMessage="No hay avisos oficiales publicados."
-          (postChange)="updatePost($event)"
-          (commentAdded)="addComment($event)"
-          (reactionRequested)="toggleReaction($event)"
-        />
-      </app-card>
-
-      <!-- ENCUESTAS -->
-      <app-card
-        variant="glass"
-        size="full"
-        align="left"
-      >
-        <app-expandable-publication-list
-          [posts]="encuestasParaLista()"
-          emptyMessage="Todavía no hay encuestas publicadas."
-          (postChange)="updatePost($event)"
-          (commentAdded)="addComment($event)"
-          (reactionRequested)="toggleReaction($event)"
-        />
-      </app-card>
-    </aside>
   </div>
 
   <!-- MODAL DE CREACIÓN -->
@@ -107,12 +129,10 @@
     size="lg"
   >
     @if (userRole() === 'admin') {
-      <!-- ADMINISTRACIÓN: AVISOS Y ENCUESTAS -->
       <app-formulario-publicacion
         (publicada)="closeCreatePost()"
       />
     } @else {
-      <!-- USUARIO: PUBLICACIÓN NORMAL -->
       <app-create-post-form
         [role]="userRole()"
         (postCreated)="createPost($event)"
@@ -128,9 +148,7 @@
     size="lg"
   >
     <app-historial-encuestas
-  (solicitarCrear)="openCreatePost()"/>
+      (solicitarCrear)="openCreatePost()"
+    />
   </app-modal>
-
-
-
 </section>

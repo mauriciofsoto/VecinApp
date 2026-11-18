@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, filter, finalize, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, MessageResponse, RegistroAdministradorRequest, RegistroComunitarioRequest } from '../models/auth';
+import { AuthResponse, LoginRequest, MessageResponse, RegistroAdministradorInvitacionRequest, RegistroAdministradorRequest, RegistroComunitarioRequest } from '../models/auth';
 import { User } from '../models/user';
 
 @Injectable({
@@ -42,6 +42,18 @@ export class AuthService {
 
   registrarAdministrador(request: RegistroAdministradorRequest): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(`${this.apiUrl}/registro-administrador`, request);
+  }
+
+  validarInvitacionAdministrador(codigoInvitacion: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/registro`, {
+      codigoInvitacion,
+      rolEsperado: 'Administrador',
+      soloValidar: true,
+    });
+  }
+
+  registrarAdministradorInvitado(request: RegistroAdministradorInvitacionRequest): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/registro`, request);
   }
 
   registrarComunidad(request: RegistroComunitarioRequest): Observable<MessageResponse> {
