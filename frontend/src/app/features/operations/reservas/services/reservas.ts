@@ -134,7 +134,7 @@ export class Reservas {
     );
   }
 
-  // ——— Reservas: Administrador ———
+  // ——— Reservas: Administrador y Portero ———
 
   cargarTodasLasReservas(): Observable<Reserva[]> {
     const session = this.auth.captureSession();

@@ -420,6 +420,10 @@ public class AppDbContext : IdentityDbContext<Usuario, IdentityRole, string>
                 .HasColumnName("prioridad")
                 .IsRequired();
 
+            entity.Property(e => e.ComentarioResolucion)
+                .HasColumnName("comentario_resolucion")
+                .HasMaxLength(2000);
+
             entity.Property(e => e.FechaCreacion)
                 .HasColumnName("fecha_creacion")
                 .IsRequired();

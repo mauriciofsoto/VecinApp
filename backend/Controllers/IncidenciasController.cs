@@ -169,7 +169,8 @@ public class IncidenciasController : ControllerBase
                 i.EstadoIncidencia.Nombre,
                 i.CategoriaIncidencia.Nombre,
                 i.UsuarioReportante.Nombre + " " + i.UsuarioReportante.Apellido,
-                i.UsuarioResponsable == null ? null : i.UsuarioResponsable.Nombre + " " + i.UsuarioResponsable.Apellido))
+                i.UsuarioResponsable == null ? null : i.UsuarioResponsable.Nombre + " " + i.UsuarioResponsable.Apellido,
+                i.ComentarioResolucion))
             .ToListAsync();
 
         return Ok(incidencias);
@@ -201,7 +202,8 @@ public class IncidenciasController : ControllerBase
                 i.EstadoIncidencia.Nombre,
                 i.CategoriaIncidencia.Nombre,
                 i.UsuarioReportante.Nombre + " " + i.UsuarioReportante.Apellido,
-                i.UsuarioResponsable == null ? null : i.UsuarioResponsable.Nombre + " " + i.UsuarioResponsable.Apellido))
+                i.UsuarioResponsable == null ? null : i.UsuarioResponsable.Nombre + " " + i.UsuarioResponsable.Apellido,
+                i.EstadoIncidencia.Nombre == "Cerrada" ? i.ComentarioResolucion : null))
             .ToListAsync();
 
         return Ok(incidencias);
@@ -217,6 +219,8 @@ public class IncidenciasController : ControllerBase
 
         if (User.IsInRole("Administrador") && !usuario.IdEdificio.HasValue)
             return BadRequest(new { mensaje = "El administrador no tiene un edificio asignado." });
+
+        var puedeVerComentarioSinCierre = User.IsInRole("Administrador") || User.IsInRole("Portero");
 
         var incidencia = await IncidenciasAccesibles(usuario)
             .AsNoTracking()
@@ -235,7 +239,8 @@ public class IncidenciasController : ControllerBase
                 i.EstadoIncidencia.Nombre,
                 i.CategoriaIncidencia.Nombre,
                 i.UsuarioReportante.Nombre + " " + i.UsuarioReportante.Apellido,
-                i.UsuarioResponsable == null ? null : i.UsuarioResponsable.Nombre + " " + i.UsuarioResponsable.Apellido))
+                i.UsuarioResponsable == null ? null : i.UsuarioResponsable.Nombre + " " + i.UsuarioResponsable.Apellido,
+                puedeVerComentarioSinCierre || i.EstadoIncidencia.Nombre == "Cerrada" ? i.ComentarioResolucion : null))
             .FirstOrDefaultAsync();
 
         return incidencia == null
@@ -252,6 +257,7 @@ public class IncidenciasController : ControllerBase
         var usuario = usuarioResult.Value!;
 
         var esAdministrador = User.IsInRole("Administrador");
+        var esPortero = User.IsInRole("Portero");
         var esDestinatario = !esAdministrador && await _context.DerivacionesIncidencia.AnyAsync(d =>
             d.IdIncidencia == id && d.IdUsuarioDestinatario == usuario.Id &&
             (User.IsInRole("Propietario") || d.Incidencia.IdEdificio == usuario.IdEdificio), HttpContext.RequestAborted);
@@ -269,24 +275,55 @@ public class IncidenciasController : ControllerBase
             .FirstOrDefaultAsync(e => e.IdEstadoIncidencia == request.IdEstadoIncidencia);
         if (nuevoEstado == null)
             return BadRequest(new { mensaje = "El estado indicado no existe." });
-        if (!TransicionPermitida(incidencia.EstadoIncidencia.Nombre, nuevoEstado.Nombre))
+        if (!TransicionPermitida(incidencia.EstadoIncidencia.Nombre, nuevoEstado.Nombre, esAdministrador, esPortero))
             return BadRequest(new { mensaje = "La transición de estado no está permitida." });
+
+        var esCierreAdministrativo = esAdministrador && NormalizarEstado(nuevoEstado.Nombre) == "cerrada";
+        var esResolucionPortero = esPortero && NormalizarEstado(nuevoEstado.Nombre) == "resuelta";
+        var comentarioResolucion = request.ComentarioResolucion?.Trim();
+
+        if (esResolucionPortero && string.IsNullOrWhiteSpace(comentarioResolucion))
+        {
+            return BadRequest(new { mensaje = "El comentario de resolución es obligatorio para marcar la incidencia como resuelta." });
+        }
 
         incidencia.IdEstadoIncidencia = nuevoEstado.IdEstadoIncidencia;
         incidencia.EstadoIncidencia = nuevoEstado;
-        if (esAdministrador || esDestinatario)
+        if (esResolucionPortero)
+        {
+            incidencia.ComentarioResolucion = comentarioResolucion;
+        }
+        if (!esCierreAdministrativo && (esAdministrador || esDestinatario))
         {
             incidencia.IdUsuarioResponsable = usuario.Id;
             incidencia.UsuarioResponsable = usuario;
         }
         await _context.SaveChangesAsync();
 
+        var mensajeReportante = esCierreAdministrativo
+            ? $"El cierre de tu incidencia '{incidencia.Titulo}' fue aprobado. Ya podés consultar el detalle de la resolución."
+            : esResolucionPortero
+                ? $"Tu incidencia '{incidencia.Titulo}' fue resuelta y quedó pendiente de aprobación por Administración."
+                : $"El estado de tu incidencia '{incidencia.Titulo}' cambió a {nuevoEstado.Nombre}.";
+
         await _notificacionesService.CrearParaUsuariosAsync(
             new[] { incidencia.IdUsuarioReportante },
             "Incidencia",
-            $"El estado de tu incidencia '{incidencia.Titulo}' cambió a {nuevoEstado.Nombre}.",
-            "Actualización de incidencia",
+            mensajeReportante,
+            esCierreAdministrativo ? "Incidencia cerrada" : "Actualización de incidencia",
             "/mis-incidencias");
+
+        if (esPortero)
+        {
+            await _notificacionesService.NotificarAAdministradoresAsync(
+                incidencia.IdEdificio,
+                "Incidencia",
+                esResolucionPortero
+                    ? $"El personal marcó como resuelta la incidencia '{incidencia.Titulo}' y dejó un comentario para revisar."
+                    : $"El personal actualizó la incidencia '{incidencia.Titulo}' a {nuevoEstado.Nombre}.",
+                esResolucionPortero ? "Resolución pendiente de aprobación" : "Incidencia actualizada",
+                "/incidencias");
+        }
 
         return Ok(new CambiarEstadoIncidenciaResponse(
             incidencia.IdIncidencia,
@@ -311,9 +348,17 @@ public class IncidenciasController : ControllerBase
         if (!incidenciaExiste)
             return NotFound(new { mensaje = "No se encontró la incidencia accesible para tu usuario." });
 
-        var mensajes = await _context.MensajesIncidencia
+        var mensajesQuery = _context.MensajesIncidencia
             .AsNoTracking()
-            .Where(m => m.IdIncidencia == id)
+            .Where(m => m.IdIncidencia == id);
+
+        if (!User.IsInRole("Administrador"))
+        {
+            mensajesQuery = mensajesQuery.Where(m =>
+                m.UsuarioEmisor.Rol == null || m.UsuarioEmisor.Rol.Nombre != "Portero");
+        }
+
+        var mensajes = await mensajesQuery
             .OrderBy(m => m.FechaCreacion)
             .Select(m => new MensajeIncidenciaDto(
                 m.IdMensajeIncidencia,
@@ -375,11 +420,14 @@ public class IncidenciasController : ControllerBase
         }
         else if (incidencia.IdEdificio > 0)
         {
+            var esNotaInterna = User.IsInRole("Portero");
             await _notificacionesService.NotificarAAdministradoresAsync(
                 incidencia.IdEdificio,
                 "Incidencia",
-                $"El residente respondió en la incidencia '{incidencia.Titulo}'.",
-                "Nueva respuesta",
+                esNotaInterna
+                    ? $"El personal agregó una nota interna en la incidencia '{incidencia.Titulo}'."
+                    : $"El residente respondió en la incidencia '{incidencia.Titulo}'.",
+                esNotaInterna ? "Nota interna" : "Nueva respuesta",
                 "/incidencias");
         }
 
@@ -422,11 +470,32 @@ public class IncidenciasController : ControllerBase
                 d.IdUsuarioDestinatario == usuario.Id));
     }
 
-    private static bool TransicionPermitida(string actual, string destino)
+    private static bool TransicionPermitida(string actual, string destino, bool esAdministrador, bool esPortero)
     {
         var source = NormalizarEstado(actual);
         var target = NormalizarEstado(destino);
         if (source == target) return false;
+
+        if (esAdministrador)
+        {
+            return source switch
+            {
+                "pendiente" => target is "en proceso" or "rechazada",
+                "en proceso" => target is "resuelta" or "rechazada",
+                "resuelta" => target is "cerrada",
+                _ => false
+            };
+        }
+
+        if (esPortero)
+        {
+            return source switch
+            {
+                "pendiente" => target is "en proceso",
+                "en proceso" => target is "resuelta",
+                _ => false
+            };
+        }
 
         return source switch
         {
@@ -466,7 +535,8 @@ public class IncidenciasController : ControllerBase
             incidencia.EstadoIncidencia.Nombre,
             incidencia.CategoriaIncidencia.Nombre,
             incidencia.UsuarioReportante.Nombre + " " + incidencia.UsuarioReportante.Apellido,
-            incidencia.UsuarioResponsable == null ? null : incidencia.UsuarioResponsable.Nombre + " " + incidencia.UsuarioResponsable.Apellido);
+            incidencia.UsuarioResponsable == null ? null : incidencia.UsuarioResponsable.Nombre + " " + incidencia.UsuarioResponsable.Apellido,
+            incidencia.ComentarioResolucion);
 }
 
 public sealed record CategoriaIncidenciaDto(int IdCategoriaIncidencia, string Nombre);
@@ -485,7 +555,8 @@ public sealed record IncidenciaDto(
     string Estado,
     string Categoria,
     string Reportante,
-    string? Responsable);
+    string? Responsable,
+    string? ComentarioResolucion);
 public sealed record CambiarEstadoIncidenciaResponse(int IdIncidencia, int IdEstadoIncidencia, string Estado, string Mensaje);
 
 public sealed class CrearIncidenciaRequest
@@ -510,6 +581,9 @@ public sealed class CambiarEstadoIncidenciaRequest
 {
     [Range(1, int.MaxValue)]
     public int IdEstadoIncidencia { get; init; }
+
+    [StringLength(2000)]
+    public string? ComentarioResolucion { get; init; }
 }
 
 public sealed class CrearMensajeIncidenciaRequest

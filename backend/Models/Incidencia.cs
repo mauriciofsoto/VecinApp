@@ -23,6 +23,8 @@ public class Incidencia
 
     public string Prioridad { get; set; } = string.Empty;
 
+    public string? ComentarioResolucion { get; set; }
+
     public DateTime FechaCreacion { get; set; }
 
     // Relaciones

@@ -1,0 +1,9 @@
+@use '../../../../../../styles/abstracts' as *;
+
+.reservation-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  flex-wrap: wrap;
+}

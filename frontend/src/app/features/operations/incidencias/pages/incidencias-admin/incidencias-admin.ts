@@ -54,6 +54,7 @@ export class IncidenciasAdmin implements OnInit {
   readonly pendientes = this.incidenciasService.totalPendientes;
   readonly enProceso = this.incidenciasService.totalEnProceso;
   readonly resueltas = this.incidenciasService.totalResueltas;
+  readonly cerradas = this.incidenciasService.totalCerradas;
 
   readonly busqueda = signal('');
   readonly estadoSeleccionado = signal('todos');

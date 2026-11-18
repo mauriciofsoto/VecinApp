@@ -60,6 +60,13 @@
             }
           </div>
 
+          @if (incidencia.comentarioResolucion) {
+            <div class="incidencia-item__resolucion">
+              <strong>Resolución informada</strong>
+              <p>{{ incidencia.comentarioResolucion }}</p>
+            </div>
+          }
+
           <div class="incidencia-item__acciones">
             <button
               type="button"

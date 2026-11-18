@@ -33,7 +33,7 @@
 
   &__resumen {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: $space-3;
 
     app-card {
@@ -228,6 +228,10 @@
 
   &[data-estado='resuelta'] {
     @include status-tint(var(--color-success), 0.12, 0.4);
+  }
+
+  &[data-estado='cerrada'] {
+    @include status-tint(var(--color-success), 0.18, 0.5);
   }
 
   &[data-estado='rechazada'] {

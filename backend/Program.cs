@@ -253,6 +253,7 @@ if (!builder.Configuration.GetValue<bool>("VecinApp:SkipDevelopmentSeed")) using
         "Pendiente",
         "En proceso",
         "Resuelta",
+        "Cerrada",
         "Rechazada"
     };
     var estadosIncidenciaExistentes = await context.EstadosIncidencia

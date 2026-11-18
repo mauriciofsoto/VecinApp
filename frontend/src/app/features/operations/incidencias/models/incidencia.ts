@@ -20,6 +20,7 @@ export interface Incidencia {
   responsableNombre: string | null;
   responsable: string | null;
   reportante: string;
+  comentarioResolucion: string | null;
 }
 
 export interface DetalleIncidencia extends Incidencia {

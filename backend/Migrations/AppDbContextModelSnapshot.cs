@@ -680,6 +680,11 @@ namespace VecinApp.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdIncidencia"));
 
+                    b.Property<string>("ComentarioResolucion")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("comentario_resolucion");
+
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("text")

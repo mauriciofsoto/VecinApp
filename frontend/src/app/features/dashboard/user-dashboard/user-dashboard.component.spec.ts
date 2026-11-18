@@ -36,6 +36,7 @@ function flushRequests(http: HttpTestingController, index: number, id: string): 
     idUsuarioReportante: id, idUsuarioResponsable: null, titulo: `Incidencia ${id}`,
     descripcion: 'Detalle', ubicacion: null, prioridad: 'Media', fechaCreacion: '2026-11-16T12:00:00Z',
     estado: 'Pendiente', categoria: 'General', reportante: id, responsable: null,
+    comentarioResolucion: null,
   }]);
   response(`${environment.apiUrl}/api/notificaciones`, [{ idNotificacion: index + 1, titulo: 'Aviso', tipo: 'Comunidad', mensaje: id, fecha: '2026-11-16T12:00:00Z', leida: false, ruta: null }]);
   response(`${environment.apiUrl}/api/reservas/mis-reservas`, [{

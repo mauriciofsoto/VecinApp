@@ -32,6 +32,7 @@ export interface IncidenciaDashboardDto {
 
 export interface DerivacionIncidenciaDto {
   idDerivacion: number;
+  idIncidencia: number;
   tipoDestinatario: 'Propietario' | 'Personal';
   fechaDerivacion: string;
   administrador: string;
@@ -39,6 +40,9 @@ export interface DerivacionIncidenciaDto {
   descripcion: string;
   fechaCreacion: string;
   estado: string;
+  prioridad: string;
+  categoria: string;
+  reportante: string;
   ubicacion: string | null;
   unidad: string | null;
 }
@@ -73,6 +77,7 @@ interface IncidenciaApiDto {
   categoria: string;
   reportante: string;
   responsable: string | null;
+  comentarioResolucion: string | null;
 }
 
 interface MensajeIncidenciaApiDto {
@@ -113,6 +118,7 @@ export class Incidencias {
   readonly totalPendientes = computed(() => this.countByState('pendiente'));
   readonly totalEnProceso = computed(() => this.countByState('en-proceso'));
   readonly totalResueltas = computed(() => this.countByState('resuelta'));
+  readonly totalCerradas = computed(() => this.countByState('cerrada'));
 
   constructor() {
     effect(() => {
@@ -183,11 +189,13 @@ export class Incidencias {
     );
   }
 
-  cambiarEstado(id: number, value: number | { idEstadoIncidencia: number }): Observable<CambiarEstadoResponse> {
+  cambiarEstado(id: number, value: number | { idEstadoIncidencia: number; comentarioResolucion?: string }): Observable<CambiarEstadoResponse> {
     const session = this.auth.captureSession();
     const idEstadoIncidencia = typeof value === 'number' ? value : value.idEstadoIncidencia;
+    const comentarioResolucion = typeof value === 'number' ? undefined : value.comentarioResolucion;
     return this.http.put<CambiarEstadoResponse>(`${this.apiUrl}/${id}/estado`, {
       idEstadoIncidencia,
+      comentarioResolucion,
     }).pipe(
       tap(response => {
         if (!this.auth.isCurrentSession(session)) return;
@@ -240,6 +248,7 @@ export class Incidencias {
       responsableNombre: item.responsable,
       responsable: item.responsable,
       reportante: item.reportante,
+      comentarioResolucion: item.comentarioResolucion,
       idCategoriaIncidencia: item.idCategoriaIncidencia,
     };
   }

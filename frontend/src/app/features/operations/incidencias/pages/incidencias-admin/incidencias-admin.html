@@ -51,8 +51,15 @@
 
     <app-card variant="glass" size="full">
       <div class="incidencia-stat">
-        <span>Resueltas</span>
+        <span>Pendientes de cierre</span>
         <strong>{{ resueltas() }}</strong>
+      </div>
+    </app-card>
+
+    <app-card variant="glass" size="full">
+      <div class="incidencia-stat">
+        <span>Cerradas</span>
+        <strong>{{ cerradas() }}</strong>
       </div>
     </app-card>
 
