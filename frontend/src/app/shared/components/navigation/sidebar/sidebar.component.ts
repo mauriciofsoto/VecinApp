@@ -170,7 +170,7 @@ export class SidebarComponent {
           ownerAccess: 'resident',
         },
         {
-          label: 'Incidencias derivadas',
+          label: 'Incidencias',
           icon: '↗',
           route: '/incidencias-derivadas',
           roles: ['Propietario', 'Portero'],

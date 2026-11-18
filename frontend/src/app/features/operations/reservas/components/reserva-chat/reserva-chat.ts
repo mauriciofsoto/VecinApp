@@ -18,6 +18,7 @@ export class ReservaChat {
   readonly reserva = input.required<Reserva>();
   readonly emisorId = input.required<string>();
   readonly emisorNombre = input.required<string>();
+  readonly soloLectura = input(false);
 
   readonly mensajes = computed(() =>
     this.reservasService.mensajesDe(this.reserva().id),

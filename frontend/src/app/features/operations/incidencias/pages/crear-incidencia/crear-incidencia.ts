@@ -1,5 +1,5 @@
 
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ButtonComponent } from '../../../../../shared/components/atoms/button/button.component';
@@ -37,6 +37,7 @@ export interface CrearIncidenciaPayload {
 export class CrearIncidencia {
   readonly categoriasDisponibles = input<CategoriaIncidenciaDto[]>([]);
   readonly unidadesDisponibles = input<UnidadDisponibleDto[]>([]);
+  readonly soloEspaciosComunes = input(false);
   readonly enviando = input(false);
   readonly guardar = output<CrearIncidenciaPayload>();
 
@@ -56,10 +57,10 @@ export class CrearIncidencia {
   );
 
   protected readonly unidades = computed<SelectOption[]>(() => [
-    ...this.unidadesDisponibles().map(unidad => ({
+    ...(this.soloEspaciosComunes() ? [] : this.unidadesDisponibles().map(unidad => ({
       label: `Piso ${unidad.piso} - Unidad ${unidad.identificacion}`,
       value: String(unidad.idUnidad),
-    })),
+    }))),
     {
       label: 'Espacios comunes',
       value: 'comunes',
@@ -71,6 +72,12 @@ export class CrearIncidencia {
     { label: 'Media', value: 'media' },
     { label: 'Alta', value: 'alta' },
   ];
+
+  constructor() {
+    effect(() => {
+      if (this.soloEspaciosComunes()) this.idUnidadSeleccionada.set('comunes');
+    });
+  }
 
   protected publicarIncidencia(): void {
     this.error.set('');
@@ -119,7 +126,7 @@ export class CrearIncidencia {
     this.titulo.set('');
     this.descripcion.set('');
     this.categoria.set('');
-    this.idUnidadSeleccionada.set('');
+    this.idUnidadSeleccionada.set(this.soloEspaciosComunes() ? 'comunes' : '');
     this.ubicacion.set('');
     this.prioridad.set('media');
     this.error.set('');

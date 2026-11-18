@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Text;
 using VecinApp.Data;
 using VecinApp.DTOs;
 using VecinApp.Models;
@@ -51,6 +53,63 @@ public sealed class PaqueteriaController : ControllerBase
             porUsuario.GetValueOrDefault(p.Id, Array.Empty<UnidadDeclaradaPaqueteDto>()))).ToArray());
     }
 
+    [HttpGet("unidades-destinatarios")]
+    [Authorize(Roles = "Administrador,Portero")]
+    public async Task<ActionResult<IReadOnlyList<UnidadDestinatarioPaqueteDto>>> ObtenerUnidadesDestinatarios(CancellationToken ct)
+    {
+        var actual = await UsuarioActivoAsync();
+        if (actual is null) return Unauthorized();
+        if (actual.Estado != EstadoUsuario.Activo || !actual.IdEdificio.HasValue) return Forbid();
+
+        var edificio = actual.IdEdificio.Value;
+        var unidades = await _context.Unidades.AsNoTracking()
+            .Where(unidad => unidad.IdEdificio == edificio)
+            .OrderBy(unidad => unidad.Piso)
+            .ThenBy(unidad => unidad.Identificacion)
+            .Select(unidad => new { unidad.IdUnidad, unidad.Piso, unidad.Identificacion })
+            .ToListAsync(ct);
+
+        if (unidades.Count == 0)
+            return Ok(Array.Empty<UnidadDestinatarioPaqueteDto>());
+
+        var idsUnidades = unidades.Select(unidad => unidad.IdUnidad).ToArray();
+        var roles = new[] { "Inquilino", "Propietario" };
+        var relaciones = await _context.UsuariosUnidades.AsNoTracking()
+            .Where(relacion => idsUnidades.Contains(relacion.IdUnidad)
+                && relacion.Usuario.IdEdificio == edificio
+                && relacion.Usuario.Estado == EstadoUsuario.Activo
+                && relacion.Usuario.Rol != null
+                && roles.Contains(relacion.Usuario.Rol.Nombre))
+            .Select(relacion => new
+            {
+                relacion.IdUnidad,
+                Residente = new ResidenteUnidadPaqueteDto(
+                    relacion.Usuario.Id,
+                    relacion.Usuario.Nombre,
+                    relacion.Usuario.Apellido,
+                    relacion.Usuario.Rol!.Nombre)
+            })
+            .ToListAsync(ct);
+
+        var residentesPorUnidad = relaciones
+            .GroupBy(relacion => relacion.IdUnidad)
+            .ToDictionary(
+                grupo => grupo.Key,
+                grupo => (IReadOnlyList<ResidenteUnidadPaqueteDto>)grupo
+                    .Select(relacion => relacion.Residente)
+                    .DistinctBy(residente => residente.Id)
+                    .OrderBy(residente => residente.Apellido)
+                    .ThenBy(residente => residente.Nombre)
+                    .ToList());
+
+        return Ok(unidades.Select(unidad => new UnidadDestinatarioPaqueteDto(
+            unidad.IdUnidad,
+            unidad.Piso,
+            unidad.Identificacion,
+            residentesPorUnidad.GetValueOrDefault(unidad.IdUnidad, Array.Empty<ResidenteUnidadPaqueteDto>())
+        )).ToArray());
+    }
+
     [HttpPost]
     [Authorize(Roles = "Administrador,Portero")]
     public async Task<ActionResult<PaqueteDto>> Registrar([FromBody] RegistrarPaqueteRequest request, CancellationToken ct)
@@ -63,9 +122,34 @@ public sealed class PaqueteriaController : ControllerBase
         var destinatario = await _context.Users.Include(u => u.Rol).FirstOrDefaultAsync(u => u.Id == request.IdUsuarioDestinatario, ct);
         if (destinatario is null || destinatario.Estado != EstadoUsuario.Activo || destinatario.IdEdificio != actual.IdEdificio || destinatario.Rol?.Nombre is not ("Inquilino" or "Propietario"))
             return BadRequest(new { mensaje = "El destinatario no es un residente activo del edificio." });
+
+        Unidad? unidad = null;
+        if (request.IdUnidad.HasValue)
+        {
+            unidad = await _context.Unidades.FirstOrDefaultAsync(
+                item => item.IdUnidad == request.IdUnidad.Value && item.IdEdificio == actual.IdEdificio.Value, ct);
+            if (unidad is null)
+                return BadRequest(new { mensaje = "La unidad seleccionada no pertenece a este edificio." });
+
+            var estaVinculado = await _context.UsuariosUnidades.AnyAsync(relacion =>
+                relacion.IdUnidad == unidad.IdUnidad && relacion.IdUsuario == destinatario.Id, ct);
+            var declaracionesDestinatario = await _context.DeclaracionesUnidadesComunitarias.AsNoTracking()
+                .Where(declaracion => declaracion.IdUsuario == destinatario.Id
+                    && declaracion.IdEdificio == actual.IdEdificio.Value)
+                .Select(declaracion => new { declaracion.PisoDeclarado, declaracion.IdentificacionDeclarada })
+                .ToListAsync(ct);
+            var tieneUnidadDeclarada = declaracionesDestinatario.Any(declaracion =>
+                NormalizarUbicacion(declaracion.PisoDeclarado) == NormalizarUbicacion(unidad.Piso)
+                && NormalizarUbicacion(declaracion.IdentificacionDeclarada) == NormalizarUbicacion(unidad.Identificacion));
+
+            if (!estaVinculado && !tieneUnidadDeclarada)
+                return BadRequest(new { mensaje = "El destinatario seleccionado no está asociado a esa unidad." });
+        }
+
         var paquete = new Paquete
         {
             IdEdificio = actual.IdEdificio.Value,
+            IdUnidad = unidad?.IdUnidad,
             IdUsuarioRegistro = actual.Id,
             IdUsuarioDestinatario = destinatario.Id,
             Remitente = request.Remitente.Trim(),
@@ -174,6 +258,16 @@ public sealed class PaqueteriaController : ControllerBase
     }
 
     private async Task<Usuario?> UsuarioActivoAsync() => await _userManager.GetUserAsync(User);
+
+    private static string NormalizarUbicacion(string? valor)
+    {
+        var descompuesto = (valor ?? string.Empty).Normalize(NormalizationForm.FormD);
+        var sinDiacriticos = new string(descompuesto
+            .Where(caracter => CharUnicodeInfo.GetUnicodeCategory(caracter) != UnicodeCategory.NonSpacingMark)
+            .ToArray());
+        return string.Join(' ', sinDiacriticos.Trim().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))
+            .ToUpperInvariant();
+    }
 
     private async Task<(Usuario? Usuario, IActionResult? Result)> PaqueteAccesibleAsync(int id, CancellationToken ct)
     {

@@ -121,6 +121,30 @@
   gap: $space-4;
 }
 
+.recipient-lookup {
+  display: grid;
+  gap: $space-3;
+}
+
+.unit-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-3;
+
+  > label {
+    @include ops.operation-form-label;
+    min-width: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+  }
+
+  select {
+    @include ops.operation-form-control;
+    color: var(--color-text-primary);
+    color-scheme: dark;
+  }
+}
+
 .form-intro,
 .state-message {
   @include ops.operation-muted-text(var(--font-size-small));
@@ -190,7 +214,8 @@
   }
 
   .package-workspace,
-  .form-grid {
+  .form-grid,
+  .unit-selectors {
     grid-template-columns: 1fr;
   }
 

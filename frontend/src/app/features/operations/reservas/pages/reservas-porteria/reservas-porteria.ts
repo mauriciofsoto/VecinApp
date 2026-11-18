@@ -1,27 +1,39 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Reservas as ReservasService } from '../../services/reservas';
-import { EstadoReserva } from '../../models/reserva';
-import { Badge, BadgeVariant } from '../../../../../shared/components/atoms/badge/badge';
-import { EmptyState } from '../../../../../shared/components/molecules/empty-state/empty-state';
+import { Reserva } from '../../models/reserva';
+import { AuthService } from '../../../../../core/services/auth';
+import { ReservaCalendarModal } from '../../components/reserva-calendar-modal/reserva-calendar-modal';
+import { ReservaChat } from '../../components/reserva-chat/reserva-chat';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-reservas-porteria',
   standalone: true,
-  imports: [Badge, EmptyState],
+  imports: [CommonModule, ReservaCalendarModal, ReservaChat],
   templateUrl: './reservas-porteria.html',
   styleUrl: './reservas-porteria.scss',
 })
 export class ReservasPorteria implements OnInit {
   private readonly reservasService = inject(ReservasService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly authService = inject(AuthService);
 
+  readonly usuario = this.authService.currentUser;
   readonly reservas = this.reservasService.reservas;
   readonly cargando = this.reservasService.cargando;
   readonly error = signal<string | null>(null);
   readonly errorEspacios = signal(false);
+  readonly errorConversacion = signal<string | null>(null);
+  readonly fechaSeleccionada = signal(this.fechaKey(new Date()));
+  readonly reservaSeleccionada = signal<Reserva | null>(null);
+  readonly reservasDelDia = computed(() =>
+    this.reservas().filter(reserva =>
+      reserva.fecha.slice(0, 10) === this.fechaSeleccionada(),
+    ),
+  );
 
   ngOnInit(): void {
     this.cargar();
@@ -55,24 +67,25 @@ export class ReservasPorteria implements OnInit {
     return this.reservasService.nombreEspacio(espacioId);
   }
 
-  varianteEstado(estado: EstadoReserva): BadgeVariant {
-    switch (estado) {
-      case 'pendiente':
-        return 'warning';
-      case 'en-mediacion':
-        return 'info';
-      case 'confirmada':
-        return 'success';
-      case 'rechazada':
-        return 'danger';
-      case 'cancelada':
-      case 'finalizada':
-        return 'neutral';
-    }
+  seleccionarFecha(fecha: string): void {
+    this.fechaSeleccionada.set(fecha);
+    this.reservaSeleccionada.set(null);
+    this.errorConversacion.set(null);
+    this.reservasService.limpiarMensajes();
   }
 
-  formatearFecha(fecha: string): string {
-    const [anio, mes, dia] = fecha.split('-');
-    return `${dia}/${mes}/${anio}`;
+  seleccionarReserva(reserva: Reserva): void {
+    this.reservaSeleccionada.set(reserva);
+    this.errorConversacion.set(null);
+    this.reservasService.cargarMensajes(reserva.id).subscribe({
+      error: () => this.errorConversacion.set('No se pudo cargar la conversación de esta reserva.'),
+    });
+  }
+
+  private fechaKey(fecha: Date): string {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
   }
 }

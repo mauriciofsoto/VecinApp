@@ -26,7 +26,9 @@
     @if (mensajes().length === 0) {
       <div class="reserva-chat__empty">
         <p>Todavía no hay mensajes.</p>
-        <span>Podés iniciar la conversación desde acá.</span>
+        @if (!soloLectura()) {
+          <span>Podés iniciar la conversación desde acá.</span>
+        }
       </div>
     } @else {
       @for (mensaje of mensajes(); track mensaje.id) {
@@ -45,10 +47,12 @@
     }
   </div>
 
-  <footer class="reserva-chat__composer">
-    <app-message-input
-      placeholder="Escribí un mensaje..."
-      (send)="enviarMensaje($event)"
-    />
-  </footer>
+  @if (!soloLectura()) {
+    <footer class="reserva-chat__composer">
+      <app-message-input
+        placeholder="Escribí un mensaje..."
+        (send)="enviarMensaje($event)"
+      />
+    </footer>
+  }
 </section>

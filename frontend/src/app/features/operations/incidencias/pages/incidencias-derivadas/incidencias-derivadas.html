@@ -2,18 +2,37 @@
   <header class="incidencias-derivadas__header">
     <div>
       <span class="incidencias-derivadas__eyebrow">{{ perfil.toLocaleUpperCase('es-AR') }}</span>
-      <h1>Incidencias derivadas</h1>
-      <p>@if (perfil === 'Personal') { Incidencias asignadas a tu usuario por Administración. } @else { Incidencias derivadas por Administración para las unidades vinculadas. }</p>
+      <h1>Incidencias</h1>
+      <p>@if (perfil === 'Personal') { Consultá las incidencias asignadas por Administración y reportá problemas en espacios comunes. } @else { Incidencias derivadas por Administración para las unidades vinculadas. }</p>
     </div>
+    @if (puedeCrear) {
+      <app-button
+        variant="primary"
+        [disabled]="cargandoCategorias() || !categorias().length"
+        (buttonClick)="abrirFormulario()"
+      >
+        + Nueva incidencia
+      </app-button>
+    }
   </header>
 
-  <section class="incidencias-derivadas__contenido" aria-label="Incidencias derivadas">
+  @if (mensajeCreacion()) {
+    <p class="incidencias-derivadas__feedback" role="status">{{ mensajeCreacion() }}</p>
+  }
+  @if (errorCategorias()) {
+    <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ errorCategorias() }}</p>
+  }
+  @if (errorCreacion()) {
+    <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ errorCreacion() }}</p>
+  }
+
+  <section class="incidencias-derivadas__contenido" aria-label="Incidencias">
     @if (cargando()) {
-      <p class="incidencias-derivadas__feedback" role="status">Cargando incidencias derivadas…</p>
+      <p class="incidencias-derivadas__feedback" role="status">Cargando incidencias…</p>
     } @else if (error()) {
       <p class="incidencias-derivadas__feedback incidencias-derivadas__feedback--error" role="alert">{{ error() }}</p>
     } @else if (items().length === 0) {
-      <p class="incidencias-derivadas__feedback" role="status">Todavía no tenés incidencias derivadas.</p>
+      <p class="incidencias-derivadas__feedback" role="status">No hay incidencias asignadas para mostrar.</p>
     } @else {
       <div class="incidencias-derivadas__tabla-wrapper">
         <table class="incidencias-derivadas__tabla">
@@ -73,3 +92,14 @@
     }
   </section>
 </section>
+
+@if (puedeCrear) {
+  <app-modal [(open)]="modalCrearAbierto" heading="Nueva incidencia comunitaria" size="lg">
+    <app-crear-incidencia
+      [categoriasDisponibles]="categorias()"
+      [soloEspaciosComunes]="true"
+      [enviando]="enviando()"
+      (guardar)="guardarIncidencia($event)"
+    />
+  </app-modal>
+}

@@ -80,18 +80,6 @@
   <form class="registration-form" (ngSubmit)="intentarRegistrar()">
     <p class="form-intro">Seleccioná al destinatario y completá los datos del paquete.</p>
 
-    <label class="search-field">
-      <span>Buscar por nombre o apellido</span>
-      <app-input
-        name="busquedaDestinatario"
-        type="search"
-        autocomplete="off"
-        placeholder="Nombre o apellido"
-        [value]="busqueda()"
-        (valueChange)="busqueda.set($event.toString())"
-      />
-    </label>
-
     @if (cargando()) {
       <p class="state-message" role="status">Cargando destinatarios…</p>
     } @else if (errorCarga()) {
@@ -102,35 +90,104 @@
     } @else if (destinatarios().length === 0) {
       <p class="state-message">No hay residentes activos disponibles en este edificio.</p>
     } @else {
-      <div class="recipient-list" aria-label="Destinatarios disponibles">
-        @for (persona of destinatariosFiltrados(); track persona.id) {
-          <button
-            type="button"
-            class="recipient-card"
-            [class.recipient-card--selected]="destinatarioSeleccionadoId() === persona.id"
-            [attr.aria-pressed]="destinatarioSeleccionadoId() === persona.id"
-            (click)="seleccionarDestinatario(persona)"
-          >
-            <strong>{{ persona.nombre }} {{ persona.apellido }}</strong>
-            @if (persona.unidadesDeclaradas.length) {
-              <span class="recipient-references">
-                @for (referencia of referenciasUnidad(persona); track $index) {
-                  <span>{{ referencia }}</span>
-                }
-              </span>
-            } @else {
-              <span class="recipient-no-unit">Sin unidad declarada</span>
-            }
-          </button>
-        } @empty {
-          <p class="state-message">No hay residentes que coincidan con la búsqueda.</p>
+      <div class="recipient-lookup">
+        <label class="search-field">
+          <span>Buscar por nombre o apellido</span>
+          <app-input
+            name="busquedaDestinatario"
+            type="search"
+            autocomplete="off"
+            placeholder="Ingresá al menos 3 caracteres"
+            [value]="busqueda()"
+            (valueChange)="cambiarBusqueda($event.toString())"
+          />
+        </label>
+
+        <div class="unit-selectors">
+          <label>
+            Piso
+            <select
+              name="pisoDestinatario"
+              [ngModel]="pisoSeleccionado()"
+              (ngModelChange)="seleccionarPiso($event)"
+              [disabled]="cargandoUnidades() || !!errorUnidades() || pisosDisponibles().length === 0"
+            >
+              <option value="">Seleccioná un piso</option>
+              @for (piso of pisosDisponibles(); track piso) {
+                <option [value]="piso">{{ piso }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Departamento
+            <select
+              name="departamentoDestinatario"
+              [ngModel]="unidadSeleccionadaId()"
+              (ngModelChange)="seleccionarDepartamento($event === null ? null : +$event)"
+              [disabled]="!pisoSeleccionado() || cargandoUnidades() || !!errorUnidades()"
+            >
+              <option [ngValue]="null">Seleccioná un departamento</option>
+              @for (unidad of unidadesDePiso(); track unidad.id) {
+                <option [ngValue]="unidad.id">{{ unidad.identificacion }}</option>
+              }
+            </select>
+          </label>
+        </div>
+        @if (cargandoUnidades()) {
+          <p class="state-message" role="status">Cargando departamentos del edificio…</p>
+        } @else if (errorUnidades()) {
+          <div class="state-message state-message--error" role="alert">
+            <p>{{ errorUnidades() }}</p>
+            <app-button type="button" variant="outline" (buttonClick)="cargarUnidades()">Reintentar departamentos</app-button>
+          </div>
+        } @else if (unidades().length === 0) {
+          <p class="state-message">Este edificio todavía no tiene departamentos cargados.</p>
         }
       </div>
+
+      @if (busqueda().trim().length > 0 && busqueda().trim().length < 3) {
+        <p class="state-message">Ingresá 3 caracteres para buscar por nombre o apellido.</p>
+      } @else if (!busqueda().trim() && !pisoSeleccionado()) {
+        <p class="state-message">La lista está vacía. Buscá por nombre o elegí piso y departamento.</p>
+      } @else if (pisoSeleccionado() && !unidadSeleccionadaId()) {
+        <p class="state-message">Elegí un departamento para buscar a sus residentes.</p>
+      } @else {
+        <div class="recipient-list" aria-label="Destinatarios disponibles">
+          @for (persona of destinatariosFiltrados(); track persona.id) {
+            <button
+              type="button"
+              class="recipient-card"
+              [class.recipient-card--selected]="destinatarioSeleccionadoId() === persona.id"
+              [attr.aria-pressed]="destinatarioSeleccionadoId() === persona.id"
+              (click)="seleccionarDestinatario(persona)"
+            >
+              <strong>{{ persona.nombre }} {{ persona.apellido }}</strong>
+              @if (persona.unidadesDeclaradas.length) {
+                <span class="recipient-references">
+                  @for (referencia of referenciasUnidad(persona); track $index) {
+                    <span>{{ referencia }}</span>
+                  }
+                </span>
+              } @else {
+                <span class="recipient-no-unit">Sin unidad declarada</span>
+              }
+            </button>
+          } @empty {
+            <p class="state-message">
+              {{ busqueda().trim() ? 'No hay residentes que coincidan con la búsqueda.' : 'No hay residentes asociados a ese departamento.' }}
+            </p>
+          }
+        </div>
+      }
     }
 
     @if (destinatarioSeleccionado(); as seleccionado) {
       <p class="selection-feedback" aria-live="polite">
         Destinatario: <strong>{{ seleccionado.nombre }} {{ seleccionado.apellido }}</strong>
+        @if (unidadSeleccionada(); as unidad) {
+          · Piso {{ unidad.piso }}, departamento {{ unidad.identificacion }}
+        }
       </p>
     }
 

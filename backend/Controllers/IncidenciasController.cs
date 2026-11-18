@@ -29,7 +29,7 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpGet("categorias")]
-    [Authorize(Roles = "Inquilino,Propietario")]
+    [Authorize(Roles = "Inquilino,Propietario,Portero")]
     public async Task<IActionResult> ListarCategorias()
     {
         var usuario = await UsuarioActivoAsync();
@@ -63,7 +63,7 @@ public class IncidenciasController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Inquilino,Propietario")]
+    [Authorize(Roles = "Inquilino,Propietario,Portero")]
     public async Task<IActionResult> Crear([FromBody] CrearIncidenciaRequest request)
     {
         var usuarioResult = await UsuarioActivoAsync();
@@ -74,6 +74,9 @@ public class IncidenciasController : ControllerBase
 
         int idEdificio = usuario.IdEdificio.Value;
         Unidad? unidad = null;
+
+        if (User.IsInRole("Portero") && request.IdUnidad.HasValue)
+            return BadRequest(new { mensaje = "El personal solo puede reportar incidencias en espacios comunes." });
 
         if (request.IdUnidad.HasValue)
         {
