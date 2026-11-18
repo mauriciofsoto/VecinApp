@@ -88,7 +88,7 @@
               <p>{{ usuario.email || 'No hay información registrada' }}</p>
             </div>
             <div class="profile-field">
-              <span>Edificio</span>
+              <span>{{ esPropietarioNoResidente() ? 'Comunidad asociada' : 'Edificio' }}</span>
               <p>{{ usuario.edificioNombre || 'No hay información registrada' }}</p>
             </div>
           </div>
@@ -123,18 +123,18 @@
             <dd>{{ usuario.telefono || 'No hay información registrada' }}</dd>
           </div>
           <div>
-            <dt>Edificio</dt>
+            <dt>{{ esPropietarioNoResidente() ? 'Comunidad asociada' : 'Edificio' }}</dt>
             <dd>{{ usuario.edificioNombre || 'No hay información registrada' }}</dd>
           </div>
         </dl>
       }
     </app-card>
 
-    @if (esResidente()) {
+    @if (usuario.unidadesVinculadas.length > 0 || esPropietario() || esInquilino()) {
       <div class="profile-page__sections">
-        <app-card variant="glass" size="full">
-          <div card-title><h2>Unidades vinculadas</h2></div>
-          @if (usuario.unidadesVinculadas.length) {
+        @if (usuario.unidadesVinculadas.length > 0) {
+          <app-card variant="glass" size="full">
+            <div card-title><h2>Unidades vinculadas</h2></div>
             <ul class="profile-list">
               @for (unidad of usuario.unidadesVinculadas; track unidad.id) {
                 <li class="profile-list__item">
@@ -146,21 +146,17 @@
                 </li>
               }
             </ul>
-          } @else {
-            <app-empty-state
-              title="No hay información registrada"
-              description="Todavía no hay unidades vinculadas a tu cuenta."
-            />
-          }
-        </app-card>
+          </app-card>
+        }
 
-        <app-card variant="glass" size="full">
-          <div card-title class="profile-card__heading">
-            <h2>Declaraciones de unidades</h2>
-            <button class="profile-action profile-action--secondary" type="button" (click)="toggleEdicionDeclaraciones()">
-              {{ editandoDeclaraciones() ? 'Cerrar edición' : 'Completar o corregir' }}
-            </button>
-          </div>
+        @if (esPropietario() || esInquilino()) {
+          <app-card variant="glass" size="full">
+            <div card-title class="profile-card__heading">
+              <h2>Declaraciones de unidades</h2>
+              <button class="profile-action profile-action--secondary" type="button" (click)="toggleEdicionDeclaraciones()">
+                {{ editandoDeclaraciones() ? 'Cerrar edición' : 'Completar o corregir' }}
+              </button>
+            </div>
           @if (errorDeclaraciones()) { <p class="profile-page__state profile-page__state--error" role="alert">{{ errorDeclaraciones() }}</p> }
           @if (usuario.unidadesDeclaradas.length) {
             <ul class="profile-list">
@@ -198,7 +194,7 @@
               description="No hay declaraciones de unidades asociadas a tu cuenta."
             />
           }
-          @if (editandoDeclaraciones() && (esPropietario() || esInquilino())) {
+          @if (editandoDeclaraciones() && (esInquilino() || (esPropietario() && usuario.declaraUnidadesAlquiladas === true))) {
             <form class="declaration-add-form" (ngSubmit)="agregarDeclaracion()">
               <h3>{{ esPropietario() ? 'Agregar una unidad alquilada' : 'Agregar una unidad ocupada' }}</h3>
               <p>La unidad debe existir en el catálogo del edificio. Agregarla conserva la declaración como pendiente.</p>
@@ -213,7 +209,8 @@
               <button class="profile-action" type="submit" [disabled]="guardandoDeclaracionId() !== null">{{ guardandoDeclaracionId() === -1 ? 'Guardando…' : 'Agregar declaración' }}</button>
             </form>
           }
-        </app-card>
+          </app-card>
+        }
       </div>
 
       @if (esInquilino()) {

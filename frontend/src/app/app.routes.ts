@@ -10,8 +10,9 @@ import {
 
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
-const ADMIN_ROLES = ['Administrador', 'SuperAdministrador'];
+const ADMIN_ROLES = ['Administrador'];
 const RESIDENT_ROLES = ['Inquilino', 'Propietario'];
+const COMMUNITY_ROLES = ['Administrador', ...RESIDENT_ROLES, 'Portero'];
 
 export const routes: Routes = [
   {
@@ -63,7 +64,7 @@ export const routes: Routes = [
       {
         path: 'perfil',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, ...RESIDENT_ROLES, 'Portero'] },
+        data: { roles: ['Administrador', 'SuperAdministrador', ...RESIDENT_ROLES, 'Portero'] },
         loadComponent: () =>
           import('./features/profile/pages/perfil/perfil')
             .then(m => m.Perfil),
@@ -89,7 +90,7 @@ export const routes: Routes = [
       {
         path: 'user-dashboard',
         canActivate: [roleGuard],
-        data: { roles: RESIDENT_ROLES },
+        data: { roles: RESIDENT_ROLES, ownerAccess: 'resident' },
         loadComponent: () =>
           import('./features/dashboard/user-dashboard/user-dashboard.component')
             .then(m => m.UserDashboardComponent),
@@ -106,6 +107,14 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/dashboard/admin-dashboard/admin-dashboard.component')
                 .then(m => m.AdminDashboardComponent),
+          },
+          {
+            path: 'edificios',
+            canActivate: [roleGuard],
+            data: { roles: ['SuperAdministrador'] },
+            loadComponent: () =>
+              import('./features/operations/edificios/pages/edificios-list/edificios-list')
+                .then(m => m.EdificiosList),
           },
           {
             path: 'incidencias',
@@ -170,7 +179,7 @@ export const routes: Routes = [
       {
         path: 'comunidad',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, ...RESIDENT_ROLES] },
+        data: { roles: COMMUNITY_ROLES, ownerAccess: 'community' },
         loadComponent: () =>
           import('./features/community/feed/pages/feed-principal/feed-principal')
             .then(m => m.FeedPrincipal),
@@ -180,7 +189,7 @@ export const routes: Routes = [
       {
         path: 'encuestas',
         canActivate: [roleGuard],
-        data: { roles: [...ADMIN_ROLES, ...RESIDENT_ROLES] },
+        data: { roles: COMMUNITY_ROLES, ownerAccess: 'community' },
         loadComponent: () =>
           import('./features/operations/encuestas/pages/historial-encuestas/historial-encuestas')
             .then(m => m.HistorialEncuestas),
@@ -203,7 +212,7 @@ export const routes: Routes = [
       {
         path: 'mis-incidencias',
         canActivate: [roleGuard],
-        data: { roles: RESIDENT_ROLES },
+        data: { roles: RESIDENT_ROLES, ownerAccess: 'resident' },
         loadComponent: () =>
           import('./features/operations/incidencias/pages/mis-incidencias/mis-incidencias')
             .then(m => m.MisIncidencias),
@@ -218,7 +227,7 @@ export const routes: Routes = [
       {
         path: 'incidencias/crear',
         canActivate: [roleGuard],
-        data: { roles: RESIDENT_ROLES },
+        data: { roles: RESIDENT_ROLES, ownerAccess: 'resident' },
         loadComponent: () => import('./features/operations/incidencias/pages/crear-incidencia/crear-incidencia').then(m => m.CrearIncidencia),
       },
       {
@@ -236,7 +245,7 @@ export const routes: Routes = [
       {
         path: 'inquilino/incidencias',
         canActivate: [roleGuard],
-        data: { roles: RESIDENT_ROLES },
+        data: { roles: RESIDENT_ROLES, ownerAccess: 'resident' },
         loadComponent: () => import('./features/operations/incidencias/pages/incidencias-inquilino/incidencias-inquilino').then(m => m.IncidenciasInquilinoComponent),
       },
 
@@ -252,7 +261,7 @@ export const routes: Routes = [
       {
         path: 'mis-paquetes',
         canActivate: [roleGuard],
-        data: { roles: RESIDENT_ROLES },
+        data: { roles: RESIDENT_ROLES, ownerAccess: 'resident' },
         loadComponent: () =>
           import('./features/operations/paqueteria/pages/mis-paquetes/mis-paquetes')
             .then(m => m.MisPaquetes),
@@ -280,7 +289,7 @@ export const routes: Routes = [
       {
         path: 'mis-reservas',
         canActivate: [roleGuard],
-        data: { roles: RESIDENT_ROLES },
+        data: { roles: RESIDENT_ROLES, ownerAccess: 'resident' },
         loadComponent: () =>
           import('./features/operations/reservas/pages/mis-reservas/mis-reservas')
             .then(m => m.MisReservas),

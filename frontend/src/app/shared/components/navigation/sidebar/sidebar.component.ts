@@ -1,8 +1,11 @@
 
-import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, effect, HostListener, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { getDashboardUrl, ownerHasAccess } from '../../../../core/guards/auth.guard';
 import { AuthService } from '../../../../core/services/auth';
 import { ThemeService } from '../../../../core/services/theme.service';
+import { PerfilUsuario } from '../../../../features/profile/models/perfil-usuario';
+import { PerfilService } from '../../../../features/profile/services/perfil.service';
 
 type UserRole =
   | 'Administrador'
@@ -17,6 +20,7 @@ interface SidebarItem {
   route: string;
   exact?: boolean;
   roles: UserRole[];
+  ownerAccess?: 'resident' | 'community' | 'rental';
 }
 
 interface SidebarSection {
@@ -34,12 +38,33 @@ interface SidebarSection {
 export class SidebarComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly perfilService = inject(PerfilService);
   readonly themeService = inject(ThemeService);
 
   readonly isOpen = signal(false);
   readonly loggingOut = signal(false);
 
   readonly user = this.authService.currentUser;
+  readonly ownerProfile = signal<PerfilUsuario | null>(null);
+
+  constructor() {
+    effect(onCleanup => {
+      const currentUser = this.user();
+      this.ownerProfile.set(null);
+      if (currentUser?.rol !== 'Propietario') return;
+
+      const userId = currentUser.id;
+      const request = this.perfilService.obtenerMiPerfil().subscribe({
+        next: profile => {
+          if (this.user()?.id === userId) this.ownerProfile.set(profile);
+        },
+        error: () => {
+          if (this.user()?.id === userId) this.ownerProfile.set(null);
+        },
+      });
+      onCleanup(() => request.unsubscribe());
+    });
+  }
 
   readonly role = computed(
     () => (this.user()?.rol ?? '') as UserRole
@@ -55,23 +80,9 @@ export class SidebarComponent {
 
   readonly userRoleLabel = computed(() => this.role() === 'Portero' ? 'Personal' : this.role());
 
-  readonly dashboardRoute = computed(() => {
-    switch (this.role()) {
-      case 'Administrador':
-      case 'SuperAdministrador':
-        return '/admin/dashboard';
-
-      case 'Portero':
-        return '/porteria-dashboard';
-
-      case 'Inquilino':
-      case 'Propietario':
-        return '/user-dashboard';
-
-      default:
-        return '/login';
-    }
-  });
+  readonly dashboardRoute = computed(() =>
+    getDashboardUrl(this.authService, this.ownerProfile() ?? undefined),
+  );
 
   private readonly sections: SidebarSection[] = [
     {
@@ -82,7 +93,7 @@ export class SidebarComponent {
           icon: '▦',
           route: '/admin/dashboard',
           exact: true,
-          roles: ['Administrador', 'SuperAdministrador'],
+          roles: ['Administrador'],
         },
         {
           label: 'Dashboard',
@@ -97,6 +108,7 @@ export class SidebarComponent {
           route: '/user-dashboard',
           exact: true,
           roles: ['Inquilino', 'Propietario'],
+          ownerAccess: 'resident',
         },
       ],
     },
@@ -109,10 +121,11 @@ export class SidebarComponent {
           route: '/comunidad',
           roles: [
             'Administrador',
-            'SuperAdministrador',
             'Inquilino',
             'Propietario',
+            'Portero',
           ],
+          ownerAccess: 'community',
         },
         {
           label: 'Encuestas',
@@ -120,10 +133,11 @@ export class SidebarComponent {
           route: '/encuestas',
           roles: [
             'Administrador',
-            'SuperAdministrador',
             'Inquilino',
             'Propietario',
+            'Portero',
           ],
+          ownerAccess: 'community',
         },
       ],
     },
@@ -134,7 +148,13 @@ export class SidebarComponent {
           label: 'Publicaciones',
           icon: '▤',
           route: '/admin/publicaciones',
-          roles: ['Administrador', 'SuperAdministrador'],
+          roles: ['Administrador'],
+        },
+        {
+          label: 'Edificios',
+          icon: '▦',
+          route: '/admin/edificios',
+          roles: ['SuperAdministrador'],
         },
         {
           label: 'Incidencias',
@@ -147,12 +167,14 @@ export class SidebarComponent {
           icon: '◈',
           route: '/mis-incidencias',
           roles: ['Inquilino', 'Propietario'],
+          ownerAccess: 'resident',
         },
         {
           label: 'Incidencias derivadas',
           icon: '↗',
           route: '/incidencias-derivadas',
           roles: ['Propietario', 'Portero'],
+          ownerAccess: 'rental',
         },
         {
           label: 'Recepción de paquetes',
@@ -168,18 +190,20 @@ export class SidebarComponent {
           icon: '▣',
           route: '/mis-paquetes',
           roles: ['Inquilino', 'Propietario'],
+          ownerAccess: 'resident',
         },
         {
           label: 'Gestionar reservas',
           icon: '▦',
           route: '/admin/reservas',
-          roles: ['Administrador', 'SuperAdministrador'],
+          roles: ['Administrador'],
         },
         {
           label: 'Mis reservas',
           icon: '▦',
           route: '/mis-reservas',
           roles: ['Inquilino', 'Propietario'],
+          ownerAccess: 'resident',
         },
       ],
     },
@@ -196,7 +220,7 @@ export class SidebarComponent {
           label: 'Inquilinos',
           icon: '♙',
           route: '/inquilinos',
-          roles: ['Administrador', 'SuperAdministrador'],
+          roles: ['Administrador'],
         },
       ],
     },
@@ -208,7 +232,14 @@ export class SidebarComponent {
     return this.sections
       .map(section => ({
         ...section,
-        items: section.items.filter(item => item.roles.includes(currentRole)),
+        items: section.items.filter(item => {
+          if (!item.roles.includes(currentRole)) return false;
+          if (currentRole !== 'Propietario') return true;
+
+          const profile = this.ownerProfile();
+          if (!profile || !item.ownerAccess) return false;
+          return ownerHasAccess(profile, item.ownerAccess);
+        }),
       }))
       .filter(section => section.items.length > 0);
   });

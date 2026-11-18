@@ -17,6 +17,8 @@
 .invitation-card { display:grid; grid-template-columns:minmax(0, 1fr) minmax(15rem, 19rem); gap:$space-7; align-items:center; padding:clamp($space-4, 4vw, $space-7); }
 .invitation-card__content { display:flex; flex-direction:column; align-items:center; text-align:center; }
 .invitation-card__content .qr-code { width:min(100%, 25rem); }
+.building-identity { display:flex; flex-direction:column; gap:.2rem; margin:$space-3 0; color:$text-main; }
+.building-identity span, .building-identity small { color:$text-muted; }
 .invitation-card__print-heading { display:none; align-items:center; gap:.55rem; color:#171923; font-weight:700; font-size:1.25rem; }
 .brand-mark { display:grid; place-items:center; width:2rem; height:2rem; border-radius:.6rem; background:#a78bfa; color:#171923; }
 .print-message { max-width:19rem; margin:$space-4 0 0; color:$text-main; font-size:$text-heading; font-weight:$font-semibold; line-height:$line-tight; }

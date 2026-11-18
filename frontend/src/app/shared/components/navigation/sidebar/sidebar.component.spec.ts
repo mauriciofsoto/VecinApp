@@ -2,8 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth';
 import { User } from '../../../../core/models/user';
+import { PerfilUsuario } from '../../../../features/profile/models/perfil-usuario';
+import { PerfilService } from '../../../../features/profile/services/perfil.service';
 
 import { SidebarComponent } from './sidebar.component';
 
@@ -13,8 +16,12 @@ class RouteTarget {}
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
   let fixture: ComponentFixture<SidebarComponent>;
+  let perfilActual: PerfilUsuario;
+  let fallaPerfil: boolean;
 
   beforeEach(async () => {
+    perfilActual = profileFor(false, false);
+    fallaPerfil = false;
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
       providers: [
@@ -23,6 +30,9 @@ describe('SidebarComponent', () => {
           { path: 'perfil', component: RouteTarget },
         ]),
         provideHttpClient(),
+        { provide: PerfilService, useValue: {
+          obtenerMiPerfil: () => fallaPerfil ? throwError(() => new Error('perfil no disponible')) : of(perfilActual),
+        } },
       ],
     })
     .compileComponents();
@@ -45,32 +55,121 @@ describe('SidebarComponent', () => {
     declaraUnidadesAlquiladas: false,
   });
 
-  function hasDerivedIncidentsOption(rol: User['rol']): boolean {
+  const profileFor = (
+    viveEnEdificio: boolean | null,
+    declaraAlquiler: boolean,
+    estadoConfirmacion = 'Confirmada',
+  ): PerfilUsuario => ({
+    nombre: 'Persona', apellido: 'Prueba', email: 'persona@example.test', telefono: null,
+    rol: 'Propietario', edificioNombre: 'Edificio', viveEnEdificio,
+    tieneOtrasUnidades: declaraAlquiler, declaraUnidadesAlquiladas: declaraAlquiler,
+    modalidadAlquiler: null, funcionPersonal: null, funcionPersonalOtra: null, horarioPersonal: null,
+    unidadesVinculadas: [],
+    unidadesDeclaradas: declaraAlquiler ? [{
+      id: 1, tipo: 'Titularidad', pisoDeclarado: '1', identificacionDeclarada: 'A',
+      esPrincipalDeclarada: false, estaAlquiladaDeclarada: true,
+      estadoConfirmacion, fechaDeclaracion: '2026-01-01',
+      personaRelacionNombre: null, personaRelacionApellido: null,
+      pisoRelacion: null, identificacionRelacion: null,
+    }] : [],
+  });
+
+  async function loginAs(
+    rol: User['rol'],
+    profile = profileFor(false, false),
+    failProfile = false,
+  ): Promise<void> {
+    perfilActual = profile;
+    fallaPerfil = failProfile;
     TestBed.inject(AuthService).currentUser.set(createUser(rol));
     fixture.detectChanges();
-    return component.menuSections()
-      .flatMap(section => section.items)
-      .some(item => item.label === 'Incidencias derivadas');
+    await fixture.whenStable();
+    fixture.detectChanges();
   }
 
-  it('muestra Incidencias derivadas a Propietario y Portero (Personal)', () => {
-    expect(hasDerivedIncidentsOption('Propietario')).toBe(true);
-    expect(hasDerivedIncidentsOption('Portero')).toBe(true);
+  function hasMenuOption(label: string): boolean {
+    return component.menuSections().flatMap(section => section.items)
+      .some(item => item.label === label);
+  }
 
-    TestBed.inject(AuthService).currentUser.set(createUser('Portero'));
-    fixture.detectChanges();
+  it('siempre muestra Comunidad y Encuestas al Propietario no residente y exige alquiler confirmado para derivadas', async () => {
+    const expectNoResidentModules = () => {
+      for (const label of ['Mi inicio', 'Mis incidencias', 'Mis paquetes', 'Mis reservas']) {
+        expect(hasMenuOption(label)).toBe(false);
+      }
+    };
+
+    await loginAs('Propietario', profileFor(true, false));
+    expect(hasMenuOption('Incidencias derivadas')).toBe(false);
+    expect(hasMenuOption('Mis incidencias')).toBe(true);
+
+    await loginAs('Propietario', profileFor(true, true));
+    expect(hasMenuOption('Incidencias derivadas')).toBe(true);
+    expect(hasMenuOption('Mis incidencias')).toBe(true);
+
+    await loginAs('Propietario', profileFor(false, true));
+    expect(hasMenuOption('Comunidad')).toBe(true);
+    expect(hasMenuOption('Encuestas')).toBe(true);
+    expect(hasMenuOption('Incidencias derivadas')).toBe(true);
+    expect(component.dashboardRoute()).toBe('/comunidad');
+    expectNoResidentModules();
+
+    await loginAs('Propietario', profileFor(false, false));
+    expect(hasMenuOption('Comunidad')).toBe(true);
+    expect(hasMenuOption('Encuestas')).toBe(true);
+    expect(hasMenuOption('Incidencias derivadas')).toBe(false);
+    expectNoResidentModules();
+
+    await loginAs('Propietario', profileFor(false, true, 'Declarada'));
+    expect(hasMenuOption('Comunidad')).toBe(true);
+    expect(hasMenuOption('Encuestas')).toBe(true);
+    expect(hasMenuOption('Incidencias derivadas')).toBe(false);
+    expectNoResidentModules();
+  });
+
+  it('muestra los módulos del Portero y conserva la etiqueta Personal', async () => {
+    await loginAs('Portero');
+    expect(hasMenuOption('Comunidad')).toBe(true);
+    expect(hasMenuOption('Encuestas')).toBe(true);
+    expect(hasMenuOption('Incidencias derivadas')).toBe(true);
+    expect(hasMenuOption('Recepción de paquetes')).toBe(true);
+    expect(hasMenuOption('Dashboard')).toBe(true);
+    expect(hasMenuOption('Incidencias')).toBe(false);
+    expect(hasMenuOption('Gestionar reservas')).toBe(false);
+    expect(hasMenuOption('Inquilinos')).toBe(false);
     expect(component.userRoleLabel()).toBe('Personal');
   });
 
-  it('oculta Incidencias derivadas a Inquilino, Administrador y SuperAdministrador', () => {
-    expect(hasDerivedIncidentsOption('Inquilino')).toBe(false);
-    expect(hasDerivedIncidentsOption('Administrador')).toBe(false);
-    expect(hasDerivedIncidentsOption('SuperAdministrador')).toBe(false);
+  it('limita SuperAdministrador a Edificios y mantiene los módulos de Administrador', async () => {
+    await loginAs('SuperAdministrador');
+    expect(component.menuSections().flatMap(section => section.items).map(item => item.label))
+      .toEqual(['Edificios']);
+    expect(component.dashboardRoute()).toBe('/admin/edificios');
+
+    await loginAs('Administrador');
+    expect(hasMenuOption('Edificios')).toBe(false);
+    for (const label of ['Dashboard', 'Comunidad', 'Encuestas', 'Publicaciones', 'Incidencias',
+      'Recepción de paquetes', 'Gestionar reservas', 'Invitaciones QR', 'Inquilinos']) {
+      expect(hasMenuOption(label)).toBe(true);
+    }
+  });
+
+  it('mantiene las opciones existentes del Inquilino', async () => {
+    await loginAs('Inquilino');
+    for (const label of ['Mi inicio', 'Comunidad', 'Encuestas', 'Mis incidencias', 'Mis paquetes', 'Mis reservas']) {
+      expect(hasMenuOption(label)).toBe(true);
+    }
+    expect(hasMenuOption('Incidencias derivadas')).toBe(false);
+  });
+
+  it('no concede opciones adicionales si no se puede cargar el perfil del Propietario', async () => {
+    await loginAs('Propietario', profileFor(false, true), true);
+    expect(component.menuSections().flatMap(section => section.items)).toHaveLength(0);
+    expect(component.dashboardRoute()).toBe('/perfil');
   });
 
   it('navega a la ruta existente desde el RouterLink del Sidebar compartido', async () => {
-    TestBed.inject(AuthService).currentUser.set(createUser('Propietario'));
-    fixture.detectChanges();
+    await loginAs('Propietario', profileFor(false, true));
 
     const link = Array.from(
       fixture.nativeElement.querySelectorAll('a.nav-item'),
@@ -83,8 +182,7 @@ describe('SidebarComponent', () => {
   });
 
   it('permite abrir el perfil desde el nombre del usuario', async () => {
-    TestBed.inject(AuthService).currentUser.set(createUser('Inquilino'));
-    fixture.detectChanges();
+    await loginAs('Inquilino');
 
     const link = fixture.nativeElement.querySelector('.user-name') as HTMLAnchorElement;
     expect(link.textContent?.trim()).toBe('Persona Prueba');

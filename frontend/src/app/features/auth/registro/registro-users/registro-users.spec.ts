@@ -334,7 +334,7 @@ describe('RegistroUsers', () => {
   });
 
   it.each([
-    ['Propietario', 'owner', '/user-dashboard'],
+    ['Propietario', 'owner', '/'],
     ['Inquilino', 'tenant', '/user-dashboard'],
     ['Portero', 'staff', '/porteria-dashboard'],
   ])('inicia sesión y navega al dashboard correspondiente para %s', async (rol, perfil, destino) => {
@@ -387,7 +387,7 @@ describe('RegistroUsers', () => {
     expect(questionnaire.sessionReady).toBe(true);
     expect(questionnaire.navigationFailed).toBe(true);
     expect(registros).toHaveLength(1);
-    expect(navegaciones).toEqual(['/user-dashboard']);
+    expect(navegaciones).toEqual(['/']);
     expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
   });

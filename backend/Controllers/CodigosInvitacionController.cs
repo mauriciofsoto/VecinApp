@@ -54,16 +54,28 @@ public class CodigosInvitacionController : ControllerBase
         if (!usuario.IdEdificio.HasValue)
             return BadRequest(new { message = "El administrador no tiene un edificio asignado." });
 
-        var accesoPublicoId = await _context.Edificios
+        var edificio = await _context.Edificios
             .AsNoTracking()
             .Where(edificio => edificio.IdEdificio == usuario.IdEdificio.Value)
-            .Select(edificio => (Guid?)edificio.AccesoPublicoId)
+            .Select(edificio => new
+            {
+                edificio.IdEdificio,
+                edificio.Nombre,
+                edificio.Direccion,
+                edificio.AccesoPublicoId
+            })
             .SingleOrDefaultAsync();
 
-        if (!accesoPublicoId.HasValue)
+        if (edificio == null)
             return NotFound(new { message = "No se encontró el edificio del administrador." });
 
-        return Ok(new { identificadorPublico = accesoPublicoId.Value });
+        return Ok(new
+        {
+            idEdificio = edificio.IdEdificio,
+            nombreEdificio = edificio.Nombre,
+            direccionEdificio = edificio.Direccion,
+            identificadorPublico = edificio.AccesoPublicoId
+        });
     }
 
     // POST /api/codigos-invitacion/comunidad/{accesoPublicoId}/token

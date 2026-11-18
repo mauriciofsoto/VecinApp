@@ -5,15 +5,29 @@
     <p>Generá un código QR para que una persona pueda iniciar su incorporación.</p>
   </header>
 
-  @if (!identificadorPublico()) {
+  @if (loading()) {
+    <section class="invite-panel">
+      <div class="invite-panel__icon" aria-hidden="true">⌁</div>
+      <h2>QR de acceso del edificio</h2>
+      <p role="status">Consultando el acceso del edificio de tu sesión…</p>
+    </section>
+  } @else if (error()) {
+    <section class="invite-panel">
+      <div class="invite-panel__icon" aria-hidden="true">⌁</div>
+      <h2>No se pudo confirmar el acceso del edificio</h2>
+      <p class="feedback feedback--error" role="alert">{{ error() }}</p>
+      <button type="button" class="invite-button" (click)="cargarQrComunitario()" [disabled]="loading()">
+        Volver a cargar QR
+      </button>
+    </section>
+  } @else if (!identificadorPublico() || !edificio()) {
     <section class="invite-panel">
       <div class="invite-panel__icon" aria-hidden="true">⌁</div>
       <h2>QR de acceso del edificio</h2>
       <p>El QR permanente permite iniciar el registro en esta comunidad. El acceso temporal se renueva al abrirlo.</p>
       <button type="button" class="invite-button" (click)="cargarQrComunitario()" [disabled]="loading()">
-        {{ loading() ? 'Cargando…' : 'Volver a cargar QR' }}
+        Volver a cargar QR
       </button>
-      @if (error()) { <p class="feedback feedback--error" role="alert">{{ error() }}</p> }
     </section>
   } @else {
     <section class="invitation-card">
@@ -23,13 +37,17 @@
         </div>
         <p class="invite-page__eyebrow screen-only">QR PERMANENTE DEL EDIFICIO</p>
         <h2 class="screen-only">Compartí este QR con un residente</h2>
+        <div class="building-identity" aria-label="Edificio asociado a este enlace">
+          <strong>{{ edificio()?.nombreEdificio }}</strong>
+          <span>{{ edificio()?.direccionEdificio }}</span>
+          <small>ID de edificio {{ edificio()?.idEdificio }}</small>
+        </div>
         <app-qr-code [value]="enlace()" />
         <p class="print-message">Escaneá el código para unirte a tu comunidad</p>
         <div class="invitation-meta screen-only">
           <span class="status-pill">Acceso permanente</span>
           <span>El QR se mantiene aunque se renueve el acceso temporal.</span>
         </div>
-        @if (error()) { <p class="feedback feedback--error" role="alert">{{ error() }}</p> }
         @if (mensaje()) { <p class="feedback" role="status">{{ mensaje() }}</p> }
       </div>
       <div class="invitation-actions screen-only">

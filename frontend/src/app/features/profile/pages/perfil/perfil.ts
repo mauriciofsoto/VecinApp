@@ -52,7 +52,24 @@ export class Perfil implements OnInit {
     telefono: ['', [Validators.maxLength(30), Validators.pattern(/^\+?[0-9()\s.-]*$/)]],
   });
   readonly rolVisible = computed(() => this.perfil()?.rol === 'Portero' ? 'Personal' : this.perfil()?.rol ?? '');
-  readonly esResidente = computed(() => ['Inquilino', 'Propietario'].includes(this.perfil()?.rol ?? ''));
+
+  readonly esResidente = computed(() => {
+    const perfil = this.perfil();
+
+    if (!perfil) return false;
+    if (perfil.rol === 'Inquilino') return true;
+
+    return perfil.rol === 'Propietario'
+      && perfil.viveEnEdificio === true;
+  });
+
+  readonly esPropietarioNoResidente = computed(() => {
+    const perfil = this.perfil();
+
+    return perfil?.rol === 'Propietario'
+      && perfil.viveEnEdificio !== true;
+  });
+
   readonly esPropietario = computed(() => this.perfil()?.rol === 'Propietario');
   readonly esInquilino = computed(() => this.perfil()?.rol === 'Inquilino');
   readonly esPersonal = computed(() => this.perfil()?.rol === 'Portero');

@@ -53,7 +53,9 @@ export class Login {
           const requestedUrl =
             this.route.snapshot.queryParamMap.get('returnUrl');
 
-          const dashboard = getDashboardUrl(this.authService);
+          const dashboard = this.authService.hasRole('Propietario')
+            ? '/'
+            : getDashboardUrl(this.authService);
 
           const returnUrl =
             requestedUrl?.startsWith('/') &&

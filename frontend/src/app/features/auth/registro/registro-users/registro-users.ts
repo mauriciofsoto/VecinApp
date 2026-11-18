@@ -290,7 +290,10 @@ export class RegistroUsers implements OnInit {
   async navigateToDashboard(): Promise<void> {
     if (!this.sessionReady) return;
     try {
-      const navigated = await this.router.navigateByUrl(getDashboardUrl(this.authService));
+      const destination = this.authService.hasRole('Propietario')
+        ? '/'
+        : getDashboardUrl(this.authService);
+      const navigated = await this.router.navigateByUrl(destination);
       this.navigationFailed = !navigated;
     } catch (error) {
       console.error('Falló la navegación al dashboard después del registro comunitario.', error);
